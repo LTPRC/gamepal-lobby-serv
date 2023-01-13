@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.entity.UserInfo;
+import com.github.ltprc.gamepal.repository.entity.UserInfo;
 import com.github.ltprc.gamepal.repository.UserInfoRepository;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.ContentUtil;

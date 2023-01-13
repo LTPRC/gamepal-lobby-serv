@@ -1,4 +1,4 @@
-package com.github.ltprc.gamepal.entity;
+package com.github.ltprc.gamepal.repository.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
