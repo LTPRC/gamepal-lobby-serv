@@ -1,0 +1,46 @@
+#Spring Boot配置
+server:
+  #修改tomcat的端口为8080
+  port: 9000
+  #修改进入DispatcherServlet的规则为：*.html
+  servlet-path: \*.html
+
+spring:
+  datasource:
+    #数据库url,db名称随便起（这里为projectdb），项目启动后会在硬盘上自动生成db文件
+    url: jdbc:h2:~/projectdb;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    #用户名
+    username: sa
+    #密码,项目启动成功后可以通过web console连接数据库
+    password: 32sfdsrfd
+    #驱动
+    driverClassName: org.h2.Driver
+    initialization-mode: always
+    separator: ;
+    #初始化表结构
+    schema:
+      classpath:schema.sql
+    #初始化数据
+    data:
+      classpath:data.sql
+    sql-script-encoding: UTF-8  #必须设置
+  h2:
+    console:
+      #配置web console的路径，若不配置则默认就是localhost:8080/contextpath/h2-console
+      #如果不配置，虽然本地可以通过这个路径访问，但项目打war包发到tomcat下面，通过这个路径是访问不到的
+      path: /h2-console
+      enabled: true
+  resources:
+    #修改默认的静态资源存放目录
+    static-locations: classpath:/
+
+#自定义配置
+
+person:
+  name: zhangsan
+  age: 12
+  sex: 男
+  likes:
+    - book
+    - movie
+    - girl
