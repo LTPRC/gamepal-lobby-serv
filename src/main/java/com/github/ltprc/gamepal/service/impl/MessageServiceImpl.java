@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
-import javax.websocket.server.PathParam;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +28,7 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    private static final Map<String, Queue<Message>> chatMap = new ConcurrentHashMap<>(); // uuid, message queue
+    private static final Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // uuid, message queue
 
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
 
@@ -46,7 +46,7 @@ public class MessageServiceImpl implements MessageService {
         }
         String userCode = jsonObject.getString("userCode").toString();
         // Reply automatically
-        sendMessage(userCode, generateReplyContent(userCode));
+        communicate(userCode);
     }
 
     /**
@@ -55,68 +55,84 @@ public class MessageServiceImpl implements MessageService {
      * @param userCode
      * @param message
      */
-    private ResponseEntity sendMessage(@PathParam("userCode") String userCode, String message) {
+    public ResponseEntity sendMessage(String userCode, Message message) {
         JSONObject rst = ContentUtil.generateRst();
         Session session = userService.getSessionByUserCode(userCode);
         if (null == session) {
             logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1009);
         }
-        try {
-            session.getBasicRemote().sendText(message);
-        } catch (IOException e) {
-            logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-            return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1010);
+//        try {
+//            session.getBasicRemote().sendText(message);
+//        } catch (IOException e) {
+//            logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
+//            return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1010);
+//        }
+        if(!messageMap.containsKey(userCode)) {
+            messageMap.put(userCode, new LinkedBlockingDeque<>());
         }
+        messageMap.get(userCode).add(message);
         return ResponseEntity.ok().body(rst.toString());
     }
 
     /**
      * 集体发送消息
-     * @param userCode
      * @param message
      */
-    private ResponseEntity sendMessageToAll(String message) {
+    @Override
+    public ResponseEntity sendMessageToAll(Message message) {
         JSONObject rst = ContentUtil.generateRst();
         for (Entry<String, Session> entry : userService.getSessionEntrySet()) {
-            try {
-                entry.getValue().getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + entry.getKey());
-                return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1010);
-            }
+//            try {
+//                entry.getValue().getBasicRemote().sendText(message);
+//            } catch (IOException e) {
+//                logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + entry.getKey());
+//                return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1010);
+//            }
+            String userCode = entry.getKey();
+            sendMessage(userCode, message);
         }
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    private String generateReplyContent(String userCode) {
+    private void communicate(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
         // Update token automatically
         String token = userService.updateTokenByUserCode(userCode);
         rst.put("token", token);
         // Flush messages automatically
-        if (chatMap.containsKey(userCode) && !chatMap.get(userCode).isEmpty()) {
+        if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
             JSONArray messages = new JSONArray();
-            messages.addAll(chatMap.get(userCode));
-            chatMap.get(userCode).clear();
+            messages.addAll(messageMap.get(userCode));
+            messageMap.get(userCode).clear();
             rst.put("messages", messages);
-//            System.out.println("Messages sent:" + userCode);
         }
-        return JSONObject.toJSONString(rst);
+        String content = JSONObject.toJSONString(rst);
+        try {
+            userService.getSessionByUserCode(userCode).getBasicRemote().sendText(content);
+        } catch (IOException e) {
+            logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
+        }
     }
 
+    /**
+     * Send one message to the specific receiver.
+     * @param request
+     * @return
+     */
     @Override
     public ResponseEntity sendMessage(HttpServletRequest request) {
-        JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
         try {
             req = ContentUtil.request2JSONObject(request);
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
         }
-        String userCode = req.getString("userCode");
+        String fromUserCode = req.getString("fromUserCode");
+        String toUserCode = req.getString("toUserCode");
+        int type = req.getInteger("fromUserCode");
         String content = req.getString("content");
-        return sendMessage(userCode, content);
+        return sendMessage(toUserCode, new Message(fromUserCode, toUserCode, type, content));
     }
 }

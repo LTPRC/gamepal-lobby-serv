@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 
+import com.github.ltprc.gamepal.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,9 @@ public class ServerController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private PlayerService playerService;
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity<String> registerAccount(HttpServletRequest request) {
@@ -45,5 +49,10 @@ public class ServerController {
     @RequestMapping(value = "/sendmsg", method = RequestMethod.POST)
     public ResponseEntity<String> sendMessage(HttpServletRequest request) {
         return messageService.sendMessage(request);
+    }
+
+    @RequestMapping(value = "/setrelation", method = RequestMethod.POST)
+    public ResponseEntity<String> setRelation(HttpServletRequest request) {
+        return playerService.setRelation(request);
     }
 }

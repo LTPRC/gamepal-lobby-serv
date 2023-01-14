@@ -36,12 +36,12 @@ public class UserServiceImpl implements UserService {
 
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
 
-    @Autowired
-    private UserInfoRepository userInfoRepository;
-
     private Map<String, Session> sessionMap = new ConcurrentHashMap<>(); // userId, session
     private Map<String, String> tokenMap = new ConcurrentHashMap<>(); // userId, token
     private LinkedHashMap<String, Long> onlineMap = new LinkedHashMap<>(); // userId, timestamp
+
+    @Autowired
+    private UserInfoRepository userInfoRepository;
 
     @Override
     public ResponseEntity<String> registerAccount(HttpServletRequest request) {
