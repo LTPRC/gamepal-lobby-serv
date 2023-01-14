@@ -55,4 +55,19 @@ public class ServerController {
     public ResponseEntity<String> setRelation(HttpServletRequest request) {
         return playerService.setRelation(request);
     }
+
+    @RequestMapping(value = "/getrelation", method = RequestMethod.POST)
+    public ResponseEntity<String> getRelation(HttpServletRequest request) {
+        return playerService.getRelation(request);
+    }
+
+    @RequestMapping(value = "/setdrop", method = RequestMethod.POST)
+    public ResponseEntity<String> setDrop(HttpServletRequest request) {
+        return playerService.setDrop(request);
+    }
+
+    @RequestMapping(value = "/getdrop", method = RequestMethod.POST)
+    public ResponseEntity<String> getDrop(HttpServletRequest request) {
+        return playerService.getDrop(request);
+    }
 }
