@@ -28,9 +28,8 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    private static final Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // uuid, message queue
-
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
+    private Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // userCode, message queue
 
     @Autowired
     private UserService userService;

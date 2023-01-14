@@ -14,4 +14,6 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1008 = new GamepalError("1008", "Invalid request format.");
     public static final GamepalError ERROR_1009 = new GamepalError("1009", "Message receiver is not online.");
     public static final GamepalError ERROR_1010 = new GamepalError("1010", "Sending message failed.");
+    public static final GamepalError ERROR_1011 = new GamepalError("1011", "Contact does not exist.");
+
 }
