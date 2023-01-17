@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserService {
         String password = req.getString("password");
         List<UserInfo> userInfoList = userInfoRepository.queryUserInfoByUsernameAndPassword(username, password);
         if (userInfoList.isEmpty()) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1005));
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1005));
         }
         String userCode = userInfoList.get(0).getUserCode();
         updateTokenByUserCode(userCode);

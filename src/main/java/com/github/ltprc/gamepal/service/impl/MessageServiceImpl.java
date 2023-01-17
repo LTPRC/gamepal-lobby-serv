@@ -10,6 +10,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
+import com.github.ltprc.gamepal.model.lobby.BasicInfo;
+import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
+import com.github.ltprc.gamepal.service.PlayerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PlayerService playerService;
+
     @Override
     public void onMessage(String message) {
 //      System.out.println("Received String (size:" + message.length() + ")");
@@ -43,7 +49,17 @@ public class MessageServiceImpl implements MessageService {
             logger.error(ErrorUtil.ERROR_1008);
             return;
         }
-        String userCode = jsonObject.getString("userCode").toString();
+        String userCode = jsonObject.getString("userCode");
+        // Receive basicInfo and update
+        if (jsonObject.containsKey("basicInfo")) {
+            BasicInfo basicInfo = jsonObject.getObject("basicInfo", BasicInfo.class);
+            playerService.getBasicInfoMap().put(userCode, basicInfo);
+        }
+        // Receive playerInfo and update
+        if (jsonObject.containsKey("playerInfo")) {
+            PlayerInfo playerInfo = jsonObject.getObject("playerInfo", PlayerInfo.class);
+            playerService.getPlayerInfoMap().put(userCode, playerInfo);
+        }
         // Reply automatically
         communicate(userCode);
     }
@@ -107,6 +123,25 @@ public class MessageServiceImpl implements MessageService {
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }
+        // Return all detected basicInfos
+        Map<String, BasicInfo> basicInfoMap = playerService.getBasicInfoMap();
+        JSONArray basicInfos = new JSONArray();
+        basicInfoMap.entrySet().stream().forEach(entry -> {
+            JSONObject obj = new JSONObject();
+            obj.put(entry.getKey(), entry.getValue());
+            basicInfos.add(obj);
+        });
+        rst.put("basicInfos", basicInfos);
+        // Return all detected playerInfos
+        Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
+        JSONArray playerInfos = new JSONArray();
+        playerInfoMap.entrySet().stream().forEach(entry -> {
+            JSONObject obj = new JSONObject();
+            obj.put(entry.getKey(), entry.getValue());
+            playerInfos.add(obj);
+        });
+        rst.put("playerInfos", playerInfos);
+        // Communicate
         String content = JSONObject.toJSONString(rst);
         try {
             userService.getSessionByUserCode(userCode).getBasicRemote().sendText(content);

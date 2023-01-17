@@ -46,6 +46,10 @@ public class ServerController {
         return userService.logoff(request);
     }
 
+    @RequestMapping(value = "/inituserinfo", method = RequestMethod.POST)
+    public ResponseEntity<String> initUser(HttpServletRequest request) {
+        return playerService.initUserInfo(request);
+    }
     @RequestMapping(value = "/sendmsg", method = RequestMethod.POST)
     public ResponseEntity<String> sendMessage(HttpServletRequest request) {
         return messageService.sendMessage(request);

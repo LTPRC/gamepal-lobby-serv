@@ -1,10 +1,15 @@
 package com.github.ltprc.gamepal.service;
 
+import com.github.ltprc.gamepal.model.lobby.BasicInfo;
+import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 public interface PlayerService {
+
+    ResponseEntity<String> initUserInfo(HttpServletRequest request);
 
     ResponseEntity setRelation(HttpServletRequest request);
 
@@ -21,4 +26,8 @@ public interface PlayerService {
     ResponseEntity setPlayerInfo(HttpServletRequest request);
 
     ResponseEntity getPlayerInfo(HttpServletRequest request);
+
+    Map<String, BasicInfo> getBasicInfoMap();
+
+    Map<String, PlayerInfo> getPlayerInfoMap();
 }

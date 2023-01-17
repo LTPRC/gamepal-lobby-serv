@@ -42,6 +42,20 @@ public class PlayerServiceImpl implements PlayerService {
     private UserService userService;
 
     @Override
+    public ResponseEntity<String> initUserInfo(HttpServletRequest request) {
+//        JSONObject rst = ContentUtil.generateRst();
+//        JSONObject req = null;
+//        try {
+//            req = ContentUtil.request2JSONObject(request);
+//        } catch (IOException e) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
+//        }
+//        String userCode = req.getString("userCode");
+//        return ResponseEntity.ok().body(rst.toString());
+        return null;
+    }
+
+    @Override
     public ResponseEntity setRelation(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -199,6 +213,16 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         rst.put("playerInfo", playerInfo);
         return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public Map<String, BasicInfo> getBasicInfoMap() {
+        return basicInfoMap;
+    }
+
+    @Override
+    public Map<String, PlayerInfo> getPlayerInfoMap() {
+        return playerInfoMap;
     }
 
     private Message generateRelationMessage(String userCode, String nextUserCode, boolean isFrom, int newRelation) {
