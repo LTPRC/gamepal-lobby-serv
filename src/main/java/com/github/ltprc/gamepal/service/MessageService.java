@@ -6,11 +6,12 @@ import com.github.ltprc.gamepal.model.Message;
 import org.springframework.http.ResponseEntity;
 
 public interface MessageService {
-    void onMessage(String message);
 
     ResponseEntity sendMessage(HttpServletRequest request);
 
     ResponseEntity sendMessage(String userCode, Message message);
 
     ResponseEntity sendMessageToAll(Message message);
+
+    void communicate(String userCode);
 }

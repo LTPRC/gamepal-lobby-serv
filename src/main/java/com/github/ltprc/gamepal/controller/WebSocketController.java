@@ -7,6 +7,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.github.ltprc.gamepal.service.WebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,12 @@ import com.github.ltprc.gamepal.service.UserService;
 @ServerEndpoint("/websocket/v1/{userCode}")
 public class WebSocketController {
 
-    @Autowired
-    private UserService userService;
+    private static WebSocketService webSocketService;
 
     @Autowired
-    private MessageService messageService;
+    public void setWebSocketService(WebSocketService webSocketService) {
+        WebSocketController.webSocketService = webSocketService;
+    }
 
     /**
      * 建立连接调用的方法
@@ -31,7 +33,7 @@ public class WebSocketController {
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("userCode") String userCode) {
-        userService.onOpen(session, userCode);;
+        webSocketService.onOpen(session, userCode);;
     }
 
     /**
@@ -40,7 +42,7 @@ public class WebSocketController {
      */
     @OnClose
     public void onClose(@PathParam("userCode") String userCode) {
-        userService.onClose(userCode);
+        webSocketService.onClose(userCode);
     }
 
     /**
@@ -49,6 +51,6 @@ public class WebSocketController {
      */
     @OnMessage
     public void onMessage(@NonNull String message) {
-        messageService.onMessage(message);
+        webSocketService.onMessage(message);
     }
 }

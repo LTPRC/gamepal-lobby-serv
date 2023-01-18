@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.service;
 
-import java.util.Set;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
@@ -17,17 +16,13 @@ public interface UserService {
 
     ResponseEntity<String> logoff(HttpServletRequest request);
 
-    void onOpen(Session session, String userCode);
-
-    void onClose(String userCode);
-
     String getTokenByUserCode(String userCode);
 
     Long getOnlineTimestampByUserCode(String userCode);
 
     Session getSessionByUserCode(String userCode);
 
-    Set<Entry<String, Session>> getSessionEntrySet();
+    Map<String, Session> getSessionMap();
 
     String updateTokenByUserCode(String userCode);
 }

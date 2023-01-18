@@ -40,30 +40,6 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private PlayerService playerService;
 
-    @Override
-    public void onMessage(String message) {
-//      System.out.println("Received String (size:" + message.length() + ")");
-//      System.out.println("Received String:" + message);
-        JSONObject jsonObject = JSONObject.parseObject(message);
-        if (null == jsonObject || !jsonObject.containsKey("userCode")) {
-            logger.error(ErrorUtil.ERROR_1008);
-            return;
-        }
-        String userCode = jsonObject.getString("userCode");
-        // Receive basicInfo and update
-        if (jsonObject.containsKey("basicInfo")) {
-            BasicInfo basicInfo = jsonObject.getObject("basicInfo", BasicInfo.class);
-            playerService.getBasicInfoMap().put(userCode, basicInfo);
-        }
-        // Receive playerInfo and update
-        if (jsonObject.containsKey("playerInfo")) {
-            PlayerInfo playerInfo = jsonObject.getObject("playerInfo", PlayerInfo.class);
-            playerService.getPlayerInfoMap().put(userCode, playerInfo);
-        }
-        // Reply automatically
-        communicate(userCode);
-    }
-
     /**
      * 发送消息
      * 
@@ -97,7 +73,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public ResponseEntity sendMessageToAll(Message message) {
         JSONObject rst = ContentUtil.generateRst();
-        for (Entry<String, Session> entry : userService.getSessionEntrySet()) {
+        for (Entry<String, Session> entry : userService.getSessionMap().entrySet()) {
 //            try {
 //                entry.getValue().getBasicRemote().sendText(message);
 //            } catch (IOException e) {
@@ -110,7 +86,8 @@ public class MessageServiceImpl implements MessageService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    private void communicate(String userCode) {
+    @Override
+    public void communicate(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
         // Update token automatically

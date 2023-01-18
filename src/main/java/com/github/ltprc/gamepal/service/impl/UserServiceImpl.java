@@ -139,18 +139,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void onOpen(Session session, String userCode) {
-        sessionMap.put(userCode, session);
-        logger.info("建立连接成功");
-    }
-
-    @Override
-    public void onClose(String userCode) {
-        sessionMap.remove(userCode);
-        logger.info("断开连接成功");
-    }
-
-    @Override
     public String getTokenByUserCode(String userCode) {
         return tokenMap.getOrDefault(userCode, null);
     }
@@ -166,8 +154,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<Entry<String, Session>> getSessionEntrySet() {
-        return sessionMap.entrySet();
+    public Map<String, Session> getSessionMap() {
+        return sessionMap;
     }
 
     @Override

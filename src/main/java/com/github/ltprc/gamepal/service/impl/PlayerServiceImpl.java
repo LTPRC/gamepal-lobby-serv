@@ -37,9 +37,10 @@ public class PlayerServiceImpl implements PlayerService {
     private Map<String, Drop> dropMap = new ConcurrentSkipListMap<>(); // dropCode, drop
 
     @Autowired
-    private MessageService messageService;
-    @Autowired
     private UserService userService;
+
+    @Autowired
+    private MessageService messageService;
 
     @Override
     public ResponseEntity<String> initUserInfo(HttpServletRequest request) {
