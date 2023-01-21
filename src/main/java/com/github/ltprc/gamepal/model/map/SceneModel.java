@@ -32,6 +32,7 @@ public class SceneModel {
                 west = value;
                 break;
             case 4:
+            default:
                 center = value;
                 break;
             case 5:
@@ -46,8 +47,6 @@ public class SceneModel {
             case 8:
                 southeast = value;
                 break;
-            default:
-                center = value;
         }
     }
     public Integer getSceneNo(int index) {
@@ -61,6 +60,7 @@ public class SceneModel {
             case 3:
                 return west;
             case 4:
+            default:
                 return center;
             case 5:
                 return east;
@@ -70,8 +70,11 @@ public class SceneModel {
                 return south;
             case 8:
                 return southeast;
-            default:
-                return center;
         }
+    }
+    public boolean isSceneNoDetected(int sceneNo) {
+        return ((sceneNo - northwest) & (sceneNo - north) & (sceneNo - northeast)
+                & (sceneNo - west) & (sceneNo - center) & (sceneNo - east)
+                & (sceneNo - southwest) & (sceneNo - south) & (sceneNo - southeast)) == 0;
     }
 }

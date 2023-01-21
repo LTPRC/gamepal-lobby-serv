@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
@@ -13,6 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
+import com.github.ltprc.gamepal.model.lobby.BasicInfo;
+import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.SceneModel;
+import com.github.ltprc.gamepal.model.map.UserCoordinate;
+import com.github.ltprc.gamepal.service.PlayerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +44,9 @@ public class UserServiceImpl implements UserService {
     private Map<String, Session> sessionMap = new ConcurrentHashMap<>(); // userId, session
     private Map<String, String> tokenMap = new ConcurrentHashMap<>(); // userId, token
     private LinkedHashMap<String, Long> onlineMap = new LinkedHashMap<>(); // userId, timestamp
+
+    @Autowired
+    private PlayerService playerService;
 
     @Autowired
     private UserInfoRepository userInfoRepository;
@@ -111,6 +121,52 @@ public class UserServiceImpl implements UserService {
         updateTokenByUserCode(userCode);
         onlineMap.remove(userCode);
         onlineMap.put(userCode, Instant.now().getEpochSecond());
+        // Mocked BasicInfo TBD
+        BasicInfo basicInfo = new BasicInfo();
+        basicInfo.setPlayerType(0);
+        basicInfo.setUserCode(userCode);
+        basicInfo.setWorldNo(0);
+        UserCoordinate userCoordinate = new UserCoordinate();
+        userCoordinate.setPosition(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        SceneModel sceneModel = new SceneModel();
+        sceneModel.setCenter(0);
+        userCoordinate.setScenes(sceneModel);
+        userCoordinate.setFaceDirection(BigDecimal.ZERO);
+        basicInfo.setUserCoordinate(userCoordinate);
+        basicInfo.setAvatar("1");
+        basicInfo.setFirstName("克强");
+        basicInfo.setLastName("曾");
+        basicInfo.setFullName(basicInfo.getLastName() + basicInfo.getFirstName());
+        basicInfo.setNickname("大曾");
+        basicInfo.setNameColor("red");
+        basicInfo.setCreature("human");
+        basicInfo.setGender("0");
+        basicInfo.setSkinColor("asian");
+        basicInfo.setHairstyle("1");
+        basicInfo.setHairColor("black");
+        basicInfo.setEyes("1");
+        playerService.getBasicInfoMap().put(userCode, basicInfo);
+        // Mocked PlayerInfo TBD
+        PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setMaxSpeedX(new BigDecimal(1));
+        playerInfo.setMaxSpeedY(new BigDecimal(1));
+        playerInfo.setAccelerationX(new BigDecimal(0.01));
+        playerInfo.setAccelerationY(new BigDecimal(0.01));
+        playerInfo.setHpMax(1000);
+        playerInfo.setHp(playerInfo.getHpMax());
+        playerInfo.setVpMax(1000);
+        playerInfo.setVp(playerInfo.getVpMax());
+        playerInfo.setHungerMax(1000);
+        playerInfo.setHunger(playerInfo.getHungerMax());
+        playerInfo.setThirstMax(1000);
+        playerInfo.setThirst(playerInfo.getThirstMax());
+        playerInfo.setLevel(1);
+        playerInfo.setExp(0);
+        playerInfo.setExpMax(100);
+        playerInfo.setMoney(1);
+        playerInfo.setCapacity(new BigDecimal(100));
+        playerInfo.setCapacityMax(new BigDecimal(500));
+        playerService.getPlayerInfoMap().put(userCode, playerInfo);
         rst.put("userCode", userCode);
         rst.put("token", tokenMap.get(userCode));
         return ResponseEntity.ok().body(rst.toString());
@@ -130,6 +186,8 @@ public class UserServiceImpl implements UserService {
         if (token.equals(tokenMap.get(userCode))) {
             tokenMap.remove(userCode);
             onlineMap.remove(userCode);
+            playerService.getBasicInfoMap().remove(userCode);
+            playerService.getPlayerInfoMap().remove(userCode);
         } else {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));
         }

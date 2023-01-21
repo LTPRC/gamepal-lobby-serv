@@ -10,8 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCoordinate {
-    private String userCode;
-    private int sceneNo;
+    private SceneModel scenes;
     private Coordinate position;
     private Coordinate speed;
     private BigDecimal faceDirection; // from 0 to 360

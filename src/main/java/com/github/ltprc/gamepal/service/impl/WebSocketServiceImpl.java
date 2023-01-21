@@ -39,6 +39,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void onOpen(Session session, String userCode) {
         userService.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
+        communicate(userCode);
     }
 
     @Override
@@ -75,8 +76,8 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void communicate(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
-        // Update token automatically
-        String token = userService.updateTokenByUserCode(userCode);
+        // Return stored token
+        String token = userService.getTokenByUserCode(userCode);
         rst.put("token", token);
         // Flush messages automatically
         Map<String, Queue<Message>> messageMap = messageService.getMessageMap();
@@ -88,20 +89,22 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         // Return all detected basicInfos
         Map<String, BasicInfo> basicInfoMap = playerService.getBasicInfoMap();
-        JSONArray basicInfos = new JSONArray();
+        JSONObject basicInfos = new JSONObject();
         basicInfoMap.entrySet().stream().forEach(entry -> {
-            JSONObject obj = new JSONObject();
-            obj.put(entry.getKey(), entry.getValue());
-            basicInfos.add(obj);
+            if (basicInfoMap.get(userCode).getUserCoordinate().getScenes()
+                    .isSceneNoDetected(basicInfoMap.get(entry.getKey()).getUserCoordinate().getScenes().getCenter())) {
+                basicInfos.put(entry.getKey(), entry.getValue());
+            }
         });
         rst.put("basicInfos", basicInfos);
         // Return all detected playerInfos
         Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
-        JSONArray playerInfos = new JSONArray();
+        JSONObject playerInfos = new JSONObject();
         playerInfoMap.entrySet().stream().forEach(entry -> {
-            JSONObject obj = new JSONObject();
-            obj.put(entry.getKey(), entry.getValue());
-            playerInfos.add(obj);
+            if (basicInfoMap.get(userCode).getUserCoordinate().getScenes()
+                    .isSceneNoDetected(basicInfoMap.get(entry.getKey()).getUserCoordinate().getScenes().getCenter())) {
+                playerInfos.put(entry.getKey(), entry.getValue());
+            }
         });
         rst.put("playerInfos", playerInfos);
         // Communicate
