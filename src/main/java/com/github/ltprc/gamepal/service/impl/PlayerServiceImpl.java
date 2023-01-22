@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
-import com.github.ltprc.gamepal.model.lobby.BasicInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.Drop;
 import com.github.ltprc.gamepal.service.MessageService;
@@ -18,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -32,7 +32,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
-    private Map<String, BasicInfo> basicInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
     private Map<String, Drop> dropMap = new ConcurrentSkipListMap<>(); // dropCode, drop
 
@@ -41,20 +40,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private MessageService messageService;
-
-    @Override
-    public ResponseEntity<String> initUserInfo(HttpServletRequest request) {
-//        JSONObject rst = ContentUtil.generateRst();
-//        JSONObject req = null;
-//        try {
-//            req = ContentUtil.request2JSONObject(request);
-//        } catch (IOException e) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-//        }
-//        String userCode = req.getString("userCode");
-//        return ResponseEntity.ok().body(rst.toString());
-        return null;
-    }
 
     @Override
     public ResponseEntity setRelation(HttpServletRequest request) {
@@ -157,36 +142,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity setBasicInfo(HttpServletRequest request) {
-        JSONObject rst = ContentUtil.generateRst();
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        String userCode = req.getString("userCode");
-        BasicInfo basicInfo = req.getObject("basicInfo", BasicInfo.class);
-        basicInfoMap.put(userCode, basicInfo);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity getBasicInfo(HttpServletRequest request) {
-        JSONObject rst = ContentUtil.generateRst();
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        String userCode = req.getString("userCode");
-        BasicInfo basicInfo = basicInfoMap.get(userCode);
-        rst.put("basicInfo", basicInfo);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
     public ResponseEntity setPlayerInfo(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -198,6 +153,73 @@ public class PlayerServiceImpl implements PlayerService {
         String userCode = req.getString("userCode");
         PlayerInfo playerInfo = req.getObject("playerInfo", PlayerInfo.class);
         playerInfoMap.put(userCode, playerInfo);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity setPlayerInfoByEntities(HttpServletRequest request) {
+        JSONObject rst = ContentUtil.generateRst();
+        JSONObject req = null;
+        try {
+            req = ContentUtil.request2JSONObject(request);
+        } catch (IOException e) {
+            logger.error(ErrorUtil.ERROR_1002);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
+        }
+        if (null == req || !req.containsKey("userCode")) {
+            logger.error(ErrorUtil.ERROR_1008);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1008));
+        }
+        String userCode = req.getString("userCode");
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        String firstName = req.getString("firstName");
+        if (StringUtils.hasText(firstName)) {
+            playerInfo.setFirstName(firstName);
+        }
+        String lastName = req.getString("lastName");
+        if (StringUtils.hasText(lastName)) {
+            playerInfo.setLastName(lastName);
+        }
+        String nickname = req.getString("nickname");
+        if (StringUtils.hasText(nickname)) {
+            playerInfo.setNickname(nickname);
+        }
+        String nameColor = req.getString("nameColor");
+        if (StringUtils.hasText(nameColor)) {
+            playerInfo.setNameColor(nameColor);
+        }
+        String creature = req.getString("creature");
+        if (StringUtils.hasText(creature)) {
+            playerInfo.setCreature(creature);
+        }
+        String gender = req.getString("gender");
+        if (StringUtils.hasText(gender)) {
+            playerInfo.setGender(gender);
+        }
+        String skinColor = req.getString("skinColor");
+        if (StringUtils.hasText(skinColor)) {
+            playerInfo.setSkinColor(skinColor);
+        }
+        String hairstyle = req.getString("hairstyle");
+        if (StringUtils.hasText(hairstyle)) {
+            playerInfo.setHairstyle(hairstyle);
+        }
+        String hairColor = req.getString("hairColor");
+        if (StringUtils.hasText(hairColor)) {
+            playerInfo.setHairColor(hairColor);
+        }
+        String eyes = req.getString("eyes");
+        if (StringUtils.hasText(eyes)) {
+            playerInfo.setEyes(eyes);
+        }
+        String avatar = req.getString("avatar");
+        if (StringUtils.hasText(avatar)) {
+            playerInfo.setAvatar(avatar);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -217,11 +239,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Map<String, BasicInfo> getBasicInfoMap() {
-        return basicInfoMap;
-    }
-
-    @Override
     public Map<String, PlayerInfo> getPlayerInfoMap() {
         return playerInfoMap;
     }
@@ -231,10 +248,10 @@ public class PlayerServiceImpl implements PlayerService {
         message.setType(0);
         if (isFrom) {
             message.setToUserCode(userCode);
-            message.setContent("你将对" + basicInfoMap.get(nextUserCode).getFullName() + "的关系调整为" + newRelation);
+            message.setContent("你将对" + playerInfoMap.get(nextUserCode).getNickname() + "的关系调整为" + newRelation);
         } else {
             message.setToUserCode(nextUserCode);
-            message.setContent(basicInfoMap.get(nextUserCode).getFullName() + "将对你的关系调整为" + newRelation);
+            message.setContent(playerInfoMap.get(nextUserCode).getNickname() + "将对你的关系调整为" + newRelation);
         }
         return message;
     }

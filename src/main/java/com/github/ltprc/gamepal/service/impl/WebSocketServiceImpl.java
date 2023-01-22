@@ -3,8 +3,9 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.lobby.BasicInfo;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.SceneModel;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -18,8 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 @Service
 public class WebSocketServiceImpl implements WebSocketService {
@@ -58,11 +58,6 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         String userCode = jsonObject.getString("userCode");
-        // Receive basicInfo and update
-        if (jsonObject.containsKey("basicInfo")) {
-            BasicInfo basicInfo = jsonObject.getObject("basicInfo", BasicInfo.class);
-            playerService.getBasicInfoMap().put(userCode, basicInfo);
-        }
         // Receive playerInfo and update
         if (jsonObject.containsKey("playerInfo")) {
             PlayerInfo playerInfo = jsonObject.getObject("playerInfo", PlayerInfo.class);
@@ -87,32 +82,65 @@ public class WebSocketServiceImpl implements WebSocketService {
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }
-        // Return all detected basicInfos
-        Map<String, BasicInfo> basicInfoMap = playerService.getBasicInfoMap();
-        JSONObject basicInfos = new JSONObject();
-        basicInfoMap.entrySet().stream().forEach(entry -> {
-            if (basicInfoMap.get(userCode).getUserCoordinate().getScenes()
-                    .isSceneNoDetected(basicInfoMap.get(entry.getKey()).getUserCoordinate().getScenes().getCenter())) {
-                basicInfos.put(entry.getKey(), entry.getValue());
+        // Based on current playerInfo, detect playerInfos from 9 around scenes
+        Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
+            return;
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Set<PlayerInfo> rankedSet = new TreeSet<>(new Comparator<PlayerInfo>() {
+            @Override
+            public int compare(PlayerInfo o1, PlayerInfo o2) {
+                return o1.getUserCoordinate().getPosition().getY().compareTo(o2.getUserCoordinate().getPosition().getY());
             }
         });
-        rst.put("basicInfos", basicInfos);
-        // Return all detected playerInfos
-        Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
-        JSONObject playerInfos = new JSONObject();
         playerInfoMap.entrySet().stream().forEach(entry -> {
-            if (basicInfoMap.get(userCode).getUserCoordinate().getScenes()
-                    .isSceneNoDetected(basicInfoMap.get(entry.getKey()).getUserCoordinate().getScenes().getCenter())) {
-                playerInfos.put(entry.getKey(), entry.getValue());
-            }
+            rankedSet.add(entry.getValue());
+        });
+        JSONObject playerInfos = new JSONObject();
+        JSONArray detectedUserCodes = new JSONArray();
+        rankedSet.stream().forEach(info -> {
+            playerInfos.put(info.getUserCode(), info);
+            detectedUserCodes.add(info.getUserCode());
         });
         rst.put("playerInfos", playerInfos);
+        rst.put("detectedUserCodes", detectedUserCodes);
         // Communicate
         String content = JSONObject.toJSONString(rst);
+        if (null == userService.getSessionByUserCode(userCode)
+                || null == userService.getSessionByUserCode(userCode).getBasicRemote()) {
+            logger.warn(ErrorUtil.ERROR_1003 + "userCode: " + userCode);
+            return;
+        }
         try {
             userService.getSessionByUserCode(userCode).getBasicRemote().sendText(content);
         } catch (IOException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
+        }
+    }
+
+    private int getCoordinateRelation(SceneModel from, SceneModel to) {
+        if (to.getCenter() == from.getNorthwest()) {
+            return 0;
+        } else if (to.getCenter() == from.getNorth()) {
+            return 1;
+        } else if (to.getCenter() == from.getNortheast()) {
+            return 2;
+        } else if (to.getCenter() == from.getWest()) {
+            return 3;
+        } else if (to.getCenter() == from.getCenter()) {
+            return 4;
+        } else if (to.getCenter() == from.getEast()) {
+            return 5;
+        } else if (to.getCenter() == from.getSouthwest()) {
+            return 6;
+        } else if (to.getCenter() == from.getSouth()) {
+            return 7;
+        } else if (to.getCenter() == from.getSoutheast()) {
+            return 8;
+        } else {
+            return -1;
         }
     }
 }

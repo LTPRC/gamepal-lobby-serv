@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
-import com.github.ltprc.gamepal.model.lobby.BasicInfo;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.SceneModel;
@@ -121,33 +120,29 @@ public class UserServiceImpl implements UserService {
         updateTokenByUserCode(userCode);
         onlineMap.remove(userCode);
         onlineMap.put(userCode, Instant.now().getEpochSecond());
-        // Mocked BasicInfo TBD
-        BasicInfo basicInfo = new BasicInfo();
-        basicInfo.setPlayerType(0);
-        basicInfo.setUserCode(userCode);
-        basicInfo.setWorldNo(0);
+        // Mocked PlayerInfo TBD
+        PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setPlayerType(0);
+        playerInfo.setUserCode(userCode);
+        playerInfo.setWorldNo(0);
         UserCoordinate userCoordinate = new UserCoordinate();
         userCoordinate.setPosition(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         SceneModel sceneModel = new SceneModel();
         sceneModel.setCenter(0);
         userCoordinate.setScenes(sceneModel);
         userCoordinate.setFaceDirection(BigDecimal.ZERO);
-        basicInfo.setUserCoordinate(userCoordinate);
-        basicInfo.setAvatar("1");
-        basicInfo.setFirstName("克强");
-        basicInfo.setLastName("曾");
-        basicInfo.setFullName(basicInfo.getLastName() + basicInfo.getFirstName());
-        basicInfo.setNickname("大曾");
-        basicInfo.setNameColor("red");
-        basicInfo.setCreature("human");
-        basicInfo.setGender("0");
-        basicInfo.setSkinColor("asian");
-        basicInfo.setHairstyle("1");
-        basicInfo.setHairColor("black");
-        basicInfo.setEyes("1");
-        playerService.getBasicInfoMap().put(userCode, basicInfo);
-        // Mocked PlayerInfo TBD
-        PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setUserCoordinate(userCoordinate);
+        playerInfo.setAvatar("1");
+        playerInfo.setFirstName("克强");
+        playerInfo.setLastName("曾");
+        playerInfo.setNickname("大曾");
+        playerInfo.setNameColor("#990000");
+        playerInfo.setCreature("1");
+        playerInfo.setGender("2");
+        playerInfo.setSkinColor("3");
+        playerInfo.setHairstyle("2");
+        playerInfo.setHairColor("2");
+        playerInfo.setEyes("2");
         playerInfo.setMaxSpeedX(new BigDecimal(1));
         playerInfo.setMaxSpeedY(new BigDecimal(1));
         playerInfo.setAccelerationX(new BigDecimal(0.01));
@@ -186,7 +181,6 @@ public class UserServiceImpl implements UserService {
         if (token.equals(tokenMap.get(userCode))) {
             tokenMap.remove(userCode);
             onlineMap.remove(userCode);
-            playerService.getBasicInfoMap().remove(userCode);
             playerService.getPlayerInfoMap().remove(userCode);
         } else {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));

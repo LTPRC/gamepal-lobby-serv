@@ -72,9 +72,4 @@ public class SceneModel {
                 return southeast;
         }
     }
-    public boolean isSceneNoDetected(int sceneNo) {
-        return ((sceneNo - northwest) & (sceneNo - north) & (sceneNo - northeast)
-                & (sceneNo - west) & (sceneNo - center) & (sceneNo - east)
-                & (sceneNo - southwest) & (sceneNo - south) & (sceneNo - southeast)) == 0;
-    }
 }
