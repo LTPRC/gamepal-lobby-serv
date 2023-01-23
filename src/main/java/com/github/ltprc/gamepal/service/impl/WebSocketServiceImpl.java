@@ -3,15 +3,17 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
+import com.github.ltprc.gamepal.model.lobby.Drop;
+import com.github.ltprc.gamepal.model.lobby.Event;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.SceneModel;
+import com.github.ltprc.gamepal.model.map.SceneCoordinate;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,30 +84,59 @@ public class WebSocketServiceImpl implements WebSocketService {
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }
-        // Based on current playerInfo, detect playerInfos from 9 around scenes
+
+        // Return maps of playerInfos, drops, and events based on detected scenes
+        Set<SceneCoordinate> rankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
+            @Override
+            public int compare(SceneCoordinate o1, SceneCoordinate o2) {
+                return o1.getPosition().getY().compareTo(o2.getPosition().getY());
+            }
+        });
         Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return;
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Set<PlayerInfo> rankedSet = new TreeSet<>(new Comparator<PlayerInfo>() {
-            @Override
-            public int compare(PlayerInfo o1, PlayerInfo o2) {
-                return o1.getUserCoordinate().getPosition().getY().compareTo(o2.getUserCoordinate().getPosition().getY());
-            }
-        });
-        playerInfoMap.entrySet().stream().forEach(entry -> {
-            rankedSet.add(entry.getValue());
-        });
+
         JSONObject playerInfos = new JSONObject();
-        JSONArray detectedUserCodes = new JSONArray();
-        rankedSet.stream().forEach(info -> {
-            playerInfos.put(info.getUserCode(), info);
-            detectedUserCodes.add(info.getUserCode());
-        });
+        playerInfoMap.entrySet().stream()
+                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
+                        entry.getValue().getSceneNo())).forEach(entry -> {
+                    playerInfos.put(entry.getKey(), entry.getValue());
+                    rankedSet.add(entry.getValue());
+                });
         rst.put("playerInfos", playerInfos);
-        rst.put("detectedUserCodes", detectedUserCodes);
+
+        JSONObject drops = new JSONObject();
+        Map<String, Drop> dropMap = playerService.getDropMap();
+        dropMap.entrySet().stream()
+                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
+                        entry.getValue().getSceneNo())).forEach(entry -> {
+                    drops.put(entry.getKey(), entry.getValue());
+                    rankedSet.add(entry.getValue());
+                });
+        rst.put("drops", drops);
+
+        JSONObject events = new JSONObject();
+        Map<String, Event> eventMap = playerService.getEventMap();
+        eventMap.entrySet().stream()
+                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
+                        entry.getValue().getSceneNo())).forEach(entry -> {
+                    events.put(entry.getKey(), entry.getValue());
+                    rankedSet.add(entry.getValue());
+                });
+        rst.put("events", events);
+
+        JSONArray detectedObjects = new JSONArray();
+        rankedSet.stream().forEach(info -> {
+            JSONObject detectedObject = new JSONObject();
+            detectedObject.put("userCode", userCode);
+            detectedObject.put("type", info.detectionType);
+            detectedObjects.add(detectedObject);
+        });
+        rst.put("detectedObjects", detectedObjects);
+
         // Communicate
         String content = JSONObject.toJSONString(rst);
         if (null == userService.getSessionByUserCode(userCode)
@@ -117,30 +148,6 @@ public class WebSocketServiceImpl implements WebSocketService {
             userService.getSessionByUserCode(userCode).getBasicRemote().sendText(content);
         } catch (IOException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-        }
-    }
-
-    private int getCoordinateRelation(SceneModel from, SceneModel to) {
-        if (to.getCenter() == from.getNorthwest()) {
-            return 0;
-        } else if (to.getCenter() == from.getNorth()) {
-            return 1;
-        } else if (to.getCenter() == from.getNortheast()) {
-            return 2;
-        } else if (to.getCenter() == from.getWest()) {
-            return 3;
-        } else if (to.getCenter() == from.getCenter()) {
-            return 4;
-        } else if (to.getCenter() == from.getEast()) {
-            return 5;
-        } else if (to.getCenter() == from.getSouthwest()) {
-            return 6;
-        } else if (to.getCenter() == from.getSouth()) {
-            return 7;
-        } else if (to.getCenter() == from.getSoutheast()) {
-            return 8;
-        } else {
-            return -1;
         }
     }
 }

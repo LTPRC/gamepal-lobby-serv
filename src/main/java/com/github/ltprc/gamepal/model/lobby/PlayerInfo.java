@@ -1,6 +1,8 @@
 package com.github.ltprc.gamepal.model.lobby;
 
-import com.github.ltprc.gamepal.model.map.UserCoordinate;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.SceneCoordinate;
+import com.github.ltprc.gamepal.model.map.SceneModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,11 +16,15 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerInfo {
+public class PlayerInfo extends SceneCoordinate {
+
+    static {
+        detectionType = "player";
+    }
     private int playerType; // 0-human player 1-npc
-    private String userCode;
-    private int worldNo; // TBD
-    private UserCoordinate userCoordinate = new UserCoordinate();
+    private SceneModel scenes;
+    private Coordinate speed;
+    private BigDecimal faceDirection; // from 0 to 360
     private String avatar;
     private String firstName;
     private String lastName;

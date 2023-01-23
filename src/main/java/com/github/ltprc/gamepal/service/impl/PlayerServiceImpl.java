@@ -4,9 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
+import com.github.ltprc.gamepal.model.lobby.Event;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.Drop;
+import com.github.ltprc.gamepal.model.lobby.Drop;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -33,7 +34,8 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
-    private Map<String, Drop> dropMap = new ConcurrentSkipListMap<>(); // dropCode, drop
+    private Map<String, Drop> dropMap = new ConcurrentSkipListMap<>(); // userCode, drop
+    private Map<String, Event> eventMap = new ConcurrentSkipListMap<>(); // userCode, event
 
     @Autowired
     private UserService userService;
@@ -102,7 +104,10 @@ public class PlayerServiceImpl implements PlayerService {
         Integer sceneNo = req.getInteger("sceneNo");
         BigDecimal x = req.getBigDecimal("x");
         BigDecimal y = req.getBigDecimal("y");
-        Drop drop = new Drop(itemNo, amount, sceneNo, new Coordinate(x, y));
+        Drop drop = new Drop(itemNo, amount);
+        drop.setUserCode(UUID.randomUUID().toString());
+        drop.setSceneNo(sceneNo);
+        drop.setPosition(new Coordinate(x, y));
         String dropCode = UUID.randomUUID().toString();
         if (dropMap.containsKey(dropCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1001));
@@ -241,6 +246,16 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Map<String, PlayerInfo> getPlayerInfoMap() {
         return playerInfoMap;
+    }
+
+    @Override
+    public Map<String, Drop> getDropMap() {
+        return dropMap;
+    }
+
+    @Override
+    public Map<String, Event> getEventMap() {
+        return eventMap;
     }
 
     private Message generateRelationMessage(String userCode, String nextUserCode, boolean isFrom, int newRelation) {
