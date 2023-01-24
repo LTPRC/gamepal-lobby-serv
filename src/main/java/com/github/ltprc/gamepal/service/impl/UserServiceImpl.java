@@ -142,10 +142,8 @@ public class UserServiceImpl implements UserService {
         playerInfo.setHairstyle("2");
         playerInfo.setHairColor("2");
         playerInfo.setEyes("2");
-        playerInfo.setMaxSpeedX(new BigDecimal(1));
-        playerInfo.setMaxSpeedY(new BigDecimal(1));
-        playerInfo.setAccelerationX(new BigDecimal(0.01));
-        playerInfo.setAccelerationY(new BigDecimal(0.01));
+        playerInfo.setMaxSpeed(new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+        playerInfo.setAcceleration(new Coordinate(new BigDecimal(0.01), new BigDecimal(0.01)));
         playerInfo.setHpMax(1000);
         playerInfo.setHp(playerInfo.getHpMax());
         playerInfo.setVpMax(1000);

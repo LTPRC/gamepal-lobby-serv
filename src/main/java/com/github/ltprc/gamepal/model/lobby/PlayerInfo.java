@@ -37,10 +37,8 @@ public class PlayerInfo extends SceneCoordinate {
     private String hairColor;
     private String eyes;
     private Set<String> outfits = new ConcurrentSkipListSet<>();
-    private BigDecimal maxSpeedX; // block per second
-    private BigDecimal maxSpeedY; // block per second
-    private BigDecimal accelerationX; // block per second square
-    private BigDecimal accelerationY; // block per second square
+    private Coordinate maxSpeed; // block per second
+    private Coordinate acceleration; // block per second square
     private int hpMax;
     private int hp;
     private int vpMax;

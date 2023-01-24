@@ -10,5 +10,5 @@ public interface WebSocketService {
 
     void onClose(String userCode);
 
-    void communicate(String userCode);
+    void communicate(String userCode, int state);
 }

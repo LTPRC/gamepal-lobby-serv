@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.service.impl;
 
+import cn.hutool.core.io.resource.ResourceUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
@@ -26,6 +27,8 @@ import java.util.*;
 @Service
 public class WebSocketServiceImpl implements WebSocketService {
 
+    private static final int STATE_START = 0;
+    private static final int STATE_IN_PROGRESS = 1;
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
 
     @Autowired
@@ -41,7 +44,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void onOpen(Session session, String userCode) {
         userService.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
-        communicate(userCode);
+        communicate(userCode, STATE_START);
     }
 
     @Override
@@ -66,16 +69,24 @@ public class WebSocketServiceImpl implements WebSocketService {
             playerService.getPlayerInfoMap().put(userCode, playerInfo);
         }
         // Reply automatically
-        communicate(userCode);
+        int state = jsonObject.getInteger("state");
+        communicate(userCode, state);
     }
 
     @Override
-    public void communicate(String userCode) {
+    public void communicate(String userCode, int state) {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
+
         // Return stored token
         String token = userService.getTokenByUserCode(userCode);
         rst.put("token", token);
+
+        // [Init] Return scenes
+        if (state == STATE_START) {
+            rst.put("scenes", ResourceUtil.readUtf8Str("config/scenes.json"));
+        }
+
         // Flush messages automatically
         Map<String, Queue<Message>> messageMap = messageService.getMessageMap();
         if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
@@ -118,15 +129,15 @@ public class WebSocketServiceImpl implements WebSocketService {
                 });
         rst.put("drops", drops);
 
-        JSONObject events = new JSONObject();
-        Map<String, Event> eventMap = playerService.getEventMap();
-        eventMap.entrySet().stream()
-                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
-                        entry.getValue().getSceneNo())).forEach(entry -> {
-                    events.put(entry.getKey(), entry.getValue());
-                    rankedSet.add(entry.getValue());
-                });
-        rst.put("events", events);
+//        JSONObject events = new JSONObject();
+//        Map<String, Event> eventMap = playerService.getEventMap();
+//        eventMap.entrySet().stream()
+//                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
+//                        entry.getValue().getSceneNo())).forEach(entry -> {
+//                    events.put(entry.getKey(), entry.getValue());
+//                    rankedSet.add(entry.getValue());
+//                });
+//        rst.put("events", events);
 
         JSONArray detectedObjects = new JSONArray();
         rankedSet.stream().forEach(info -> {
