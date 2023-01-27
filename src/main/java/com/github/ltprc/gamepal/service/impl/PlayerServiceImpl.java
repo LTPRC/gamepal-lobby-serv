@@ -54,16 +54,24 @@ public class PlayerServiceImpl implements PlayerService {
         }
         String userCode = req.getString("userCode");
         String nextUserCode = req.getString("nextUserCode");
-        int value = req.getInteger("value");
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (!playerInfoMap.containsKey(nextUserCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        int newRelation = req.getInteger("newRelation");
         if (!relationMap.containsKey(userCode)) {
             relationMap.put(userCode, new ConcurrentHashMap<>());
         }
-        relationMap.get(userCode).put(nextUserCode, value);
-        messageService.sendMessage(userCode, generateRelationMessage(userCode, nextUserCode, true, value));
+        relationMap.get(userCode).put(nextUserCode, newRelation);
+        messageService.sendMessage(userCode, generateRelationMessage(userCode, nextUserCode, true, newRelation));
         if (!relationMap.containsKey(nextUserCode)) {
             relationMap.put(nextUserCode, new ConcurrentHashMap<>());
         }
-        relationMap.get(nextUserCode).put(userCode, value);
+        relationMap.get(nextUserCode).put(userCode, newRelation);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -77,6 +85,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
         }
         String userCode = req.getString("userCode");
+        String nextUserCode = req.getString("nextUserCode");
         JSONArray relations = new JSONArray();
         if (relationMap.containsKey(userCode)) {
             relationMap.get(userCode).entrySet().stream().forEach(entry -> {
