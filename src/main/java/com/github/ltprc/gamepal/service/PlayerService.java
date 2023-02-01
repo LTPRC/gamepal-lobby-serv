@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.service;
 
 import com.github.ltprc.gamepal.model.lobby.Drop;
-import com.github.ltprc.gamepal.model.lobby.Event;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import org.springframework.http.ResponseEntity;
 
@@ -27,6 +26,4 @@ public interface PlayerService {
     Map<String, PlayerInfo> getPlayerInfoMap();
 
     Map<String, Drop> getDropMap();
-
-    Map<String, Event> getEventMap();
 }

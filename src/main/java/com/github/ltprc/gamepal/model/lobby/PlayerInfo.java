@@ -18,9 +18,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @AllArgsConstructor
 public class PlayerInfo extends SceneCoordinate {
 
-    static {
-        detectionType = "player";
-    }
     private int playerType; // 0-human player 1-npc
     private SceneModel scenes;
     private Coordinate speed;

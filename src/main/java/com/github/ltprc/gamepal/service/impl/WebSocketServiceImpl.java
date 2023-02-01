@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.lobby.Drop;
-import com.github.ltprc.gamepal.model.lobby.Event;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.SceneCoordinate;
 import com.github.ltprc.gamepal.service.MessageService;
@@ -97,7 +96,19 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         // Return maps of playerInfos, drops, and events based on detected scenes
-        Set<SceneCoordinate> rankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
+        Set<SceneCoordinate> northRankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
+            @Override
+            public int compare(SceneCoordinate o1, SceneCoordinate o2) {
+                return o1.getPosition().getY().compareTo(o2.getPosition().getY());
+            }
+        });
+        Set<SceneCoordinate> centerRankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
+            @Override
+            public int compare(SceneCoordinate o1, SceneCoordinate o2) {
+                return o1.getPosition().getY().compareTo(o2.getPosition().getY());
+            }
+        });
+        Set<SceneCoordinate> southRankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
             @Override
             public int compare(SceneCoordinate o1, SceneCoordinate o2) {
                 return o1.getPosition().getY().compareTo(o2.getPosition().getY());
@@ -115,7 +126,23 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
                         entry.getValue().getSceneNo())).forEach(entry -> {
                     playerInfos.put(entry.getKey(), entry.getValue());
-                    rankedSet.add(entry.getValue());
+                    switch (PlayerUtil.getCoordinateRelation(playerInfo.getScenes(), entry.getValue().getSceneNo())) {
+                        case 0:
+                        case 1:
+                        case 2:
+                            northRankedSet.add(entry.getValue());
+                            break;
+                        case 3:
+                        case 4:
+                        case 5:
+                            centerRankedSet.add(entry.getValue());
+                            break;
+                        case 6:
+                        case 7:
+                        case 8:
+                            southRankedSet.add(entry.getValue());
+                            break;
+                    }
                 });
         rst.put("playerInfos", playerInfos);
 
@@ -124,8 +151,24 @@ public class WebSocketServiceImpl implements WebSocketService {
         dropMap.entrySet().stream()
                 .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
                         entry.getValue().getSceneNo())).forEach(entry -> {
-                    drops.put(entry.getKey(), entry.getValue());
-                    rankedSet.add(entry.getValue());
+                    drops.put(entry.getValue().getUserCode(), entry.getValue());
+                    switch (PlayerUtil.getCoordinateRelation(playerInfo.getScenes(), entry.getValue().getSceneNo())) {
+                        case 0:
+                        case 1:
+                        case 2:
+                            northRankedSet.add(entry.getValue());
+                            break;
+                        case 3:
+                        case 4:
+                        case 5:
+                            centerRankedSet.add(entry.getValue());
+                            break;
+                        case 6:
+                        case 7:
+                        case 8:
+                            southRankedSet.add(entry.getValue());
+                            break;
+                    }
                 });
         rst.put("drops", drops);
 
@@ -140,10 +183,15 @@ public class WebSocketServiceImpl implements WebSocketService {
 //        rst.put("events", events);
 
         JSONArray detectedObjects = new JSONArray();
+        for (Set<SceneCoordinate> rankedSet : new Set[] {northRankedSet, centerRankedSet, southRankedSet})
         rankedSet.stream().forEach(info -> {
             JSONObject detectedObject = new JSONObject();
-            detectedObject.put("userCode", userCode);
-            detectedObject.put("type", info.detectionType);
+            detectedObject.put("userCode", info.getUserCode());
+            if (Drop.class.isInstance(info)) {
+                detectedObject.put("type", "drop");
+            } else if (PlayerInfo.class.isInstance(info)) {
+                detectedObject.put("type", "player");
+            }
             detectedObjects.add(detectedObject);
         });
         rst.put("detectedObjects", detectedObjects);

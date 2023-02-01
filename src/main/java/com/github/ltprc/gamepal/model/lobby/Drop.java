@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Drop extends SceneCoordinate {
-    static {
-        detectionType = "drop";
-    }
+
     private String itemNo;
     private int amount;
 }

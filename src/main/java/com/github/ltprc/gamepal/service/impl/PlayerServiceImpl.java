@@ -1,10 +1,8 @@
 package com.github.ltprc.gamepal.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.lobby.Event;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.lobby.Drop;
@@ -31,11 +29,13 @@ import java.util.concurrent.ConcurrentSkipListMap;
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
+    private static final Integer RELATION_INIT = 0;
+    private static final Integer RELATION_MIN = -100;
+    private static final Integer RELATION_MAX = 100;
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
     private Map<String, Drop> dropMap = new ConcurrentSkipListMap<>(); // userCode, drop
-    private Map<String, Event> eventMap = new ConcurrentSkipListMap<>(); // userCode, event
 
     @Autowired
     private UserService userService;
@@ -54,6 +54,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         String userCode = req.getString("userCode");
         String nextUserCode = req.getString("nextUserCode");
+        boolean isAbsolute = req.getBoolean("isAbsolute");
         if (!playerInfoMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
@@ -66,12 +67,25 @@ public class PlayerServiceImpl implements PlayerService {
         if (!relationMap.containsKey(userCode)) {
             relationMap.put(userCode, new ConcurrentHashMap<>());
         }
-        relationMap.get(userCode).put(nextUserCode, newRelation);
-        messageService.sendMessage(userCode, generateRelationMessage(userCode, nextUserCode, true, newRelation));
         if (!relationMap.containsKey(nextUserCode)) {
             relationMap.put(nextUserCode, new ConcurrentHashMap<>());
         }
+        if (!relationMap.get(userCode).containsKey(nextUserCode)) {
+            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
+        }
+        if (!relationMap.get(nextUserCode).containsKey(userCode)) {
+            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
+        }
+        if (!isAbsolute) {
+            newRelation += relationMap.get(userCode).get(nextUserCode);
+        }
+        newRelation = Math.min(RELATION_MAX, Math.max(RELATION_MIN, newRelation));
+        relationMap.get(userCode).put(nextUserCode, newRelation);
         relationMap.get(nextUserCode).put(userCode, newRelation);
+        messageService.sendMessage(userCode, generateRelationMessage(userCode, nextUserCode, true, newRelation));
+        rst.put("userCode", userCode);
+        rst.put("nextUserCode", nextUserCode);
+        rst.put("relation", newRelation);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -86,16 +100,29 @@ public class PlayerServiceImpl implements PlayerService {
         }
         String userCode = req.getString("userCode");
         String nextUserCode = req.getString("nextUserCode");
-        JSONArray relations = new JSONArray();
-        if (relationMap.containsKey(userCode)) {
-            relationMap.get(userCode).entrySet().stream().forEach(entry -> {
-                JSONObject relation = new JSONObject();
-                relation.put("userCode", entry.getKey());
-                relation.put("relation", entry.getValue());
-                relations.add(relation);
-            });
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        rst.put("relations", relations);
+        if (!playerInfoMap.containsKey(nextUserCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (!relationMap.containsKey(userCode)) {
+            relationMap.put(userCode, new ConcurrentHashMap<>());
+        }
+        if (!relationMap.containsKey(nextUserCode)) {
+            relationMap.put(nextUserCode, new ConcurrentHashMap<>());
+        }
+        if (!relationMap.get(userCode).containsKey(nextUserCode)) {
+            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
+        }
+        if (!relationMap.get(nextUserCode).containsKey(userCode)) {
+            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
+        }
+        rst.put("userCode", userCode);
+        rst.put("nextUserCode", nextUserCode);
+        rst.put("relation", relationMap.get(userCode).get(nextUserCode));
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -114,13 +141,13 @@ public class PlayerServiceImpl implements PlayerService {
         BigDecimal x = req.getBigDecimal("x");
         BigDecimal y = req.getBigDecimal("y");
         Drop drop = new Drop(itemNo, amount);
-        drop.setUserCode(UUID.randomUUID().toString());
-        drop.setSceneNo(sceneNo);
-        drop.setPosition(new Coordinate(x, y));
         String dropCode = UUID.randomUUID().toString();
         if (dropMap.containsKey(dropCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1001));
         }
+        drop.setUserCode(dropCode);
+        drop.setSceneNo(sceneNo);
+        drop.setPosition(new Coordinate(x, y));
         dropMap.put(dropCode, drop);
         rst.put("dropCode", dropCode);
         return ResponseEntity.ok().body(rst.toString());
@@ -260,11 +287,6 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Map<String, Drop> getDropMap() {
         return dropMap;
-    }
-
-    @Override
-    public Map<String, Event> getEventMap() {
-        return eventMap;
     }
 
     private Message generateRelationMessage(String userCode, String nextUserCode, boolean isFrom, int newRelation) {
