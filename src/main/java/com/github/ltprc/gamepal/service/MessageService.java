@@ -14,7 +14,5 @@ public interface MessageService {
 
     ResponseEntity sendMessage(String userCode, Message message);
 
-    ResponseEntity sendMessageToAll(Message message);
-
     Map<String, Queue<Message>> getMessageMap();
 }

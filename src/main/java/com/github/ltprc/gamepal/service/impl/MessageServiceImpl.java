@@ -13,6 +13,7 @@ import javax.websocket.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,10 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 @Service
 public class MessageServiceImpl implements MessageService {
 
+    private static final Integer TYPE_PRINTED = 0;
+    private static final Integer TYPE_VOICE = 1;
+    private static final Integer SCOPE_GLOBAL = 0;
+    private static final Integer SCOPE_INDIVIDUAL = 1;
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // userCode, message queue
 
@@ -35,7 +40,7 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 发送消息
-     * 
+     *
      * @param userCode
      * @param message
      */
@@ -46,36 +51,10 @@ public class MessageServiceImpl implements MessageService {
             logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1009);
         }
-//        try {
-//            session.getBasicRemote().sendText(message);
-//        } catch (IOException e) {
-//            logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-//            return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1010);
-//        }
         if(!messageMap.containsKey(userCode)) {
             messageMap.put(userCode, new LinkedBlockingDeque<>());
         }
         messageMap.get(userCode).add(message);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    /**
-     * 集体发送消息
-     * @param message
-     */
-    @Override
-    public ResponseEntity sendMessageToAll(Message message) {
-        JSONObject rst = ContentUtil.generateRst();
-        for (Entry<String, Session> entry : userService.getSessionMap().entrySet()) {
-//            try {
-//                entry.getValue().getBasicRemote().sendText(message);
-//            } catch (IOException e) {
-//                logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + entry.getKey());
-//                return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1010);
-//            }
-            String userCode = entry.getKey();
-            sendMessage(userCode, message);
-        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -91,16 +70,40 @@ public class MessageServiceImpl implements MessageService {
      */
     @Override
     public ResponseEntity sendMessage(HttpServletRequest request) {
+        JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
         try {
             req = ContentUtil.request2JSONObject(request);
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
         }
+        int type = req.getInteger("type");
+        int scope = req.getInteger("scope");
         String fromUserCode = req.getString("fromUserCode");
         String toUserCode = req.getString("toUserCode");
-        int type = req.getInteger("fromUserCode");
         String content = req.getString("content");
-        return sendMessage(toUserCode, new Message(fromUserCode, toUserCode, type, content));
+        int success = 0;
+        int failure = 0;
+        if (scope == SCOPE_GLOBAL) {
+            for (Entry<String, Session> entry : userService.getSessionMap().entrySet()) {
+                String userCode = entry.getKey();
+                ResponseEntity responseEntity = sendMessage(userCode, new Message(type, scope, fromUserCode, toUserCode, content));
+                if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                    success++;
+                } else {
+                    failure++;
+                }
+            }
+        } else if (scope == SCOPE_INDIVIDUAL) {
+            ResponseEntity responseEntity = sendMessage(toUserCode, new Message(type, scope, fromUserCode, toUserCode, content));
+            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                success++;
+            } else {
+                failure++;
+            }
+        }
+        rst.put("success", success);
+        rst.put("failure", failure);
+        return ResponseEntity.ok().body(rst.toString());
     }
 }
