@@ -301,4 +301,12 @@ public class PlayerServiceImpl implements PlayerService {
         }
         return message;
     }
+
+    @Override
+    public Map<String, Integer> getRelationMapByUserCode(String userCode) {
+        if (!relationMap.containsKey(userCode)) {
+            relationMap.put(userCode, new ConcurrentHashMap<String, Integer>());
+        }
+        return relationMap.get(userCode);
+    }
 }

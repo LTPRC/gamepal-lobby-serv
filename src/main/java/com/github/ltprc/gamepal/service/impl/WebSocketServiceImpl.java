@@ -184,17 +184,21 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         JSONArray detectedObjects = new JSONArray();
         for (Set<SceneCoordinate> rankedSet : new Set[] {northRankedSet, centerRankedSet, southRankedSet})
-        rankedSet.stream().forEach(info -> {
-            JSONObject detectedObject = new JSONObject();
-            detectedObject.put("userCode", info.getUserCode());
-            if (Drop.class.isInstance(info)) {
-                detectedObject.put("type", "drop");
-            } else if (PlayerInfo.class.isInstance(info)) {
-                detectedObject.put("type", "player");
-            }
-            detectedObjects.add(detectedObject);
-        });
+            rankedSet.stream().forEach(info -> {
+                JSONObject detectedObject = new JSONObject();
+                detectedObject.put("userCode", info.getUserCode());
+                if (Drop.class.isInstance(info)) {
+                    detectedObject.put("type", "drop");
+                } else if (PlayerInfo.class.isInstance(info)) {
+                    detectedObject.put("type", "player");
+                }
+                detectedObjects.add(detectedObject);
+            });
         rst.put("detectedObjects", detectedObjects);
+
+        JSONObject relations = new JSONObject();
+        relations.putAll(playerService.getRelationMapByUserCode(userCode));
+        rst.put("relations", relations);
 
         // Communicate
         String content = JSONObject.toJSONString(rst);

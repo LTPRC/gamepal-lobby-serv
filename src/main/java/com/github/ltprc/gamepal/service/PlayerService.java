@@ -26,4 +26,6 @@ public interface PlayerService {
     Map<String, PlayerInfo> getPlayerInfoMap();
 
     Map<String, Drop> getDropMap();
+
+    Map<String, Integer> getRelationMapByUserCode(String userCode);
 }
