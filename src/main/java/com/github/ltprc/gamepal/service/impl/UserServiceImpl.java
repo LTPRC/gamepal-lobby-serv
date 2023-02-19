@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
+import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.SceneModel;

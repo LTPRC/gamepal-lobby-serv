@@ -17,5 +17,6 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1011 = new GamepalError("1011", "Contact does not exist.");
     public static final GamepalError ERROR_1012 = new GamepalError("1012", "Invalid dropCode.");
     public static final GamepalError ERROR_1013 = new GamepalError("1013", "Amount exceeded.");
+    public static final GamepalError ERROR_1014 = new GamepalError("1014", "Game status is invalid.");
 
 }
