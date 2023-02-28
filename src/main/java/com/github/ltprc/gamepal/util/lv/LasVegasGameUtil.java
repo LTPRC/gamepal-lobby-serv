@@ -10,15 +10,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class LasVegasGameUtil {
     private static final Log logger = LogFactory.getLog(LasVegasGameUtil.class);
     public static LasVegasGame getInstance() {
         LasVegasGame lasVegasGame = new LasVegasGame();
+        lasVegasGame.setUserCode(UUID.randomUUID().toString());
         lasVegasGame.setGameStatus(0);
         lasVegasGame.setMinPlayerNum(3);
         lasVegasGame.setMaxPlayerNum(5);

@@ -3,7 +3,11 @@ package com.github.ltprc.gamepal.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.util.ContentUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.UserService;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -43,7 +49,15 @@ public class ServerController {
 
     @RequestMapping(value = "/logoff", method = RequestMethod.POST)
     public ResponseEntity<String> logoff(HttpServletRequest request) {
-        return userService.logoff(request);
+        JSONObject req = null;
+        try {
+            req = ContentUtil.request2JSONObject(request);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
+        }
+        String userCode = req.getString("userCode");
+        String token = req.getString("token");
+        return userService.logoff(userCode, token);
     }
 
     @RequestMapping(value = "/setplayerinfobyentities", method = RequestMethod.POST)

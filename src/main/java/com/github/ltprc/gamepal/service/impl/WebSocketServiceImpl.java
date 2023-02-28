@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -62,14 +63,20 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         String userCode = jsonObject.getString("userCode");
-        // Receive playerInfo and update
-        if (jsonObject.containsKey("playerInfo")) {
-            PlayerInfo playerInfo = jsonObject.getObject("playerInfo", PlayerInfo.class);
-            playerService.getPlayerInfoMap().put(userCode, playerInfo);
+        // Update onlineMap
+        userService.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
+        // Check requests
+        if (jsonObject.containsKey("updatePlayerInfo")) {
+            updatePlayerInfo(userCode, jsonObject.getObject("updatePlayerInfo", PlayerInfo.class));
         }
         // Reply automatically
         int state = jsonObject.getInteger("state");
         communicate(userCode, state);
+    }
+
+    private void updatePlayerInfo(String userCode, PlayerInfo playerInfo) {
+        // Receive playerInfo and update
+        playerService.getPlayerInfoMap().put(userCode, playerInfo);
     }
 
     @Override

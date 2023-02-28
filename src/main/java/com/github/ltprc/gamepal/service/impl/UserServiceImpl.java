@@ -4,17 +4,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
-import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.SceneModel;
@@ -42,7 +37,18 @@ public class UserServiceImpl implements UserService {
 
     private Map<String, Session> sessionMap = new ConcurrentHashMap<>(); // userId, session
     private Map<String, String> tokenMap = new ConcurrentHashMap<>(); // userId, token
-    private LinkedHashMap<String, Long> onlineMap = new LinkedHashMap<>(); // userId, timestamp
+    private Map<String, Long> onlineMap = new ConcurrentHashMap<>(); // userId, timestamp
+    private Queue<String> onlineQueue = new PriorityQueue<>((s1, s2) -> {
+        long l1 = onlineMap.get(s1);
+        long l2 = onlineMap.get(s2);
+        if (l1 - l2 < 0) {
+            return -1;
+        } else if (l1 - l2 > 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }); // userId
 
     @Autowired
     private PlayerService playerService;
@@ -166,16 +172,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<String> logoff(HttpServletRequest request) {
+    public ResponseEntity<String> logoff(String userCode, String token) {
         JSONObject rst = ContentUtil.generateRst();
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        String userCode = req.getString("userCode");
-        String token = req.getString("token");
         if (token.equals(tokenMap.get(userCode))) {
             tokenMap.remove(userCode);
             onlineMap.remove(userCode);
@@ -211,6 +209,21 @@ public class UserServiceImpl implements UserService {
         String token = UUID.randomUUID().toString();
         tokenMap.put(userCode, token);
         return token;
+    }
+
+    @Override
+    public Map<String, String> getTokenMap() {
+        return tokenMap;
+    }
+
+    @Override
+    public Map<String, Long> getOnlineMap() {
+        return onlineMap;
+    }
+
+    @Override
+    public Queue<String> getOnlineQueue() {
+        return onlineQueue;
     }
 
 }

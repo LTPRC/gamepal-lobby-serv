@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 public class Game {
+    private String userCode;
     // 0: start
     // 1: wait for players
     // 2: in-game
