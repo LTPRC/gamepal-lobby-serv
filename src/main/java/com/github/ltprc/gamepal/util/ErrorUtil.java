@@ -7,7 +7,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1001 = new GamepalError("1001", "Generating UUID code failed.");
     public static final GamepalError ERROR_1002 = new GamepalError("1002", "Validating and converting request failed.");
     public static final GamepalError ERROR_1003 = new GamepalError("1003", "Websocket connection has gone.");
-    public static final GamepalError ERROR_1004 = new GamepalError("1004", "Username is already taken.");
+    public static final GamepalError ERROR_1004 = new GamepalError("1004", "Username is already used.");
     public static final GamepalError ERROR_1005 = new GamepalError("1005", "Invalid username or password.");
     public static final GamepalError ERROR_1006 = new GamepalError("1006", "Invalid userCode or token.");
     public static final GamepalError ERROR_1007 = new GamepalError("1007", "Valid player information not found.");
@@ -18,5 +18,8 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1012 = new GamepalError("1012", "Invalid dropCode.");
     public static final GamepalError ERROR_1013 = new GamepalError("1013", "Amount exceeded.");
     public static final GamepalError ERROR_1014 = new GamepalError("1014", "Game status is invalid.");
+    public static final GamepalError ERROR_1015 = new GamepalError("1015", "World with this worldCode has been created.");
+    public static final GamepalError ERROR_1016 = new GamepalError("1016", "Invalid worldCode.");
+    public static final GamepalError ERROR_1017 = new GamepalError("1017", "Unable to communicate between different worlds.");
 
 }

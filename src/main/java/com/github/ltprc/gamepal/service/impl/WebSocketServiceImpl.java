@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import cn.hutool.core.io.resource.ResourceUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.GameWorld;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.lobby.Drop;
 import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
@@ -42,14 +43,16 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Override
     public void onOpen(Session session, String userCode) {
-        userService.getSessionMap().put(userCode, session);
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        world.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
         communicate(userCode, STATE_START);
     }
 
     @Override
     public void onClose(String userCode) {
-        userService.getSessionMap().remove(userCode);
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        world.getSessionMap().remove(userCode);
         logger.info("断开连接成功");
     }
 
@@ -63,8 +66,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         String userCode = jsonObject.getString("userCode");
+        GameWorld world = userService.getWorldByUserCode(userCode);
         // Update onlineMap
-        userService.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
+        world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         // Check requests
         if (jsonObject.containsKey("updatePlayerInfo")) {
             updatePlayerInfo(userCode, jsonObject.getObject("updatePlayerInfo", PlayerInfo.class));
@@ -83,9 +87,10 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void communicate(String userCode, int state) {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
+        GameWorld world = userService.getWorldByUserCode(userCode);
 
         // Return stored token
-        String token = userService.getTokenByUserCode(userCode);
+        String token = world.getTokenMap().get(userCode);
         rst.put("token", token);
 
         // [Init] Return scenes
@@ -209,13 +214,13 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Communicate
         String content = JSONObject.toJSONString(rst);
-        if (null == userService.getSessionByUserCode(userCode)
-                || null == userService.getSessionByUserCode(userCode).getBasicRemote()) {
+        Session session = world.getSessionMap().get(userCode);
+        if (null == session || null == session.getBasicRemote()) {
             logger.warn(ErrorUtil.ERROR_1003 + "userCode: " + userCode);
             return;
         }
         try {
-            userService.getSessionByUserCode(userCode).getBasicRemote().sendText(content);
+            session.getBasicRemote().sendText(content);
         } catch (IOException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
         }

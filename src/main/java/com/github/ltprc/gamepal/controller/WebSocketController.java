@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import com.github.ltprc.gamepal.service.MessageService;
-import com.github.ltprc.gamepal.service.UserService;
 
 @Component
 @ServerEndpoint("/websocket/v1/{userCode}")

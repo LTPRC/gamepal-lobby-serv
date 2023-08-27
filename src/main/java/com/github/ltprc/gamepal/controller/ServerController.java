@@ -49,15 +49,7 @@ public class ServerController {
 
     @RequestMapping(value = "/logoff", method = RequestMethod.POST)
     public ResponseEntity<String> logoff(HttpServletRequest request) {
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        String userCode = req.getString("userCode");
-        String token = req.getString("token");
-        return userService.logoff(userCode, token);
+        return userService.logoff(request);
     }
 
     @RequestMapping(value = "/setplayerinfobyentities", method = RequestMethod.POST)

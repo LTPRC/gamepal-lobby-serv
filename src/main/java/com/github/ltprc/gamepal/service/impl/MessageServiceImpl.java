@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
+import com.github.ltprc.gamepal.model.GameWorld;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,8 @@ public class MessageServiceImpl implements MessageService {
      */
     public ResponseEntity sendMessage(String userCode, Message message) {
         JSONObject rst = ContentUtil.generateRst();
-        Session session = userService.getSessionByUserCode(userCode);
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Session session = world.getSessionMap().get(userCode);
         if (null == session) {
             logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1009);
@@ -81,11 +83,17 @@ public class MessageServiceImpl implements MessageService {
         int scope = req.getInteger("scope");
         String fromUserCode = req.getString("fromUserCode");
         String toUserCode = req.getString("toUserCode");
+        GameWorld fromWorld = userService.getWorldByUserCode(fromUserCode);
+        GameWorld toWorld = userService.getWorldByUserCode(toUserCode);
+        if (fromWorld != toWorld) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1017));
+        }
+        GameWorld world = fromWorld;
         String content = req.getString("content");
         int success = 0;
         int failure = 0;
         if (scope == SCOPE_GLOBAL) {
-            for (Entry<String, Session> entry : userService.getSessionMap().entrySet()) {
+            for (Entry<String, Session> entry : world.getSessionMap().entrySet()) {
                 String userCode = entry.getKey();
                 ResponseEntity responseEntity = sendMessage(userCode, new Message(type, scope, fromUserCode, toUserCode, content));
                 if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {

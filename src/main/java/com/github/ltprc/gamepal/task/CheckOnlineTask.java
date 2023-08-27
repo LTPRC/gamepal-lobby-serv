@@ -1,6 +1,8 @@
 package com.github.ltprc.gamepal.task;
 
+import com.github.ltprc.gamepal.model.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,18 +16,25 @@ public class CheckOnlineTask {
     private static final long TIMEOUT_SECOND = 3;
 
     @Autowired
+    private WorldService worldService;
+
+    @Autowired
     private UserService userService;
 
     /**
      * This method is used for checking idle user which is not under anyone's control.
+     * All worlds are to be checked. 23/08/28
      */
     @Scheduled(cron = "*/2 * * * * ?")
     public void execute() {
-        Map<String, Long> onlineMap = userService.getOnlineMap();
-        if (!onlineMap.isEmpty() && Instant.now().getEpochSecond() - onlineMap.entrySet().iterator().next().getValue()
-                > TIMEOUT_SECOND) {
-            String userCode = onlineMap.entrySet().iterator().next().getKey();
-            userService.logoff(userCode, userService.getTokenMap().get(userCode));
+        for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
+            GameWorld world = entry.getValue();
+            Map<String, Long> onlineMap = world.getOnlineMap();
+            if (!onlineMap.isEmpty() && Instant.now().getEpochSecond() - onlineMap.entrySet().iterator().next().getValue()
+                    > TIMEOUT_SECOND) {
+                String userCode = onlineMap.entrySet().iterator().next().getKey();
+                userService.logoff(userCode, world.getTokenMap().get(userCode));
+            }
         }
     }
 }

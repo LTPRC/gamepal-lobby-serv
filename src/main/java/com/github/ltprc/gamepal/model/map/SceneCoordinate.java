@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public abstract class SceneCoordinate {
 
-    private int worldNo; // TBD
+    private int regionNo; // TBD
     private int sceneNo;
     private Coordinate position;
     private String userCode;
