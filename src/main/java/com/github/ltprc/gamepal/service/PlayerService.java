@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.service;
 
-import com.github.ltprc.gamepal.model.lobby.Drop;
-import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
+import com.github.ltprc.gamepal.model.world.Drop;
+import com.github.ltprc.gamepal.model.world.PlayerInfo;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;

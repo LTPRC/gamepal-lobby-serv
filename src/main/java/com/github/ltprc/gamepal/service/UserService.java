@@ -2,7 +2,7 @@ package com.github.ltprc.gamepal.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.github.ltprc.gamepal.model.GameWorld;
+import com.github.ltprc.gamepal.model.world.GameWorld;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {

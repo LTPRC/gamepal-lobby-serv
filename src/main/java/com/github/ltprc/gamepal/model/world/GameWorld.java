@@ -1,6 +1,5 @@
-package com.github.ltprc.gamepal.model;
+package com.github.ltprc.gamepal.model.world;
 
-import com.github.ltprc.gamepal.model.map.Coordinate;
 import lombok.Data;
 
 import javax.websocket.Session;
@@ -14,5 +13,4 @@ public class GameWorld {
     private Map<String, String> tokenMap; // userCode, token
     private Map<String, Long> onlineMap; // userCode, timestamp
     private Queue<String> onlineQueue; // userCode
-    private Map<Integer, Map<Coordinate, Map<Coordinate, String>>> phaseMaps; // phaseNo, sceneCoordinate, blockCoordinate, blockCode
 }

@@ -8,12 +8,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.websocket.Session;
 
-import com.github.ltprc.gamepal.model.GameWorld;
-import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
+import com.github.ltprc.gamepal.model.world.GameWorld;
+import com.github.ltprc.gamepal.model.world.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.SceneModel;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WorldService;
 import org.apache.commons.logging.Log;
@@ -127,17 +126,21 @@ public class UserServiceImpl implements UserService {
         // Update online record
         world.getOnlineMap().remove(userCode);
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
-        // Mocked PlayerInfo TBD
         PlayerInfo playerInfo = new PlayerInfo();
-        playerInfo.setPlayerType(0);
+        initiatePlayerInfo(playerInfo);
         playerInfo.setUserCode(userCode);
-        playerInfo.setRegionNo(0);
-        playerInfo.setPosition(new Coordinate(new BigDecimal(5), new BigDecimal(5)));
+        playerService.getPlayerInfoMap().put(userCode, playerInfo);
+        rst.put("userCode", userCode);
+        rst.put("token", world.getTokenMap().get(userCode));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    private void initiatePlayerInfo(PlayerInfo playerInfo) {
+        playerInfo.setPlayerType(0);
+        playerInfo.setRegionNo(1);
+        playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
+        playerInfo.setCoordinate(new Coordinate(new BigDecimal(5), new BigDecimal(5)));
         playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        playerInfo.setSceneNo(1);
-        SceneModel scenes = new SceneModel();
-        scenes.setCenter(playerInfo.getSceneNo());
-        playerInfo.setScenes(scenes);
         playerInfo.setFaceDirection(BigDecimal.ZERO);
         playerInfo.setAvatar("1");
         playerInfo.setFirstName("克强");
@@ -150,8 +153,8 @@ public class UserServiceImpl implements UserService {
         playerInfo.setHairstyle("2");
         playerInfo.setHairColor("2");
         playerInfo.setEyes("2");
-        playerInfo.setMaxSpeed(new BigDecimal(0.1));
-        playerInfo.setAcceleration(new BigDecimal(0.01));
+        playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
+        playerInfo.setAcceleration(BigDecimal.valueOf(0.01));
         playerInfo.setHpMax(1000);
         playerInfo.setHp(playerInfo.getHpMax());
         playerInfo.setVpMax(1000);
@@ -166,10 +169,6 @@ public class UserServiceImpl implements UserService {
         playerInfo.setMoney(1);
         playerInfo.setCapacity(new BigDecimal(100));
         playerInfo.setCapacityMax(new BigDecimal(500));
-        playerService.getPlayerInfoMap().put(userCode, playerInfo);
-        rst.put("userCode", userCode);
-        rst.put("token", world.getTokenMap().get(userCode));
-        return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override

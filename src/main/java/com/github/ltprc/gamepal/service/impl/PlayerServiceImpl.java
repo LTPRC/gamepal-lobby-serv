@@ -3,9 +3,10 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.world.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.lobby.Drop;
+import com.github.ltprc.gamepal.model.world.Drop;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -137,17 +138,22 @@ public class PlayerServiceImpl implements PlayerService {
         }
         String itemNo = req.getString("itemNo");
         Integer amount = req.getInteger("amount");
-        Integer sceneNo = req.getInteger("sceneNo");
+        Integer sceneX = req.getInteger("sceneX");
+        Integer sceneY = req.getInteger("sceneY");
+        Integer regionNo = req.getInteger("regionNo");
         BigDecimal x = req.getBigDecimal("x");
         BigDecimal y = req.getBigDecimal("y");
-        Drop drop = new Drop(itemNo, amount);
+        Drop drop = new Drop();
         String dropCode = UUID.randomUUID().toString();
         if (dropMap.containsKey(dropCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1001));
         }
-        drop.setUserCode(dropCode);
-        drop.setSceneNo(sceneNo);
-        drop.setPosition(new Coordinate(x, y));
+        drop.setCode(dropCode);
+        drop.setItemNo(itemNo);
+        drop.setAmount(amount);
+        drop.setRegionNo(regionNo);
+        drop.setSceneCoordinate(new IntegerCoordinate(sceneX, sceneY));
+        drop.setCoordinate(new Coordinate(x, y));
         dropMap.put(dropCode, drop);
         rst.put("dropCode", dropCode);
         return ResponseEntity.ok().body(rst.toString());
@@ -162,7 +168,6 @@ public class PlayerServiceImpl implements PlayerService {
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
         }
-//        String userCode = req.getString("userCode");
         String dropCode = req.getString("dropCode");
         if (!dropMap.containsKey(dropCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));

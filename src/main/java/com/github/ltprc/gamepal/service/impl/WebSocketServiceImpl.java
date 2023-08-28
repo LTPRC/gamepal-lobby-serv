@@ -1,17 +1,13 @@
 package com.github.ltprc.gamepal.service.impl;
 
-import cn.hutool.core.io.resource.ResourceUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.model.GameWorld;
+import com.github.ltprc.gamepal.model.world.GameWorld;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.lobby.Drop;
-import com.github.ltprc.gamepal.model.lobby.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.SceneCoordinate;
-import com.github.ltprc.gamepal.service.MessageService;
-import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.service.WebSocketService;
+import com.github.ltprc.gamepal.model.world.Drop;
+import com.github.ltprc.gamepal.model.world.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerUtil;
@@ -22,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
@@ -30,7 +27,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private static final int STATE_START = 0;
     private static final int STATE_IN_PROGRESS = 1;
-    private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
+    private static final Log logger = LogFactory.getLog(WebSocketServiceImpl.class);
 
     @Autowired
     private UserService userService;
@@ -40,6 +37,9 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private WorldService worldService;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -93,11 +93,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         String token = world.getTokenMap().get(userCode);
         rst.put("token", token);
 
-        // [Init] Return scenes
-        if (state == STATE_START) {
-            rst.put("scenes", ResourceUtil.readUtf8Str("config/scenes.json"));
-        }
-
         // Flush messages automatically
         Map<String, Queue<Message>> messageMap = messageService.getMessageMap();
         if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
@@ -107,110 +102,84 @@ public class WebSocketServiceImpl implements WebSocketService {
             rst.put("messages", messages);
         }
 
-        // Return maps of playerInfos, drops, and events based on detected scenes
-        Set<SceneCoordinate> northRankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
-            @Override
-            public int compare(SceneCoordinate o1, SceneCoordinate o2) {
-                return o1.getPosition().getY().compareTo(o2.getPosition().getY());
-            }
-        });
-        Set<SceneCoordinate> centerRankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
-            @Override
-            public int compare(SceneCoordinate o1, SceneCoordinate o2) {
-                return o1.getPosition().getY().compareTo(o2.getPosition().getY());
-            }
-        });
-        Set<SceneCoordinate> southRankedSet = new TreeSet<>(new Comparator<SceneCoordinate>() {
-            @Override
-            public int compare(SceneCoordinate o1, SceneCoordinate o2) {
-                return o1.getPosition().getY().compareTo(o2.getPosition().getY());
-            }
-        });
+        // Return playerInfos
         Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return;
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-
-        JSONObject playerInfos = new JSONObject();
-        playerInfoMap.entrySet().stream()
-                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
-                        entry.getValue().getSceneNo())).forEach(entry -> {
-                    playerInfos.put(entry.getKey(), entry.getValue());
-                    switch (PlayerUtil.getCoordinateRelation(playerInfo.getScenes(), entry.getValue().getSceneNo())) {
-                        case 0:
-                        case 1:
-                        case 2:
-                            northRankedSet.add(entry.getValue());
-                            break;
-                        case 3:
-                        case 4:
-                        case 5:
-                            centerRankedSet.add(entry.getValue());
-                            break;
-                        case 6:
-                        case 7:
-                        case 8:
-                            southRankedSet.add(entry.getValue());
-                            break;
-                    }
-                });
-        rst.put("playerInfos", playerInfos);
-
-        JSONObject drops = new JSONObject();
+        rst.put("playerInfos", playerInfoMap);
+        // Return drops
         Map<String, Drop> dropMap = playerService.getDropMap();
-        dropMap.entrySet().stream()
-                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
-                        entry.getValue().getSceneNo())).forEach(entry -> {
-                    drops.put(entry.getValue().getUserCode(), entry.getValue());
-                    switch (PlayerUtil.getCoordinateRelation(playerInfo.getScenes(), entry.getValue().getSceneNo())) {
-                        case 0:
-                        case 1:
-                        case 2:
-                            northRankedSet.add(entry.getValue());
-                            break;
-                        case 3:
-                        case 4:
-                        case 5:
-                            centerRankedSet.add(entry.getValue());
-                            break;
-                        case 6:
-                        case 7:
-                        case 8:
-                            southRankedSet.add(entry.getValue());
-                            break;
-                    }
-                });
-        rst.put("drops", drops);
-
-//        JSONObject events = new JSONObject();
-//        Map<String, Event> eventMap = playerService.getEventMap();
-//        eventMap.entrySet().stream()
-//                .filter(entry -> -1 != PlayerUtil.getCoordinateRelation(playerInfo.getScenes(),
-//                        entry.getValue().getSceneNo())).forEach(entry -> {
-//                    events.put(entry.getKey(), entry.getValue());
-//                    rankedSet.add(entry.getValue());
-//                });
-//        rst.put("events", events);
-
-        JSONArray detectedObjects = new JSONArray();
-        for (Set<SceneCoordinate> rankedSet : new Set[] {northRankedSet, centerRankedSet, southRankedSet})
-            rankedSet.stream().forEach(info -> {
-                JSONObject detectedObject = new JSONObject();
-                detectedObject.put("userCode", info.getUserCode());
-                if (Drop.class.isInstance(info)) {
-                    detectedObject.put("type", "drop");
-                } else if (PlayerInfo.class.isInstance(info)) {
-                    detectedObject.put("type", "player");
-                }
-                detectedObjects.add(detectedObject);
-            });
-        rst.put("detectedObjects", detectedObjects);
-
+        rst.put("drops", dropMap);
+        // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
         rst.put("relations", relations);
+
+        // Generate returned block map
+        JSONArray blocks = new JSONArray();
+        // Put floors and collect walls
+        IntegerCoordinate sceneCoordinate = playerInfo.getRegionCoordinate().getSceneCoordinate();
+        Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
+        rst.put("height", region.getHeight());
+        rst.put("width", region.getWidth());
+        Set<Block> rankingSet = new TreeSet<>(new Comparator<Block>() {
+            @Override
+            public int compare(Block o1, Block o2) {
+                return o1.getY().compareTo(o2.getY());
+            }
+        });
+        for (int i = sceneCoordinate.getY() - 1; i <= sceneCoordinate.getY() + 1; i++) {
+            for (int j = sceneCoordinate.getX() - 1; j <= sceneCoordinate.getX() + 1; j++) {
+                Scene scene = region.getScenes().get(new IntegerCoordinate(i, j));
+                if (null == scene) {
+                    continue;
+                }
+                scene.getBlocks().entrySet().stream().forEach(entry -> {
+                    Block block = new Block();
+                    block.setType(2);
+                    block.setCode(String.valueOf(Math.abs(entry.getValue())));
+                    block.setY(BigDecimal.valueOf(entry.getKey().getY()));
+                    block.setX(BigDecimal.valueOf(entry.getKey().getX()));
+                    if (entry.getValue() < 0) {
+                        blocks.add(block);
+                    } else {
+                        rankingSet.add(block);
+                    }
+                });
+            }
+        }
+        // Collect playerInfos as blocks
+        playerInfoMap.entrySet().stream().forEach(entry -> {
+            Block block = new Block();
+            block.setType(1);
+            block.setCode(entry.getValue().getUserCode());
+            block.setY(entry.getValue().getCoordinate().getY());
+            block.setX(entry.getValue().getCoordinate().getX());
+            PlayerUtil.adjustCoordinate(block,
+                    PlayerUtil.getCoordinateRelation(playerInfo.getRegionCoordinate().getSceneCoordinate(),
+                    entry.getValue().getRegionCoordinate().getSceneCoordinate()),
+                    BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+            rankingSet.add(block);
+        });
+        // Collect drops as blocks
+        dropMap.entrySet().stream().forEach(entry -> {
+            Block block = new Block();
+            block.setType(1);
+            block.setCode(entry.getKey());
+            block.setY(entry.getValue().getCoordinate().getY());
+            block.setX(entry.getValue().getCoordinate().getX());
+            PlayerUtil.adjustCoordinate(block,
+                    PlayerUtil.getCoordinateRelation(playerInfo.getRegionCoordinate().getSceneCoordinate(),
+                            entry.getValue().getSceneCoordinate()),
+                    BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+            rankingSet.add(block);
+        });
+        // Put all blocks
+        blocks.addAll(rankingSet);
+        rst.put("blocks", blocks);
 
         // Communicate
         String content = JSONObject.toJSONString(rst);

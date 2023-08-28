@@ -35,6 +35,8 @@ spring:
     static-locations: classpath:/
 
 #自定义配置
+json:
+  regions: /json/regions.json
 
 person:
   name: zhangsan
