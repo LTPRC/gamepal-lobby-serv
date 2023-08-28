@@ -34,7 +34,6 @@ public class WorldServiceImpl implements WorldService {
     @Value("${json.regions}")
     private String regionsJson;
     private Map<Integer, Region> regionMap = new HashMap<>(); // regionNo, region
-    private boolean areScenesLoaded = false;
 
     @Autowired
     private UserService userService;
@@ -71,6 +70,7 @@ public class WorldServiceImpl implements WorldService {
         return regionMap;
     }
 
+    @Override
     public void initiateWorld(GameWorld world) {
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
@@ -86,10 +86,6 @@ public class WorldServiceImpl implements WorldService {
                 return 0;
             }
         })); // userCode
-        if (!areScenesLoaded) {
-            loadScenes();
-            areScenesLoaded = true;
-        }
     }
 
     public void loadScenes() {

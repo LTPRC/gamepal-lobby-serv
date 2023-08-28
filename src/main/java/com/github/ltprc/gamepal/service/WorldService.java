@@ -15,4 +15,6 @@ public interface WorldService {
     ResponseEntity<String> removeWorld(String worldCode);
 
     Map<Integer, Region> getRegionMap();
+
+    void initiateWorld(GameWorld world);
 }
