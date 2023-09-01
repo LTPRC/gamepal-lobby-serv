@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Event extends Coordinate {
-    private Integer type;
-    private String code;
+public class Teleport extends Block {
+    private RegionCoordinate to;
 }

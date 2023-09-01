@@ -3,6 +3,8 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.GamePalConstants;
+import com.github.ltprc.gamepal.model.map.Teleport;
 import com.github.ltprc.gamepal.model.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
@@ -14,15 +16,12 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Transactional
@@ -89,7 +88,7 @@ public class WorldServiceImpl implements WorldService {
     public void loadScenes() {
         JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/json/regions.json");
         for (Object obj : regions) {
-            JSONObject region = (JSONObject) obj;
+            JSONObject region = JSON.parseObject(String.valueOf(obj));
             Region newRegion = new Region();
             int regionNo = region.getInteger("regionNo");
             int height = region.getInteger("height");
@@ -99,7 +98,7 @@ public class WorldServiceImpl implements WorldService {
             newRegion.setWidth(width);
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
-                JSONObject scene = (JSONObject) obj2;
+                JSONObject scene = JSON.parseObject(String.valueOf(obj2));
                 Scene newScene = new Scene();
                 String name = scene.getString("name");
                 int y = scene.getInteger("y");
@@ -107,6 +106,7 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new HashMap<>());
+                newScene.setTeleports(new LinkedList<>());
                 JSONArray blocks = scene.getJSONArray("blocks");
                 for (int i = 0; i < Math.min(height, blocks.size()); i++) {
                     JSONArray blockRow = blocks.getJSONArray(i);
@@ -122,6 +122,14 @@ public class WorldServiceImpl implements WorldService {
                     for (int j = 0; j < Math.min(width, terrainRow.size()); j++) {
                         Integer value = terrainRow.getInteger(j);
                         newScene.getTerrain().put(new IntegerCoordinate(j, i), value);
+                    }
+                }
+                JSONArray teleports = scene.getJSONArray("teleports");
+                if (null != teleports) {
+                    for (Object obj3 : teleports) {
+                        Teleport teleport = JSON.parseObject(String.valueOf(obj3), Teleport.class);
+                        teleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
+                        newScene.getTeleports().add(teleport);
                     }
                 }
                 if (null == newRegion.getScenes()) {

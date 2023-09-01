@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
-import com.github.ltprc.gamepal.model.map.Block;
+import com.github.ltprc.gamepal.model.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.SceneModel;
@@ -99,6 +99,22 @@ public class PlayerUtil {
             case -1:
             default:
                 break;
+        }
+    }
+
+    public static int ConvertBlockType2Level(int type) {
+        switch(type) {
+            case GamePalConstants.BLOCK_TYPE_GROUND:
+            default:
+                return 10;
+            case GamePalConstants.BLOCK_TYPE_WALL:
+                return 50;
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+                return 80;
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                return 70;
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                return 60;
         }
     }
 }

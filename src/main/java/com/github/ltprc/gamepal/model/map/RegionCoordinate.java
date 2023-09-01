@@ -3,8 +3,7 @@ package com.github.ltprc.gamepal.model.map;
 import lombok.Data;
 
 @Data
-public abstract class RegionCoordinate {
-    private int regionNo;
+public class RegionCoordinate {
     private IntegerCoordinate sceneCoordinate;
     private Coordinate coordinate;
 }

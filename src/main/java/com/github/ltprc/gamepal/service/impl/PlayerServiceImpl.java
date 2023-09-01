@@ -128,6 +128,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Deprecated
     public ResponseEntity setDrop(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -140,7 +141,7 @@ public class PlayerServiceImpl implements PlayerService {
         Integer amount = req.getInteger("amount");
         Integer sceneX = req.getInteger("sceneX");
         Integer sceneY = req.getInteger("sceneY");
-        Integer regionNo = req.getInteger("regionNo");
+//        Integer regionNo = req.getInteger("regionNo");
         BigDecimal x = req.getBigDecimal("x");
         BigDecimal y = req.getBigDecimal("y");
         Drop drop = new Drop();
@@ -151,7 +152,7 @@ public class PlayerServiceImpl implements PlayerService {
         drop.setCode(dropCode);
         drop.setItemNo(itemNo);
         drop.setAmount(amount);
-        drop.setRegionNo(regionNo);
+//        drop.setRegionNo(regionNo);
         drop.setSceneCoordinate(new IntegerCoordinate(sceneX, sceneY));
         drop.setCoordinate(new Coordinate(x, y));
         dropMap.put(dropCode, drop);

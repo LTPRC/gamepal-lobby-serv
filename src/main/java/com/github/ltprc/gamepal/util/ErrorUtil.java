@@ -16,7 +16,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1010 = new GamepalError("1010", "Communicating failed.");
     public static final GamepalError ERROR_1011 = new GamepalError("1011", "Contact does not exist.");
     public static final GamepalError ERROR_1012 = new GamepalError("1012", "Invalid dropCode.");
-    public static final GamepalError ERROR_1013 = new GamepalError("1013", "Amount exceeded.");
+    public static final GamepalError ERROR_1013 = new GamepalError("1013", "Duplicated dropCode.");
     public static final GamepalError ERROR_1014 = new GamepalError("1014", "Game status is invalid.");
     public static final GamepalError ERROR_1015 = new GamepalError("1015", "World with this worldCode has been created.");
     public static final GamepalError ERROR_1016 = new GamepalError("1016", "Invalid worldCode.");

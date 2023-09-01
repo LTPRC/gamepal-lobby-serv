@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayerInfo extends RegionCoordinate {
+    private int regionNo;
     private String userCode;
     private int playerType; // 0-human 1-npc
     private Coordinate speed;

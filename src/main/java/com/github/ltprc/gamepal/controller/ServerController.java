@@ -72,6 +72,7 @@ public class ServerController {
     }
 
     @RequestMapping(value = "/setdrop", method = RequestMethod.POST)
+    @Deprecated
     public ResponseEntity<String> setDrop(HttpServletRequest request) {
         return playerService.setDrop(request);
     }
