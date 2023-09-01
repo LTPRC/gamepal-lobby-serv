@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.world.GameWorld;
@@ -27,6 +28,13 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private static final int STATE_START = 0;
     private static final int STATE_IN_PROGRESS = 1;
+    private static final int BLOCK_TYPE_PLAYER = 1;
+    private static final int BLOCK_TYPE_BLOCK = 2;
+    private static final int BLOCK_TYPE_DROP = 3;
+    private static final int BLOCK_TYPE_DECORATION = 4;
+    private static final int EVENT_TYPE_GROUND = 0;
+    private static final int EVENT_TYPE_WALL = 1;
+    private static final int EVENT_TYPE_PLAYER = 2;
     private static final Log logger = LogFactory.getLog(WebSocketServiceImpl.class);
 
     @Autowired
@@ -51,8 +59,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Override
     public void onClose(String userCode) {
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        world.getSessionMap().remove(userCode);
         logger.info("断开连接成功");
     }
 
@@ -72,6 +78,21 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Check requests
         if (jsonObject.containsKey("updatePlayerInfo")) {
             updatePlayerInfo(userCode, jsonObject.getObject("updatePlayerInfo", PlayerInfo.class));
+        }
+        // Check incoming messages
+        JSONArray messages = jsonObject.getJSONArray("messages");
+        for (Object obj : messages) {
+            Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
+            if (msg.getScope() == MessageServiceImpl.SCOPE_GLOBAL) {
+                messageService.getMessageMap().entrySet().stream()
+                        .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
+                        .forEach(entry -> entry.getValue().add(msg));
+            } else {
+                if (!messageService.getMessageMap().containsKey(msg.getToUserCode())) {
+                    messageService.getMessageMap().put(msg.getToUserCode(), new LinkedList<>());
+                }
+                messageService.getMessageMap().get(msg.getToUserCode()).add(msg);
+            }
         }
         // Reply automatically
         int state = jsonObject.getInteger("state");
@@ -118,61 +139,114 @@ public class WebSocketServiceImpl implements WebSocketService {
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
         rst.put("relations", relations);
 
+        // Return region
+        Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
+        JSONObject regionObj = new JSONObject();
+        regionObj.put("height", region.getHeight());
+        regionObj.put("width", region.getWidth());
+        rst.put("region", regionObj);
+
+        // Return SceneInfos
+        JSONArray sceneInfos = new JSONArray();
+        region.getScenes().entrySet().stream().forEach(entry -> {
+            SceneInfo sceneInfo = new SceneInfo();
+            sceneInfo.setName(entry.getValue().getName());
+            sceneInfo.setSceneCoordinate(entry.getKey());
+            sceneInfos.add(sceneInfo);
+        });
+        rst.put("sceneInfos", sceneInfos);
         // Generate returned block map
         JSONArray blocks = new JSONArray();
+        // Generate returned event map
+        JSONArray events = new JSONArray();
         // Put floors and collect walls
-        IntegerCoordinate sceneCoordinate = playerInfo.getRegionCoordinate().getSceneCoordinate();
-        Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
-        rst.put("height", region.getHeight());
-        rst.put("width", region.getWidth());
+        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Set<Block> rankingSet = new TreeSet<>(new Comparator<Block>() {
             @Override
             public int compare(Block o1, Block o2) {
-                return o1.getY().compareTo(o2.getY());
+                if (o1.getType() == o2.getType()) {
+                    return o1.getY().compareTo(o2.getY());
+                } else {
+                    return o1.getType().compareTo(o2.getType());
+                }
             }
         });
+        // Collect blocks from nine scenes
         for (int i = sceneCoordinate.getY() - 1; i <= sceneCoordinate.getY() + 1; i++) {
             for (int j = sceneCoordinate.getX() - 1; j <= sceneCoordinate.getX() + 1; j++) {
-                Scene scene = region.getScenes().get(new IntegerCoordinate(i, j));
+                Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
                 if (null == scene) {
                     continue;
                 }
                 scene.getBlocks().entrySet().stream().forEach(entry -> {
                     Block block = new Block();
-                    block.setType(2);
+                    block.setType(BLOCK_TYPE_BLOCK);
                     block.setCode(String.valueOf(Math.abs(entry.getValue())));
                     block.setY(BigDecimal.valueOf(entry.getKey().getY()));
                     block.setX(BigDecimal.valueOf(entry.getKey().getX()));
+                    PlayerUtil.adjustCoordinate(block,
+                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
                     if (entry.getValue() < 0) {
                         blocks.add(block);
                     } else {
                         rankingSet.add(block);
                     }
                 });
+                scene.getTerrain().entrySet().stream().filter(entry -> entry.getValue() == 1).forEach(entry -> {
+                    Event event = new Event();
+                    event.setType(EVENT_TYPE_WALL);
+                    event.setCode("");
+                    event.setY(BigDecimal.valueOf(entry.getKey().getY()));
+                    event.setX(BigDecimal.valueOf(entry.getKey().getX()));
+                    PlayerUtil.adjustCoordinate(event,
+                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                    events.add(event);
+                });
             }
         }
-        // Collect playerInfos as blocks
-        playerInfoMap.entrySet().stream().forEach(entry -> {
+        // Collect detected playerInfos
+        // Player block is included, event is excluded again 23/08/30
+        playerInfoMap.entrySet().stream()
+                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
+                        entry.getValue().getSceneCoordinate()) != -1)
+                .forEach(entry -> {
             Block block = new Block();
-            block.setType(1);
+            block.setType(BLOCK_TYPE_PLAYER);
             block.setCode(entry.getValue().getUserCode());
             block.setY(entry.getValue().getCoordinate().getY());
             block.setX(entry.getValue().getCoordinate().getX());
             PlayerUtil.adjustCoordinate(block,
-                    PlayerUtil.getCoordinateRelation(playerInfo.getRegionCoordinate().getSceneCoordinate(),
-                    entry.getValue().getRegionCoordinate().getSceneCoordinate()),
+                    PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                            entry.getValue().getSceneCoordinate()),
                     BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
             rankingSet.add(block);
+            if (!userCode.equals(entry.getValue().getUserCode())) {
+                Event event = new Event();
+                event.setType(EVENT_TYPE_PLAYER);
+                event.setCode(entry.getValue().getUserCode());
+                event.setY(entry.getValue().getCoordinate().getY());
+                event.setX(entry.getValue().getCoordinate().getX());
+                PlayerUtil.adjustCoordinate(event,
+                        PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                                entry.getValue().getSceneCoordinate()),
+                        BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                events.add(event);
+            }
         });
-        // Collect drops as blocks
-        dropMap.entrySet().stream().forEach(entry -> {
+        // Collect detected drops
+        dropMap.entrySet().stream()
+                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
+                        entry.getValue().getSceneCoordinate()) != -1)
+                .forEach(entry -> {
             Block block = new Block();
-            block.setType(1);
+            block.setType(BLOCK_TYPE_DROP);
             block.setCode(entry.getKey());
             block.setY(entry.getValue().getCoordinate().getY());
             block.setX(entry.getValue().getCoordinate().getX());
             PlayerUtil.adjustCoordinate(block,
-                    PlayerUtil.getCoordinateRelation(playerInfo.getRegionCoordinate().getSceneCoordinate(),
+                    PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                             entry.getValue().getSceneCoordinate()),
                     BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
             rankingSet.add(block);
@@ -180,6 +254,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Put all blocks
         blocks.addAll(rankingSet);
         rst.put("blocks", blocks);
+        // Put all events
+        rst.put("events", events);
 
         // Communicate
         String content = JSONObject.toJSONString(rst);

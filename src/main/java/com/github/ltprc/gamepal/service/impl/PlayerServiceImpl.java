@@ -218,8 +218,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         String userCode = req.getString("userCode");
         if (!playerInfoMap.containsKey(userCode)) {
-            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+            playerInfoMap.put(userCode, new PlayerInfo());
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         String firstName = req.getString("firstName");

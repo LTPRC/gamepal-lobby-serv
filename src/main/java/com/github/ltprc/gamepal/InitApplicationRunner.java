@@ -23,7 +23,7 @@ public class InitApplicationRunner implements ApplicationRunner {
         String defaultWorldName = "DEFAULT";
         worldService.addWorld(defaultWorldName);
         logger.info("World " + defaultWorldName + " is added.");
-        worldService.initiateWorld(worldService.getWorldMap().get(defaultWorldName));
+        worldService.loadScenes();
         logger.info("World map is loaded.");
     }
 }

@@ -5,9 +5,6 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class Region {
-    private int regionNo;
-    private int height;
-    private int width;
+public class Region extends RegionInfo{
     private Map<IntegerCoordinate, Scene> scenes; // sceneCoordinate, scene
 }

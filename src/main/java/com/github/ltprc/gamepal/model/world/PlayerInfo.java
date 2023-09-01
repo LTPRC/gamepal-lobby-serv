@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class PlayerInfo extends RegionCoordinate {
     private String userCode;
     private int playerType; // 0-human 1-npc
-    private RegionCoordinate regionCoordinate;
     private Coordinate speed;
     private BigDecimal faceDirection; // from 0 to 360
     private String avatar;

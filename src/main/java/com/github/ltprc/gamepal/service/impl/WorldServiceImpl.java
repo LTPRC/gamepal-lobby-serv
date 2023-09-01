@@ -31,8 +31,6 @@ public class WorldServiceImpl implements WorldService {
 
     private static final Log logger = LogFactory.getLog(WorldServiceImpl.class);
     private Map<String, GameWorld> worldMap = new LinkedHashMap<>(); // worldCode, world
-    @Value("${json.regions}")
-    private String regionsJson;
     private Map<Integer, Region> regionMap = new HashMap<>(); // regionNo, region
 
     @Autowired
@@ -70,8 +68,7 @@ public class WorldServiceImpl implements WorldService {
         return regionMap;
     }
 
-    @Override
-    public void initiateWorld(GameWorld world) {
+    private void initiateWorld(GameWorld world) {
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
         world.setOnlineMap(new ConcurrentHashMap<>()); // userCode, timestamp
@@ -88,8 +85,9 @@ public class WorldServiceImpl implements WorldService {
         })); // userCode
     }
 
+    @Override
     public void loadScenes() {
-        JSONArray regions = JSON.parseArray(regionsJson);
+        JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/json/regions.json");
         for (Object obj : regions) {
             JSONObject region = (JSONObject) obj;
             Region newRegion = new Region();
@@ -107,30 +105,29 @@ public class WorldServiceImpl implements WorldService {
                 int y = scene.getInteger("y");
                 int x = scene.getInteger("x");
                 newScene.setName(name);
-                newScene.setY(y);
-                newScene.setX(x);
+                newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new HashMap<>());
                 JSONArray blocks = scene.getJSONArray("blocks");
-                for (int i = 0; i < Math.min(y, blocks.size()); i++) {
+                for (int i = 0; i < Math.min(height, blocks.size()); i++) {
                     JSONArray blockRow = blocks.getJSONArray(i);
-                    for (int j = 0; j < Math.min(x, blockRow.size()); j++) {
+                    for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                         Integer value = blockRow.getInteger(j);
-                        newScene.getBlocks().put(new IntegerCoordinate(i, j), value);
+                        newScene.getBlocks().put(new IntegerCoordinate(j, i), value);
                     }
                 }
                 newScene.setTerrain(new HashMap<>());
                 JSONArray terrain = scene.getJSONArray("terrain");
-                for (int i = 0; i < Math.min(y, terrain.size()); i++) {
+                for (int i = 0; i < Math.min(height, terrain.size()); i++) {
                     JSONArray terrainRow = terrain.getJSONArray(i);
-                    for (int j = 0; j < Math.min(x, terrainRow.size()); j++) {
+                    for (int j = 0; j < Math.min(width, terrainRow.size()); j++) {
                         Integer value = terrainRow.getInteger(j);
-                        newScene.getTerrain().put(new IntegerCoordinate(i, j), value);
+                        newScene.getTerrain().put(new IntegerCoordinate(j, i), value);
                     }
                 }
                 if (null == newRegion.getScenes()) {
                     newRegion.setScenes(new HashMap<>());
                 }
-                newRegion.getScenes().put(new IntegerCoordinate(y, x), newScene);
+                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
             }
             regionMap.put(regionNo, newRegion);
         }

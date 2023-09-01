@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.model.map.Block;
+import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.SceneModel;
 
@@ -62,37 +63,38 @@ public class PlayerUtil {
         return -1;
     }
 
-    public static void adjustCoordinate(Block block, int relationValue, BigDecimal height, BigDecimal width) {
+    public static void adjustCoordinate(Coordinate coordinate, int relationValue, BigDecimal height, BigDecimal width) {
+        // Pos-y is south, neg-y is north
         switch (relationValue) {
             case 0:
-                block.setY(block.getY().subtract(height));
-                block.setX(block.getX().subtract(width));
+                coordinate.setY(coordinate.getY().subtract(height));
+                coordinate.setX(coordinate.getX().subtract(width));
                 break;
             case 1:
-                block.setY(block.getY().subtract(height));
+                coordinate.setY(coordinate.getY().subtract(height));
                 break;
             case 2:
-                block.setY(block.getY().subtract(height));
-                block.setX(block.getX().add(width));
+                coordinate.setY(coordinate.getY().subtract(height));
+                coordinate.setX(coordinate.getX().add(width));
                 break;
             case 3:
-                block.setX(block.getX().subtract(width));
+                coordinate.setX(coordinate.getX().subtract(width));
                 break;
             case 4:
                 break;
             case 5:
-                block.setX(block.getX().add(width));
+                coordinate.setX(coordinate.getX().add(width));
                 break;
             case 6:
-                block.setY(block.getY().add(height));
-                block.setX(block.getX().subtract(width));
+                coordinate.setY(coordinate.getY().add(height));
+                coordinate.setX(coordinate.getX().subtract(width));
                 break;
             case 7:
-                block.setY(block.getY().add(height));
+                coordinate.setY(coordinate.getY().add(height));
                 break;
             case 8:
-                block.setY(block.getY().add(height));
-                block.setX(block.getX().add(width));
+                coordinate.setY(coordinate.getY().add(height));
+                coordinate.setX(coordinate.getX().add(width));
                 break;
             case -1:
             default:

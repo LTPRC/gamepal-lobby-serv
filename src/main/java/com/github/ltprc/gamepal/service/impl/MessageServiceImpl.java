@@ -29,10 +29,10 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    private static final Integer TYPE_PRINTED = 0;
-    private static final Integer TYPE_VOICE = 1;
-    private static final Integer SCOPE_GLOBAL = 0;
-    private static final Integer SCOPE_INDIVIDUAL = 1;
+    public static final Integer TYPE_PRINTED = 1;
+    public static final Integer TYPE_VOICE = 2;
+    public static final Integer SCOPE_GLOBAL = 0;
+    public static final Integer SCOPE_INDIVIDUAL = 1;
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // userCode, message queue
 

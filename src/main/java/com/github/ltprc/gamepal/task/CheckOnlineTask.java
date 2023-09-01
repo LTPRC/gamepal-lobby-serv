@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 public class CheckOnlineTask {
 
-    private static final long TIMEOUT_SECOND = 3;
+    private static final long TIMEOUT_SECOND = 300;
 
     @Autowired
     private WorldService worldService;
@@ -25,7 +25,7 @@ public class CheckOnlineTask {
      * This method is used for checking idle user which is not under anyone's control.
      * All worlds are to be checked. 23/08/28
      */
-    @Scheduled(cron = "*/2 * * * * ?")
+    @Scheduled(cron = "* */2 * * * ?")
     public void execute() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();

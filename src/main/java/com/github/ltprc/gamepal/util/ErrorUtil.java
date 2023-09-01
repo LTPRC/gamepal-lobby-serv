@@ -21,5 +21,6 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1015 = new GamepalError("1015", "World with this worldCode has been created.");
     public static final GamepalError ERROR_1016 = new GamepalError("1016", "Invalid worldCode.");
     public static final GamepalError ERROR_1017 = new GamepalError("1017", "Unable to communicate between different worlds.");
+    public static final GamepalError ERROR_1018 = new GamepalError("1018", "Already offline.");
 
 }

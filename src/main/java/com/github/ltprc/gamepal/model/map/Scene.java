@@ -5,10 +5,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class Scene {
-    private String name;
-    private int y;
-    private int x;
+public class Scene extends SceneInfo {
     private Map<IntegerCoordinate, Integer> blocks;
     private Map<IntegerCoordinate, Integer> terrain;
 }

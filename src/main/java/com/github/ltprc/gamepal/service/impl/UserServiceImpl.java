@@ -14,6 +14,7 @@ import com.github.ltprc.gamepal.model.world.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,9 +44,12 @@ public class UserServiceImpl implements UserService {
     private WorldService worldService;
 
     @Autowired
+    private WebSocketService webSocketService;
+
+    @Autowired
     private UserInfoRepository userInfoRepository;
 
-    private Map<String, GameWorld> userWorldMap = new ConcurrentHashMap<>(); // userCode, world
+    private Map<String, GameWorld> userWorldMap = new LinkedHashMap<>(); // userCode, world
 
     @Override
     public ResponseEntity<String> registerAccount(HttpServletRequest request) {
@@ -189,16 +193,18 @@ public class UserServiceImpl implements UserService {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = getWorldByUserCode(userCode);
         if (null == world) {
-            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1018));
         }
-        userWorldMap.remove(userCode);
         if (token.equals(world.getTokenMap().get(userCode))) {
             world.getTokenMap().remove(userCode);
             world.getOnlineMap().remove(userCode);
+            world.getSessionMap().remove(userCode);
             playerService.getPlayerInfoMap().remove(userCode);
+            webSocketService.onClose(userCode);
         } else {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));
         }
+        userWorldMap.remove(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 
