@@ -1,6 +1,5 @@
-package com.github.ltprc.gamepal.model.map;
+package com.github.ltprc.gamepal.model.map.world;
 
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Teleport extends Block {
+public class WorldTeleport extends WorldBlock {
     private WorldCoordinate to;
 }

@@ -3,9 +3,9 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.model.GamePalConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.Teleport;
-import com.github.ltprc.gamepal.model.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.Scene;
@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 @Transactional
 @Service
@@ -81,6 +82,7 @@ public class WorldServiceImpl implements WorldService {
                 return 0;
             }
         })); // userCode
+        world.setBlockMap(new ConcurrentSkipListMap<>());
     }
 
     @Override

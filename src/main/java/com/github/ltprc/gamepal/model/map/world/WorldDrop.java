@@ -1,6 +1,5 @@
-package com.github.ltprc.gamepal.model.world;
+package com.github.ltprc.gamepal.model.map.world;
 
-import com.github.ltprc.gamepal.model.map.RegionCoordinate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Drop extends RegionCoordinate {
+public class WorldDrop extends WorldBlock {
 
-    private String code;
     private String itemNo;
     private int amount;
 }

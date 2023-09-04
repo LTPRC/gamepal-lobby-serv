@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.task;
 
-import com.github.ltprc.gamepal.model.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import org.springframework.beans.factory.annotation.Autowired;

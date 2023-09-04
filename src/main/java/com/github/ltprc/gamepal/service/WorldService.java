@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.service;
 
-import com.github.ltprc.gamepal.model.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.Region;
 import org.springframework.http.ResponseEntity;
 

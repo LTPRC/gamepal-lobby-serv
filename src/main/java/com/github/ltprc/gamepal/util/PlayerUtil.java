@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
-import com.github.ltprc.gamepal.model.GamePalConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.SceneModel;
@@ -114,7 +114,7 @@ public class PlayerUtil {
             case GamePalConstants.BLOCK_TYPE_DROP:
                 return 70;
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                return 60;
+                return 20;
         }
     }
 }

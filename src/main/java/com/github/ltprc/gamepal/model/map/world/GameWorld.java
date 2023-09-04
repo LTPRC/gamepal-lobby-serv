@@ -1,5 +1,6 @@
-package com.github.ltprc.gamepal.model.world;
+package com.github.ltprc.gamepal.model.map.world;
 
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import lombok.Data;
 
 import javax.websocket.Session;
@@ -13,4 +14,5 @@ public class GameWorld {
     private Map<String, String> tokenMap; // userCode, token
     private Map<String, Long> onlineMap; // userCode, timestamp
     private Queue<String> onlineQueue; // userCode
+    private Map<String, WorldBlock> blockMap; // code, WorldBlock
 }

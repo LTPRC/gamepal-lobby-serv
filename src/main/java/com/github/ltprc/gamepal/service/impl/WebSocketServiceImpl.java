@@ -3,12 +3,13 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.model.GamePalConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.world.Drop;
-import com.github.ltprc.gamepal.model.world.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.world.WorldDrop;
+import com.github.ltprc.gamepal.model.map.world.PlayerInfo;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -94,24 +95,34 @@ public class WebSocketServiceImpl implements WebSocketService {
             // Only create, not consume 23/09/04
             JSONArray drops = functions.getJSONArray("addDrops");
             drops.stream().forEach(obj -> {
-                Drop drop = JSON.parseObject(String.valueOf(obj), Drop.class);
-                String dropCode = UUID.randomUUID().toString();
-                drop.setCode(dropCode);
-                if (playerService.getDropMap().containsKey(dropCode)) {
-                    logger.warn(ErrorUtil.ERROR_1013 + " dropCode: " + dropCode);
+                WorldDrop drop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
+                String code = UUID.randomUUID().toString();
+                drop.setCode(code);
+                if (world.getBlockMap().containsKey(code)) {
+                    logger.warn(ErrorUtil.ERROR_1013 + " code: " + code);
                 } else {
-                    playerService.getDropMap().put(dropCode, drop);
+                    world.getBlockMap().put(code, drop);
                 }
             });
             if (functions.containsKey("useDrop")) {
                 // Only consume, not obtain 23/09/04
                 JSONObject useDrop = functions.getJSONObject("useDrop");
                 String code = useDrop.getString("code");
-                if (null != code) {
-                    if (!playerService.getDropMap().containsKey(code)) {
-                        logger.warn(ErrorUtil.ERROR_1012);
-                    }
-                    playerService.getDropMap().remove(code);
+                if (!world.getBlockMap().containsKey(code)) {
+                    logger.warn(ErrorUtil.ERROR_1012);
+                }
+                world.getBlockMap().remove(code);
+            }
+            if (functions.containsKey("setRelation")) {
+                JSONObject setRelation = functions.getJSONObject("setRelation");
+                String userCode1 = setRelation.getString("userCode");
+                String userCode2 = setRelation.getString("nextUserCode");
+                int newRelation = setRelation.getInteger("newRelation");
+                boolean isAbsolute = setRelation.getBoolean("isAbsolute");
+                ResponseEntity setRelationRst =
+                        playerService.setRelation(userCode1, userCode2, newRelation, isAbsolute);
+                if (setRelationRst.getStatusCode().isError()) {
+                    logger.warn(setRelationRst);
                 }
             }
         }
@@ -148,8 +159,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         rst.put("playerInfos", playerInfoMap);
         // Return drops
-        Map<String, Drop> dropMap = playerService.getDropMap();
-        rst.put("drops", dropMap);
+        Map<String, WorldBlock> blockMap = world.getBlockMap();
+        rst.put("drops", blockMap);
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
@@ -158,6 +169,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Return region
         Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
         JSONObject regionObj = new JSONObject();
+        regionObj.put("regionNo", region.getRegionNo());
         regionObj.put("height", region.getHeight());
         regionObj.put("width", region.getWidth());
         rst.put("region", regionObj);
@@ -241,7 +253,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     rankingQueue.add(block);
         });
         // Collect detected drops
-        dropMap.entrySet().stream()
+        blockMap.entrySet().stream()
                 .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
                         entry.getValue().getSceneCoordinate()) != -1)
                 .forEach(entry -> {

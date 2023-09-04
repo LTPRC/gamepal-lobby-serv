@@ -10,8 +10,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
-import com.github.ltprc.gamepal.model.GamePalConstants;
-import com.github.ltprc.gamepal.model.world.GameWorld;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

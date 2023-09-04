@@ -1,8 +1,6 @@
 package com.github.ltprc.gamepal;
 
-import com.github.ltprc.gamepal.model.world.GameWorld;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.service.impl.WorldServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

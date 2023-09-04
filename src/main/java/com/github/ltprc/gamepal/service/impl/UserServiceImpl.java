@@ -5,12 +5,11 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.github.ltprc.gamepal.model.world.GameWorld;
-import com.github.ltprc.gamepal.model.world.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;

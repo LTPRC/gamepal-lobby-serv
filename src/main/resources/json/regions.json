@@ -39,6 +39,7 @@
             "y": 1,
             "x": 4,
             "to": {
+              "regionNo": 1,
               "sceneCoordinate": {
                 "y": 1,
                 "x": 0
@@ -54,6 +55,7 @@
             "y": 1,
             "x": 5,
             "to": {
+              "regionNo": 1,
               "sceneCoordinate": {
                 "y": -1,
                 "x": 0
@@ -101,6 +103,7 @@
             "y": 1,
             "x": 4,
             "to": {
+              "regionNo": 1,
               "sceneCoordinate": {
                 "y": 0,
                 "x": 0
@@ -148,6 +151,7 @@
             "y": 1,
             "x": 5,
             "to": {
+              "regionNo": 1,
               "sceneCoordinate": {
                 "y": 0,
                 "x": 0
