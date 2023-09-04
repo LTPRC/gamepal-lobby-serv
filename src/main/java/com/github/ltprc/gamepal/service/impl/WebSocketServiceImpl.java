@@ -243,7 +243,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .forEach(entry -> {
             Block block = new Block();
             block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-            block.setCode(entry.getValue().getUserCode());
+            block.setCode(entry.getValue().getCode());
             block.setY(entry.getValue().getCoordinate().getY());
             block.setX(entry.getValue().getCoordinate().getX());
             PlayerUtil.adjustCoordinate(block,

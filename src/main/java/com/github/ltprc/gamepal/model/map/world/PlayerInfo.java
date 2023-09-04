@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.model.map.world;
 
 import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,8 +14,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerInfo extends WorldCoordinate {
-    private String userCode;
+public class PlayerInfo extends WorldBlock {
     private int playerType; // 0-human 1-npc
     private Coordinate speed;
     private BigDecimal faceDirection; // from 0 to 360

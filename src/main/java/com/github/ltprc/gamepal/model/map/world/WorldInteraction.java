@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorldDrop extends WorldBlock {
-    private String itemNo;
-    private int amount;
+@Deprecated
+public class WorldInteraction extends WorldBlock {
+    private List<Integer> interactions;
 }
