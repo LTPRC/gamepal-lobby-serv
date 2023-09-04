@@ -4,6 +4,10 @@ public class GamePalConstants {
 
     public static final int STATE_START = 0;
     public static final int STATE_IN_PROGRESS = 1;
+    public static final int TYPE_PRINTED = 1;
+    public static final int TYPE_VOICE = 2;
+    public static final int SCOPE_GLOBAL = 0;
+    public static final int SCOPE_INDIVIDUAL = 1;
     public static final int BLOCK_TYPE_GROUND = 0;
     public static final int BLOCK_TYPE_WALL = 1;
     public static final int BLOCK_TYPE_PLAYER = 2;

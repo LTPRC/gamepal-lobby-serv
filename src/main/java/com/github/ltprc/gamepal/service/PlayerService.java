@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.world.Drop;
 import com.github.ltprc.gamepal.model.world.PlayerInfo;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,7 @@ public interface PlayerService {
 
     ResponseEntity getDrop(HttpServletRequest request);
 
-    ResponseEntity setPlayerInfo(HttpServletRequest request);
-
-    ResponseEntity setPlayerInfoByEntities(HttpServletRequest request);
+    ResponseEntity updateplayerinfobyentities(String userCode, JSONObject req);
 
     ResponseEntity getPlayerInfo(HttpServletRequest request);
 

@@ -161,6 +161,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Deprecated
     public ResponseEntity getDrop(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -189,35 +190,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity setPlayerInfo(HttpServletRequest request) {
+    public ResponseEntity updateplayerinfobyentities(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        String userCode = req.getString("userCode");
-        PlayerInfo playerInfo = req.getObject("playerInfo", PlayerInfo.class);
-        playerInfoMap.put(userCode, playerInfo);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity setPlayerInfoByEntities(HttpServletRequest request) {
-        JSONObject rst = ContentUtil.generateRst();
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            logger.error(ErrorUtil.ERROR_1002);
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        if (null == req || !req.containsKey("userCode")) {
-            logger.error(ErrorUtil.ERROR_1008);
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1008));
-        }
-        String userCode = req.getString("userCode");
         if (!playerInfoMap.containsKey(userCode)) {
             playerInfoMap.put(userCode, new PlayerInfo());
         }

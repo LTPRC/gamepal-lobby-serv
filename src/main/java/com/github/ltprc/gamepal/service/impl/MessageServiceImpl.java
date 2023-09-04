@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
+import com.github.ltprc.gamepal.model.GamePalConstants;
 import com.github.ltprc.gamepal.model.world.GameWorld;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,10 +30,6 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    public static final Integer TYPE_PRINTED = 1;
-    public static final Integer TYPE_VOICE = 2;
-    public static final Integer SCOPE_GLOBAL = 0;
-    public static final Integer SCOPE_INDIVIDUAL = 1;
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // userCode, message queue
 
@@ -67,6 +64,7 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * Send one message to the specific receiver.
+     * As long as voice message cannot be transmitted by websocket, this method must be used.
      * @param request
      * @return
      */
@@ -79,35 +77,33 @@ public class MessageServiceImpl implements MessageService {
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
         }
-        int type = req.getInteger("type");
-        int scope = req.getInteger("scope");
-        String fromUserCode = req.getString("fromUserCode");
-        String toUserCode = req.getString("toUserCode");
+        Message msg = JSON.parseObject(String.valueOf(req), Message.class);
+        int scope = msg.getScope();
+        String fromUserCode = msg.getFromUserCode();
         GameWorld fromWorld = userService.getWorldByUserCode(fromUserCode);
-        GameWorld toWorld = userService.getWorldByUserCode(toUserCode);
-        if (fromWorld != toWorld) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1017));
-        }
-        GameWorld world = fromWorld;
-        String content = req.getString("content");
         int success = 0;
         int failure = 0;
-        if (scope == SCOPE_GLOBAL) {
-            for (Entry<String, Session> entry : world.getSessionMap().entrySet()) {
-                String userCode = entry.getKey();
-                ResponseEntity responseEntity = sendMessage(userCode, new Message(type, scope, fromUserCode, toUserCode, content));
+        if (GamePalConstants.SCOPE_GLOBAL == scope) {
+            for (Entry<String, Session> entry : fromWorld.getSessionMap().entrySet()) {
+                if (!entry.getKey().equals(fromUserCode)) {
+                    String toUserCode = entry.getKey();
+                    ResponseEntity responseEntity = sendMessage(toUserCode, msg);
+                    if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                        success++;
+                    } else {
+                        failure++;
+                    }
+                }
+            }
+        } else if (scope == GamePalConstants.SCOPE_INDIVIDUAL) {
+            String toUserCode = msg.getToUserCode();
+            if (toUserCode.equals(fromUserCode) || userService.getWorldByUserCode(toUserCode) == fromWorld) {
+                ResponseEntity responseEntity = sendMessage(toUserCode, msg);
                 if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                     success++;
                 } else {
                     failure++;
                 }
-            }
-        } else if (scope == SCOPE_INDIVIDUAL) {
-            ResponseEntity responseEntity = sendMessage(toUserCode, new Message(type, scope, fromUserCode, toUserCode, content));
-            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                success++;
-            } else {
-                failure++;
             }
         }
         rst.put("success", success);

@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -124,12 +123,17 @@ public class WorldServiceImpl implements WorldService {
                         newScene.getTerrain().put(new IntegerCoordinate(j, i), value);
                     }
                 }
-                JSONArray teleports = scene.getJSONArray("teleports");
-                if (null != teleports) {
-                    for (Object obj3 : teleports) {
-                        Teleport teleport = JSON.parseObject(String.valueOf(obj3), Teleport.class);
-                        teleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-                        newScene.getTeleports().add(teleport);
+                JSONArray events = scene.getJSONArray("events");
+                if (null != events) {
+                    for (Object obj3 : events) {
+                        JSONObject event = JSON.parseObject(String.valueOf(obj3));
+                        switch (event.getInteger("type")) {
+                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                                Teleport teleport = JSON.parseObject(String.valueOf(obj3), Teleport.class);
+                                teleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
+                                newScene.getTeleports().add(teleport);
+                                break;
+                        }
                     }
                 }
                 if (null == newRegion.getScenes()) {

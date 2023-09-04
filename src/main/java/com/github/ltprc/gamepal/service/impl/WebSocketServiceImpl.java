@@ -66,28 +66,33 @@ public class WebSocketServiceImpl implements WebSocketService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         // Update onlineMap
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
-        // Check requests
-        if (jsonObject.containsKey("updatePlayerInfo")) {
-            playerService.getPlayerInfoMap().put(userCode, jsonObject.getObject("updatePlayerInfo", PlayerInfo.class));
-        }
-        // Check incoming messages
-        JSONArray messages = jsonObject.getJSONArray("messages");
-        for (Object obj : messages) {
-            Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
-            if (msg.getScope().equals(MessageServiceImpl.SCOPE_GLOBAL)) {
-                messageService.getMessageMap().entrySet().stream()
-                        .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
-                        .forEach(entry -> entry.getValue().add(msg));
-            } else {
-                if (!messageService.getMessageMap().containsKey(msg.getToUserCode())) {
-                    messageService.getMessageMap().put(msg.getToUserCode(), new LinkedList<>());
-                }
-                messageService.getMessageMap().get(msg.getToUserCode()).add(msg);
+        // Check functions
+        if (jsonObject.containsKey("functions")) {
+            JSONObject functions = jsonObject.getJSONObject("functions");
+            if (functions.containsKey("updatePlayerInfo")) {
+                playerService.getPlayerInfoMap().put(userCode,
+                        functions.getObject("updatePlayerInfo", PlayerInfo.class));
             }
-        }
-        // Check new drop
-        if (jsonObject.containsKey("drops")) {
-            JSONArray drops = jsonObject.getJSONArray("drops");
+//            if (functions.containsKey("updatePlayerInfoByEntities")) {
+//                playerService.updateplayerinfobyentities(userCode, functions.getJSONObject("updatePlayerInfoByEntities"));
+//            }
+            // Check incoming messages
+            JSONArray messages = functions.getJSONArray("addMessages");
+            for (Object obj : messages) {
+                Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
+                if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
+                    messageService.getMessageMap().entrySet().stream()
+                            .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
+                            .forEach(entry -> entry.getValue().add(msg));
+                } else {
+                    if (!messageService.getMessageMap().containsKey(msg.getToUserCode())) {
+                        messageService.getMessageMap().put(msg.getToUserCode(), new LinkedList<>());
+                    }
+                    messageService.getMessageMap().get(msg.getToUserCode()).add(msg);
+                }
+            }
+            // Only create, not consume 23/09/04
+            JSONArray drops = functions.getJSONArray("addDrops");
             drops.stream().forEach(obj -> {
                 Drop drop = JSON.parseObject(String.valueOf(obj), Drop.class);
                 String dropCode = UUID.randomUUID().toString();
@@ -98,6 +103,17 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.getDropMap().put(dropCode, drop);
                 }
             });
+            if (functions.containsKey("useDrop")) {
+                // Only consume, not obtain 23/09/04
+                JSONObject useDrop = functions.getJSONObject("useDrop");
+                String code = useDrop.getString("code");
+                if (null != code) {
+                    if (!playerService.getDropMap().containsKey(code)) {
+                        logger.warn(ErrorUtil.ERROR_1012);
+                    }
+                    playerService.getDropMap().remove(code);
+                }
+            }
         }
         // Reply automatically
         int state = jsonObject.getInteger("state");
@@ -162,7 +178,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         Queue<Block> rankingQueue = new PriorityQueue<>(new Comparator<Block>() {
             @Override
             public int compare(Block o1, Block o2) {
-                if (!o1.getType().equals(o2.getType())) {
+                if (o1.getY().equals(o2.getY())) {
                     return PlayerUtil.ConvertBlockType2Level(o1.getType()) - PlayerUtil.ConvertBlockType2Level(o2.getType());
                 }
                 return o1.getY().compareTo(o2.getY());
@@ -194,11 +210,16 @@ public class WebSocketServiceImpl implements WebSocketService {
                 });
                 // Collect teleports
                 scene.getTeleports().stream().forEach(teleport -> {
-                    PlayerUtil.adjustCoordinate(teleport,
-                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                                    teleport.getTo().getSceneCoordinate()),
+                    Teleport tel = new Teleport();
+                    tel.setType(teleport.getType());
+                    tel.setCode(teleport.getCode());
+                    tel.setTo(teleport.getTo());
+                    tel.setX(teleport.getX());
+                    tel.setY(teleport.getY());
+                    PlayerUtil.adjustCoordinate(tel,
+                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(teleport);
+                    rankingQueue.add(tel);
                 });
             }
         }
@@ -236,7 +257,9 @@ public class WebSocketServiceImpl implements WebSocketService {
                     rankingQueue.add(block);
         });
         // Put all blocks
-        blocks.addAll(rankingQueue);
+        while (!rankingQueue.isEmpty()) {
+            blocks.add(rankingQueue.poll());
+        }
         rst.put("blocks", blocks);
 
         // Communicate

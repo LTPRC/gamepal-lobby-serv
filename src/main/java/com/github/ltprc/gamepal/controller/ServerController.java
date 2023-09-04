@@ -52,10 +52,6 @@ public class ServerController {
         return userService.logoff(request);
     }
 
-    @RequestMapping(value = "/setplayerinfobyentities", method = RequestMethod.POST)
-    public ResponseEntity<String> initUser(HttpServletRequest request) {
-        return playerService.setPlayerInfoByEntities(request);
-    }
     @RequestMapping(value = "/sendmsg", method = RequestMethod.POST)
     public ResponseEntity<String> sendMessage(HttpServletRequest request) {
         return messageService.sendMessage(request);
@@ -78,6 +74,7 @@ public class ServerController {
     }
 
     @RequestMapping(value = "/getdrop", method = RequestMethod.POST)
+    @Deprecated
     public ResponseEntity<String> getDrop(HttpServletRequest request) {
         return playerService.getDrop(request);
     }
