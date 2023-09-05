@@ -232,20 +232,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                         rankingQueue.add(block);
                     }
                 });
-                // Collect teleports
-                scene.getTeleports().stream().forEach(teleport -> {
-                    Teleport tel = new Teleport();
-                    tel.setType(teleport.getType());
-                    tel.setId(teleport.getId());
-                    tel.setCode(teleport.getCode());
-                    tel.setTo(teleport.getTo());
-                    tel.setX(teleport.getX());
-                    tel.setY(teleport.getY());
-                    PlayerUtil.adjustCoordinate(tel,
-                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
-                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(tel);
-                });
             }
         }
         // Collect detected playerInfos
@@ -293,7 +279,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     }
                     block.setType(entry.getValue().getType());
                     block.setId(entry.getValue().getId());
-                    block.setCode(entry.getKey());
+                    block.setCode(entry.getValue().getCode());
                     block.setY(entry.getValue().getCoordinate().getY());
                     block.setX(entry.getValue().getCoordinate().getX());
                     PlayerUtil.adjustCoordinate(block,

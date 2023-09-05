@@ -102,7 +102,6 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new HashMap<>());
-                newScene.setTeleports(new LinkedList<>());
                 JSONArray blocks = scene.getJSONArray("blocks");
                 for (int i = 0; i < Math.min(height, blocks.size()); i++) {
                     JSONArray blockRow = blocks.getJSONArray(i);
@@ -111,28 +110,6 @@ public class WorldServiceImpl implements WorldService {
                         newScene.getBlocks().put(new IntegerCoordinate(j, i), value);
                     }
                 }
-                newScene.setTerrain(new HashMap<>());
-                JSONArray terrain = scene.getJSONArray("terrain");
-                for (int i = 0; i < Math.min(height, terrain.size()); i++) {
-                    JSONArray terrainRow = terrain.getJSONArray(i);
-                    for (int j = 0; j < Math.min(width, terrainRow.size()); j++) {
-                        Integer value = terrainRow.getInteger(j);
-                        newScene.getTerrain().put(new IntegerCoordinate(j, i), value);
-                    }
-                }
-//                JSONArray events = scene.getJSONArray("events");
-//                if (null != events) {
-//                    for (Object obj3 : events) {
-//                        JSONObject event = JSON.parseObject(String.valueOf(obj3));
-//                        switch (event.getInteger("type")) {
-//                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-//                                Teleport teleport = JSON.parseObject(String.valueOf(obj3), Teleport.class);
-//                                teleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-//                                newScene.getTeleports().add(teleport);
-//                                break;
-//                        }
-//                    }
-//                }
                 if (null == newRegion.getScenes()) {
                     newRegion.setScenes(new HashMap<>());
                 }
