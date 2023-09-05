@@ -5,11 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.map.world.WorldDrop;
-import com.github.ltprc.gamepal.model.map.world.PlayerInfo;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -265,7 +262,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
                     rankingQueue.add(block);
         });
-        // Collect detected drops
+        // Collect detected special blocks 23/09/05
         Map<String, WorldBlock> blockMap = world.getBlockMap();
         blockMap.entrySet().stream()
                 .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
@@ -279,6 +276,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                             drop.setItemNo(worldDrop.getItemNo());
                             drop.setAmount(worldDrop.getAmount());
                             block = drop;
+                            break;
+                        case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                            Teleport teleport = new Teleport();
+                            WorldTeleport worldTeleport = (WorldTeleport) entry.getValue();
+                            teleport.setTo(worldTeleport.getTo());
+                            block = teleport;
                             break;
                         default:
                             block = new Block();

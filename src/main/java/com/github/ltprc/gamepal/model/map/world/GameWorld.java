@@ -1,11 +1,9 @@
 package com.github.ltprc.gamepal.model.map.world;
 
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import lombok.Data;
 
 import javax.websocket.Session;
 import java.util.Map;
-import java.util.Queue;
 
 
 @Data
