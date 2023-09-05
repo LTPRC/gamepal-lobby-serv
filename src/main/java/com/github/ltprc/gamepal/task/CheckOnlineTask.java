@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.task;
 
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -12,8 +13,6 @@ import java.util.Map;
 
 @Component
 public class CheckOnlineTask {
-
-    private static final long TIMEOUT_SECOND = 300;
 
     @Autowired
     private WorldService worldService;
@@ -31,9 +30,9 @@ public class CheckOnlineTask {
             GameWorld world = entry.getValue();
             Map<String, Long> onlineMap = world.getOnlineMap();
             if (!onlineMap.isEmpty() && Instant.now().getEpochSecond() - onlineMap.entrySet().iterator().next().getValue()
-                    > TIMEOUT_SECOND) {
+                    > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
                 String userCode = onlineMap.entrySet().iterator().next().getKey();
-                userService.logoff(userCode, world.getTokenMap().get(userCode));
+                userService.logoff(userCode, null, false);
             }
         }
     }

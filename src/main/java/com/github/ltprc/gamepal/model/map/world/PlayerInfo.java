@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @AllArgsConstructor
 public class PlayerInfo extends WorldBlock {
     private int playerType; // 0-human 1-npc
+    private int playerStatus; // 0-human 1-npc
     private Coordinate speed;
     private BigDecimal faceDirection; // from 0 to 360
     private String avatar;

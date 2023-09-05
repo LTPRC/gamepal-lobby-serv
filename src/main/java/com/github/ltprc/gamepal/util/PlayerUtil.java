@@ -102,19 +102,39 @@ public class PlayerUtil {
         }
     }
 
-    public static int ConvertBlockType2Level(int type) {
+    /**
+     * X stands for bottom(0), middle(1), top(2), and y stands for detailed height
+     * @param type
+     * @return
+     */
+    public static IntegerCoordinate ConvertBlockType2Level(int type) {
+        IntegerCoordinate rst = new IntegerCoordinate();
         switch(type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
-            default:
-                return 10;
-            case GamePalConstants.BLOCK_TYPE_WALL:
-                return 50;
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-                return 80;
-            case GamePalConstants.BLOCK_TYPE_DROP:
-                return 70;
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                return 20;
+                rst.setX(0);
+                break;
+            case GamePalConstants.BLOCK_TYPE_WALL:
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+            case GamePalConstants.BLOCK_TYPE_DROP:
+            default:
+                rst.setX(1);
+                break;
         }
+        switch(type) {
+            case GamePalConstants.BLOCK_TYPE_GROUND:
+            case GamePalConstants.BLOCK_TYPE_WALL:
+                rst.setY(0);
+                break;
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+            default:
+                rst.setY(10);
+                break;
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                rst.setY(20);
+                break;
+        }
+        return rst;
     }
 }

@@ -8,6 +8,7 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
@@ -140,6 +141,7 @@ public class UserServiceImpl implements UserService {
 
     private void initiatePlayerInfo(PlayerInfo playerInfo) {
         playerInfo.setPlayerType(0);
+        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         playerInfo.setRegionNo(1);
         playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
         playerInfo.setCoordinate(new Coordinate(new BigDecimal(5), new BigDecimal(5)));
@@ -184,17 +186,17 @@ public class UserServiceImpl implements UserService {
         }
         String userCode = req.getString("userCode");
         String token = req.getString("token");
-        return logoff(userCode, token);
+        return logoff(userCode, token, true);
     }
 
     @Override
-    public ResponseEntity<String> logoff(String userCode, String token) {
+    public ResponseEntity<String> logoff(String userCode, String token, boolean needToken) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1018));
         }
-        if (token.equals(world.getTokenMap().get(userCode))) {
+        if (!needToken || token.equals(world.getTokenMap().get(userCode))) {
             world.getTokenMap().remove(userCode);
             world.getOnlineMap().remove(userCode);
             world.getSessionMap().remove(userCode);

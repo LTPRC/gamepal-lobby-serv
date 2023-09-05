@@ -14,7 +14,7 @@ public interface UserService {
 
     ResponseEntity<String> logoff(HttpServletRequest request);
 
-    ResponseEntity<String> logoff(String userCode, String token);
+    ResponseEntity<String> logoff(String userCode, String token, boolean needToken);
 
     GameWorld getWorldByUserCode(String userCode);
 }

@@ -2,8 +2,10 @@ package com.github.ltprc.gamepal.config;
 
 public class GamePalConstants {
 
-    public static final int STATE_START = 0;
-    public static final int STATE_IN_PROGRESS = 1;
+    public static final long ONLINE_TIMEOUT_SECOND = 300;
+
+    public static final int PLAYER_STATUS_INIT = 0;
+    public static final int PLAYER_STATUS_RUNNING = 1;
 
     public static final int MESSAGE_TYPE_PRINTED = 1;
     public static final int MESSAGE_TYPE_VOICE = 2;

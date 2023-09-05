@@ -17,4 +17,6 @@ public interface WorldService {
     Map<Integer, Region> getRegionMap();
 
     void loadScenes();
+
+    void loadBlocks(GameWorld world);
 }

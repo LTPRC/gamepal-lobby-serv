@@ -48,12 +48,18 @@ public class WebSocketServiceImpl implements WebSocketService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         world.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
-        communicate(userCode, GamePalConstants.STATE_START);
+        communicate(userCode);
     }
 
     @Override
     public void onClose(String userCode) {
         logger.info("断开连接成功");
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.info(ErrorUtil.ERROR_1018);
+            return;
+        }
+//        userService.logoff(userCode,"", false);
     }
 
     @Override
@@ -74,9 +80,9 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.getPlayerInfoMap().put(userCode,
                         functions.getObject("updatePlayerInfo", PlayerInfo.class));
             }
-//            if (functions.containsKey("updatePlayerInfoByEntities")) {
-//                playerService.updateplayerinfobyentities(userCode, functions.getJSONObject("updatePlayerInfoByEntities"));
-//            }
+            if (functions.containsKey("updatePlayerInfoByEntities")) {
+                playerService.updateplayerinfobyentities(userCode, functions.getJSONObject("updatePlayerInfoByEntities"));
+            }
             // Check incoming messages
             JSONArray messages = functions.getJSONArray("addMessages");
             for (Object obj : messages) {
@@ -98,6 +104,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 WorldDrop drop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
                 String code = UUID.randomUUID().toString();
                 drop.setCode(code);
+                drop.setType(GamePalConstants.BLOCK_TYPE_DROP);
                 if (world.getBlockMap().containsKey(code)) {
                     logger.warn(ErrorUtil.ERROR_1013 + " code: " + code);
                 } else {
@@ -127,12 +134,11 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         }
         // Reply automatically
-        int state = jsonObject.getInteger("state");
-        communicate(userCode, state);
+        communicate(userCode);
     }
 
     @Override
-    public void communicate(String userCode, int state) {
+    public void communicate(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -158,9 +164,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         rst.put("playerInfos", playerInfoMap);
-        // Return drops
-        Map<String, WorldBlock> blockMap = world.getBlockMap();
-        rst.put("drops", blockMap);
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
@@ -190,10 +193,15 @@ public class WebSocketServiceImpl implements WebSocketService {
         Queue<Block> rankingQueue = new PriorityQueue<>(new Comparator<Block>() {
             @Override
             public int compare(Block o1, Block o2) {
-                if (o1.getY().equals(o2.getY())) {
-                    return PlayerUtil.ConvertBlockType2Level(o1.getType()) - PlayerUtil.ConvertBlockType2Level(o2.getType());
+                IntegerCoordinate level1 = PlayerUtil.ConvertBlockType2Level(o1.getType());
+                IntegerCoordinate level2 = PlayerUtil.ConvertBlockType2Level(o2.getType());
+                if (level1.getX() != level2.getX()) {
+                    return level1.getX() - level2.getX();
                 }
-                return o1.getY().compareTo(o2.getY());
+                if (o1.getY() != o2.getY()) {
+                    return o1.getY().compareTo(o2.getY());
+                }
+                return level1.getY() - level2.getY();
             }
         });
         // Collect blocks from nine scenes
@@ -253,20 +261,33 @@ public class WebSocketServiceImpl implements WebSocketService {
                     rankingQueue.add(block);
         });
         // Collect detected drops
+        Map<String, WorldBlock> blockMap = world.getBlockMap();
         blockMap.entrySet().stream()
                 .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
                         entry.getValue().getSceneCoordinate()) != -1)
                 .forEach(entry -> {
-            Block block = new Block();
-            block.setType(GamePalConstants.BLOCK_TYPE_DROP);
-            block.setCode(entry.getKey());
-            block.setY(entry.getValue().getCoordinate().getY());
-            block.setX(entry.getValue().getCoordinate().getX());
-            PlayerUtil.adjustCoordinate(block,
-                    PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                            entry.getValue().getSceneCoordinate()),
-                    BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(block);
+                    Block block;
+                    switch (entry.getValue().getType()) {
+                        case GamePalConstants.BLOCK_TYPE_DROP:
+                            Drop drop = new Drop();
+                            WorldDrop worldDrop = (WorldDrop) entry.getValue();
+                            drop.setItemNo(worldDrop.getItemNo());
+                            drop.setAmount(worldDrop.getAmount());
+                            block = drop;
+                            break;
+                        default:
+                            block = new Block();
+                            break;
+                    }
+                    block.setType(entry.getValue().getType());
+                    block.setCode(entry.getKey());
+                    block.setY(entry.getValue().getCoordinate().getY());
+                    block.setX(entry.getValue().getCoordinate().getX());
+                    PlayerUtil.adjustCoordinate(block,
+                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                                    entry.getValue().getSceneCoordinate()),
+                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                            rankingQueue.add(block);
         });
         // Put all blocks
         while (!rankingQueue.isEmpty()) {

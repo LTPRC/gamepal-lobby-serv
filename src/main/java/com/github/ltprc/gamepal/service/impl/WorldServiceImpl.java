@@ -4,11 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.model.map.Teleport;
+import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.Region;
-import com.github.ltprc.gamepal.model.map.Scene;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
@@ -20,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -55,8 +54,12 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public ResponseEntity<String> removeWorld(String worldCode) {
         JSONObject rst = ContentUtil.generateRst();
-        worldMap.get(worldCode).getTokenMap().entrySet().forEach(entry -> {
-            userService.logoff(entry.getKey(), entry.getValue());
+        GameWorld world =worldMap.get(worldCode);
+        if (null == world) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1019));
+        }
+        world.getOnlineMap().entrySet().forEach(entry -> {
+            userService.logoff(entry.getKey(), "", false);
         });
         worldMap.remove(worldCode);
         return ResponseEntity.ok().body(rst.toString());
@@ -71,18 +74,8 @@ public class WorldServiceImpl implements WorldService {
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
         world.setOnlineMap(new ConcurrentHashMap<>()); // userCode, timestamp
-        world.setOnlineQueue(new PriorityQueue<>((s1, s2) -> {
-            long l1 = world.getOnlineMap().get(s1);
-            long l2 = world.getOnlineMap().get(s2);
-            if (l1 - l2 < 0) {
-                return -1;
-            } else if (l1 - l2 > 0) {
-                return 1;
-            } else {
-                return 0;
-            }
-        })); // userCode
         world.setBlockMap(new ConcurrentSkipListMap<>());
+        loadBlocks(world);
     }
 
     @Override
@@ -145,5 +138,66 @@ public class WorldServiceImpl implements WorldService {
             }
             regionMap.put(regionNo, newRegion);
         }
+    }
+
+    @Override
+    public void loadBlocks(GameWorld world) {
+        WorldBlock block;
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(1)));
+        block.setType(GamePalConstants.BLOCK_TYPE_BED);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(1)));
+        block.setType(GamePalConstants.BLOCK_TYPE_TOILET);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
+        block.setType(GamePalConstants.BLOCK_TYPE_DRESSER);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(1)));
+        block.setType(GamePalConstants.BLOCK_TYPE_WORKSHOP);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(4)));
+        block.setType(GamePalConstants.BLOCK_TYPE_GAME);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(4)));
+        block.setType(GamePalConstants.BLOCK_TYPE_STORAGE);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(4)));
+        block.setType(GamePalConstants.BLOCK_TYPE_COOKER);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
+        block = new WorldBlock();
+        block.setRegionNo(1);
+        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(4)));
+        block.setType(GamePalConstants.BLOCK_TYPE_SINK);
+        block.setCode(UUID.randomUUID().toString());
+        world.getBlockMap().put(block.getCode(), block);
     }
 }
