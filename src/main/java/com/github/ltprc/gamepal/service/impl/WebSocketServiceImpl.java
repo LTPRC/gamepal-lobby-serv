@@ -218,19 +218,24 @@ public class WebSocketServiceImpl implements WebSocketService {
                 scene.getBlocks().entrySet().stream().forEach(entry -> {
                     Block block = new Block();
                     block.setId("");
-                    block.setCode(String.valueOf(Math.abs(entry.getValue())));
+                    block.setCode(String.valueOf(entry.getValue() % 10000));
                     block.setY(BigDecimal.valueOf(entry.getKey().getY()));
                     block.setX(BigDecimal.valueOf(entry.getKey().getX()));
                     PlayerUtil.adjustCoordinate(block,
                             PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    if (entry.getValue() < 0) {
-                        block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
-                        blocks.add(block);
-                    } else if (entry.getValue() > 0) {
-                        block.setType(GamePalConstants.BLOCK_TYPE_WALL);
-                        rankingQueue.add(block);
+                    switch (entry.getValue() / 10000) {
+                        case GamePalConstants.LAYER_BOTTOM:
+                            block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
+                            break;
+                        case GamePalConstants.LAYER_CENTER:
+                            block.setType(GamePalConstants.BLOCK_TYPE_WALL);
+                            break;
+                        case GamePalConstants.LAYER_TOP:
+                            block.setType(GamePalConstants.BLOCK_TYPE_CEILING);
+                            break;
                     }
+                    rankingQueue.add(block);
                 });
             }
         }

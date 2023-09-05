@@ -103,7 +103,7 @@ public class PlayerUtil {
     }
 
     /**
-     * X stands for bottom(0), middle(1), top(2), and y stands for detailed height
+     * X stands for bottom, center, top, and y stands for detailed height
      * @param type
      * @return
      */
@@ -112,13 +112,13 @@ public class PlayerUtil {
         switch(type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                rst.setX(0);
+                rst.setX(GamePalConstants.LAYER_BOTTOM);
                 break;
             case GamePalConstants.BLOCK_TYPE_WALL:
             case GamePalConstants.BLOCK_TYPE_PLAYER:
             case GamePalConstants.BLOCK_TYPE_DROP:
             default:
-                rst.setX(1);
+                rst.setX(GamePalConstants.LAYER_CENTER);
                 break;
         }
         switch(type) {
