@@ -142,6 +142,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONObject rst = ContentUtil.generateRst();
         rst.put("userCode", userCode);
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.warn(ErrorUtil.ERROR_1016 + "userCode: " + userCode);
+            logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
+            return;
+        }
 
         // Return stored token
         String token = world.getTokenMap().get(userCode);
