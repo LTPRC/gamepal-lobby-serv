@@ -132,7 +132,8 @@ public class UserServiceImpl implements UserService {
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         PlayerInfo playerInfo = new PlayerInfo();
         initiatePlayerInfo(playerInfo);
-        playerInfo.setCode(userCode);
+        playerInfo.setId(userCode);
+        playerInfo.setCode("");
         playerService.getPlayerInfoMap().put(userCode, playerInfo);
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));

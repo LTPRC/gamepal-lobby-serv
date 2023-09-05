@@ -99,23 +99,24 @@ public class WebSocketServiceImpl implements WebSocketService {
             JSONArray drops = functions.getJSONArray("addDrops");
             drops.stream().forEach(obj -> {
                 WorldDrop drop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
-                String code = UUID.randomUUID().toString();
-                drop.setCode(code);
+                String id = UUID.randomUUID().toString();
+                drop.setId(id);
+                drop.setCode("3000");
                 drop.setType(GamePalConstants.BLOCK_TYPE_DROP);
-                if (world.getBlockMap().containsKey(code)) {
-                    logger.warn(ErrorUtil.ERROR_1013 + " code: " + code);
+                if (world.getBlockMap().containsKey(id)) {
+                    logger.warn(ErrorUtil.ERROR_1013 + " id: " + id);
                 } else {
-                    world.getBlockMap().put(code, drop);
+                    world.getBlockMap().put(id, drop);
                 }
             });
             if (functions.containsKey("useDrop")) {
                 // Only consume, not obtain 23/09/04
                 JSONObject useDrop = functions.getJSONObject("useDrop");
-                String code = useDrop.getString("code");
-                if (!world.getBlockMap().containsKey(code)) {
+                String id = useDrop.getString("id");
+                if (!world.getBlockMap().containsKey(id)) {
                     logger.warn(ErrorUtil.ERROR_1012);
                 }
-                world.getBlockMap().remove(code);
+                world.getBlockMap().remove(id);
             }
             if (functions.containsKey("setRelation")) {
                 JSONObject setRelation = functions.getJSONObject("setRelation");
@@ -216,6 +217,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 // Collect walls and grounds
                 scene.getBlocks().entrySet().stream().forEach(entry -> {
                     Block block = new Block();
+                    block.setId("");
                     block.setCode(String.valueOf(Math.abs(entry.getValue())));
                     block.setY(BigDecimal.valueOf(entry.getKey().getY()));
                     block.setX(BigDecimal.valueOf(entry.getKey().getX()));
@@ -234,6 +236,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 scene.getTeleports().stream().forEach(teleport -> {
                     Teleport tel = new Teleport();
                     tel.setType(teleport.getType());
+                    tel.setId(teleport.getId());
                     tel.setCode(teleport.getCode());
                     tel.setTo(teleport.getTo());
                     tel.setX(teleport.getX());
@@ -251,16 +254,17 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
                         entry.getValue().getSceneCoordinate()) != -1)
                 .forEach(entry -> {
-            Block block = new Block();
-            block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-            block.setCode(entry.getValue().getCode());
-            block.setY(entry.getValue().getCoordinate().getY());
-            block.setX(entry.getValue().getCoordinate().getX());
-            PlayerUtil.adjustCoordinate(block,
-                    PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                            entry.getValue().getSceneCoordinate()),
-                    BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(block);
+                    Block block = new Block();
+                    block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
+                    block.setId(entry.getValue().getId());
+                    block.setCode(entry.getValue().getCode());
+                    block.setY(entry.getValue().getCoordinate().getY());
+                    block.setX(entry.getValue().getCoordinate().getX());
+                    PlayerUtil.adjustCoordinate(block,
+                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                                    entry.getValue().getSceneCoordinate()),
+                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                            rankingQueue.add(block);
         });
         // Collect detected special blocks 23/09/05
         Map<String, WorldBlock> blockMap = world.getBlockMap();
@@ -288,6 +292,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                             break;
                     }
                     block.setType(entry.getValue().getType());
+                    block.setId(entry.getValue().getId());
                     block.setCode(entry.getKey());
                     block.setY(entry.getValue().getCoordinate().getY());
                     block.setX(entry.getValue().getCoordinate().getX());

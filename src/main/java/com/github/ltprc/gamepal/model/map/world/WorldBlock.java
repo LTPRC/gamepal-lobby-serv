@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WorldBlock extends WorldCoordinate {
     private Integer type;
+    private String id;
     private String code;
 }
