@@ -208,8 +208,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         });
         // Collect blocks from nine scenes
-        for (int i = sceneCoordinate.getY() - 1; i <= sceneCoordinate.getY() + 1; i++) {
-            for (int j = sceneCoordinate.getX() - 1; j <= sceneCoordinate.getX() + 1; j++) {
+        for (int i = sceneCoordinate.getY() - 2; i <= sceneCoordinate.getY() + 2; i++) {
+            for (int j = sceneCoordinate.getX() - 2; j <= sceneCoordinate.getX() + 2; j++) {
                 Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
                 if (null == scene) {
                     continue;

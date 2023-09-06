@@ -111,21 +111,31 @@ public class PlayerUtil {
         IntegerCoordinate rst = new IntegerCoordinate();
         switch(type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
+            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
                 rst.setX(GamePalConstants.LAYER_BOTTOM);
                 break;
             case GamePalConstants.BLOCK_TYPE_WALL:
+            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
             case GamePalConstants.BLOCK_TYPE_PLAYER:
             case GamePalConstants.BLOCK_TYPE_DROP:
             default:
                 rst.setX(GamePalConstants.LAYER_CENTER);
                 break;
+            case GamePalConstants.BLOCK_TYPE_CEILING:
+            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
+                rst.setX(GamePalConstants.LAYER_TOP);
+                break;
         }
         switch(type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_WALL:
+            case GamePalConstants.BLOCK_TYPE_CEILING:
                 rst.setY(0);
                 break;
+            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
             default:
                 rst.setY(10);

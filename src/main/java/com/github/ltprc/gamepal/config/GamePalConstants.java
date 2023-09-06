@@ -24,6 +24,12 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_COOKER = 11;
     public static final int BLOCK_TYPE_SINK = 12;
     public static final int BLOCK_TYPE_CEILING = 13;
+    public static final int BLOCK_TYPE_GROUND_DECORATION = 14;
+    public static final int BLOCK_TYPE_WALL_DECORATION = 15;
+    public static final int BLOCK_TYPE_CEILING_DECORATION = 16;
+    public static final int BLOCK_TYPE_BLOCKED_GROUND = 17;
+    public static final int BLOCK_TYPE_HOLLOW_WALL = 18;
+    public static final int BLOCK_TYPE_BLOCKED_CEILING = 19;
 
     public static final int INTERACTION_USE = 0;
     public static final int INTERACTION_EXCHANGE = 1;

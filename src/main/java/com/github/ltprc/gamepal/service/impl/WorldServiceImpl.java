@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.Region;
+import com.github.ltprc.gamepal.model.map.Scene;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
@@ -102,9 +105,9 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new HashMap<>());
-                JSONArray blocks = scene.getJSONArray("blocks");
-                for (int i = 0; i < Math.min(height, blocks.size()); i++) {
-                    JSONArray blockRow = blocks.getJSONArray(i);
+                JSONArray map = scene.getJSONArray("map");
+                for (int i = 0; i < Math.min(height, map.size()); i++) {
+                    JSONArray blockRow = map.getJSONArray(i);
                     for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                         Integer value = blockRow.getInteger(j);
                         newScene.getBlocks().put(new IntegerCoordinate(j, i), value);
