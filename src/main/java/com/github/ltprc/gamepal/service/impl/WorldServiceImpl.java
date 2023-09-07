@@ -4,18 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.Region;
-import com.github.ltprc.gamepal.model.map.Scene;
-import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldTeleport;
+import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,13 +99,71 @@ public class WorldServiceImpl implements WorldService {
                 int x = scene.getInteger("x");
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
-                newScene.setBlocks(new HashMap<>());
+                newScene.setBlocks(new ArrayList<>());
                 JSONArray map = scene.getJSONArray("map");
-                for (int i = 0; i < Math.min(height, map.size()); i++) {
-                    JSONArray blockRow = map.getJSONArray(i);
-                    for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
-                        Integer value = blockRow.getInteger(j);
-                        newScene.getBlocks().put(new IntegerCoordinate(j, i), value);
+                if (null != map && !map.isEmpty()) {
+                    for (int i = 0; i < Math.min(height, map.size()); i++) {
+                        JSONArray blockRow = map.getJSONArray(i);
+                        for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
+                            Integer value = blockRow.getInteger(j);
+                            Block block = new Block();
+                            switch (value / 10000) {
+                                case 1:
+                                default:
+                                    block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
+                                    break;
+                                case 2:
+                                    block.setType(GamePalConstants.BLOCK_TYPE_WALL);
+                                    break;
+                                case 3:
+                                    block.setType(GamePalConstants.BLOCK_TYPE_CEILING);
+                                    break;
+                            }
+                            block.setCode(String.valueOf(value % 10000));
+                            block.setX(BigDecimal.valueOf(j));
+                            block.setY(BigDecimal.valueOf(i));
+                            newScene.getBlocks().add(block);
+                        }
+                    }
+                }
+                JSONArray blocks = scene.getJSONArray("blocks");
+                if (null != blocks && !blocks.isEmpty()) {
+                    for (int i = 0; i < blocks.size(); i++) {
+                        JSONArray blockRow = blocks.getJSONArray(i);
+                        Integer type = blockRow.getInteger(0);
+                        switch (type) {
+                            case GamePalConstants.BLOCK_TYPE_DROP:
+                                Drop drop = new Drop();
+                                drop.setType(type);
+                                drop.setCode(String.valueOf(blockRow.getInteger(1)));
+                                drop.setX(BigDecimal.valueOf(blockRow.getInteger(2)));
+                                drop.setY(BigDecimal.valueOf(blockRow.getInteger(3)));
+                                drop.setItemNo(blockRow.getString(4));
+                                drop.setAmount(blockRow.getInteger(5));
+                                newScene.getBlocks().add(drop);
+                                break;
+                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                                Teleport teleport = new Teleport();
+                                teleport.setType(type);
+                                teleport.setCode(String.valueOf(blockRow.getInteger(1)));
+                                teleport.setX(BigDecimal.valueOf(blockRow.getInteger(2)));
+                                teleport.setY(BigDecimal.valueOf(blockRow.getInteger(3)));
+                                WorldCoordinate to = new WorldCoordinate();
+                                to.setRegionNo(blockRow.getInteger(4));
+                                to.setSceneCoordinate(new IntegerCoordinate(blockRow.getInteger(5), blockRow.getInteger(6)));
+                                to.setCoordinate(new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)), BigDecimal.valueOf(blockRow.getInteger(8))));
+                                teleport.setTo(to);
+                                newScene.getBlocks().add(teleport);
+                                break;
+                            default:
+                                Block block = new Block();
+                                block.setType(type);
+                                block.setCode(String.valueOf(blockRow.getInteger(1)));
+                                block.setX(BigDecimal.valueOf(blockRow.getInteger(2)));
+                                block.setY(BigDecimal.valueOf(blockRow.getInteger(3)));
+                                newScene.getBlocks().add(block);
+                                break;
+                        }
                     }
                 }
                 if (null == newRegion.getScenes()) {
@@ -124,125 +177,171 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void loadBlocks(GameWorld world) {
-        WorldBlock block;
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(1)));
-        block.setType(GamePalConstants.BLOCK_TYPE_BED);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3007");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(1)));
-        block.setType(GamePalConstants.BLOCK_TYPE_TOILET);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3008");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
-        block.setType(GamePalConstants.BLOCK_TYPE_DRESSER);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3010");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(1)));
-        block.setType(GamePalConstants.BLOCK_TYPE_WORKSHOP);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3009");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(4)));
-        block.setType(GamePalConstants.BLOCK_TYPE_GAME);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3021");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(4)));
-        block.setType(GamePalConstants.BLOCK_TYPE_STORAGE);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3001");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(4)));
-        block.setType(GamePalConstants.BLOCK_TYPE_COOKER);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3004");
-        world.getBlockMap().put(block.getId(), block);
-        block = new WorldBlock();
-        block.setRegionNo(1);
-        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(4)));
-        block.setType(GamePalConstants.BLOCK_TYPE_SINK);
-        block.setId(UUID.randomUUID().toString());
-        block.setCode("3005");
-        world.getBlockMap().put(block.getId(), block);
+        regionMap.entrySet().stream().forEach(entry1 -> {
+            Region region = entry1.getValue();
+            region.getScenes().entrySet().stream().forEach(entry2 -> {
+                Scene scene = entry2.getValue();
+                scene.getBlocks().stream().forEach(block -> {
+                    block.setId(UUID.randomUUID().toString());
+                    switch (block.getType()) {
+                        case GamePalConstants.BLOCK_TYPE_DROP:
+                            WorldDrop worldDrop = new WorldDrop();
+                            worldDrop.setType(block.getType());
+                            worldDrop.setCode(block.getCode());
+                            worldDrop.setId(block.getId());
+                            worldDrop.setCoordinate(new Coordinate(block.getX(), block.getY()));
+                            worldDrop.setSceneCoordinate(scene.getSceneCoordinate());
+                            worldDrop.setRegionNo(region.getRegionNo());
+                            worldDrop.setAmount(((Drop) block).getAmount());
+                            worldDrop.setItemNo(((Drop) block).getItemNo());
+                            world.getBlockMap().put(block.getId(), worldDrop);
+                            break;
+                        case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                            WorldTeleport worldTeleport = new WorldTeleport();
+                            worldTeleport.setType(block.getType());
+                            worldTeleport.setCode(block.getCode());
+                            worldTeleport.setId(block.getId());
+                            worldTeleport.setCoordinate(new Coordinate(block.getX(), block.getY()));
+                            worldTeleport.setSceneCoordinate(scene.getSceneCoordinate());
+                            worldTeleport.setRegionNo(region.getRegionNo());
+                            worldTeleport.setTo(((Teleport) block).getTo());
+                            world.getBlockMap().put(block.getId(), worldTeleport);
+                            break;
+                        default:
+                            WorldBlock worldBlock = new WorldBlock();
+                            worldBlock.setType(block.getType());
+                            worldBlock.setCode(block.getCode());
+                            worldBlock.setId(block.getId());
+                            worldBlock.setCoordinate(new Coordinate(block.getX(), block.getY()));
+                            worldBlock.setSceneCoordinate(scene.getSceneCoordinate());
+                            worldBlock.setRegionNo(region.getRegionNo());
+                            world.getBlockMap().put(block.getId(), worldBlock);
+                            break;
+                    }
+                });
+            });
+        });
 
-        WorldTeleport worldTeleport;
-        WorldCoordinate to;
-        worldTeleport = new WorldTeleport();
-        worldTeleport.setRegionNo(1);
-        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 0));
-        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(4), BigDecimal.valueOf(1)));
-        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-        worldTeleport.setId(UUID.randomUUID().toString());
-        worldTeleport.setCode("2212");
-        to = new WorldCoordinate();
-        to.setRegionNo(worldTeleport.getRegionNo());
-        to.setSceneCoordinate(new IntegerCoordinate(0, 1));
-        to.setCoordinate(new Coordinate(BigDecimal.valueOf(6), BigDecimal.valueOf(0.5)));
-        worldTeleport.setTo(to);
-        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
-        worldTeleport = new WorldTeleport();
-        worldTeleport.setRegionNo(1);
-        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 0));
-        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
-        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-        worldTeleport.setId(UUID.randomUUID().toString());
-        worldTeleport.setCode("2204");
-        to = new WorldCoordinate();
-        to.setRegionNo(worldTeleport.getRegionNo());
-        to.setSceneCoordinate(new IntegerCoordinate(0, -1));
-        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
-        worldTeleport.setTo(to);
-        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
-        worldTeleport = new WorldTeleport();
-        worldTeleport.setRegionNo(1);
-        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, -1));
-        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(4), BigDecimal.valueOf(1)));
-        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-        worldTeleport.setId(UUID.randomUUID().toString());
-        worldTeleport.setCode("2212");
-        to = new WorldCoordinate();
-        to.setRegionNo(worldTeleport.getRegionNo());
-        to.setSceneCoordinate(new IntegerCoordinate(0, 0));
-        to.setCoordinate(new Coordinate(BigDecimal.valueOf(6), BigDecimal.valueOf(0.5)));
-        worldTeleport.setTo(to);
-        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
-        worldTeleport = new WorldTeleport();
-        worldTeleport.setRegionNo(1);
-        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 1));
-        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
-        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-        worldTeleport.setId(UUID.randomUUID().toString());
-        worldTeleport.setCode("2204");
-        to = new WorldCoordinate();
-        to.setRegionNo(worldTeleport.getRegionNo());
-        to.setSceneCoordinate(new IntegerCoordinate(0, 0));
-        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
-        worldTeleport.setTo(to);
-        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
+
+//        WorldBlock block;
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(1)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_BED);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3007");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(1)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_TOILET);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3008");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_DRESSER);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3010");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(1)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_WORKSHOP);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3009");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(4)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_GAME);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3021");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(4)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_STORAGE);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3001");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(4)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_COOKER);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3004");
+//        world.getBlockMap().put(block.getId(), block);
+//        block = new WorldBlock();
+//        block.setRegionNo(1);
+//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
+//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(4)));
+//        block.setType(GamePalConstants.BLOCK_TYPE_SINK);
+//        block.setId(UUID.randomUUID().toString());
+//        block.setCode("3005");
+//        world.getBlockMap().put(block.getId(), block);
+//
+//        WorldTeleport worldTeleport;
+//        WorldCoordinate to;
+//        worldTeleport = new WorldTeleport();
+//        worldTeleport.setRegionNo(1);
+//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 0));
+//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(4), BigDecimal.valueOf(1)));
+//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
+//        worldTeleport.setId(UUID.randomUUID().toString());
+//        worldTeleport.setCode("2212");
+//        to = new WorldCoordinate();
+//        to.setRegionNo(worldTeleport.getRegionNo());
+//        to.setSceneCoordinate(new IntegerCoordinate(0, 1));
+//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(6), BigDecimal.valueOf(0.5)));
+//        worldTeleport.setTo(to);
+//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
+//        worldTeleport = new WorldTeleport();
+//        worldTeleport.setRegionNo(1);
+//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 0));
+//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
+//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
+//        worldTeleport.setId(UUID.randomUUID().toString());
+//        worldTeleport.setCode("2204");
+//        to = new WorldCoordinate();
+//        to.setRegionNo(worldTeleport.getRegionNo());
+//        to.setSceneCoordinate(new IntegerCoordinate(0, -1));
+//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
+//        worldTeleport.setTo(to);
+//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
+//        worldTeleport = new WorldTeleport();
+//        worldTeleport.setRegionNo(1);
+//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, -1));
+//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(4), BigDecimal.valueOf(1)));
+//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
+//        worldTeleport.setId(UUID.randomUUID().toString());
+//        worldTeleport.setCode("2212");
+//        to = new WorldCoordinate();
+//        to.setRegionNo(worldTeleport.getRegionNo());
+//        to.setSceneCoordinate(new IntegerCoordinate(0, 0));
+//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(6), BigDecimal.valueOf(0.5)));
+//        worldTeleport.setTo(to);
+//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
+//        worldTeleport = new WorldTeleport();
+//        worldTeleport.setRegionNo(1);
+//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 1));
+//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
+//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
+//        worldTeleport.setId(UUID.randomUUID().toString());
+//        worldTeleport.setCode("2204");
+//        to = new WorldCoordinate();
+//        to.setRegionNo(worldTeleport.getRegionNo());
+//        to.setSceneCoordinate(new IntegerCoordinate(0, 0));
+//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
+//        worldTeleport.setTo(to);
+//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
     }
 }

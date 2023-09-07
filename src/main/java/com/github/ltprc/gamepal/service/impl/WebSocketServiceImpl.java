@@ -207,35 +207,19 @@ public class WebSocketServiceImpl implements WebSocketService {
                 return level1.getY() - level2.getY();
             }
         });
-        // Collect blocks from nine scenes
-        for (int i = sceneCoordinate.getY() - 2; i <= sceneCoordinate.getY() + 2; i++) {
-            for (int j = sceneCoordinate.getX() - 2; j <= sceneCoordinate.getX() + 2; j++) {
+        // Collect blocks from 9 scenes 23/09/07
+        for (int i = sceneCoordinate.getY() - 1; i <= sceneCoordinate.getY() + 1; i++) {
+            for (int j = sceneCoordinate.getX() - 1; j <= sceneCoordinate.getX() + 1; j++) {
                 Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
                 if (null == scene) {
                     continue;
                 }
-                // Collect walls and grounds
-                scene.getBlocks().entrySet().stream().forEach(entry -> {
-                    Block block = new Block();
-                    block.setId("");
-                    block.setCode(String.valueOf(entry.getValue() % 10000));
-                    block.setY(BigDecimal.valueOf(entry.getKey().getY()));
-                    block.setX(BigDecimal.valueOf(entry.getKey().getX()));
-                    PlayerUtil.adjustCoordinate(block,
+                scene.getBlocks().stream().forEach(block -> {
+                    Block newBlock = PlayerUtil.copyBlock(block);
+                    PlayerUtil.adjustCoordinate(newBlock,
                             PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    switch (entry.getValue() / 10000) {
-                        case GamePalConstants.LAYER_BOTTOM:
-                            block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
-                            break;
-                        case GamePalConstants.LAYER_CENTER:
-                            block.setType(GamePalConstants.BLOCK_TYPE_WALL);
-                            break;
-                        case GamePalConstants.LAYER_TOP:
-                            block.setType(GamePalConstants.BLOCK_TYPE_CEILING);
-                            break;
-                    }
-                    rankingQueue.add(block);
+                    rankingQueue.add(newBlock);
                 });
             }
         }
@@ -258,41 +242,42 @@ public class WebSocketServiceImpl implements WebSocketService {
                             rankingQueue.add(block);
         });
         // Collect detected special blocks 23/09/05
-        Map<String, WorldBlock> blockMap = world.getBlockMap();
-        blockMap.entrySet().stream()
-                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
-                        entry.getValue().getSceneCoordinate()) != -1)
-                .forEach(entry -> {
-                    Block block;
-                    switch (entry.getValue().getType()) {
-                        case GamePalConstants.BLOCK_TYPE_DROP:
-                            Drop drop = new Drop();
-                            WorldDrop worldDrop = (WorldDrop) entry.getValue();
-                            drop.setItemNo(worldDrop.getItemNo());
-                            drop.setAmount(worldDrop.getAmount());
-                            block = drop;
-                            break;
-                        case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                            Teleport teleport = new Teleport();
-                            WorldTeleport worldTeleport = (WorldTeleport) entry.getValue();
-                            teleport.setTo(worldTeleport.getTo());
-                            block = teleport;
-                            break;
-                        default:
-                            block = new Block();
-                            break;
-                    }
-                    block.setType(entry.getValue().getType());
-                    block.setId(entry.getValue().getId());
-                    block.setCode(entry.getValue().getCode());
-                    block.setY(entry.getValue().getCoordinate().getY());
-                    block.setX(entry.getValue().getCoordinate().getX());
-                    PlayerUtil.adjustCoordinate(block,
-                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                                    entry.getValue().getSceneCoordinate()),
-                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                            rankingQueue.add(block);
-        });
+        // This way is to be deprecated 23/09/06
+//        Map<String, WorldBlock> blockMap = world.getBlockMap();
+//        blockMap.entrySet().stream()
+//                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
+//                        entry.getValue().getSceneCoordinate()) != -1)
+//                .forEach(entry -> {
+//                    Block block;
+//                    switch (entry.getValue().getType()) {
+//                        case GamePalConstants.BLOCK_TYPE_DROP:
+//                            Drop drop = new Drop();
+//                            WorldDrop worldDrop = (WorldDrop) entry.getValue();
+//                            drop.setItemNo(worldDrop.getItemNo());
+//                            drop.setAmount(worldDrop.getAmount());
+//                            block = drop;
+//                            break;
+//                        case GamePalConstants.BLOCK_TYPE_TELEPORT:
+//                            Teleport teleport = new Teleport();
+//                            WorldTeleport worldTeleport = (WorldTeleport) entry.getValue();
+//                            teleport.setTo(worldTeleport.getTo());
+//                            block = teleport;
+//                            break;
+//                        default:
+//                            block = new Block();
+//                            break;
+//                    }
+//                    block.setType(entry.getValue().getType());
+//                    block.setId(entry.getValue().getId());
+//                    block.setCode(entry.getValue().getCode());
+//                    block.setY(entry.getValue().getCoordinate().getY());
+//                    block.setX(entry.getValue().getCoordinate().getX());
+//                    PlayerUtil.adjustCoordinate(block,
+//                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+//                                    entry.getValue().getSceneCoordinate()),
+//                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+//                            rankingQueue.add(block);
+//        });
         // Put all blocks
         while (!rankingQueue.isEmpty()) {
             blocks.add(rankingQueue.poll());

@@ -1,9 +1,8 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.SceneModel;
+import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.world.WorldDrop;
 
 import java.math.BigDecimal;
 
@@ -63,6 +62,13 @@ public class PlayerUtil {
         return -1;
     }
 
+    /**
+     * Only support 3*3 matrix
+     * @param coordinate
+     * @param relationValue
+     * @param height
+     * @param width
+     */
     public static void adjustCoordinate(Coordinate coordinate, int relationValue, BigDecimal height, BigDecimal width) {
         // Pos-y is south, neg-y is north
         switch (relationValue) {
@@ -146,5 +152,37 @@ public class PlayerUtil {
                 break;
         }
         return rst;
+    }
+
+    public static Block copyBlock(Block block) {
+        switch (block.getType()) {
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                Drop newDrop = new Drop();
+                newDrop.setType(block.getType());
+                newDrop.setCode(block.getCode());
+                newDrop.setId(block.getId());
+                newDrop.setX(block.getX());
+                newDrop.setY(block.getY());
+                newDrop.setAmount(((Drop) block).getAmount());
+                newDrop.setItemNo(((Drop) block).getItemNo());
+                return newDrop;
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                Teleport newTeleport = new Teleport();
+                newTeleport.setType(block.getType());
+                newTeleport.setCode(block.getCode());
+                newTeleport.setId(block.getId());
+                newTeleport.setX(block.getX());
+                newTeleport.setY(block.getY());
+                newTeleport.setTo(((Teleport) block).getTo());
+                return newTeleport;
+            default:
+                Block newBlock = new Block();
+                newBlock.setType(block.getType());
+                newBlock.setCode(block.getCode());
+                newBlock.setId(block.getId());
+                newBlock.setX(block.getX());
+                newBlock.setY(block.getY());
+                return newBlock;
+        }
     }
 }
