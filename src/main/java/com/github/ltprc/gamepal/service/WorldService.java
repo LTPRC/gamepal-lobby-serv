@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.service;
 
+import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.Region;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,11 @@ public interface WorldService {
 
     Map<Integer, Region> getRegionMap();
 
+    Map<String, Item> getItemMap();
+
     void loadScenes();
 
     void loadBlocks(GameWorld world);
+
+    void loadItems();
 }

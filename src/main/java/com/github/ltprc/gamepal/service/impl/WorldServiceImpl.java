@@ -4,13 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.item.Consumable;
+import com.github.ltprc.gamepal.model.item.Item;
+import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ public class WorldServiceImpl implements WorldService {
     private static final Log logger = LogFactory.getLog(WorldServiceImpl.class);
     private Map<String, GameWorld> worldMap = new LinkedHashMap<>(); // worldCode, world
     private Map<Integer, Region> regionMap = new HashMap<>(); // regionNo, region
+    private Map<String, Item> itemMap = new HashMap<>(); // itemNo, item
 
     @Autowired
     private UserService userService;
@@ -68,6 +71,11 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public Map<Integer, Region> getRegionMap() {
         return regionMap;
+    }
+
+    @Override
+    public Map<String, Item> getItemMap() {
+        return itemMap;
     }
 
     private void initiateWorld(GameWorld world) {
@@ -343,5 +351,74 @@ public class WorldServiceImpl implements WorldService {
 //        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
 //        worldTeleport.setTo(to);
 //        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
+    }
+
+    @Override
+    public void loadItems() {
+        JSONArray items = ContentUtil.jsonFile2JSONArray("src/main/resources/json/items.json");
+        items.stream().forEach(itemObj -> {
+            switch (((JSONObject) itemObj).getString("itemNo").charAt(0)) {
+                case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
+                    Consumable consumable = JSON.parseObject(String.valueOf(itemObj),Consumable.class);
+                    itemMap.put(consumable.getItemNo(), consumable);
+                    break;
+                case GamePalConstants.ITEM_CHARACTER_JUNK:
+                    Junk junk = JSON.parseObject(String.valueOf(itemObj),Junk.class);
+                    itemMap.put(junk.getItemNo(), junk);
+                    break;
+                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                case GamePalConstants.ITEM_CHARACTER_MATERIAL:
+                case GamePalConstants.ITEM_CHARACTER_NOTE:
+                case GamePalConstants.ITEM_CHARACTER_RECORDING:
+                    Item item = JSON.parseObject(String.valueOf(itemObj),Item.class);
+                    itemMap.put(item.getItemNo(), item);
+                    break;
+            }
+        });
+    }
+
+    public void loadItemsOld() {
+        JSONObject items = ContentUtil.jsonFile2JSONObject("src/main/resources/json/items.json");
+        items.entrySet().stream().forEach(entry -> {
+            switch (entry.getKey().charAt(0)) {
+                case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
+                    Consumable consumable = new Consumable();
+                    consumable.setItemNo(entry.getKey());
+                    consumable.setName(((JSONObject) entry.getValue()).getString("name"));
+                    consumable.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
+                    consumable.setDescription(((JSONObject) entry.getValue()).getString("description"));
+                    JSONObject effects = ((JSONObject) entry.getValue()).getJSONObject("effects");
+                    effects.entrySet().stream().forEach(entry2 -> {
+                        consumable.getEffects().put(String.valueOf(entry2.getKey()), (int) entry2.getValue());
+                    });
+                    itemMap.put(consumable.getItemNo(), consumable);
+                    break;
+                case GamePalConstants.ITEM_CHARACTER_JUNK:
+                    Junk junk = new Junk();
+                    junk.setItemNo(entry.getKey());
+                    junk.setName(((JSONObject) entry.getValue()).getString("name"));
+                    junk.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
+                    junk.setDescription(((JSONObject) entry.getValue()).getString("description"));
+                    JSONObject materials = ((JSONObject) entry.getValue()).getJSONObject("materials");
+                    materials.entrySet().stream().forEach(entry2 -> {
+                        junk.getMaterials().put(String.valueOf(entry2.getKey()), (int) entry2.getValue());
+                    });
+                    itemMap.put(junk.getItemNo(), junk);
+                    break;
+                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                case GamePalConstants.ITEM_CHARACTER_MATERIAL:
+                case GamePalConstants.ITEM_CHARACTER_NOTE:
+                case GamePalConstants.ITEM_CHARACTER_RECORDING:
+                    Item item = new Item();
+                    item.setItemNo(entry.getKey());
+                    item.setName(((JSONObject) entry.getValue()).getString("name"));
+                    item.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
+                    item.setDescription(((JSONObject) entry.getValue()).getString("description"));
+                    itemMap.put(item.getItemNo(), item);
+                    break;
+            }
+        });
     }
 }

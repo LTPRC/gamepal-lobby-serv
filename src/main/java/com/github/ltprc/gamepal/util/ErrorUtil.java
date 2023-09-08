@@ -23,5 +23,6 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1017 = new GamepalError("1017", "Unable to communicate between different worlds.");
     public static final GamepalError ERROR_1018 = new GamepalError("1018", "Already offline.");
     public static final GamepalError ERROR_1019 = new GamepalError("1019", "Already removed.");
+    public static final GamepalError ERROR_1020 = new GamepalError("1020", "Invalid item information.");
 
 }

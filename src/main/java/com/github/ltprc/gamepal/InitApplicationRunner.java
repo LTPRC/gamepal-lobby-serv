@@ -19,6 +19,7 @@ public class InitApplicationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String defaultWorldName = "DEFAULT";
+        worldService.loadItems();
         worldService.addWorld(defaultWorldName);
         logger.info("World " + defaultWorldName + " is added.");
         worldService.loadScenes();

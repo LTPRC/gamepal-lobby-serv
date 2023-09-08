@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.Message;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class WebSocketServiceImpl implements WebSocketService {
@@ -45,18 +47,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         world.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
-        communicate(userCode);
+        communicate(userCode, GamePalConstants.GAME_STATE_START);
     }
 
     @Override
     public void onClose(String userCode) {
         logger.info("断开连接成功");
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            logger.info(ErrorUtil.ERROR_1018);
-            return;
-        }
-//        userService.logoff(userCode,"", false);
     }
 
     @Override
@@ -66,8 +62,14 @@ public class WebSocketServiceImpl implements WebSocketService {
             logger.error(ErrorUtil.ERROR_1008);
             return;
         }
+        int gameState = jsonObject.getInteger("gameState");
+
+        // Usercode information
         String userCode = jsonObject.getString("userCode");
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return;
+        }
         // Update onlineMap
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         // Check functions
@@ -77,8 +79,35 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.getPlayerInfoMap().put(userCode,
                         functions.getObject("updatePlayerInfo", PlayerInfo.class));
             }
-            if (functions.containsKey("updatePlayerInfoByEntities")) {
-                playerService.updateplayerinfobyentities(userCode, functions.getJSONObject("updatePlayerInfoByEntities"));
+            if (functions.containsKey("updateplayerinfoCharacter")) {
+                playerService.updateplayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
+            }
+            if (functions.containsKey("useItems")) {
+                JSONArray useItems = functions.getJSONArray("useItems");
+                useItems.stream().forEach(useItem -> {
+                    String itemNo = ((JSONObject) useItem).getString("itemNo");
+                    int itemAmount = ((JSONObject) useItem).getInteger("itemAmount");
+                    playerService.useItem(userCode, itemNo, itemAmount);
+                });
+            }
+            if (functions.containsKey("getItems")) {
+                JSONArray getItems = functions.getJSONArray("getItems");
+                getItems.stream().forEach(getItem -> {
+                    String itemNo = ((JSONObject) getItem).getString("itemNo");
+                    int itemAmount = ((JSONObject) getItem).getInteger("itemAmount");
+                    playerService.getItem(userCode, itemNo, itemAmount);
+                });
+            }
+            if (functions.containsKey("getPreservedItems")) {
+                JSONArray getPreservedItems = functions.getJSONArray("getPreservedItems");
+                getPreservedItems.stream().forEach(getPreservedItem -> {
+                    String itemNo = ((JSONObject) getPreservedItem).getString("itemNo");
+                    int itemAmount = ((JSONObject) getPreservedItem).getInteger("itemAmount");
+                    playerService.getPreservedItem(userCode, itemNo, itemAmount);
+                });
+            }
+            if (functions.containsKey("updateMovingBlock")) {
+                playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
             }
             // Check incoming messages
             JSONArray messages = functions.getJSONArray("addMessages");
@@ -98,15 +127,19 @@ public class WebSocketServiceImpl implements WebSocketService {
             // Only create, not consume 23/09/04
             JSONArray drops = functions.getJSONArray("addDrops");
             drops.stream().forEach(obj -> {
-                WorldDrop drop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
+                WorldDrop worldDrop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
                 String id = UUID.randomUUID().toString();
-                drop.setId(id);
-                drop.setCode("3000");
-                drop.setType(GamePalConstants.BLOCK_TYPE_DROP);
+                worldDrop.setId(id);
+                worldDrop.setCode("3000");
+                worldDrop.setType(GamePalConstants.BLOCK_TYPE_DROP);
                 if (world.getBlockMap().containsKey(id)) {
                     logger.warn(ErrorUtil.ERROR_1013 + " id: " + id);
                 } else {
-                    world.getBlockMap().put(id, drop);
+                    playerService.getItem(userCode, worldDrop.getItemNo(), -1 * worldDrop.getAmount());
+                    Region region = worldService.getRegionMap().get(worldDrop.getRegionNo());
+                    Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
+                    scene.getBlocks().add(PlayerUtil.convertWorldBlock2Block(worldDrop));
+                    world.getBlockMap().put(id, worldDrop);
                 }
             });
             if (functions.containsKey("useDrop")) {
@@ -115,8 +148,15 @@ public class WebSocketServiceImpl implements WebSocketService {
                 String id = useDrop.getString("id");
                 if (!world.getBlockMap().containsKey(id)) {
                     logger.warn(ErrorUtil.ERROR_1012);
+                } else {
+                    WorldDrop worldDrop = (WorldDrop) world.getBlockMap().get(id);
+                    playerService.getItem(userCode, worldDrop.getItemNo(), worldDrop.getAmount());
+                    Region region = worldService.getRegionMap().get(worldDrop.getRegionNo());
+                    Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
+                    scene.setBlocks(scene.getBlocks().stream()
+                            .filter(block -> !id.equals(block.getId())).collect(Collectors.toList()));
+                    world.getBlockMap().remove(id);
                 }
-                world.getBlockMap().remove(id);
             }
             if (functions.containsKey("setRelation")) {
                 JSONObject setRelation = functions.getJSONObject("setRelation");
@@ -132,12 +172,21 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         }
         // Reply automatically
-        communicate(userCode);
+        communicate(userCode, gameState);
     }
 
     @Override
-    public void communicate(String userCode) {
+    public void communicate(String userCode, int gameState) {
         JSONObject rst = ContentUtil.generateRst();
+
+        // Static information
+        if (gameState == GamePalConstants.GAME_STATE_START) {
+            JSONObject itemsObj = new JSONObject();
+            worldService.getItemMap().forEach((key, value) -> itemsObj.put(key, value));
+            rst.put("items", itemsObj);
+        }
+
+        // Usercode information
         rst.put("userCode", userCode);
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -241,8 +290,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
                             rankingQueue.add(block);
         });
-        // Collect detected special blocks 23/09/05
-        // This way is to be deprecated 23/09/06
+        // Collect detected special blocks from blockMap (duplicated) 23/09/08
 //        Map<String, WorldBlock> blockMap = world.getBlockMap();
 //        blockMap.entrySet().stream()
 //                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,

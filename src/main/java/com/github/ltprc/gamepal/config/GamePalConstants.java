@@ -4,11 +4,18 @@ public class GamePalConstants {
 
     // Frontend constants
 
+
+    public static final int GAME_STATE_START = 0;
+    public static final int GAME_STATE_INITIALIZING = 1;
+    public static final int GAME_STATE_INITIALIZED = 2;
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
+    public static final int PLAYER_STATUS_DEAD = 2;
+    public static final int PLAYER_STATUS_INVINCIBLE = 3;
 
     public static final int SCOPE_GLOBAL = 0;
     public static final int SCOPE_INDIVIDUAL = 1;
+    public static final int SCOPE_SELF = 2;
 
     public static final int BLOCK_TYPE_GROUND = 0;
     public static final int BLOCK_TYPE_WALL = 1;
@@ -40,6 +47,14 @@ public class GamePalConstants {
     public static final int INTERACTION_ATTACK = 6;
     public static final int INTERACTION_FLIRT = 7;
     public static final int INTERACTION_SET = 8;
+
+    public static final char ITEM_CHARACTER_TOOL = 't';
+    public static final char ITEM_CHARACTER_OUTFIT = 'a';
+    public static final char ITEM_CHARACTER_CONSUMABLE = 'c';
+    public static final char ITEM_CHARACTER_MATERIAL = 'm';
+    public static final char ITEM_CHARACTER_JUNK = 'j';
+    public static final char ITEM_CHARACTER_NOTE = 'n';
+    public static final char ITEM_CHARACTER_RECORDING = 'r';
 
     // Backend constants
 

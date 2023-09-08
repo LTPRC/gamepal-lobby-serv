@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.PlayerInfo;
+import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -162,13 +162,13 @@ public class UserServiceImpl implements UserService {
         playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
         playerInfo.setAcceleration(BigDecimal.valueOf(0.01));
         playerInfo.setHpMax(1000);
-        playerInfo.setHp(playerInfo.getHpMax());
+        playerInfo.setHp(playerInfo.getHpMax() / 2);
         playerInfo.setVpMax(1000);
-        playerInfo.setVp(playerInfo.getVpMax());
+        playerInfo.setVp(playerInfo.getVpMax() / 2);
         playerInfo.setHungerMax(1000);
-        playerInfo.setHunger(playerInfo.getHungerMax());
+        playerInfo.setHunger(playerInfo.getHungerMax() / 2);
         playerInfo.setThirstMax(1000);
-        playerInfo.setThirst(playerInfo.getThirstMax());
+        playerInfo.setThirst(playerInfo.getThirstMax() / 2);
         playerInfo.setLevel(1);
         playerInfo.setExp(0);
         playerInfo.setExpMax(100);

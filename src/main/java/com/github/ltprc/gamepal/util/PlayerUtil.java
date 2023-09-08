@@ -2,7 +2,9 @@ package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
+import com.github.ltprc.gamepal.model.map.world.WorldTeleport;
 
 import java.math.BigDecimal;
 
@@ -182,6 +184,38 @@ public class PlayerUtil {
                 newBlock.setId(block.getId());
                 newBlock.setX(block.getX());
                 newBlock.setY(block.getY());
+                return newBlock;
+        }
+    }
+
+    public static Block convertWorldBlock2Block(WorldBlock worldBlock) {
+        switch (worldBlock.getType()) {
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                Drop newDrop = new Drop();
+                newDrop.setType(worldBlock.getType());
+                newDrop.setCode(worldBlock.getCode());
+                newDrop.setId(worldBlock.getId());
+                newDrop.setX(worldBlock.getCoordinate().getX());
+                newDrop.setY(worldBlock.getCoordinate().getY());
+                newDrop.setAmount(((WorldDrop) worldBlock).getAmount());
+                newDrop.setItemNo(((WorldDrop) worldBlock).getItemNo());
+                return newDrop;
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                Teleport newTeleport = new Teleport();
+                newTeleport.setType(worldBlock.getType());
+                newTeleport.setCode(worldBlock.getCode());
+                newTeleport.setId(worldBlock.getId());
+                newTeleport.setX(worldBlock.getCoordinate().getX());
+                newTeleport.setY(worldBlock.getCoordinate().getY());
+                newTeleport.setTo(((WorldTeleport) worldBlock).getTo());
+                return newTeleport;
+            default:
+                Block newBlock = new Block();
+                newBlock.setType(worldBlock.getType());
+                newBlock.setCode(worldBlock.getCode());
+                newBlock.setId(worldBlock.getId());
+                newBlock.setX(worldBlock.getCoordinate().getX());
+                newBlock.setY(worldBlock.getCoordinate().getY());
                 return newBlock;
         }
     }

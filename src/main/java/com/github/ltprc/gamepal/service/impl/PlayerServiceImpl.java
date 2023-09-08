@@ -2,11 +2,17 @@ package com.github.ltprc.gamepal.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.map.world.PlayerInfo;
+import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.item.Consumable;
+import com.github.ltprc.gamepal.model.item.Junk;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
@@ -18,6 +24,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,6 +43,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private WorldService worldService;
 
     @Override
     public ResponseEntity setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
@@ -74,10 +84,10 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity updateplayerinfobyentities(String userCode, JSONObject req) {
+    public ResponseEntity updateplayerinfoCharacter(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         if (!playerInfoMap.containsKey(userCode)) {
-            playerInfoMap.put(userCode, new PlayerInfo());
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         String firstName = req.getString("firstName");
@@ -128,6 +138,36 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public ResponseEntity updateMovingBlock(String userCode, JSONObject req) {
+        JSONObject rst = ContentUtil.generateRst();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Integer regionNo = req.getInteger("regionNo");
+        if (null != regionNo) {
+            playerInfo.setRegionNo(regionNo);
+        }
+        IntegerCoordinate sceneCoordinate = req.getObject("sceneCoordinate", IntegerCoordinate.class);
+        if (null != sceneCoordinate) {
+            playerInfo.setSceneCoordinate(sceneCoordinate);
+        }
+        Coordinate coordinate = req.getObject("coordinate", Coordinate.class);
+        if (null != coordinate) {
+            playerInfo.setCoordinate(coordinate);
+        }
+        Coordinate speed = req.getObject("speed", Coordinate.class);
+        if (null != speed) {
+            playerInfo.setSpeed(speed);
+        }
+        BigDecimal faceDirection = req.getObject("faceDirection", BigDecimal.class);
+        if (null != faceDirection) {
+            playerInfo.setFaceDirection(faceDirection);
+        }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
     public ResponseEntity getPlayerInfo(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -147,9 +187,36 @@ public class PlayerServiceImpl implements PlayerService {
         return playerInfoMap;
     }
 
+    private Message generateGetItemMessage(String userCode, String itemNo, int itemAmount) {
+        Message message = new Message();
+        message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
+        message.setScope(GamePalConstants.SCOPE_SELF);
+        message.setToUserCode(userCode);
+        if (itemAmount < 0) {
+            message.setContent("失去 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+        } else if (itemAmount > 0) {
+            message.setContent("获得 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+        }
+        return message;
+    }
+
+    private Message generateGetPreservedItemMessage(String userCode, String itemNo, int itemAmount) {
+        Message message = new Message();
+        message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
+        message.setScope(GamePalConstants.SCOPE_SELF);
+        message.setToUserCode(userCode);
+        if (itemAmount < 0) {
+            message.setContent("取出 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+        } else if (itemAmount > 0) {
+            message.setContent("存入 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+        }
+        return message;
+    }
+
     private Message generateRelationMessage(String userCode, String nextUserCode, boolean isFrom, int newRelation) {
         Message message = new Message();
-        message.setType(0);
+        message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
+        message.setScope(GamePalConstants.SCOPE_SELF);
         if (isFrom) {
             message.setToUserCode(userCode);
             message.setContent("你将对" + playerInfoMap.get(nextUserCode).getNickname() + "的关系调整为" + newRelation);
@@ -166,5 +233,141 @@ public class PlayerServiceImpl implements PlayerService {
             relationMap.put(userCode, new ConcurrentHashMap<String, Integer>());
         }
         return relationMap.get(userCode);
+    }
+
+    @Override
+    public ResponseEntity useItem(String userCode, String itemNo, int itemAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (!StringUtils.hasText(itemNo) || !playerInfo.getItems().containsKey(itemNo)
+                || playerInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
+        }
+        switch (itemNo.charAt(0)) {
+            case GamePalConstants.ITEM_CHARACTER_TOOL:
+                if (playerInfo.getTools().contains(itemNo)) {
+                    playerInfo.getTools().clear();
+                } else {
+                    playerInfo.getTools().clear();
+                    playerInfo.getTools().add(itemNo);
+                }
+                break;
+            case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                if (playerInfo.getOutfits().contains(itemNo)) {
+                    playerInfo.getOutfits().clear();
+                } else {
+                    playerInfo.getOutfits().clear();
+                    playerInfo.getOutfits().add(itemNo);
+                }
+                break;
+            case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
+                useConsumable(userCode, itemNo, itemAmount);
+                break;
+            case GamePalConstants.ITEM_CHARACTER_MATERIAL:
+                break;
+            case GamePalConstants.ITEM_CHARACTER_JUNK:
+                getItem(userCode, itemNo, -1);
+                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet().stream().forEach(entry -> {
+                    getItem(userCode, entry.getKey(), entry.getValue());
+                });
+                break;
+            case GamePalConstants.ITEM_CHARACTER_NOTE:
+                break;
+            case GamePalConstants.ITEM_CHARACTER_RECORDING:
+                break;
+        }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity getItem(String userCode, String itemNo, int itemAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldItemAmount = playerInfo.getItems().getOrDefault(itemNo, 0);
+        playerInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+        if (playerInfo.getItems().get(itemNo) == 0) {
+            if (playerInfo.getTools().contains(itemNo)){
+                playerInfo.getTools().clear();
+            }
+            if (playerInfo.getOutfits().contains(itemNo)){
+                playerInfo.getOutfits().clear();
+            }
+        }
+        messageService.sendMessage(userCode, generateGetItemMessage(userCode, itemNo, itemAmount));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity getPreservedItem(String userCode, String itemNo, int itemAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldItemAmount = playerInfo.getPreservedItems().getOrDefault(itemNo, 0);
+        playerInfo.getPreservedItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+        messageService.sendMessage(userCode, generateGetPreservedItemMessage(userCode, itemNo, itemAmount));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity changeHp(String userCode, int value, boolean isAbsolute) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldHp = playerInfo.getHp();
+        int newHp = isAbsolute ? value : oldHp + value;
+        playerInfoMap.get(userCode).setHp(Math.max(0, Math.min(newHp, playerInfo.getHpMax())));
+        // TODO Check death
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity changeVp(String userCode, int value, boolean isAbsolute) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldVp = playerInfo.getVp();
+        int newVp = isAbsolute ? value : oldVp + value;
+        playerInfoMap.get(userCode).setVp(Math.max(0, Math.min(newVp, playerInfo.getVpMax())));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity changeHunger(String userCode, int value, boolean isAbsolute) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldHunger = playerInfo.getHunger();
+        int newHunger = isAbsolute ? value : oldHunger + value;
+        playerInfoMap.get(userCode).setHunger(Math.max(0, Math.min(newHunger, playerInfo.getHungerMax())));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity changeThirst(String userCode, int value, boolean isAbsolute) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldThirst = playerInfo.getThirst();
+        int newThirst = isAbsolute ? value : oldThirst + value;
+        playerInfoMap.get(userCode).setThirst(Math.max(0, Math.min(newThirst, playerInfo.getThirstMax())));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    private ResponseEntity useConsumable(String userCode, String itemNo, int itemAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet().stream()
+                .forEach(entry -> {
+                    switch (entry.getKey()) {
+                        case "hp":
+                            changeHp(userCode, entry.getValue(), false);
+                            break;
+                        case "vp":
+                            changeVp(userCode, entry.getValue(), false);
+                            break;
+                        case "hunger":
+                            changeHunger(userCode, entry.getValue(), false);
+                            break;
+                        case "thirst":
+                            changeThirst(userCode, entry.getValue(), false);
+                            break;
+                    }
+                });
+        getItem(userCode, itemNo, -1 * itemAmount);
+        return ResponseEntity.ok().body(rst.toString());
     }
 }
