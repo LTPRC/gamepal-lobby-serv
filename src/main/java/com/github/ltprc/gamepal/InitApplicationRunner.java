@@ -20,9 +20,10 @@ public class InitApplicationRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         String defaultWorldName = "DEFAULT";
         worldService.loadItems();
-        worldService.addWorld(defaultWorldName);
-        logger.info("World " + defaultWorldName + " is added.");
+        logger.info("Item config is loaded.");
         worldService.loadScenes();
         logger.info("World map is loaded.");
+        worldService.addWorld(defaultWorldName);
+        logger.info("World " + defaultWorldName + " is added.");
     }
 }

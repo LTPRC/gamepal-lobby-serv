@@ -199,19 +199,6 @@ public class PlayerServiceImpl implements PlayerService {
         return playerInfoMap;
     }
 
-    private Message generateGetItemMessage(String userCode, String itemNo, int itemAmount) {
-        Message message = new Message();
-        message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
-        message.setScope(GamePalConstants.SCOPE_SELF);
-        message.setToUserCode(userCode);
-        if (itemAmount < 0) {
-            message.setContent("失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
-        } else if (itemAmount > 0) {
-            message.setContent("获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
-        }
-        return message;
-    }
-
     private void generateNotificationMessage(String userCode, String content) {
         Message message = new Message();
         message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
@@ -297,7 +284,13 @@ public class PlayerServiceImpl implements PlayerService {
         BigDecimal capacity = playerInfo.getCapacity();
         playerInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
                 .multiply(BigDecimal.valueOf(itemAmount))));
-        messageService.sendMessage(userCode, generateGetItemMessage(userCode, itemNo, itemAmount));
+        if (itemAmount < 0) {
+            generateNotificationMessage(userCode,
+                    "失去 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+        } else if (itemAmount > 0) {
+            generateNotificationMessage(userCode,
+                    "获得 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+        }
         flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
         flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
@@ -389,10 +382,10 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity interactBlocks(String userCode, int interactionCode, String id) {
         JSONObject rst = ContentUtil.generateRst();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        WorldBlock block = world.getBlockMap().get(id);
         switch (interactionCode) {
             case GamePalConstants.INTERACTION_USE:
-                GameWorld world = userService.getWorldByUserCode(userCode);
-                WorldBlock block = world.getBlockMap().get(id);
                 switch (block.getType()) {
                     case GamePalConstants.BLOCK_TYPE_TOILET:
                         generateNotificationMessage(userCode, "你方便了一下。");
