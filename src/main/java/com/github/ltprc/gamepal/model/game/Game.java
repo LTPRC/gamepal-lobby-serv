@@ -13,6 +13,8 @@ public class Game {
     // 2: in-game
     // 3: end
     private int gameStatus;
+    private int roundNumber;
+    private int playerNumber;
     private int minPlayerNum;
     private int maxPlayerNum;
     private Map<Integer, String> userCodeMap = new ConcurrentHashMap<>();

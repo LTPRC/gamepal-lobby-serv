@@ -286,10 +286,10 @@ public class PlayerServiceImpl implements PlayerService {
                 .multiply(BigDecimal.valueOf(itemAmount))));
         if (itemAmount < 0) {
             generateNotificationMessage(userCode,
-                    "失去 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+                    "失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
         } else if (itemAmount > 0) {
             generateNotificationMessage(userCode,
-                    "获得 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+                    "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
         flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
         flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
@@ -304,10 +304,10 @@ public class PlayerServiceImpl implements PlayerService {
         playerInfo.getPreservedItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (itemAmount < 0) {
             generateNotificationMessage(userCode,
-                    "取出 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+                    "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
         } else if (itemAmount > 0) {
             generateNotificationMessage(userCode,
-                    "存入 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+                    "存入 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
         return ResponseEntity.ok().body(rst.toString());
     }
