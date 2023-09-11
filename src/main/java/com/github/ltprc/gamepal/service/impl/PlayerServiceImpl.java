@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.service.impl;
 
+import cn.hutool.core.collection.ConcurrentHashSet;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -37,6 +39,7 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
+    private Set<String> flagSet = new ConcurrentHashSet<>();
 
     @Autowired
     private UserService userService;
@@ -236,6 +239,11 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public Set<String> getFlagSet() {
+        return flagSet;
+    }
+
+    @Override
     public ResponseEntity useItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -276,6 +284,8 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.ITEM_CHARACTER_RECORDING:
                 break;
         }
+        flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -294,6 +304,8 @@ public class PlayerServiceImpl implements PlayerService {
             }
         }
         messageService.sendMessage(userCode, generateGetItemMessage(userCode, itemNo, itemAmount));
+        flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -350,23 +362,25 @@ public class PlayerServiceImpl implements PlayerService {
 
     private ResponseEntity useConsumable(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
-        ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet().stream()
-                .forEach(entry -> {
-                    switch (entry.getKey()) {
-                        case "hp":
-                            changeHp(userCode, entry.getValue(), false);
-                            break;
-                        case "vp":
-                            changeVp(userCode, entry.getValue(), false);
-                            break;
-                        case "hunger":
-                            changeHunger(userCode, entry.getValue(), false);
-                            break;
-                        case "thirst":
-                            changeThirst(userCode, entry.getValue(), false);
-                            break;
-                    }
-                });
+        for (int i = 0; i < itemAmount; i++) {
+            ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet().stream()
+                    .forEach(entry -> {
+                        switch (entry.getKey()) {
+                            case "hp":
+                                changeHp(userCode, entry.getValue(), false);
+                                break;
+                            case "vp":
+                                changeVp(userCode, entry.getValue(), false);
+                                break;
+                            case "hunger":
+                                changeHunger(userCode, entry.getValue(), false);
+                                break;
+                            case "thirst":
+                                changeThirst(userCode, entry.getValue(), false);
+                                break;
+                        }
+                    });
+        }
         getItem(userCode, itemNo, -1 * itemAmount);
         return ResponseEntity.ok().body(rst.toString());
     }

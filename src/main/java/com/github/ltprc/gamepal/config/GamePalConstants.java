@@ -4,7 +4,6 @@ public class GamePalConstants {
 
     // Frontend constants
 
-
     public static final int GAME_STATE_START = 0;
     public static final int GAME_STATE_INITIALIZING = 1;
     public static final int GAME_STATE_INITIALIZED = 2;
@@ -55,6 +54,9 @@ public class GamePalConstants {
     public static final char ITEM_CHARACTER_JUNK = 'j';
     public static final char ITEM_CHARACTER_NOTE = 'n';
     public static final char ITEM_CHARACTER_RECORDING = 'r';
+
+    public static final String FLAG_UPDATE_ITEMS = "updateItems";
+    public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";
 
     // Backend constants
 

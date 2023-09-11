@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.Set;
 
 public interface PlayerService {
 
@@ -20,6 +21,8 @@ public interface PlayerService {
     Map<String, PlayerInfo> getPlayerInfoMap();
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);
+
+    Set<String> getFlagSet();
 
     ResponseEntity useItem(String userCode, String itemNo, int itemAmount);
 

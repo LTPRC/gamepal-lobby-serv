@@ -184,6 +184,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             JSONObject itemsObj = new JSONObject();
             worldService.getItemMap().forEach((key, value) -> itemsObj.put(key, value));
             rst.put("items", itemsObj);
+            playerService.getFlagSet().add(GamePalConstants.FLAG_UPDATE_ITEMS);
+            playerService.getFlagSet().add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         }
 
         // Usercode information
@@ -207,6 +209,12 @@ public class WebSocketServiceImpl implements WebSocketService {
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }
+
+        // Return flags
+        JSONArray flags = new JSONArray();
+        playerService.getFlagSet().stream().forEach(flag -> flags.add(flag));
+        rst.put("flags", flags);
+        playerService.getFlagSet().clear();
 
         // Return playerInfos
         Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
