@@ -289,8 +289,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Collect detected playerInfos
         // Player block is included 23/09/01
         playerInfoMap.entrySet().stream()
-                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
-                        entry.getValue().getSceneCoordinate()) != -1)
+                .filter(entry -> {
+                    IntegerCoordinate integerCoordinate
+                            = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
+                    return Math.abs(integerCoordinate.getX()) <= 1 && Math.abs(integerCoordinate.getY()) <= 1;
+                })
                 .forEach(entry -> {
                     Block block = new Block();
                     block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);

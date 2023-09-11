@@ -35,7 +35,11 @@ public class PlayerUtil {
         }
     }
 
-    public static int getCoordinateRelation(IntegerCoordinate from, IntegerCoordinate to) {
+    public static IntegerCoordinate getCoordinateRelation(IntegerCoordinate from, IntegerCoordinate to) {
+        return new IntegerCoordinate(to.getX() - from.getX(), to.getY() - from.getY());
+    }
+
+    public static int getCoordinateRelationOld(IntegerCoordinate from, IntegerCoordinate to) {
         if (from.getY() - to.getY() == 1) {
             if (from.getX() - to.getX() == 1) {
                 return 0;
@@ -64,6 +68,12 @@ public class PlayerUtil {
         return -1;
     }
 
+    public static void adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, BigDecimal height, BigDecimal width) {
+        // Pos-y is south, neg-y is north
+        coordinate.setX(coordinate.getX().add(width.multiply(BigDecimal.valueOf(integerCoordinate.getX()))));
+        coordinate.setY(coordinate.getY().add(width.multiply(BigDecimal.valueOf(integerCoordinate.getY()))));
+    }
+
     /**
      * Only support 3*3 matrix
      * @param coordinate
@@ -71,7 +81,7 @@ public class PlayerUtil {
      * @param height
      * @param width
      */
-    public static void adjustCoordinate(Coordinate coordinate, int relationValue, BigDecimal height, BigDecimal width) {
+    public static void adjustCoordinateOld(Coordinate coordinate, int relationValue, BigDecimal height, BigDecimal width) {
         // Pos-y is south, neg-y is north
         switch (relationValue) {
             case 0:

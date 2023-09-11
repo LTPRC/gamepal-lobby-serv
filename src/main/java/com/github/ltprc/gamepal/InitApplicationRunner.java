@@ -17,7 +17,7 @@ public class InitApplicationRunner implements ApplicationRunner {
     private WorldService worldService;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         String defaultWorldName = "DEFAULT";
         worldService.loadItems();
         logger.info("Item config is loaded.");
