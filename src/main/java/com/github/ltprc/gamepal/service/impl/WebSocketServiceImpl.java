@@ -124,7 +124,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                     messageService.getMessageMap().get(msg.getToUserCode()).add(msg);
                 }
             }
-            // Only create, not consume 23/09/04
             JSONArray drops = functions.getJSONArray("addDrops");
             drops.stream().forEach(obj -> {
                 WorldDrop worldDrop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
@@ -143,7 +142,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                 }
             });
             if (functions.containsKey("useDrop")) {
-                // Only consume, not obtain 23/09/04
                 JSONObject useDrop = functions.getJSONObject("useDrop");
                 String id = useDrop.getString("id");
                 if (!world.getBlockMap().containsKey(id)) {
@@ -169,6 +167,14 @@ public class WebSocketServiceImpl implements WebSocketService {
                 if (setRelationRst.getStatusCode().isError()) {
                     logger.warn(setRelationRst);
                 }
+            }
+            if (functions.containsKey("interactBlocks")) {
+                JSONArray interactBlocks = functions.getJSONArray("interactBlocks");
+                interactBlocks.stream().forEach(interactBlock -> {
+                    int interactionCode = ((JSONObject) interactBlock).getInteger("interactionCode");
+                    String id = ((JSONObject) interactBlock).getString("id");
+                    playerService.interactBlocks(userCode, interactionCode, id);
+                });
             }
         }
         // Reply automatically

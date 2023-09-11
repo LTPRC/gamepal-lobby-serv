@@ -37,4 +37,6 @@ public interface PlayerService {
     ResponseEntity changeHunger(String userCode, int value, boolean isAbsolute);
 
     ResponseEntity changeThirst(String userCode, int value, boolean isAbsolute);
+
+    ResponseEntity interactBlocks(String userCode, int interactionCode, String id);
 }

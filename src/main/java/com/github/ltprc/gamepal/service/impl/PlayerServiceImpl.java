@@ -10,6 +10,8 @@ import com.github.ltprc.gamepal.model.item.Consumable;
 import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -77,9 +79,16 @@ public class PlayerServiceImpl implements PlayerService {
             newRelation += relationMap.get(userCode).get(nextUserCode);
         }
         newRelation = Math.min(RELATION_MAX, Math.max(RELATION_MIN, newRelation));
-        relationMap.get(userCode).put(nextUserCode, newRelation);
-        relationMap.get(nextUserCode).put(userCode, newRelation);
-        messageService.sendMessage(userCode, generateRelationMessage(userCode, nextUserCode, true, newRelation));
+        if (newRelation != relationMap.get(userCode).get(nextUserCode)) {
+            generateNotificationMessage(userCode, "你将对" + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
+                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
+                    + "为" + newRelation);
+            generateNotificationMessage(nextUserCode, playerInfoMap.get(userCode).getNickname() + "将对你的关系"
+                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
+                    + "为" + newRelation);
+            relationMap.get(userCode).put(nextUserCode, newRelation);
+            relationMap.get(nextUserCode).put(userCode, newRelation);
+        }
         rst.put("userCode", userCode);
         rst.put("nextUserCode", nextUserCode);
         rst.put("relation", newRelation);
@@ -196,38 +205,20 @@ public class PlayerServiceImpl implements PlayerService {
         message.setScope(GamePalConstants.SCOPE_SELF);
         message.setToUserCode(userCode);
         if (itemAmount < 0) {
-            message.setContent("失去 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+            message.setContent("失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
         } else if (itemAmount > 0) {
-            message.setContent("获得 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+            message.setContent("获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
         return message;
     }
 
-    private Message generateGetPreservedItemMessage(String userCode, String itemNo, int itemAmount) {
+    private void generateNotificationMessage(String userCode, String content) {
         Message message = new Message();
         message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
         message.setScope(GamePalConstants.SCOPE_SELF);
         message.setToUserCode(userCode);
-        if (itemAmount < 0) {
-            message.setContent("取出 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
-        } else if (itemAmount > 0) {
-            message.setContent("存入 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
-        }
-        return message;
-    }
-
-    private Message generateRelationMessage(String userCode, String nextUserCode, boolean isFrom, int newRelation) {
-        Message message = new Message();
-        message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
-        message.setScope(GamePalConstants.SCOPE_SELF);
-        if (isFrom) {
-            message.setToUserCode(userCode);
-            message.setContent("你将对" + playerInfoMap.get(nextUserCode).getNickname() + "的关系调整为" + newRelation);
-        } else {
-            message.setToUserCode(nextUserCode);
-            message.setContent(playerInfoMap.get(nextUserCode).getNickname() + "将对你的关系调整为" + newRelation);
-        }
-        return message;
+        message.setContent(content);
+        messageService.sendMessage(userCode, message);
     }
 
     @Override
@@ -303,6 +294,9 @@ public class PlayerServiceImpl implements PlayerService {
                 playerInfo.getOutfits().clear();
             }
         }
+        BigDecimal capacity = playerInfo.getCapacity();
+        playerInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
+                .multiply(BigDecimal.valueOf(itemAmount))));
         messageService.sendMessage(userCode, generateGetItemMessage(userCode, itemNo, itemAmount));
         flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
         flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
@@ -315,7 +309,13 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldItemAmount = playerInfo.getPreservedItems().getOrDefault(itemNo, 0);
         playerInfo.getPreservedItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        messageService.sendMessage(userCode, generateGetPreservedItemMessage(userCode, itemNo, itemAmount));
+        if (itemAmount < 0) {
+            generateNotificationMessage(userCode,
+                    "取出 " + worldService.getItemMap().get(itemNo).getName() + " * " + (-1) * itemAmount);
+        } else if (itemAmount > 0) {
+            generateNotificationMessage(userCode,
+                    "存入 " + worldService.getItemMap().get(itemNo).getName() + " * " + itemAmount);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -382,6 +382,57 @@ public class PlayerServiceImpl implements PlayerService {
                     });
         }
         getItem(userCode, itemNo, -1 * itemAmount);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity interactBlocks(String userCode, int interactionCode, String id) {
+        JSONObject rst = ContentUtil.generateRst();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        switch (interactionCode) {
+            case GamePalConstants.INTERACTION_USE:
+                GameWorld world = userService.getWorldByUserCode(userCode);
+                WorldBlock block = world.getBlockMap().get(id);
+                switch (block.getType()) {
+                    case GamePalConstants.BLOCK_TYPE_TOILET:
+                        generateNotificationMessage(userCode, "你方便了一下。");
+                        break;
+                    case GamePalConstants.BLOCK_TYPE_WORKSHOP:
+                        generateNotificationMessage(userCode, "你对于如何使用一无所知。");
+                        break;
+                    case GamePalConstants.BLOCK_TYPE_GAME:
+                        generateNotificationMessage(userCode, "你加入了桌游局。");
+                        break;
+                    case GamePalConstants.BLOCK_TYPE_COOKER:
+                        generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");
+                        break;
+                    case GamePalConstants.BLOCK_TYPE_SINK:
+                        generateNotificationMessage(userCode, "你清洗了一下双手。");
+                        break;
+                }
+                break;
+            case GamePalConstants.INTERACTION_EXCHANGE:
+                break;
+            case GamePalConstants.INTERACTION_SLEEP:
+                playerInfo.setVp(playerInfo.getVpMax());
+                generateNotificationMessage(userCode, "你打了一个盹。");
+                break;
+            case GamePalConstants.INTERACTION_DRINK:
+                playerInfo.setThirst(playerInfo.getThirstMax());
+                generateNotificationMessage(userCode, "你痛饮了起来。");
+                break;
+            case GamePalConstants.INTERACTION_DECOMPOSE:
+                break;
+            case GamePalConstants.INTERACTION_TALK:
+                break;
+            case GamePalConstants.INTERACTION_ATTACK:
+                break;
+            case GamePalConstants.INTERACTION_FLIRT:
+                break;
+            case GamePalConstants.INTERACTION_SET:
+                generateNotificationMessage(userCode, "你捯饬了起来。");
+                break;
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 }

@@ -173,7 +173,7 @@ public class UserServiceImpl implements UserService {
         playerInfo.setExp(0);
         playerInfo.setExpMax(100);
         playerInfo.setMoney(1);
-        playerInfo.setCapacity(new BigDecimal(100));
+        playerInfo.setCapacity(new BigDecimal(0));
         playerInfo.setCapacityMax(new BigDecimal(500));
     }
 
