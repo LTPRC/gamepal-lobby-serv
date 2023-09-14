@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util.lv;
 
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.game.Cash;
 import com.github.ltprc.gamepal.model.game.Player;
 import com.github.ltprc.gamepal.model.game.lv.Casino;
@@ -16,8 +17,12 @@ public class LasVegasGameUtil {
     private static final Log logger = LogFactory.getLog(LasVegasGameUtil.class);
     public static LasVegasGame getInstance() {
         LasVegasGame lasVegasGame = new LasVegasGame();
-        lasVegasGame.setUserCode(UUID.randomUUID().toString());
-        lasVegasGame.setGameStatus(0);
+        lasVegasGame.setId(UUID.randomUUID().toString());
+        lasVegasGame.setGameType(GamePalConstants.GAME_TYPE_LAS_VEGAS);
+        lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_START);
+        lasVegasGame.setGameNumber(0);
+        lasVegasGame.setRoundNumber(0);
+        lasVegasGame.setPlayerNumber(0);
         lasVegasGame.setMinPlayerNum(3);
         lasVegasGame.setMaxPlayerNum(5);
         Map<Integer, Casino> casinoMap = lasVegasGame.getCasinoMap();
@@ -45,17 +50,17 @@ public class LasVegasGameUtil {
         return lasVegasGame;
     }
 
-    public static void initiateGame(LasVegasGame lasVegasGame, List<String> userCodes) {
-        if (lasVegasGame.getGameStatus() != 1) {
+    public static void initiateGame(LasVegasGame lasVegasGame, List<String> ids) {
+        if (lasVegasGame.getGameStatus() != GamePalConstants.GAME_STATUS_SEEKING_GAME) {
             logger.warn(ErrorUtil.ERROR_1014);
         }
         Map<Integer, Player> playerMap = lasVegasGame.getPlayerMap();
-        for (int i = 0; i < userCodes.size(); i++) {
+        for (int i = 0; i < ids.size(); i++) {
             LasVegasPlayer lasVegasPlayer = new LasVegasPlayer();
-            lasVegasPlayer.setUserCode(userCodes.get(i));
+            lasVegasPlayer.setId(ids.get(i));
             lasVegasPlayer.setDiceNum(8);
             playerMap.put(i, lasVegasPlayer);
         }
-        lasVegasGame.setGameStatus(2);
+        lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_RUNNING);
     }
 }

@@ -12,6 +12,10 @@ public class GamePalConstants {
     public static final int PLAYER_STATUS_DEAD = 2;
     public static final int PLAYER_STATUS_INVINCIBLE = 3;
 
+    public static final int MESSAGE_TYPE_PRINTED = 1;
+    public static final int MESSAGE_TYPE_VOICE = 2;
+    public static final int MESSAGE_TYPE_TERMINAL = 3;
+
     public static final int SCOPE_GLOBAL = 0;
     public static final int SCOPE_INDIVIDUAL = 1;
     public static final int SCOPE_SELF = 2;
@@ -61,9 +65,14 @@ public class GamePalConstants {
     // Backend constants
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;
-    public static final int MESSAGE_TYPE_PRINTED = 1;
-    public static final int MESSAGE_TYPE_VOICE = 2;
     public static final int LAYER_BOTTOM = 1;
     public static final int LAYER_CENTER = 2;
     public static final int LAYER_TOP = 3;
+
+    public static final int GAME_TYPE_LAS_VEGAS = 1;
+    public static final int GAME_STATUS_END = -1;
+    public static final int GAME_STATUS_START = 0;
+    public static final int GAME_STATUS_SEEKING_GAME = 1;
+    public static final int GAME_STATUS_WAITING_FOR_PLAYERS = 2;
+    public static final int GAME_STATUS_RUNNING = 3;
 }

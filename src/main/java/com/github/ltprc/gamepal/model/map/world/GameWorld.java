@@ -1,8 +1,10 @@
 package com.github.ltprc.gamepal.model.map.world;
 
+import com.github.ltprc.gamepal.model.game.Game;
 import lombok.Data;
 
 import javax.websocket.Session;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -12,4 +14,5 @@ public class GameWorld {
     private Map<String, String> tokenMap; // userCode, token
     private Map<String, Long> onlineMap; // userCode, timestamp
     private Map<String, WorldBlock> blockMap; // code, WorldBlock
+    private Map<Integer, Game> gameMap; // gameNo, game
 }

@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.terminal.Terminal;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,8 @@ public interface PlayerService {
     Map<String, Integer> getRelationMapByUserCode(String userCode);
 
     Set<String> getFlagSet();
+
+    Map<String, Terminal> getTerminalMap();
 
     ResponseEntity useItem(String userCode, String itemNo, int itemAmount);
 

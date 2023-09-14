@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.terminal.Terminal;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.Message;
@@ -117,7 +118,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     messageService.getMessageMap().entrySet().stream()
                             .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
                             .forEach(entry -> entry.getValue().add(msg));
-                } else {
+                } else if (GamePalConstants.SCOPE_INDIVIDUAL == msg.getScope()) {
                     if (!messageService.getMessageMap().containsKey(msg.getToUserCode())) {
                         messageService.getMessageMap().put(msg.getToUserCode(), new LinkedList<>());
                     }
@@ -175,6 +176,18 @@ public class WebSocketServiceImpl implements WebSocketService {
                     String id = ((JSONObject) interactBlock).getString("id");
                     playerService.interactBlocks(userCode, interactionCode, id);
                 });
+            }
+            if (functions.containsKey("terminalInputs")) {
+                JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
+                for (Object terminalInput : terminalInputs) {
+                    String id = ((JSONObject) terminalInput).getString("id");
+                    Terminal terminal = playerService.getTerminalMap().get(id);
+                    if (null == terminal) {
+                        logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
+                    } else {
+                        terminal.input(((JSONObject) terminalInput).getString("content"));
+                    }
+                }
             }
         }
         // Reply automatically
@@ -234,6 +247,18 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
         rst.put("relations", relations);
+        JSONArray terminalOutputs = new JSONArray();
+        playerService.getTerminalMap().entrySet().stream()
+                .filter(entry -> userCode.equals(entry.getValue().getUserCode()))
+                .forEach(entry -> {
+                    entry.getValue().flushOutput().stream().forEach(output -> {
+                        JSONObject terminalOutput = new JSONObject();
+                        terminalOutput.put("content", output);
+                        terminalOutputs.add(terminalOutput);
+                    });
+                    terminalOutputs.add(entry.getValue().returnObject());
+                });
+        rst.put("terminalOutputs", terminalOutputs);
 
         // Return region
         Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());

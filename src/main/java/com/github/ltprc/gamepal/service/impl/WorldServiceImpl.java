@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.Consumable;
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Junk;
@@ -13,6 +14,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.lv.LasVegasGameUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +85,9 @@ public class WorldServiceImpl implements WorldService {
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
         world.setOnlineMap(new ConcurrentHashMap<>()); // userCode, timestamp
         world.setBlockMap(new ConcurrentSkipListMap<>());
+        world.setGameMap(new ConcurrentHashMap<>());
         loadBlocks(world);
+        initiateGame(world);
     }
 
     @Override
@@ -229,128 +233,6 @@ public class WorldServiceImpl implements WorldService {
                 });
             });
         });
-
-
-//        WorldBlock block;
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(1)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_BED);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3007");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(1)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_TOILET);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3008");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_DRESSER);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3010");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(1)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_WORKSHOP);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3009");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(1), BigDecimal.valueOf(4)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_GAME);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3021");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(4)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_STORAGE);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3001");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(4)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_COOKER);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3004");
-//        world.getBlockMap().put(block.getId(), block);
-//        block = new WorldBlock();
-//        block.setRegionNo(1);
-//        block.setSceneCoordinate(new IntegerCoordinate(-1, 0));
-//        block.setCoordinate(new Coordinate(BigDecimal.valueOf(7), BigDecimal.valueOf(4)));
-//        block.setType(GamePalConstants.BLOCK_TYPE_SINK);
-//        block.setId(UUID.randomUUID().toString());
-//        block.setCode("3005");
-//        world.getBlockMap().put(block.getId(), block);
-//
-//        WorldTeleport worldTeleport;
-//        WorldCoordinate to;
-//        worldTeleport = new WorldTeleport();
-//        worldTeleport.setRegionNo(1);
-//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 0));
-//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(4), BigDecimal.valueOf(1)));
-//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-//        worldTeleport.setId(UUID.randomUUID().toString());
-//        worldTeleport.setCode("2212");
-//        to = new WorldCoordinate();
-//        to.setRegionNo(worldTeleport.getRegionNo());
-//        to.setSceneCoordinate(new IntegerCoordinate(0, 1));
-//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(6), BigDecimal.valueOf(0.5)));
-//        worldTeleport.setTo(to);
-//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
-//        worldTeleport = new WorldTeleport();
-//        worldTeleport.setRegionNo(1);
-//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 0));
-//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
-//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-//        worldTeleport.setId(UUID.randomUUID().toString());
-//        worldTeleport.setCode("2204");
-//        to = new WorldCoordinate();
-//        to.setRegionNo(worldTeleport.getRegionNo());
-//        to.setSceneCoordinate(new IntegerCoordinate(0, -1));
-//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
-//        worldTeleport.setTo(to);
-//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
-//        worldTeleport = new WorldTeleport();
-//        worldTeleport.setRegionNo(1);
-//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, -1));
-//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(4), BigDecimal.valueOf(1)));
-//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-//        worldTeleport.setId(UUID.randomUUID().toString());
-//        worldTeleport.setCode("2212");
-//        to = new WorldCoordinate();
-//        to.setRegionNo(worldTeleport.getRegionNo());
-//        to.setSceneCoordinate(new IntegerCoordinate(0, 0));
-//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(6), BigDecimal.valueOf(0.5)));
-//        worldTeleport.setTo(to);
-//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
-//        worldTeleport = new WorldTeleport();
-//        worldTeleport.setRegionNo(1);
-//        worldTeleport.setSceneCoordinate(new IntegerCoordinate(0, 1));
-//        worldTeleport.setCoordinate(new Coordinate(BigDecimal.valueOf(5), BigDecimal.valueOf(1)));
-//        worldTeleport.setType(GamePalConstants.BLOCK_TYPE_TELEPORT);
-//        worldTeleport.setId(UUID.randomUUID().toString());
-//        worldTeleport.setCode("2204");
-//        to = new WorldCoordinate();
-//        to.setRegionNo(worldTeleport.getRegionNo());
-//        to.setSceneCoordinate(new IntegerCoordinate(0, 0));
-//        to.setCoordinate(new Coordinate(BigDecimal.valueOf(3), BigDecimal.valueOf(0.5)));
-//        worldTeleport.setTo(to);
-//        world.getBlockMap().put(worldTeleport.getId(), worldTeleport);
     }
 
     @Override
@@ -420,5 +302,16 @@ public class WorldServiceImpl implements WorldService {
                     break;
             }
         });
+    }
+
+    @Override
+    public void initiateGame(GameWorld world) {
+        Game game = LasVegasGameUtil.getInstance();
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            if (!world.getGameMap().containsKey(i)) {
+                world.getGameMap().put(i, game);
+                break;
+            }
+        }
     }
 }

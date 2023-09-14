@@ -24,4 +24,6 @@ public interface WorldService {
     void loadBlocks(GameWorld world);
 
     void loadItems();
+
+    void initiateGame(GameWorld world);
 }

@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -64,5 +65,10 @@ public class ContentUtil {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^-?\\d+$");
+        return pattern.matcher(str).matches();
     }
 }

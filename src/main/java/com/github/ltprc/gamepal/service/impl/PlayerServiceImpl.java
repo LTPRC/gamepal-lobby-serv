@@ -12,10 +12,9 @@ import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.service.MessageService;
-import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.service.WorldService;
+import com.github.ltprc.gamepal.model.terminal.GameTerminal;
+import com.github.ltprc.gamepal.model.terminal.Terminal;
+import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
@@ -28,6 +27,7 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +42,7 @@ public class PlayerServiceImpl implements PlayerService {
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
     private Set<String> flagSet = new ConcurrentHashSet<>();
+    private Map<String, Terminal> terminalMap = new ConcurrentHashMap<>(); // interactionId, terminal
 
     @Autowired
     private UserService userService;
@@ -222,6 +223,11 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public Map<String, Terminal> getTerminalMap() {
+        return terminalMap;
+    }
+
+    @Override
     public ResponseEntity useItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -394,7 +400,16 @@ public class PlayerServiceImpl implements PlayerService {
                         generateNotificationMessage(userCode, "你对于如何使用一无所知。");
                         break;
                     case GamePalConstants.BLOCK_TYPE_GAME:
-                        generateNotificationMessage(userCode, "你加入了桌游局。");
+                        generateNotificationMessage(userCode, "你开启了桌游。");
+                        if (!terminalMap.containsKey(id)) {
+                            GameTerminal gameTerminal = new GameTerminal(world);
+                            gameTerminal.setId(id);
+                            gameTerminal.setUserCode(userCode);
+                            gameTerminal.setStatus(GamePalConstants.GAME_STATUS_START);
+                            gameTerminal.setOutputs(new ArrayList<>());
+                            terminalMap.put(id, gameTerminal);
+                        }
+                        terminalMap.get(id).input("start");
                         break;
                     case GamePalConstants.BLOCK_TYPE_COOKER:
                         generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");

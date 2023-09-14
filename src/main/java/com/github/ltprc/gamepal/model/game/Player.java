@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class Player {
-    private String userCode;
+    private String id; // Not userCode, but terminal id 23/09/14
 }
