@@ -261,9 +261,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                         terminalOutputs.add(terminalOutput);
                     });
 //                    JSONObject gameObj = entry.getValue().returnObject();
-//                    terminalOutputs.add(gameObj);
+//                    terminalOutputs.add(((GameTerminal) entry.getValue()).getGameOutput());
                 });
-        rst.put("terminalOutputs", terminalOutputs);
+        if (!terminalOutputs.isEmpty()) {
+            rst.put("terminalOutputs", terminalOutputs);
+        }
 
         // Return region
         Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());

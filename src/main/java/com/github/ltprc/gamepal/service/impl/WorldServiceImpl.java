@@ -219,6 +219,20 @@ public class WorldServiceImpl implements WorldService {
                             worldTeleport.setTo(((Teleport) block).getTo());
                             world.getBlockMap().put(block.getId(), worldTeleport);
                             break;
+                        case GamePalConstants.BLOCK_TYPE_GROUND:
+                        case GamePalConstants.BLOCK_TYPE_WALL:
+                        case GamePalConstants.BLOCK_TYPE_CEILING:
+                        case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
+                        case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
+                        case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
+                            WorldBlock regularWorldBlock = new WorldBlock();
+                            regularWorldBlock.setType(block.getType());
+                            regularWorldBlock.setCode(block.getCode());
+                            regularWorldBlock.setId(block.getId());
+                            regularWorldBlock.setCoordinate(new Coordinate(block.getX(), block.getY()));
+                            regularWorldBlock.setSceneCoordinate(scene.getSceneCoordinate());
+                            regularWorldBlock.setRegionNo(region.getRegionNo());
+                            break;
                         default:
                             WorldBlock worldBlock = new WorldBlock();
                             worldBlock.setType(block.getType());

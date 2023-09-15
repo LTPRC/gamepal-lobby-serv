@@ -2,11 +2,8 @@ package com.github.ltprc.gamepal.util.lv;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.game.Cash;
-import com.github.ltprc.gamepal.model.game.Player;
 import com.github.ltprc.gamepal.model.game.lv.Casino;
 import com.github.ltprc.gamepal.model.game.lv.LasVegasGame;
-import com.github.ltprc.gamepal.model.game.lv.LasVegasPlayer;
-import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,11 +20,14 @@ public class LasVegasGameUtil {
         lasVegasGame.setGameNumber(0);
         lasVegasGame.setRoundNumber(0);
         lasVegasGame.setPlayerNumber(0);
-        lasVegasGame.setMinPlayerNum(3);
+        lasVegasGame.setMinPlayerNum(1);
         lasVegasGame.setMaxPlayerNum(5);
         Map<Integer, Casino> casinoMap = lasVegasGame.getCasinoMap();
         for (int i = 0; i < 6; i++) {
-            casinoMap.put(i, new Casino());
+            Casino casino = new Casino();
+            casino.setCashQueue(new LinkedList<>());
+            casino.setDiceMap(new HashMap<>());
+            casinoMap.put(i, casino);
         }
         Stack<Cash> cashStack = lasVegasGame.getCashStack();
         for (int i = 0; i < 5; i++) {
@@ -49,14 +49,9 @@ public class LasVegasGameUtil {
         return lasVegasGame;
     }
 
-    public static void initiateGame(LasVegasGame lasVegasGame) {
-        if (lasVegasGame.getGameStatus() != GamePalConstants.GAME_STATUS_WAITING) {
-            logger.warn(ErrorUtil.ERROR_1014);
-        }
-        Map<Integer, Player> playerMap = lasVegasGame.getPlayerMap();
-        playerMap.entrySet().stream().forEach(entry -> {
-            ((LasVegasPlayer) entry.getValue()).setDiceNum(8);
-        });
-        lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_RUNNING);
+    public static BigDecimal getTotalMoney(Casino casino) {
+        BigDecimal total = BigDecimal.valueOf(0);
+        casino.getCashQueue().stream().forEach(cash -> total.add(cash.getValue()));
+        return total;
     }
 }

@@ -17,6 +17,7 @@ public class GameTerminal implements Terminal {
     private String userCode;
     private int status;
     private List<String> outputs;
+    private JSONObject gameOutput;
     private GameWorld world;
     private Game game;
     private int playerNo;
@@ -52,6 +53,7 @@ public class GameTerminal implements Terminal {
     }
 
     @Override
+    @Deprecated
     public JSONObject returnObject() {
         JSONObject rst = new JSONObject();
         rst.put("game", game);
