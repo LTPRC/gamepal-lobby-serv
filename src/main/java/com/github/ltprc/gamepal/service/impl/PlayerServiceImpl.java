@@ -53,6 +53,9 @@ public class PlayerServiceImpl implements PlayerService {
     @Autowired
     private WorldService worldService;
 
+    @Autowired
+    private GameService gameService;
+
     @Override
     public ResponseEntity setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
@@ -405,11 +408,11 @@ public class PlayerServiceImpl implements PlayerService {
                             GameTerminal gameTerminal = new GameTerminal(world);
                             gameTerminal.setId(id);
                             gameTerminal.setUserCode(userCode);
-                            gameTerminal.setStatus(GamePalConstants.GAME_STATUS_START);
+                            gameTerminal.setStatus(GamePalConstants.GAME_PLAYER_STATUS_START);
                             gameTerminal.setOutputs(new ArrayList<>());
                             terminalMap.put(id, gameTerminal);
                         }
-                        terminalMap.get(id).input("start");
+                        gameService.input((GameTerminal) terminalMap.get(id), "start");
                         break;
                     case GamePalConstants.BLOCK_TYPE_COOKER:
                         generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");

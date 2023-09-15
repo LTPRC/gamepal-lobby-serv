@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.List;
 
 public interface Terminal {
-    void checkStatus();
-    void input(String input);
     String getId();
     String getUserCode();
+    void addOutput(String output);
     List<String> flushOutput();
     JSONObject returnObject();
+    void setStatus(int status);
 }

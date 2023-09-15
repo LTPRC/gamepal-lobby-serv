@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.terminal.GameTerminal;
 import com.github.ltprc.gamepal.model.terminal.Terminal;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -43,12 +44,15 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Autowired
     private WorldService worldService;
 
+    @Autowired
+    private GameService gameService;
+
     @Override
     public void onOpen(Session session, String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         world.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
-        communicate(userCode, GamePalConstants.GAME_STATE_START);
+        communicate(userCode, GamePalConstants.WEB_STAGE_START);
     }
 
     @Override
@@ -63,7 +67,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             logger.error(ErrorUtil.ERROR_1008);
             return;
         }
-        int gameState = jsonObject.getInteger("gameState");
+        int webStage = jsonObject.getInteger("webStage");
 
         // Usercode information
         String userCode = jsonObject.getString("userCode");
@@ -185,21 +189,21 @@ public class WebSocketServiceImpl implements WebSocketService {
                     if (null == terminal) {
                         logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
                     } else {
-                        terminal.input(((JSONObject) terminalInput).getString("content"));
+                        gameService.input((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
                     }
                 }
             }
         }
         // Reply automatically
-        communicate(userCode, gameState);
+        communicate(userCode, webStage);
     }
 
     @Override
-    public void communicate(String userCode, int gameState) {
+    public void communicate(String userCode, int webStage) {
         JSONObject rst = ContentUtil.generateRst();
 
         // Static information
-        if (gameState == GamePalConstants.GAME_STATE_START) {
+        if (webStage == GamePalConstants.WEB_STAGE_START) {
             JSONObject itemsObj = new JSONObject();
             worldService.getItemMap().forEach((key, value) -> itemsObj.put(key, value));
             rst.put("items", itemsObj);
@@ -256,7 +260,8 @@ public class WebSocketServiceImpl implements WebSocketService {
                         terminalOutput.put("content", output);
                         terminalOutputs.add(terminalOutput);
                     });
-                    terminalOutputs.add(entry.getValue().returnObject());
+//                    JSONObject gameObj = entry.getValue().returnObject();
+//                    terminalOutputs.add(gameObj);
                 });
         rst.put("terminalOutputs", terminalOutputs);
 

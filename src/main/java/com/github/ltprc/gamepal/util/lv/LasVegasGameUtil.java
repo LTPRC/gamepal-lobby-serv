@@ -19,7 +19,7 @@ public class LasVegasGameUtil {
         LasVegasGame lasVegasGame = new LasVegasGame();
         lasVegasGame.setId(UUID.randomUUID().toString());
         lasVegasGame.setGameType(GamePalConstants.GAME_TYPE_LAS_VEGAS);
-        lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_START);
+        lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_WAITING);
         lasVegasGame.setGameNumber(0);
         lasVegasGame.setRoundNumber(0);
         lasVegasGame.setPlayerNumber(0);
@@ -46,21 +46,17 @@ public class LasVegasGameUtil {
             cashStack.push(new Cash(new BigDecimal(30000)));
         }
         Collections.shuffle(cashStack);
-        lasVegasGame.setGameStatus(1);
         return lasVegasGame;
     }
 
-    public static void initiateGame(LasVegasGame lasVegasGame, List<String> ids) {
-        if (lasVegasGame.getGameStatus() != GamePalConstants.GAME_STATUS_SEEKING_GAME) {
+    public static void initiateGame(LasVegasGame lasVegasGame) {
+        if (lasVegasGame.getGameStatus() != GamePalConstants.GAME_STATUS_WAITING) {
             logger.warn(ErrorUtil.ERROR_1014);
         }
         Map<Integer, Player> playerMap = lasVegasGame.getPlayerMap();
-        for (int i = 0; i < ids.size(); i++) {
-            LasVegasPlayer lasVegasPlayer = new LasVegasPlayer();
-            lasVegasPlayer.setId(ids.get(i));
-            lasVegasPlayer.setDiceNum(8);
-            playerMap.put(i, lasVegasPlayer);
-        }
+        playerMap.entrySet().stream().forEach(entry -> {
+            ((LasVegasPlayer) entry.getValue()).setDiceNum(8);
+        });
         lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_RUNNING);
     }
 }
