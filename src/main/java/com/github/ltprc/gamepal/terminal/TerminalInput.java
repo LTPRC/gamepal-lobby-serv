@@ -1,4 +1,4 @@
-package com.github.ltprc.gamepal.model.terminal;
+package com.github.ltprc.gamepal.terminal;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

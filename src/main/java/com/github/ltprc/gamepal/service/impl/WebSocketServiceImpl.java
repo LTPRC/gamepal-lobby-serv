@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.terminal.GameTerminal;
-import com.github.ltprc.gamepal.model.terminal.Terminal;
+import com.github.ltprc.gamepal.terminal.GameTerminal;
+import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.Message;
@@ -45,7 +45,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     private WorldService worldService;
 
     @Autowired
-    private GameService gameService;
+    private StateMachineService stateMachineService;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -189,7 +189,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     if (null == terminal) {
                         logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
                     } else {
-                        gameService.input((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
+                        stateMachineService.input((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
                     }
                 }
             }
@@ -260,8 +260,10 @@ public class WebSocketServiceImpl implements WebSocketService {
                         terminalOutput.put("content", output);
                         terminalOutputs.add(terminalOutput);
                     });
-//                    JSONObject gameObj = entry.getValue().returnObject();
-//                    terminalOutputs.add(((GameTerminal) entry.getValue()).getGameOutput());
+                    JSONObject gameOutput = ((GameTerminal) entry.getValue()).getGameOutput();
+                    if (null != gameOutput) {
+                        terminalOutputs.add(gameOutput);
+                    }
                 });
         if (!terminalOutputs.isEmpty()) {
             rst.put("terminalOutputs", terminalOutputs);

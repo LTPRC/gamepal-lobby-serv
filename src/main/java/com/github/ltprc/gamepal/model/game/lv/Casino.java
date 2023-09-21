@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Data
 public class Casino {
+    private int casinoNo;
     private Queue<Cash> cashQueue = new ConcurrentLinkedQueue<>();
     private Map<Integer, Integer> diceMap = new ConcurrentHashMap<>();
 }

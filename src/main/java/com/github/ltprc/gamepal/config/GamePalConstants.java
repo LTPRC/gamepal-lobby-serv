@@ -60,6 +60,9 @@ public class GamePalConstants {
     public static final String FLAG_UPDATE_ITEMS = "updateItems";
     public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";
 
+    public static final int TERMINAL_TYPE_GAME = 1;
+    public static final int GAME_TYPE_LAS_VEGAS = 1;
+
     // Backend constants
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;
@@ -67,11 +70,11 @@ public class GamePalConstants {
     public static final int LAYER_CENTER = 2;
     public static final int LAYER_TOP = 3;
 
-    public static final int GAME_TYPE_LAS_VEGAS = 1;
     public static final int GAME_STATUS_END = -1;
     public static final int GAME_STATUS_START = 0;
     public static final int GAME_STATUS_WAITING = 1;
     public static final int GAME_STATUS_RUNNING = 2;
+    public static final int GAME_PLAYER_STATUS_END = -1;
     public static final int GAME_PLAYER_STATUS_START = 0;
     public static final int GAME_PLAYER_STATUS_SEEKING = 1;
     public static final int GAME_PLAYER_STATUS_STANDBY = 2;

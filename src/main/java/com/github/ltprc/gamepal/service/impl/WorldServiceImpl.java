@@ -321,7 +321,7 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void initiateGame(GameWorld world) {
         Game game = LasVegasGameUtil.getInstance();
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
             if (!world.getGameMap().containsKey(i)) {
                 world.getGameMap().put(i, game);
                 break;

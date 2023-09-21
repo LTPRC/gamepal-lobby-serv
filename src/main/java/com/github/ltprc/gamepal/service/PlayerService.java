@@ -2,7 +2,7 @@ package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.terminal.Terminal;
+import com.github.ltprc.gamepal.terminal.Terminal;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;

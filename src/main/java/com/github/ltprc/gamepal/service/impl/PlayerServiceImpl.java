@@ -12,8 +12,8 @@ import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.terminal.GameTerminal;
-import com.github.ltprc.gamepal.model.terminal.Terminal;
+import com.github.ltprc.gamepal.terminal.GameTerminal;
+import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -54,7 +54,7 @@ public class PlayerServiceImpl implements PlayerService {
     private WorldService worldService;
 
     @Autowired
-    private GameService gameService;
+    private StateMachineService stateMachineService;
 
     @Override
     public ResponseEntity setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
@@ -412,7 +412,7 @@ public class PlayerServiceImpl implements PlayerService {
                             gameTerminal.setOutputs(new ArrayList<>());
                             terminalMap.put(id, gameTerminal);
                         }
-                        gameService.input((GameTerminal) terminalMap.get(id), "start");
+                        stateMachineService.input((GameTerminal) terminalMap.get(id), "start");
                         break;
                     case GamePalConstants.BLOCK_TYPE_COOKER:
                         generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");

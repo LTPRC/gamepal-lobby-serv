@@ -4,5 +4,10 @@ import lombok.Data;
 
 @Data
 public class Dice {
+
     private int point;
+
+    public Dice() {
+        point = 0;
+    }
 }
