@@ -298,15 +298,16 @@ public class WebSocketServiceImpl implements WebSocketService {
                 if (level1.getX() != level2.getX()) {
                     return level1.getX() - level2.getX();
                 }
-                if (o1.getY() != o2.getY()) {
+                // Please use equals() instead of == 24/02/10
+                if (!o1.getY().equals(o2.getY())) {
                     return o1.getY().compareTo(o2.getY());
                 }
                 return level1.getY() - level2.getY();
             }
         });
-        // Collect blocks from 9 scenes 23/09/07
-        for (int i = sceneCoordinate.getY() - 1; i <= sceneCoordinate.getY() + 1; i++) {
-            for (int j = sceneCoordinate.getX() - 1; j <= sceneCoordinate.getX() + 1; j++) {
+        // Collect blocks from 25 scenes 24/02/10
+        for (int i = sceneCoordinate.getY() - 2; i <= sceneCoordinate.getY() + 2; i++) {
+            for (int j = sceneCoordinate.getX() - 2; j <= sceneCoordinate.getX() + 2; j++) {
                 Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
                 if (null == scene) {
                     continue;
@@ -335,11 +336,10 @@ public class WebSocketServiceImpl implements WebSocketService {
                     block.setCode(entry.getValue().getCode());
                     block.setY(entry.getValue().getCoordinate().getY());
                     block.setX(entry.getValue().getCoordinate().getX());
-                    PlayerUtil.adjustCoordinate(block,
-                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                                    entry.getValue().getSceneCoordinate()),
-                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                            rankingQueue.add(block);
+                    PlayerUtil.adjustCoordinate(block, PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                            entry.getValue().getSceneCoordinate()), BigDecimal.valueOf(region.getHeight()),
+                            BigDecimal.valueOf(region.getWidth()));
+                    rankingQueue.add(block);
         });
         // Collect detected special blocks from blockMap (duplicated) 23/09/08
 //        Map<String, WorldBlock> blockMap = world.getBlockMap();
@@ -377,7 +377,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 //                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
 //                            rankingQueue.add(block);
 //        });
-        // Put all blocks
+        // Poll all blocks
         while (!rankingQueue.isEmpty()) {
             blocks.add(rankingQueue.poll());
         }
