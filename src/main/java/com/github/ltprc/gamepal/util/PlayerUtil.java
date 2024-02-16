@@ -2,9 +2,7 @@ package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.map.world.WorldDrop;
-import com.github.ltprc.gamepal.model.map.world.WorldTeleport;
+import com.github.ltprc.gamepal.model.map.world.*;
 
 import java.math.BigDecimal;
 
@@ -119,36 +117,109 @@ public class PlayerUtil {
                 break;
         }
     }
+    public static IntegerCoordinate ConvertBlockType2Level(int type) {
+        IntegerCoordinate rst = new IntegerCoordinate(0, 0);
+        switch (type) {
+            case GamePalConstants.BLOCK_TYPE_GROUND:
+                rst = new IntegerCoordinate(0, 100);
+                break;
+            case GamePalConstants.BLOCK_TYPE_WALL:
+                rst = new IntegerCoordinate(1, 105);
+                break;
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+                rst = new IntegerCoordinate(1, 200);
+                break;
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                rst = new IntegerCoordinate(1, 300);
+                break;
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                rst = new IntegerCoordinate(0, 200);
+                break;
+            case GamePalConstants.BLOCK_TYPE_BED:
+                rst = new IntegerCoordinate(1, 110);
+                break;
+            case GamePalConstants.BLOCK_TYPE_TOILET:
+                rst = new IntegerCoordinate(1, 111);
+                break;
+            case GamePalConstants.BLOCK_TYPE_DRESSER:
+                rst = new IntegerCoordinate(1, 112);
+                break;
+            case GamePalConstants.BLOCK_TYPE_WORKSHOP:
+                rst = new IntegerCoordinate(1, 113);
+                break;
+            case GamePalConstants.BLOCK_TYPE_GAME:
+                rst = new IntegerCoordinate(1, 114);
+                break;
+            case GamePalConstants.BLOCK_TYPE_STORAGE:
+                rst = new IntegerCoordinate(1, 115);
+                break;
+            case GamePalConstants.BLOCK_TYPE_COOKER:
+                rst = new IntegerCoordinate(1, 116);
+                break;
+            case GamePalConstants.BLOCK_TYPE_SINK:
+                rst = new IntegerCoordinate(1, 117);
+                break;
+            case GamePalConstants.BLOCK_TYPE_CEILING:
+                rst = new IntegerCoordinate(2, 100);
+                break;
+            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
+                rst = new IntegerCoordinate(0, 150);
+                break;
+            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
+                rst = new IntegerCoordinate(1, 150);
+                break;
+            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
+                rst = new IntegerCoordinate(2, 150);
+                break;
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
+                rst = new IntegerCoordinate(0, 105);
+                break;
+            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
+                rst = new IntegerCoordinate(1, 100);
+                break;
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
+                rst = new IntegerCoordinate(2, 105);
+                break;
+            default:
+        }
+        return rst;
+    }
 
     /**
      * X stands for bottom, center, top, and y stands for detailed height
      * @param type
      * @return
      */
-    public static IntegerCoordinate ConvertBlockType2Level(int type) {
+    public static IntegerCoordinate ConvertBlockType2LevelOld(int type) {
         IntegerCoordinate rst = new IntegerCoordinate();
-        switch(type) {
+        switch (type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
                 rst.setX(GamePalConstants.LAYER_BOTTOM);
                 break;
             case GamePalConstants.BLOCK_TYPE_WALL:
             case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
             case GamePalConstants.BLOCK_TYPE_PLAYER:
             case GamePalConstants.BLOCK_TYPE_DROP:
+            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             default:
                 rst.setX(GamePalConstants.LAYER_CENTER);
                 break;
             case GamePalConstants.BLOCK_TYPE_CEILING:
             case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
                 rst.setX(GamePalConstants.LAYER_TOP);
                 break;
         }
-        switch(type) {
+        switch (type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_WALL:
             case GamePalConstants.BLOCK_TYPE_CEILING:
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
+            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
                 rst.setY(0);
                 break;
             case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
@@ -228,5 +299,89 @@ public class PlayerUtil {
                 newBlock.setY(worldBlock.getCoordinate().getY());
                 return newBlock;
         }
+    }
+
+    public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
+        Event newEvent = new Event();
+        newEvent.setUserCode(worldEvent.getUserCode());
+        newEvent.setCode(worldEvent.getCode());
+        newEvent.setFrame(worldEvent.getFrame());
+        newEvent.setX(worldEvent.getCoordinate().getX());
+        newEvent.setY(worldEvent.getCoordinate().getY());
+        return newEvent;
+    }
+
+    public static void copyWorldCoordinate(WorldCoordinate from, WorldCoordinate to) {
+        to.setRegionNo(from.getRegionNo());
+        Coordinate coordinate = from.getCoordinate();
+        if (null != coordinate) {
+            to.setCoordinate(new Coordinate(coordinate.getX(), coordinate.getY()));
+        } else {
+            to.setCoordinate(null);
+        }
+        IntegerCoordinate sceneCoordinate = from.getSceneCoordinate();
+        if (null != sceneCoordinate) {
+            to.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY()));
+        } else {
+            to.setSceneCoordinate(null);
+        }
+    }
+
+    public static Block generateBlockByEvent(Event event) {
+        Block newBlock = new Block();
+        newBlock.setX(event.getX());
+        newBlock.setY(event.getY());
+        newBlock.setId(String.valueOf(event.getFrame()));
+        newBlock.setCode(String.valueOf(event.getCode()));
+        switch (event.getCode()) {
+            case GamePalConstants.EVENT_CODE_BLEED:
+                newBlock.setType(GamePalConstants.BLOCK_TYPE_GROUND_DECORATION);
+                break;
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+                newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
+                break;
+            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_HEAL:
+                newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
+                break;
+            default:
+                break;
+        }
+        return newBlock;
+    }
+
+    public static WorldEvent updateEvent(WorldEvent oldEvent) {
+        WorldEvent newEvent = new WorldEvent();
+        copyWorldCoordinate(oldEvent, newEvent);
+        newEvent.setUserCode(oldEvent.getUserCode());
+        newEvent.setCode(oldEvent.getCode());
+        newEvent.setFrame(oldEvent.getFrame());
+        int period = 1;
+        boolean isInfinite = false;
+        switch (oldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_BLEED:
+                period = 250;
+                break;
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+                period = 250;
+                break;
+            case GamePalConstants.EVENT_CODE_HIT:
+                period = 250;
+                break;
+            case GamePalConstants.EVENT_CODE_HEAL:
+                period = 250;
+                break;
+            default:
+                break;
+        }
+        newEvent.setFrame(newEvent.getFrame() + 1);
+        if (newEvent.getFrame() >= period) {
+            if (isInfinite) {
+                newEvent.setFrame(newEvent.getFrame() - period);
+            } else {
+                return null;
+            }
+        }
+        return newEvent;
     }
 }

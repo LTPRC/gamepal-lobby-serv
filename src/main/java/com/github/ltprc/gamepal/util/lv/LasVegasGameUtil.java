@@ -114,4 +114,19 @@ public class LasVegasGameUtil {
         }
         return Long.valueOf(player.getDiceQueue().stream().filter(dice -> dice.getPoint() == point).count()).intValue();
     }
+
+    public static List<String> calculateWinners(LasVegasGame game) {
+        List<String> winners = new ArrayList<>();
+        BigDecimal maxMoney = BigDecimal.valueOf(-1);
+        game.getPlayerMap().entrySet().stream().forEach(entry -> {
+            BigDecimal total = ((LasVegasPlayer) entry.getValue()).getMoney();
+            if (total.equals(maxMoney)) {
+                winners.add(entry.getValue().getId());
+            } else if (total.compareTo(maxMoney) > 0) {
+                winners.clear();
+                winners.add(entry.getValue().getId());
+            }
+        });
+        return winners;
+    }
 }

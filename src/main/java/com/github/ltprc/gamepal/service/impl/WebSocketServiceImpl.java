@@ -181,6 +181,19 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.interactBlocks(userCode, interactionCode, id);
                 });
             }
+            if (functions.containsKey("addEvents")) {
+                JSONArray addEvents = functions.getJSONArray("addEvents");
+                addEvents.stream().forEach(addEvent -> {
+                    WorldBlock event = new WorldBlock();
+                    event.setType(((JSONObject) addEvent).getInteger("type"));
+                    event.setId(UUID.randomUUID().toString());
+                    event.setCode(((JSONObject) addEvent).getString("code"));
+                    event.setRegionNo(((JSONObject) addEvent).getInteger("regionNo"));
+                    event.setSceneCoordinate(((JSONObject) addEvent).getObject("sceneCoordinate", IntegerCoordinate.class));
+                    event.setCoordinate(((JSONObject) addEvent).getObject("coordinate", Coordinate.class));
+                    worldService.addEvent(userCode, event);
+                });
+            }
             if (functions.containsKey("terminalInputs")) {
                 JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
                 for (Object terminalInput : terminalInputs) {
@@ -189,7 +202,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     if (null == terminal) {
                         logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
                     } else {
-                        stateMachineService.input((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
+                        stateMachineService.gameTerminalInput((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
                     }
                 }
             }
@@ -305,15 +318,23 @@ public class WebSocketServiceImpl implements WebSocketService {
                 return level1.getY() - level2.getY();
             }
         });
-        // Collect blocks from 25 scenes 24/02/10
         for (int i = sceneCoordinate.getY() - 2; i <= sceneCoordinate.getY() + 2; i++) {
             for (int j = sceneCoordinate.getX() - 2; j <= sceneCoordinate.getX() + 2; j++) {
                 Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
                 if (null == scene) {
                     continue;
                 }
+                // Collect blocks from 25 scenes 24/02/10
                 scene.getBlocks().stream().forEach(block -> {
                     Block newBlock = PlayerUtil.copyBlock(block);
+                    PlayerUtil.adjustCoordinate(newBlock,
+                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                    rankingQueue.add(newBlock);
+                });
+                // Generate blocks from scene events 24/02/16
+                scene.getEvents().stream().forEach(event -> {
+                    Block newBlock = PlayerUtil.generateBlockByEvent(event);
                     PlayerUtil.adjustCoordinate(newBlock,
                             PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));

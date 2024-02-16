@@ -7,4 +7,5 @@ import java.util.List;
 @Data
 public class Scene extends SceneInfo {
     private List<Block> blocks;
+    private List<Event> events;
 }

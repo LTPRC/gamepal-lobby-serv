@@ -63,6 +63,11 @@ public class GamePalConstants {
     public static final int TERMINAL_TYPE_GAME = 1;
     public static final int GAME_TYPE_LAS_VEGAS = 1;
 
+    public static final int EVENT_CODE_BLEED = 101;
+    public static final int EVENT_CODE_EXPLODE = 102;
+    public static final int EVENT_CODE_HIT = 103;
+    public static final int EVENT_CODE_HEAL = 104;
+
     // Backend constants
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;

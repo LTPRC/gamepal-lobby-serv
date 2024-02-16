@@ -1,11 +1,15 @@
 package com.github.ltprc.gamepal.service;
 
-import com.github.ltprc.gamepal.terminal.Terminal;
+import com.github.ltprc.gamepal.terminal.GameTerminal;
 import org.springframework.http.ResponseEntity;
 
 public interface StateMachineService {
 
-    ResponseEntity state(Terminal terminal);
+    ResponseEntity gameTerminalState(GameTerminal gameTerminal);
 
-    ResponseEntity input(Terminal terminal, String input);
+    ResponseEntity gameTerminalInput(GameTerminal gameTerminal, String input);
+
+    ResponseEntity lasVegasState(GameTerminal gameTerminal);
+
+    ResponseEntity lasVegasInput(GameTerminal gameTerminal, String input);
 }

@@ -14,6 +14,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerUtil;
 import com.github.ltprc.gamepal.util.lv.LasVegasGameUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 @Transactional
@@ -32,7 +34,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class WorldServiceImpl implements WorldService {
 
     private static final Log logger = LogFactory.getLog(WorldServiceImpl.class);
-    private Map<String, GameWorld> worldMap = new LinkedHashMap<>(); // worldCode, world
+    private Map<String, GameWorld> worldMap = new LinkedHashMap<>(); // worldCode, world (We only allow 1 world now 24/02/16)
     private Map<Integer, Region> regionMap = new HashMap<>(); // regionNo, region
     private Map<String, Item> itemMap = new HashMap<>(); // itemNo, item
 
@@ -86,6 +88,7 @@ public class WorldServiceImpl implements WorldService {
         world.setOnlineMap(new ConcurrentHashMap<>()); // userCode, timestamp
         world.setBlockMap(new ConcurrentSkipListMap<>());
         world.setGameMap(new ConcurrentHashMap<>());
+        world.setEventQueue(new ConcurrentLinkedQueue<>());
         loadBlocks(world);
         initiateGame(world);
     }
@@ -112,6 +115,7 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new ArrayList<>());
+                newScene.setEvents(new ArrayList<>());
                 JSONArray map = scene.getJSONArray("map");
                 if (null != map && !map.isEmpty()) {
                     for (int i = 0; i < Math.min(height, map.size()); i++) {
@@ -327,5 +331,46 @@ public class WorldServiceImpl implements WorldService {
                 break;
             }
         }
+    }
+
+    @Override
+    public ResponseEntity addEvent(String userCode, WorldBlock eventBlock) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        WorldEvent event = new WorldEvent();
+        PlayerUtil.copyWorldCoordinate(eventBlock, event);
+        event.setUserCode(userCode);
+        event.setCode(eventBlock.getType());
+        event.setFrame(0);
+        world.getEventQueue().add(event);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public void updateEvents(GameWorld world) {
+        // Clear events from scene 24/02/16
+        regionMap.entrySet().stream().forEach(region -> {
+            region.getValue().getScenes().entrySet().forEach(scene -> {
+                scene.getValue().setEvents(new ArrayList<>());
+            });
+        });
+        Queue<WorldEvent> eventQueue = world.getEventQueue();
+        WorldEvent tailEvent = new WorldEvent();
+        eventQueue.add(tailEvent);
+        while (tailEvent != eventQueue.peek()) {
+            WorldEvent newEvent = PlayerUtil.updateEvent(eventQueue.poll());
+            if (null != newEvent) {
+                eventQueue.add(newEvent);
+                if (!regionMap.containsKey(newEvent.getRegionNo())) {
+                    logger.error(ErrorUtil.ERROR_1027);
+                } else if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
+                    logger.error(ErrorUtil.ERROR_1028);
+                } else {
+                    regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
+                            .add(PlayerUtil.convertWorldEvent2Event(newEvent));
+                }
+            }
+        }
+        eventQueue.poll();
     }
 }

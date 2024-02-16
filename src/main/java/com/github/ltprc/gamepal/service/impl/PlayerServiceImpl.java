@@ -8,8 +8,7 @@ import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.item.Consumable;
 import com.github.ltprc.gamepal.model.item.Junk;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
@@ -17,6 +16,7 @@ import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -392,7 +392,7 @@ public class PlayerServiceImpl implements PlayerService {
         JSONObject rst = ContentUtil.generateRst();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         GameWorld world = userService.getWorldByUserCode(userCode);
-        WorldBlock block = world.getBlockMap().get(id);
+        WorldBlock block = world.getBlockMap().getOrDefault(id, null);
         switch (interactionCode) {
             case GamePalConstants.INTERACTION_USE:
                 switch (block.getType()) {
@@ -412,7 +412,7 @@ public class PlayerServiceImpl implements PlayerService {
                             gameTerminal.setOutputs(new ArrayList<>());
                             terminalMap.put(id, gameTerminal);
                         }
-                        stateMachineService.input((GameTerminal) terminalMap.get(id), "start");
+                        stateMachineService.gameTerminalInput((GameTerminal) terminalMap.get(id), "1");
                         break;
                     case GamePalConstants.BLOCK_TYPE_COOKER:
                         generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");
