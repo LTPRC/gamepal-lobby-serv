@@ -335,11 +335,7 @@ public class PlayerUtil {
         newBlock.setCode(String.valueOf(event.getCode()));
         switch (event.getCode()) {
             case GamePalConstants.EVENT_CODE_BLEED:
-                newBlock.setType(GamePalConstants.BLOCK_TYPE_GROUND_DECORATION);
-                break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
-                break;
             case GamePalConstants.EVENT_CODE_HIT:
             case GamePalConstants.EVENT_CODE_HEAL:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
@@ -360,16 +356,16 @@ public class PlayerUtil {
         boolean isInfinite = false;
         switch (oldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_BLEED:
-                period = 250;
+                period = 25;
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                period = 250;
+                period = 25;
                 break;
             case GamePalConstants.EVENT_CODE_HIT:
-                period = 250;
+                period = 25;
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
-                period = 250;
+                period = 25;
                 break;
             default:
                 break;
