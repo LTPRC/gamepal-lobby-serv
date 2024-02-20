@@ -1,4 +1,4 @@
-package com.github.ltprc.gamepal.task.effect;
+package com.github.ltprc.gamepal.task;
 
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class EventTask {
+public class FrameEventTask {
 
     @Autowired
     private WorldService worldService;

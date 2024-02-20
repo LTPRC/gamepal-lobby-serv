@@ -130,11 +130,13 @@ public class UserServiceImpl implements UserService {
         // Update online record
         world.getOnlineMap().remove(userCode);
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
-        PlayerInfo playerInfo = new PlayerInfo();
-        initiatePlayerInfo(playerInfo);
-        playerInfo.setId(userCode);
-        playerInfo.setCode("");
-        playerService.getPlayerInfoMap().put(userCode, playerInfo);
+        if (!playerService.getPlayerInfoMap().containsKey(userCode)) {
+            PlayerInfo playerInfo = new PlayerInfo();
+            initiatePlayerInfo(playerInfo);
+            playerInfo.setId(userCode);
+            playerInfo.setCode("");
+            playerService.getPlayerInfoMap().put(userCode, playerInfo);
+        }
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));
         return ResponseEntity.ok().body(rst.toString());
