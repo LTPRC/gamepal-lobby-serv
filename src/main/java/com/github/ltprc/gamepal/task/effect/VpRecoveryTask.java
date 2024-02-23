@@ -21,7 +21,7 @@ public class VpRecoveryTask {
     @Autowired
     private PlayerService playerService;
 
-    @Scheduled(fixedRate = 50)
+//    @Scheduled(fixedRate = 50)
     public void execute() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
@@ -41,7 +41,7 @@ public class VpRecoveryTask {
                         } else if (Double.valueOf(playerInfoMap.get(entry2.getKey()).getHp()) / Double.valueOf(playerInfoMap.get(entry2.getKey()).getHpMax()) < 0.1) {
                             newVp--;
                         }
-                        playerService.changeHp(entry2.getKey(), newVp, false);
+                        playerService.changeVp(entry2.getKey(), newVp, false);
                     });
         }
     }

@@ -177,6 +177,7 @@ public class UserServiceImpl implements UserService {
         playerInfo.setMoney(1);
         playerInfo.setCapacity(new BigDecimal(0));
         playerInfo.setCapacityMax(new BigDecimal(500));
+        playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
     }
 
     @Override

@@ -24,7 +24,7 @@ public class CheckOnlineTask {
      * This method is used for checking idle user which is not under anyone's control.
      * All worlds are to be checked. 23/08/28
      */
-    @Scheduled(cron = "* */2 * * * ?")
+//    @Scheduled(cron = "* */2 * * * ?")
     public void execute() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();

@@ -68,6 +68,17 @@ public class GamePalConstants {
     public static final int EVENT_CODE_HIT = 103;
     public static final int EVENT_CODE_HEAL = 104;
 
+    public static final int BUFF_CODE_DEAD = 1;
+    public static final int BUFF_CODE_STUNNED = 2;
+    public static final int BUFF_CODE_BLEEDING = 3;
+    public static final int BUFF_CODE_SICK = 4;
+    public static final int BUFF_CODE_FRACTURED = 5;
+    public static final int BUFF_CODE_HUNGRY = 6;
+    public static final int BUFF_CODE_THIRSTY = 7;
+    public static final int BUFF_CODE_FATIGUED = 8;
+    public static final int BUFF_CODE_BLIND = 9;
+    public static final int BUFF_CODE_LENGTH = 10;
+
     // Backend constants
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;

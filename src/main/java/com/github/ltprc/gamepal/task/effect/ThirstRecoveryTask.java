@@ -20,7 +20,7 @@ public class ThirstRecoveryTask {
     @Autowired
     private PlayerService playerService;
 
-    @Scheduled(fixedRate = 30000)
+//    @Scheduled(fixedRate = 30000)
     public void execute() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();

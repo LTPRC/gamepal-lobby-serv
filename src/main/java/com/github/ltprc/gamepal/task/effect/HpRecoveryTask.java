@@ -20,7 +20,7 @@ public class HpRecoveryTask {
     @Autowired
     private PlayerService playerService;
 
-    @Scheduled(fixedRate = 1000)
+//    @Scheduled(fixedRate = 10)
     public void execute() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
@@ -30,7 +30,7 @@ public class HpRecoveryTask {
                     .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey())
                             && playerInfoMap.get(entry2.getKey()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(entry2 -> {
-                        playerService.changeHp(entry2.getKey(), 1, false);
+                        playerService.changeHp(entry2.getKey(), -1, false);
                     });
         }
     }

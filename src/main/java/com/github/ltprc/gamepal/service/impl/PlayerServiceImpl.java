@@ -160,6 +160,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+
         Integer regionNo = req.getInteger("regionNo");
         if (null != regionNo) {
             playerInfo.setRegionNo(regionNo);
@@ -328,7 +329,6 @@ public class PlayerServiceImpl implements PlayerService {
         int oldHp = playerInfo.getHp();
         int newHp = isAbsolute ? value : oldHp + value;
         playerInfoMap.get(userCode).setHp(Math.max(0, Math.min(newHp, playerInfo.getHpMax())));
-        // TODO Check death
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -382,6 +382,44 @@ public class PlayerServiceImpl implements PlayerService {
                                 break;
                         }
                     });
+        }
+        switch (worldService.getItemMap().get(itemNo).getItemNo()) {
+            case "c005":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = -1;
+                break;
+            case "c006":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
+                break;
+            case "c007":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_STUNNED] = -1;
+                break;
+            case "c008":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_STUNNED] = 0;
+                break;
+            case "c009":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] = -1;
+                break;
+            case "c010":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] = 0;
+                break;
+            case "c011":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_SICK] = -1;
+                break;
+            case "c012":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_SICK] = 0;
+                break;
+            case "c013":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] = -1;
+                break;
+            case "c014":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] = 0;
+                break;
+            case "c015":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_BLIND] = -1;
+                break;
+            case "c016":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_BLIND] = 0;
+                break;
         }
         getItem(userCode, itemNo, -1 * itemAmount);
         return ResponseEntity.ok().body(rst.toString());
@@ -444,6 +482,45 @@ public class PlayerServiceImpl implements PlayerService {
                 generateNotificationMessage(userCode, "你捯饬了起来。");
                 break;
         }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    public ResponseEntity updateBuff(String userCode) {
+        JSONObject rst = ContentUtil.generateRst();
+
+        // Check death 24/02/23
+        if (0 == playerInfoMap.get(userCode).getHp()
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = -1;
+        } else if (0 < playerInfoMap.get(userCode).getHp()
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
+        }
+
+        if (playerInfoMap.get(userCode).getHunger() < playerInfoMap.get(userCode).getHungerMax() / 10
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] == 0) {
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = -1;
+        } else if (playerInfoMap.get(userCode).getHunger() >= playerInfoMap.get(userCode).getHungerMax() / 10
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0){
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = 0;
+        }
+
+        if (playerInfoMap.get(userCode).getThirst() < playerInfoMap.get(userCode).getThirstMax() / 10
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] == 0) {
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = -1;
+        } else if (playerInfoMap.get(userCode).getThirst() >= playerInfoMap.get(userCode).getThirstMax() / 10
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0){
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = 0;
+        }
+
+        if (playerInfoMap.get(userCode).getVp() < playerInfoMap.get(userCode).getVpMax() / 10
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] == 0) {
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = -1;
+        } else if (playerInfoMap.get(userCode).getVp() >= playerInfoMap.get(userCode).getVpMax() / 10
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0){
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
+        }
+
         return ResponseEntity.ok().body(rst.toString());
     }
 }

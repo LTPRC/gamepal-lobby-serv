@@ -100,9 +100,11 @@ public class WorldServiceImpl implements WorldService {
             JSONObject region = JSON.parseObject(String.valueOf(obj));
             Region newRegion = new Region();
             int regionNo = region.getInteger("regionNo");
+            String regionName =  region.getString("name");
             int height = region.getInteger("height");
             int width = region.getInteger("width");
             newRegion.setRegionNo(regionNo);
+            newRegion.setName(regionName);
             newRegion.setHeight(height);
             newRegion.setWidth(width);
             JSONArray scenes = region.getJSONArray("scenes");

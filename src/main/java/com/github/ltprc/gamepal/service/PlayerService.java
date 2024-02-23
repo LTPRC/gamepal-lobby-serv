@@ -43,4 +43,6 @@ public interface PlayerService {
     ResponseEntity changeThirst(String userCode, int value, boolean isAbsolute);
 
     ResponseEntity interactBlocks(String userCode, int interactionCode, String id);
+
+    ResponseEntity updateBuff(String userCode);
 }

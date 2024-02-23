@@ -224,7 +224,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             playerService.getFlagSet().add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         }
 
-        // Usercode information
+        // UserCode information
         rst.put("userCode", userCode);
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -284,21 +284,21 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Return region
         Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
-        JSONObject regionObj = new JSONObject();
-        regionObj.put("regionNo", region.getRegionNo());
-        regionObj.put("height", region.getHeight());
-        regionObj.put("width", region.getWidth());
-        rst.put("region", regionObj);
+        rst.put("region", JSON.toJSON(region));
 
         // Return SceneInfos
+        // sceneInfos is almost useless 24/02/22
         JSONArray sceneInfos = new JSONArray();
         region.getScenes().entrySet().stream().forEach(entry -> {
             SceneInfo sceneInfo = new SceneInfo();
             sceneInfo.setName(entry.getValue().getName());
             sceneInfo.setSceneCoordinate(entry.getKey());
             sceneInfos.add(sceneInfo);
+            if (entry.getKey().equals(playerInfo.getSceneCoordinate())) {
+                rst.put("sceneInfo", JSON.toJSON(sceneInfo));
+            }
         });
-        rst.put("sceneInfos", sceneInfos);
+//        rst.put("sceneInfos", sceneInfos);
         // Generate returned block map
         JSONArray blocks = new JSONArray();
         // Put floors and collect walls

@@ -59,5 +59,5 @@ public class PlayerInfo extends WorldBlock {
     private BigDecimal capacity;
     private BigDecimal capacityMax;
     private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
-    private Set<String> buff = new ConcurrentSkipListSet<>();
+    private int[] buff; // buff code, remaining frame
 }

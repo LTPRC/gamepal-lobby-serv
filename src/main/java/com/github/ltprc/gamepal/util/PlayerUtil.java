@@ -341,7 +341,6 @@ public class PlayerUtil {
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;
             default:
-                break;
         }
         return newBlock;
     }
