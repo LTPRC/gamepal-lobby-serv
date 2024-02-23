@@ -2,7 +2,6 @@ package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +20,8 @@ public interface PlayerService {
     ResponseEntity getPlayerInfo(HttpServletRequest request);
 
     Map<String, PlayerInfo> getPlayerInfoMap();
+
+    ResponseEntity generateNotificationMessage(String userCode, String content);
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);
 

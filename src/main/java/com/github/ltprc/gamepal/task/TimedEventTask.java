@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Map;
 
+import static com.github.ltprc.gamepal.config.GamePalConstants.FRAME_PER_SECOND;
+
 @Component
 public class TimedEventTask {
 
@@ -43,9 +45,24 @@ public class TimedEventTask {
                     .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey())
                             && playerInfoMap.get(entry2.getKey()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(entry2 -> {
+                        String userCode = entry2.getKey();
                         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
-                            if (playerInfoMap.get(entry2.getKey()).getBuff()[i] > 0)
-                            playerInfoMap.get(entry2.getKey()).getBuff()[i] = playerInfoMap.get(entry2.getKey()).getBuff()[i] - 1;
+                            if (playerInfoMap.get(userCode).getBuff()[i] > 0) {
+                                playerInfoMap.get(userCode).getBuff()[i] = playerInfoMap.get(userCode).getBuff()[i] - 1;
+                                switch (i) {
+                                    case  GamePalConstants.BUFF_CODE_DEAD:
+                                        if (playerInfoMap.get(userCode).getBuff()[i] == 0) {
+                                            playerService.changeHp(userCode, playerInfoMap.get(userCode).getHpMax(), true);
+                                            playerService.changeVp(userCode, playerInfoMap.get(userCode).getVpMax(), true);
+                                            playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
+                                            playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
+                                            playerService.generateNotificationMessage(userCode, "复活成功。");
+                                        } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
+                                            playerService.generateNotificationMessage(userCode, "距离复活还有"
+                                                    + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");
+                                        }
+                                }
+                            }
                         }
                     });
 
@@ -60,13 +77,13 @@ public class TimedEventTask {
 
                         // Change hp
                         // TODO please cancel this poison
-                        playerService.changeHp(entry2.getKey(), -1, false);
+//                        playerService.changeHp(entry2.getKey(), -1, false);
 
                         // Change vp
                         int newVp = 1;
                         Coordinate speed = playerInfoMap.get(entry2.getKey()).getSpeed();
                         if (Math.abs(speed.getX().doubleValue()) > 0 || Math.abs(speed.getY().doubleValue()) > 0) {
-                            newVp--;
+                            newVp = -1;
                         }
                         playerService.changeVp(entry2.getKey(), newVp, false);
 

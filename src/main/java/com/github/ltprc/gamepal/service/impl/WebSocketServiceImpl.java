@@ -5,12 +5,24 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Block;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.Region;
+import com.github.ltprc.gamepal.model.map.Scene;
+import com.github.ltprc.gamepal.model.map.SceneInfo;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.model.map.world.WorldDrop;
+import com.github.ltprc.gamepal.service.MessageService;
+import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.StateMachineService;
+import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WebSocketService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
-import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerUtil;
@@ -19,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import javax.websocket.Session;
 import java.io.IOException;
@@ -118,7 +131,14 @@ public class WebSocketServiceImpl implements WebSocketService {
             JSONArray messages = functions.getJSONArray("addMessages");
             for (Object obj : messages) {
                 Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
-                if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
+                if (null != msg.getContent() && msg.getContent().indexOf(GamePalConstants.COMMAND_PREFIX) == 0) {
+                    // Command detected
+                    String commandContent = StringUtils.trim(msg.getContent().substring(1));
+                    if (null == commandContent) {
+                        return;
+                    }
+                    // TODO command logics
+                } else if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
                     messageService.getMessageMap().entrySet().stream()
                             .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
                             .forEach(entry -> entry.getValue().add(msg));
@@ -338,6 +358,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     PlayerUtil.adjustCoordinate(newBlock,
                             PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                    // TODO Check event
                     rankingQueue.add(newBlock);
                 });
             }

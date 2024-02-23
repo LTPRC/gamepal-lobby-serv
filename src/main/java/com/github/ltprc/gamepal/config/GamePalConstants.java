@@ -9,7 +9,9 @@ public class GamePalConstants {
     public static final int WEB_STAGE_INITIALIZED = 2;
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
+    public static final int FRAME_PER_SECOND = 25;
 
+    public static final String COMMAND_PREFIX = "/";
     public static final int MESSAGE_TYPE_PRINTED = 1;
     public static final int MESSAGE_TYPE_VOICE = 2;
     public static final int MESSAGE_TYPE_TERMINAL = 3;
@@ -78,6 +80,7 @@ public class GamePalConstants {
     public static final int BUFF_CODE_FATIGUED = 8;
     public static final int BUFF_CODE_BLIND = 9;
     public static final int BUFF_CODE_LENGTH = 10;
+    public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
 
     // Backend constants
 

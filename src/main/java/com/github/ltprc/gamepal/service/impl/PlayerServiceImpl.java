@@ -11,12 +11,15 @@ import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.service.MessageService;
+import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.StateMachineService;
+import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
-import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,13 +207,14 @@ public class PlayerServiceImpl implements PlayerService {
         return playerInfoMap;
     }
 
-    private void generateNotificationMessage(String userCode, String content) {
+    @Override
+    public ResponseEntity generateNotificationMessage(String userCode, String content) {
         Message message = new Message();
         message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
         message.setScope(GamePalConstants.SCOPE_SELF);
         message.setToUserCode(userCode);
         message.setContent(content);
-        messageService.sendMessage(userCode, message);
+        return messageService.sendMessage(userCode, message);
     }
 
     @Override
@@ -385,10 +389,16 @@ public class PlayerServiceImpl implements PlayerService {
         }
         switch (worldService.getItemMap().get(itemNo).getItemNo()) {
             case "c005":
-                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = -1;
+                changeHp(userCode, 0, true);
+                changeVp(userCode, 0, true);
+                changeHunger(userCode, 0, true);
+                changeThirst(userCode, 0, true);
                 break;
             case "c006":
-                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
+                changeHp(userCode, playerInfoMap.get(userCode).getHpMax(), true);
+                changeVp(userCode, playerInfoMap.get(userCode).getVpMax(), true);
+                changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
+                changeThirst(userCode, playerInfoMap.get(userCode).getThirst(), true);
                 break;
             case "c007":
                 playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_STUNNED] = -1;
@@ -491,7 +501,10 @@ public class PlayerServiceImpl implements PlayerService {
         // Check death 24/02/23
         if (0 == playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = -1;
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
+            changeVp(userCode, 0, true);
+            changeHunger(userCode, 0, true);
+            changeThirst(userCode, 0, true);
         } else if (0 < playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
