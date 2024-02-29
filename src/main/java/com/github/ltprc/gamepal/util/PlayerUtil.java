@@ -334,13 +334,21 @@ public class PlayerUtil {
         newBlock.setId(String.valueOf(event.getFrame()));
         newBlock.setCode(String.valueOf(event.getCode()));
         switch (event.getCode()) {
-            case GamePalConstants.EVENT_CODE_BLEED:
-            case GamePalConstants.EVENT_CODE_EXPLODE:
             case GamePalConstants.EVENT_CODE_HIT:
-            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_HIT_FIRE:
+            case GamePalConstants.EVENT_CODE_HIT_ICE:
+            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
+            case GamePalConstants.EVENT_CODE_UPGRADE:
+            case GamePalConstants.EVENT_CODE_FIRE:
+            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_BLEED:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+                newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
+                break;
             default:
+                newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
         }
         return newBlock;
     }
@@ -354,17 +362,20 @@ public class PlayerUtil {
         int period = 1;
         boolean isInfinite = false;
         switch (oldEvent.getCode()) {
-            case GamePalConstants.EVENT_CODE_BLEED:
-                period = 25;
-                break;
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-                period = 25;
+            case GamePalConstants.EVENT_CODE_FIRE:
+                period = 3;
+                isInfinite = true;
                 break;
             case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_HIT_FIRE:
+            case GamePalConstants.EVENT_CODE_HIT_ICE:
+            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
+            case GamePalConstants.EVENT_CODE_UPGRADE:
+            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+            case GamePalConstants.EVENT_CODE_BLEED:
                 period = 25;
-                break;
-            case GamePalConstants.EVENT_CODE_HEAL:
-                period = 25;
+                isInfinite = false;
                 break;
             default:
                 break;

@@ -65,10 +65,15 @@ public class GamePalConstants {
     public static final int TERMINAL_TYPE_GAME = 1;
     public static final int GAME_TYPE_LAS_VEGAS = 1;
 
-    public static final int EVENT_CODE_BLEED = 101;
-    public static final int EVENT_CODE_EXPLODE = 102;
-    public static final int EVENT_CODE_HIT = 103;
-    public static final int EVENT_CODE_HEAL = 104;
+    public static final int EVENT_CODE_HIT = 101;
+    public static final int EVENT_CODE_HIT_FIRE = 102;
+    public static final int EVENT_CODE_HIT_ICE = 103;
+    public static final int EVENT_CODE_HIT_ELECTRICITY = 104;
+    public static final int EVENT_CODE_UPGRADE = 105;
+    public static final int EVENT_CODE_FIRE = 106;
+    public static final int EVENT_CODE_SHOOT = 107;
+    public static final int EVENT_CODE_EXPLODE = 108;
+    public static final int EVENT_CODE_BLEED = 109;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;

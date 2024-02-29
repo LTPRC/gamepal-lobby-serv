@@ -206,7 +206,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                 addEvents.stream().forEach(addEvent -> {
                     WorldBlock event = new WorldBlock();
                     event.setType(((JSONObject) addEvent).getInteger("type"));
-                    event.setId(UUID.randomUUID().toString());
                     event.setCode(((JSONObject) addEvent).getString("code"));
                     event.setRegionNo(((JSONObject) addEvent).getInteger("regionNo"));
                     event.setSceneCoordinate(((JSONObject) addEvent).getObject("sceneCoordinate", IntegerCoordinate.class));
