@@ -366,7 +366,14 @@ public class WorldServiceImpl implements WorldService {
                 if (!regionMap.containsKey(newEvent.getRegionNo())) {
                     logger.error(ErrorUtil.ERROR_1027);
                 } else if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
-                    logger.error(ErrorUtil.ERROR_1028);
+                    Scene tempScene = new Scene();
+                    tempScene.setName("temp");
+                    tempScene.setSceneCoordinate(newEvent.getSceneCoordinate());
+                    tempScene.setBlocks(new ArrayList<>());
+                    tempScene.setEvents(new ArrayList<>());
+                    regionMap.get(newEvent.getRegionNo()).getScenes().put(newEvent.getSceneCoordinate(), tempScene);
+                    regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
+                            .add(PlayerUtil.convertWorldEvent2Event(newEvent));
                 } else {
                     regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
                             .add(PlayerUtil.convertWorldEvent2Event(newEvent));
