@@ -37,6 +37,7 @@ public class PlayerUtil {
         return new IntegerCoordinate(to.getX() - from.getX(), to.getY() - from.getY());
     }
 
+    @Deprecated
     public static int getCoordinateRelationOld(IntegerCoordinate from, IntegerCoordinate to) {
         if (from.getY() - to.getY() == 1) {
             if (from.getX() - to.getX() == 1) {
@@ -68,7 +69,7 @@ public class PlayerUtil {
 
     public static void adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, BigDecimal height, BigDecimal width) {
         // Pos-y is south, neg-y is north
-        coordinate.setX(coordinate.getX().add(width.multiply(BigDecimal.valueOf(integerCoordinate.getX()))));
+        coordinate.setX(coordinate.getX().add(height.multiply(BigDecimal.valueOf(integerCoordinate.getX()))));
         coordinate.setY(coordinate.getY().add(width.multiply(BigDecimal.valueOf(integerCoordinate.getY()))));
     }
 
@@ -79,6 +80,7 @@ public class PlayerUtil {
      * @param height
      * @param width
      */
+    @Deprecated
     public static void adjustCoordinateOld(Coordinate coordinate, int relationValue, BigDecimal height, BigDecimal width) {
         // Pos-y is south, neg-y is north
         switch (relationValue) {
@@ -117,6 +119,34 @@ public class PlayerUtil {
                 break;
         }
     }
+
+    /**
+     * Keep the coordinate inside the range of width multiply height based on its sceneCoordinate.
+     * @param worldCoordinate
+     */
+    public static void fixWorldCoordinate(WorldCoordinate worldCoordinate, Region region) {
+        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(-1)) < 0) {
+            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
+            worldCoordinate.getCoordinate()
+                    .setY(worldCoordinate.getCoordinate().getY().add(new BigDecimal(region.getHeight())));
+        }
+        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(region.getHeight() - 1)) >= 0) {
+            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
+            worldCoordinate.getCoordinate()
+                    .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(region.getHeight())));
+        }
+        while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(-0.5)) < 0) {
+            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
+            worldCoordinate.getCoordinate()
+                    .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(region.getWidth())));
+        }
+        while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(region.getWidth() - 0.5)) >= 0) {
+            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
+            worldCoordinate.getCoordinate()
+                    .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(region.getWidth())));
+        }
+    }
+
     public static IntegerCoordinate ConvertBlockType2Level(int type) {
         IntegerCoordinate rst = new IntegerCoordinate(0, 0);
         switch (type) {
@@ -349,6 +379,7 @@ public class PlayerUtil {
                 break;
             default:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
+                break;
         }
         return newBlock;
     }
@@ -374,10 +405,11 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_SHOOT:
             case GamePalConstants.EVENT_CODE_EXPLODE:
             case GamePalConstants.EVENT_CODE_BLEED:
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_HEAL:
+            default:
                 period = 25;
                 isInfinite = false;
-                break;
-            default:
                 break;
         }
         newEvent.setFrame(newEvent.getFrame() + 1);

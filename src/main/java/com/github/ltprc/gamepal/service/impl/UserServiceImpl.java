@@ -178,6 +178,15 @@ public class UserServiceImpl implements UserService {
         playerInfo.setCapacity(new BigDecimal(0));
         playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
+        int[][] skill = new int[4][4];
+        skill[0] = new int[]{GamePalConstants.SKILL_CODE_SHOOT, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
+                1 * GamePalConstants.FRAME_PER_SECOND};
+        skill[1] = new int[]{GamePalConstants.SKILL_CODE_HIT, GamePalConstants.SKILL_MODE_AUTO, 0, 5};
+        skill[2] = new int[]{GamePalConstants.SKILL_CODE_BLOCK, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
+                GamePalConstants.SKILL_DEFAULT_TIME};
+        skill[3] = new int[]{GamePalConstants.SKILL_CODE_HEAL, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
+                GamePalConstants.SKILL_DEFAULT_TIME};
+        playerInfo.setSkill(skill);
     }
 
     @Override

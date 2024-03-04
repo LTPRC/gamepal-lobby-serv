@@ -20,6 +20,7 @@ import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -275,6 +276,8 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case GamePalConstants.ITEM_CHARACTER_RECORDING:
                 break;
+            default:
+                break;
         }
         flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
         flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
@@ -384,6 +387,8 @@ public class PlayerServiceImpl implements PlayerService {
                             case "thirst":
                                 changeThirst(userCode, entry.getValue(), false);
                                 break;
+                            default:
+                                break;
                         }
                     });
         }
@@ -430,6 +435,8 @@ public class PlayerServiceImpl implements PlayerService {
             case "c016":
                 playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_BLIND] = 0;
                 break;
+            default:
+                break;
         }
         getItem(userCode, itemNo, -1 * itemAmount);
         return ResponseEntity.ok().body(rst.toString());
@@ -468,6 +475,8 @@ public class PlayerServiceImpl implements PlayerService {
                     case GamePalConstants.BLOCK_TYPE_SINK:
                         generateNotificationMessage(userCode, "你清洗了一下双手。");
                         break;
+                    default:
+                        break;
                 }
                 break;
             case GamePalConstants.INTERACTION_EXCHANGE:
@@ -491,6 +500,8 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.INTERACTION_SET:
                 generateNotificationMessage(userCode, "你捯饬了起来。");
                 break;
+            default:
+                break;
         }
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -501,10 +512,15 @@ public class PlayerServiceImpl implements PlayerService {
         // Check death 24/02/23
         if (0 == playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
             changeVp(userCode, 0, true);
             changeHunger(userCode, 0, true);
             changeThirst(userCode, 0, true);
+            // Wipe all other buff and skill remaining time
+            playerInfoMap.get(userCode).setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
+            for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
+                playerInfoMap.get(userCode).getSkill()[i][2] = playerInfoMap.get(userCode).getSkill()[i][3];
+            }
         } else if (0 < playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
@@ -534,6 +550,69 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
         }
 
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity useSkill(String userCode, int skillNo, boolean isDown) {
+        JSONObject rst = ContentUtil.generateRst();
+        if (isDown) {
+            // Skill button is pushed down
+            if (playerInfoMap.get(userCode).getSkill()[skillNo][2] == 0) {
+                if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO) {
+                    playerInfoMap.get(userCode).getSkill()[skillNo][2] = -1;
+                } else {
+                    playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
+                }
+                WorldBlock event = new WorldBlock();
+                event.setCode(userCode);
+                event.setRegionNo(playerInfoMap.get(userCode).getRegionNo());
+                IntegerCoordinate newSceneCoordinate = new IntegerCoordinate();
+                newSceneCoordinate.setX(playerInfoMap.get(userCode).getSceneCoordinate().getX());
+                newSceneCoordinate.setY(playerInfoMap.get(userCode).getSceneCoordinate().getY());
+                event.setSceneCoordinate(newSceneCoordinate);
+                Coordinate newCoordinate = new Coordinate();
+                newCoordinate.setX(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getX().toString()));
+                newCoordinate.setY(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getY().toString()));
+                event.setCoordinate(newCoordinate);
+                switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
+                    case GamePalConstants.SKILL_CODE_SHOOT:
+                        newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        event.setCoordinate(newCoordinate);
+                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                        event.setType(GamePalConstants.EVENT_CODE_SHOOT);
+                        worldService.addEvent(userCode, event);
+                        break;
+                    case GamePalConstants.SKILL_CODE_HIT:
+                        newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        event.setCoordinate(newCoordinate);
+                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                        event.setType(GamePalConstants.EVENT_CODE_HIT);
+                        worldService.addEvent(userCode, event);
+                        break;
+                    case GamePalConstants.SKILL_CODE_BLOCK:
+                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                        event.setType(GamePalConstants.EVENT_CODE_BLOCK);
+                        worldService.addEvent(userCode, event);
+                        break;
+                    case GamePalConstants.SKILL_CODE_HEAL:
+                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                        event.setType(GamePalConstants.EVENT_CODE_HEAL);
+                        worldService.addEvent(userCode, event);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } else {
+            // Skill button is released
+            if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO
+                    && playerInfoMap.get(userCode).getSkill()[skillNo][2] == -1) {
+                playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
+            }
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 }

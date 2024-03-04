@@ -26,6 +26,7 @@ import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerUtil;
+import lombok.val;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updateplayerinfoCharacter")) {
                 playerService.updateplayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
             }
+            if (functions.containsKey("updateMovingBlock")) {
+                playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
+            }
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.stream().forEach(useItem -> {
@@ -123,9 +127,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                     int itemAmount = ((JSONObject) getPreservedItem).getInteger("itemAmount");
                     playerService.getPreservedItem(userCode, itemNo, itemAmount);
                 });
-            }
-            if (functions.containsKey("updateMovingBlock")) {
-                playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
             }
             // Check incoming messages
             JSONArray messages = functions.getJSONArray("addMessages");
@@ -187,8 +188,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 String userCode2 = setRelation.getString("nextUserCode");
                 int newRelation = setRelation.getInteger("newRelation");
                 boolean isAbsolute = setRelation.getBoolean("isAbsolute");
-                ResponseEntity setRelationRst =
-                        playerService.setRelation(userCode1, userCode2, newRelation, isAbsolute);
+                val setRelationRst = playerService.setRelation(userCode1, userCode2, newRelation, isAbsolute);
                 if (setRelationRst.getStatusCode().isError()) {
                     logger.warn(setRelationRst);
                 }
@@ -201,6 +201,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.interactBlocks(userCode, interactionCode, id);
                 });
             }
+            // Deprecated 24/03/04
             if (functions.containsKey("addEvents")) {
                 JSONArray addEvents = functions.getJSONArray("addEvents");
                 addEvents.stream().forEach(addEvent -> {
@@ -223,6 +224,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                     } else {
                         stateMachineService.gameTerminalInput((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
                     }
+                }
+            }
+            if (functions.containsKey("useSkills")) {
+                JSONArray useSkills = functions.getJSONArray("useSkills");
+                for (int i = 0; i < GamePalConstants.SKILL_LENGTH; i++) {
+                    playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
                 }
             }
         }

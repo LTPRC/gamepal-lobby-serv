@@ -46,4 +46,6 @@ public interface PlayerService {
     ResponseEntity interactBlocks(String userCode, int interactionCode, String id);
 
     ResponseEntity updateBuff(String userCode);
+
+    ResponseEntity useSkill(String userCode, int skillNo, boolean isDown);
 }

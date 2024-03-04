@@ -74,6 +74,8 @@ public class GamePalConstants {
     public static final int EVENT_CODE_SHOOT = 107;
     public static final int EVENT_CODE_EXPLODE = 108;
     public static final int EVENT_CODE_BLEED = 109;
+    public static final int EVENT_CODE_BLOCK = 110;
+    public static final int EVENT_CODE_HEAL = 111;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;
@@ -85,7 +87,14 @@ public class GamePalConstants {
     public static final int BUFF_CODE_FATIGUED = 8;
     public static final int BUFF_CODE_BLIND = 9;
     public static final int BUFF_CODE_LENGTH = 10;
-    public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
+
+    public static final int SKILL_LENGTH = 4;
+    public static final int SKILL_CODE_SHOOT = 1;
+    public static final int SKILL_CODE_HIT = 2;
+    public static final int SKILL_CODE_BLOCK = 3;
+    public static final int SKILL_CODE_HEAL = 4;
+    public static final int SKILL_MODE_SEMI_AUTO = 0;
+    public static final int SKILL_MODE_AUTO = 1;
 
     // Backend constants
 
@@ -104,4 +113,7 @@ public class GamePalConstants {
     public static final int GAME_PLAYER_STATUS_STANDBY = 2;
     public static final int GAME_PLAYER_STATUS_PREPARED = 3;
     public static final int GAME_PLAYER_STATUS_PLAYING = 4;
+
+    public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
+    public static final int SKILL_DEFAULT_TIME = 10;
 }

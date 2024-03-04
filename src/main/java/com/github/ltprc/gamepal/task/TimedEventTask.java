@@ -39,8 +39,7 @@ public class TimedEventTask {
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
 
-            // Update buff
-            // buff minus one
+            // Count buff remaining time
             onlineMap.entrySet().stream()
                     .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey())
                             && playerInfoMap.get(entry2.getKey()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
@@ -61,6 +60,8 @@ public class TimedEventTask {
                                             playerService.generateNotificationMessage(userCode, "距离复活还有"
                                                     + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");
                                         }
+                                    default:
+                                        break;
                                 }
                             }
                         }
@@ -76,7 +77,6 @@ public class TimedEventTask {
                         double randomNumber;
 
                         // Change hp
-                        // TODO please cancel this poison
 //                        playerService.changeHp(entry2.getKey(), -1, false);
 
                         // Change vp
@@ -103,6 +103,13 @@ public class TimedEventTask {
                         }
                         if (randomNumber < 40D / 30000D) {
                             playerService.changeThirst(entry2.getKey(), -1, false);
+                        }
+
+                        // Change skill remaining time
+                        for (int i = 0; i < playerInfoMap.get(entry2.getKey()).getSkill().length; i++) {
+                            if (playerInfoMap.get(entry2.getKey()).getSkill()[i][2] > 0) {
+                                playerInfoMap.get(entry2.getKey()).getSkill()[i][2] = playerInfoMap.get(entry2.getKey()).getSkill()[i][2] - 1;
+                            }
                         }
 
                         // Update buff
