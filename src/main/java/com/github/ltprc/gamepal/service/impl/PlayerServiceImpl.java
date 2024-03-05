@@ -560,61 +560,74 @@ public class PlayerServiceImpl implements PlayerService {
             // Skill button is pushed down
             if (playerInfoMap.get(userCode).getSkill()[skillNo][2] == 0) {
                 if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO) {
+                    // It must be -1, otherwise it will be triggered automatically 24/03/05
                     playerInfoMap.get(userCode).getSkill()[skillNo][2] = -1;
-                } else {
+                } else if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_AUTO) {
                     playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
-                }
-                WorldBlock event = new WorldBlock();
-                event.setCode(userCode);
-                event.setRegionNo(playerInfoMap.get(userCode).getRegionNo());
-                IntegerCoordinate newSceneCoordinate = new IntegerCoordinate();
-                newSceneCoordinate.setX(playerInfoMap.get(userCode).getSceneCoordinate().getX());
-                newSceneCoordinate.setY(playerInfoMap.get(userCode).getSceneCoordinate().getY());
-                event.setSceneCoordinate(newSceneCoordinate);
-                Coordinate newCoordinate = new Coordinate();
-                newCoordinate.setX(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getX().toString()));
-                newCoordinate.setY(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getY().toString()));
-                event.setCoordinate(newCoordinate);
-                switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
-                    case GamePalConstants.SKILL_CODE_SHOOT:
-                        newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                        newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                        event.setCoordinate(newCoordinate);
-                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
-                        event.setType(GamePalConstants.EVENT_CODE_SHOOT);
-                        worldService.addEvent(userCode, event);
-                        break;
-                    case GamePalConstants.SKILL_CODE_HIT:
-                        newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                        newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                        event.setCoordinate(newCoordinate);
-                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
-                        event.setType(GamePalConstants.EVENT_CODE_HIT);
-                        worldService.addEvent(userCode, event);
-                        break;
-                    case GamePalConstants.SKILL_CODE_BLOCK:
-                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
-                        event.setType(GamePalConstants.EVENT_CODE_BLOCK);
-                        worldService.addEvent(userCode, event);
-                        break;
-                    case GamePalConstants.SKILL_CODE_HEAL:
-                        // Subtracted 0.01 for event under player's feet 24/03/05
-                        event.getCoordinate().setY(event.getCoordinate().getY().subtract(BigDecimal.valueOf(0.01)));
-                        PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
-                        event.setType(GamePalConstants.EVENT_CODE_HEAL);
-                        worldService.addEvent(userCode, event);
-                        break;
-                    default:
-                        break;
+                    generateEventBySkill(userCode, skillNo);
+                } else {
+                    logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo][1]);
                 }
             }
         } else {
             // Skill button is released
-            if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO
-                    && playerInfoMap.get(userCode).getSkill()[skillNo][2] == -1) {
-                playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
+            if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO) {
+                if (playerInfoMap.get(userCode).getSkill()[skillNo][2] == -1) {
+                    playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
+                    generateEventBySkill(userCode, skillNo);
+                }
+            } else if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_AUTO) {
+            } else {
+                logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo][1]);
             }
+
         }
         return ResponseEntity.ok().body(rst.toString());
+    }
+
+    private void generateEventBySkill(String userCode, int skillNo) {
+        WorldBlock event = new WorldBlock();
+        event.setCode(userCode);
+        event.setRegionNo(playerInfoMap.get(userCode).getRegionNo());
+        IntegerCoordinate newSceneCoordinate = new IntegerCoordinate();
+        newSceneCoordinate.setX(playerInfoMap.get(userCode).getSceneCoordinate().getX());
+        newSceneCoordinate.setY(playerInfoMap.get(userCode).getSceneCoordinate().getY());
+        event.setSceneCoordinate(newSceneCoordinate);
+        Coordinate newCoordinate = new Coordinate();
+        newCoordinate.setX(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getX().toString()));
+        newCoordinate.setY(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getY().toString()));
+        event.setCoordinate(newCoordinate);
+        switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
+            case GamePalConstants.SKILL_CODE_SHOOT:
+                newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                event.setCoordinate(newCoordinate);
+                PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                event.setType(GamePalConstants.EVENT_CODE_SHOOT);
+                worldService.addEvent(userCode, event);
+                break;
+            case GamePalConstants.SKILL_CODE_HIT:
+                newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                event.setCoordinate(newCoordinate);
+                PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                event.setType(GamePalConstants.EVENT_CODE_HIT);
+                worldService.addEvent(userCode, event);
+                break;
+            case GamePalConstants.SKILL_CODE_BLOCK:
+                PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                event.setType(GamePalConstants.EVENT_CODE_BLOCK);
+                worldService.addEvent(userCode, event);
+                break;
+            case GamePalConstants.SKILL_CODE_HEAL:
+                // Subtracted 0.01 for event under player's feet 24/03/05
+                event.getCoordinate().setY(event.getCoordinate().getY().subtract(BigDecimal.valueOf(0.01)));
+                PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
+                event.setType(GamePalConstants.EVENT_CODE_HEAL);
+                worldService.addEvent(userCode, event);
+                break;
+            default:
+                break;
+        }
     }
 }

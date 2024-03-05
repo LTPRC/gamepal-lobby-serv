@@ -32,4 +32,5 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1026 = new GamepalError("1026", "Game status is not supported.");
     public static final GamepalError ERROR_1027 = new GamepalError("1027", "Invalid regionNo.");
     public static final GamepalError ERROR_1028 = new GamepalError("1028", "Invalid sceneCoordinate.");
+    public static final GamepalError ERROR_1029 = new GamepalError("1029", "Invalid skillMode.");
 }
