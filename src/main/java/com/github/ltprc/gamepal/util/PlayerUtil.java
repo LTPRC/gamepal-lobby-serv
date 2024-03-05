@@ -372,9 +372,11 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_FIRE:
             case GamePalConstants.EVENT_CODE_SHOOT:
             case GamePalConstants.EVENT_CODE_BLEED:
+            case GamePalConstants.EVENT_CODE_HEAL:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
+            case GamePalConstants.EVENT_CODE_BLOCK:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
                 break;
             default:
@@ -382,44 +384,5 @@ public class PlayerUtil {
                 break;
         }
         return newBlock;
-    }
-
-    public static WorldEvent updateEvent(WorldEvent oldEvent) {
-        WorldEvent newEvent = new WorldEvent();
-        copyWorldCoordinate(oldEvent, newEvent);
-        newEvent.setUserCode(oldEvent.getUserCode());
-        newEvent.setCode(oldEvent.getCode());
-        newEvent.setFrame(oldEvent.getFrame());
-        int period = 1;
-        boolean isInfinite = false;
-        switch (oldEvent.getCode()) {
-            case GamePalConstants.EVENT_CODE_FIRE:
-                period = 3;
-                isInfinite = true;
-                break;
-            case GamePalConstants.EVENT_CODE_HIT:
-            case GamePalConstants.EVENT_CODE_HIT_FIRE:
-            case GamePalConstants.EVENT_CODE_HIT_ICE:
-            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
-            case GamePalConstants.EVENT_CODE_UPGRADE:
-            case GamePalConstants.EVENT_CODE_SHOOT:
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-            case GamePalConstants.EVENT_CODE_BLEED:
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_HEAL:
-            default:
-                period = 25;
-                isInfinite = false;
-                break;
-        }
-        newEvent.setFrame(newEvent.getFrame() + 1);
-        if (newEvent.getFrame() >= period) {
-            if (isInfinite) {
-                newEvent.setFrame(newEvent.getFrame() - period);
-            } else {
-                return null;
-            }
-        }
-        return newEvent;
     }
 }

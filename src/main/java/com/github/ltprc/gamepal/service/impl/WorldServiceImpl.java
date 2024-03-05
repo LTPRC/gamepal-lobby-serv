@@ -10,6 +10,7 @@ import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
+import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
@@ -41,6 +42,9 @@ public class WorldServiceImpl implements WorldService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PlayerService playerService;
+
     @Override
     public Map<String, GameWorld> getWorldMap() {
         return worldMap;
@@ -65,9 +69,9 @@ public class WorldServiceImpl implements WorldService {
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1019));
         }
-        world.getOnlineMap().entrySet().forEach(entry -> {
-            userService.logoff(entry.getKey(), "", false);
-        });
+        world.getOnlineMap().entrySet().forEach(entry ->
+            userService.logoff(entry.getKey(), "", false)
+        );
         worldMap.remove(worldCode);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -126,15 +130,15 @@ public class WorldServiceImpl implements WorldService {
                             Integer value = blockRow.getInteger(j);
                             Block block = new Block();
                             switch (value / 10000) {
-                                case 1:
-                                default:
-                                    block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
-                                    break;
                                 case 2:
                                     block.setType(GamePalConstants.BLOCK_TYPE_WALL);
                                     break;
                                 case 3:
                                     block.setType(GamePalConstants.BLOCK_TYPE_CEILING);
+                                    break;
+                                case 1:
+                                default:
+                                    block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
                                     break;
                             }
                             block.setCode(String.valueOf(value % 10000));
@@ -276,6 +280,8 @@ public class WorldServiceImpl implements WorldService {
                     Item item = JSON.parseObject(String.valueOf(itemObj),Item.class);
                     itemMap.put(item.getItemNo(), item);
                     break;
+                default:
+                    break;
             }
         });
     }
@@ -291,9 +297,9 @@ public class WorldServiceImpl implements WorldService {
                     consumable.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
                     consumable.setDescription(((JSONObject) entry.getValue()).getString("description"));
                     JSONObject effects = ((JSONObject) entry.getValue()).getJSONObject("effects");
-                    effects.entrySet().stream().forEach(entry2 -> {
-                        consumable.getEffects().put(String.valueOf(entry2.getKey()), (int) entry2.getValue());
-                    });
+                    effects.entrySet().stream().forEach(entry2 ->
+                        consumable.getEffects().put(String.valueOf(entry2.getKey()), (int) entry2.getValue())
+                    );
                     itemMap.put(consumable.getItemNo(), consumable);
                     break;
                 case GamePalConstants.ITEM_CHARACTER_JUNK:
@@ -303,9 +309,9 @@ public class WorldServiceImpl implements WorldService {
                     junk.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
                     junk.setDescription(((JSONObject) entry.getValue()).getString("description"));
                     JSONObject materials = ((JSONObject) entry.getValue()).getJSONObject("materials");
-                    materials.entrySet().stream().forEach(entry2 -> {
-                        junk.getMaterials().put(String.valueOf(entry2.getKey()), (int) entry2.getValue());
-                    });
+                    materials.entrySet().stream().forEach(entry2 ->
+                        junk.getMaterials().put(String.valueOf(entry2.getKey()), (int) entry2.getValue())
+                    );
                     itemMap.put(junk.getItemNo(), junk);
                     break;
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
@@ -319,6 +325,8 @@ public class WorldServiceImpl implements WorldService {
                     item.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
                     item.setDescription(((JSONObject) entry.getValue()).getString("description"));
                     itemMap.put(item.getItemNo(), item);
+                    break;
+                default:
                     break;
             }
         });
@@ -351,16 +359,16 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void updateEvents(GameWorld world) {
         // Clear events from scene 24/02/16
-        regionMap.entrySet().stream().forEach(region -> {
-            region.getValue().getScenes().entrySet().forEach(scene -> {
-                scene.getValue().setEvents(new ArrayList<>());
-            });
-        });
+        regionMap.entrySet().stream().forEach(region ->
+            region.getValue().getScenes().entrySet().forEach(scene ->
+                scene.getValue().setEvents(new ArrayList<>())
+            )
+        );
         Queue<WorldEvent> eventQueue = world.getEventQueue();
         WorldEvent tailEvent = new WorldEvent();
         eventQueue.add(tailEvent);
         while (tailEvent != eventQueue.peek()) {
-            WorldEvent newEvent = PlayerUtil.updateEvent(eventQueue.poll());
+            WorldEvent newEvent = updateEvent(eventQueue.poll());
             if (null != newEvent) {
                 eventQueue.add(newEvent);
                 if (!regionMap.containsKey(newEvent.getRegionNo())) {
@@ -381,5 +389,54 @@ public class WorldServiceImpl implements WorldService {
             }
         }
         eventQueue.poll();
+    }
+
+    private WorldEvent updateEvent(WorldEvent oldEvent) {
+        WorldEvent newEvent = new WorldEvent();
+        newEvent.setUserCode(oldEvent.getUserCode());
+        newEvent.setCode(oldEvent.getCode());
+        // Set location 24/03/05
+        switch (oldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_HEAL:
+                PlayerUtil.copyWorldCoordinate(playerService.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
+                break;
+            default:
+                PlayerUtil.copyWorldCoordinate(oldEvent, newEvent);
+                break;
+        }
+        // Set period
+        newEvent.setFrame(oldEvent.getFrame());
+        int period = 1;
+        boolean isInfinite = false;
+        switch (oldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_FIRE:
+                period = 3;
+                isInfinite = true;
+                break;
+            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_HIT_FIRE:
+            case GamePalConstants.EVENT_CODE_HIT_ICE:
+            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
+            case GamePalConstants.EVENT_CODE_UPGRADE:
+            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+            case GamePalConstants.EVENT_CODE_BLEED:
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_HEAL:
+            default:
+                period = 25;
+                isInfinite = false;
+                break;
+        }
+        newEvent.setFrame(newEvent.getFrame() + 1);
+        if (newEvent.getFrame() >= period) {
+            if (isInfinite) {
+                newEvent.setFrame(newEvent.getFrame() - period);
+            } else {
+                return null;
+            }
+        }
+        return newEvent;
     }
 }

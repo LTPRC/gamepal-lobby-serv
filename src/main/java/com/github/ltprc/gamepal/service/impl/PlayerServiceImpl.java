@@ -598,6 +598,8 @@ public class PlayerServiceImpl implements PlayerService {
                         worldService.addEvent(userCode, event);
                         break;
                     case GamePalConstants.SKILL_CODE_HEAL:
+                        // Subtracted 0.01 for event under player's feet 24/03/05
+                        event.getCoordinate().setY(event.getCoordinate().getY().subtract(BigDecimal.valueOf(0.01)));
                         PlayerUtil.fixWorldCoordinate(event, worldService.getRegionMap().get(event.getRegionNo()));
                         event.setType(GamePalConstants.EVENT_CODE_HEAL);
                         worldService.addEvent(userCode, event);
