@@ -11,4 +11,6 @@ public class Event extends Coordinate {
     private String userCode;
     private int code;
     private int frame;
+    private int frameMax;
+    private int period;
 }

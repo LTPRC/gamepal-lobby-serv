@@ -172,7 +172,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 JSONObject useDrop = functions.getJSONObject("useDrop");
                 String id = useDrop.getString("id");
                 if (!world.getBlockMap().containsKey(id)) {
-                    logger.warn(ErrorUtil.ERROR_1012);
+                    logger.warn(ErrorUtil.ERROR_1030);
                 } else {
                     WorldDrop worldDrop = (WorldDrop) world.getBlockMap().get(id);
                     playerService.getItem(userCode, worldDrop.getItemNo(), worldDrop.getAmount());
@@ -361,11 +361,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                 });
                 // Generate blocks from scene events 24/02/16
                 scene.getEvents().stream().forEach(event -> {
+                    // TODO Check existing event
                     Block newBlock = PlayerUtil.generateBlockByEvent(event);
                     PlayerUtil.adjustCoordinate(newBlock,
                             PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
                             BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    // TODO Check event
                     rankingQueue.add(newBlock);
                 });
             }

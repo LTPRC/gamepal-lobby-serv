@@ -336,6 +336,8 @@ public class PlayerUtil {
         newEvent.setUserCode(worldEvent.getUserCode());
         newEvent.setCode(worldEvent.getCode());
         newEvent.setFrame(worldEvent.getFrame());
+        newEvent.setFrameMax(worldEvent.getFrameMax());
+        newEvent.setPeriod(worldEvent.getPeriod());
         newEvent.setX(worldEvent.getCoordinate().getX());
         newEvent.setY(worldEvent.getCoordinate().getY());
         return newEvent;

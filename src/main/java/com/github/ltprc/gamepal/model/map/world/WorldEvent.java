@@ -11,4 +11,6 @@ public class WorldEvent extends WorldCoordinate {
     private String userCode;
     private int code;
     private int frame;
+    private int frameMax;
+    private int period;
 }

@@ -352,6 +352,29 @@ public class WorldServiceImpl implements WorldService {
         event.setUserCode(userCode);
         event.setCode(eventBlock.getType());
         event.setFrame(0);
+        int period = 1;
+        int frameMax = -1; // infinite event
+        switch (eventBlock.getType()) {
+            case GamePalConstants.EVENT_CODE_FIRE:
+                period = 3;
+                break;
+            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_HIT_FIRE:
+            case GamePalConstants.EVENT_CODE_HIT_ICE:
+            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
+            case GamePalConstants.EVENT_CODE_UPGRADE:
+            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+            case GamePalConstants.EVENT_CODE_BLEED:
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_HEAL:
+            default:
+                period = 25;
+                frameMax = 25;
+                break;
+        }
+        event.setFrameMax(frameMax);
+        event.setPeriod(period);
         world.getEventQueue().add(event);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -405,34 +428,12 @@ public class WorldServiceImpl implements WorldService {
                 PlayerUtil.copyWorldCoordinate(oldEvent, newEvent);
                 break;
         }
-        // Set period
-        newEvent.setFrame(oldEvent.getFrame());
-        int period = 1;
-        boolean isInfinite = false;
-        switch (oldEvent.getCode()) {
-            case GamePalConstants.EVENT_CODE_FIRE:
-                period = 3;
-                isInfinite = true;
-                break;
-            case GamePalConstants.EVENT_CODE_HIT:
-            case GamePalConstants.EVENT_CODE_HIT_FIRE:
-            case GamePalConstants.EVENT_CODE_HIT_ICE:
-            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
-            case GamePalConstants.EVENT_CODE_UPGRADE:
-            case GamePalConstants.EVENT_CODE_SHOOT:
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-            case GamePalConstants.EVENT_CODE_BLEED:
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_HEAL:
-            default:
-                period = 25;
-                isInfinite = false;
-                break;
-        }
-        newEvent.setFrame(newEvent.getFrame() + 1);
-        if (newEvent.getFrame() >= period) {
-            if (isInfinite) {
-                newEvent.setFrame(newEvent.getFrame() - period);
+        newEvent.setFrame(oldEvent.getFrame() + 1);
+        newEvent.setFrameMax(oldEvent.getFrameMax());
+        newEvent.setPeriod(oldEvent.getPeriod());
+        if (newEvent.getFrame() >= newEvent.getPeriod()) {
+            if (newEvent.getFrameMax() == -1) {
+                newEvent.setFrame(newEvent.getFrame() - newEvent.getPeriod());
             } else {
                 return null;
             }
