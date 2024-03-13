@@ -58,6 +58,11 @@ public class GamePalConstants {
     public static final char ITEM_CHARACTER_JUNK = 'j';
     public static final char ITEM_CHARACTER_NOTE = 'n';
     public static final char ITEM_CHARACTER_RECORDING = 'r';
+    public static final int TOOL_INDEX_DEFAULT = 0;
+    public static final int TOOL_INDEX_ONE_HANDED = 1;
+    public static final int TOOL_INDEX_TWO_HANDED = 2;
+    public static final int OUTFIT_INDEX_DEFAULT = 0;
+    public static final int OUTFIT_INDEX_CLOTHES = 1;
 
     public static final String FLAG_UPDATE_ITEMS = "updateItems";
     public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";

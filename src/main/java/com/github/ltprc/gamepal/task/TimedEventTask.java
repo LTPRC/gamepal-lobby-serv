@@ -46,22 +46,20 @@ public class TimedEventTask {
                     .forEach(entry2 -> {
                         String userCode = entry2.getKey();
                         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
-                            if (playerInfoMap.get(userCode).getBuff()[i] > 0) {
-                                playerInfoMap.get(userCode).getBuff()[i] = playerInfoMap.get(userCode).getBuff()[i] - 1;
-                                switch (i) {
-                                    case  GamePalConstants.BUFF_CODE_DEAD:
-                                        if (playerInfoMap.get(userCode).getBuff()[i] == 0) {
-                                            playerService.changeHp(userCode, playerInfoMap.get(userCode).getHpMax(), true);
-                                            playerService.changeVp(userCode, playerInfoMap.get(userCode).getVpMax(), true);
-                                            playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
-                                            playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
-                                            playerService.generateNotificationMessage(userCode, "复活成功。");
-                                        } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
-                                            playerService.generateNotificationMessage(userCode, "距离复活还有"
-                                                    + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");
-                                        }
-                                    default:
-                                        break;
+                            if (playerInfoMap.get(userCode).getBuff()[i] <= 0) {
+                                break;
+                            }
+                            playerInfoMap.get(userCode).getBuff()[i] = playerInfoMap.get(userCode).getBuff()[i] - 1;
+                            if (i == GamePalConstants.BUFF_CODE_DEAD) {
+                                if (playerInfoMap.get(userCode).getBuff()[i] == 0) {
+                                    playerService.changeHp(userCode, playerInfoMap.get(userCode).getHpMax(), true);
+                                    playerService.changeVp(userCode, playerInfoMap.get(userCode).getVpMax(), true);
+                                    playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
+                                    playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
+                                    playerService.generateNotificationMessage(userCode, "复活成功。");
+                                } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
+                                    playerService.generateNotificationMessage(userCode, "距离复活还有"
+                                            + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");
                                 }
                             }
                         }

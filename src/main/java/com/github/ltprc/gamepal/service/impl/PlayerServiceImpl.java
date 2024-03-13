@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -42,7 +43,7 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Integer RELATION_INIT = 0;
     private static final Integer RELATION_MIN = -100;
     private static final Integer RELATION_MAX = 100;
-    private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
+    private static final Log logger = LogFactory.getLog(PlayerServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
     private Set<String> flagSet = new ConcurrentHashSet<>();
@@ -71,18 +72,12 @@ public class PlayerServiceImpl implements PlayerService {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        if (!relationMap.containsKey(userCode)) {
-            relationMap.put(userCode, new ConcurrentHashMap<>());
-        }
-        if (!relationMap.containsKey(nextUserCode)) {
-            relationMap.put(nextUserCode, new ConcurrentHashMap<>());
-        }
-        if (!relationMap.get(userCode).containsKey(nextUserCode)) {
-            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
-        }
-        if (!relationMap.get(nextUserCode).containsKey(userCode)) {
-            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
-        }
+        relationMap.computeIfAbsent(userCode, k -> relationMap.put(k, new ConcurrentHashMap<>()));
+        relationMap.computeIfAbsent(nextUserCode, k -> relationMap.put(k, new ConcurrentHashMap<>()));
+        relationMap.get(userCode).computeIfAbsent(nextUserCode, k ->
+                relationMap.get(userCode).put(k, RELATION_INIT));
+        relationMap.get(nextUserCode).computeIfAbsent(userCode, k ->
+                relationMap.get(nextUserCode).put(k, RELATION_INIT));
         if (!isAbsolute) {
             newRelation += relationMap.get(userCode).get(nextUserCode);
         }
@@ -246,18 +241,38 @@ public class PlayerServiceImpl implements PlayerService {
         }
         switch (itemNo.charAt(0)) {
             case GamePalConstants.ITEM_CHARACTER_TOOL:
+                int toolIndex = worldService.getItemMap().get(itemNo).getItemIndex();
+                Set<String> newTools = new ConcurrentSkipListSet<>();
                 if (playerInfo.getTools().contains(itemNo)) {
-                    playerInfo.getTools().clear();
+                    playerInfo.getTools().stream()
+                            .filter(toolNo -> !itemNo.equals(toolNo))
+                            .forEach(newTools::add);
+                    playerInfo.setTools(newTools);
+                } else if (toolIndex != GamePalConstants.TOOL_INDEX_DEFAULT){
+                    playerInfo.getTools().stream()
+                            .filter(toolNo -> toolIndex != worldService.getItemMap().get(toolNo).getItemIndex())
+                            .forEach(newTools::add);
+                    playerInfo.setTools(newTools);
+                    playerInfo.getTools().add(itemNo);
                 } else {
-                    playerInfo.getTools().clear();
                     playerInfo.getTools().add(itemNo);
                 }
                 break;
             case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                int outfitIndex = worldService.getItemMap().get(itemNo).getItemIndex();
+                Set<String> newOutfits = new ConcurrentSkipListSet<>();
                 if (playerInfo.getOutfits().contains(itemNo)) {
-                    playerInfo.getOutfits().clear();
+                    playerInfo.getOutfits().stream()
+                            .filter(outfitNo -> !itemNo.equals(outfitNo))
+                            .forEach(newOutfits::add);
+                    playerInfo.setOutfits(newOutfits);
+                } else if (outfitIndex != GamePalConstants.OUTFIT_INDEX_DEFAULT){
+                    playerInfo.getOutfits().stream()
+                            .filter(outfitNo -> outfitIndex != worldService.getItemMap().get(outfitNo).getItemIndex())
+                            .forEach(newOutfits::add);
+                    playerInfo.setOutfits(newOutfits);
+                    playerInfo.getOutfits().add(itemNo);
                 } else {
-                    playerInfo.getOutfits().clear();
                     playerInfo.getOutfits().add(itemNo);
                 }
                 break;
@@ -268,9 +283,8 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case GamePalConstants.ITEM_CHARACTER_JUNK:
                 getItem(userCode, itemNo, -1);
-                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet().stream().forEach(entry -> {
-                    getItem(userCode, entry.getKey(), entry.getValue());
-                });
+                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet().stream()
+                        .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue()));
                 break;
             case GamePalConstants.ITEM_CHARACTER_NOTE:
                 break;
@@ -291,12 +305,8 @@ public class PlayerServiceImpl implements PlayerService {
         int oldItemAmount = playerInfo.getItems().getOrDefault(itemNo, 0);
         playerInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (playerInfo.getItems().get(itemNo) == 0) {
-            if (playerInfo.getTools().contains(itemNo)){
-                playerInfo.getTools().clear();
-            }
-            if (playerInfo.getOutfits().contains(itemNo)){
-                playerInfo.getOutfits().clear();
-            }
+            playerInfo.getTools().remove(itemNo);
+            playerInfo.getOutfits().remove(itemNo);
         }
         BigDecimal capacity = playerInfo.getCapacity();
         playerInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
@@ -373,7 +383,7 @@ public class PlayerServiceImpl implements PlayerService {
         JSONObject rst = ContentUtil.generateRst();
         for (int i = 0; i < itemAmount; i++) {
             ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet().stream()
-                    .forEach(entry -> {
+                    .forEach((Map.Entry<String, Integer> entry) -> {
                         switch (entry.getKey()) {
                             case "hp":
                                 changeHp(userCode, entry.getValue(), false);
@@ -577,6 +587,7 @@ public class PlayerServiceImpl implements PlayerService {
                     generateEventBySkill(userCode, skillNo);
                 }
             } else if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_AUTO) {
+                // Nothing
             } else {
                 logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo][1]);
             }
@@ -599,16 +610,16 @@ public class PlayerServiceImpl implements PlayerService {
         eventBlock.setCoordinate(newCoordinate);
         switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
             case GamePalConstants.SKILL_CODE_SHOOT:
-                newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                newCoordinate.setX(newCoordinate.getX().add(BigDecimal.valueOf((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                newCoordinate.setY(newCoordinate.getY().subtract(BigDecimal.valueOf((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.setCoordinate(newCoordinate);
                 PlayerUtil.fixWorldCoordinate(eventBlock, worldService.getRegionMap().get(eventBlock.getRegionNo()));
                 eventBlock.setType(GamePalConstants.EVENT_CODE_SHOOT);
                 worldService.addEvent(userCode, eventBlock);
                 break;
             case GamePalConstants.SKILL_CODE_HIT:
-                newCoordinate.setX(newCoordinate.getX().add(new BigDecimal((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                newCoordinate.setY(newCoordinate.getY().subtract(new BigDecimal((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                newCoordinate.setX(newCoordinate.getX().add(BigDecimal.valueOf((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                newCoordinate.setY(newCoordinate.getY().subtract(BigDecimal.valueOf((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.setCoordinate(newCoordinate);
                 PlayerUtil.fixWorldCoordinate(eventBlock, worldService.getRegionMap().get(eventBlock.getRegionNo()));
                 eventBlock.setType(GamePalConstants.EVENT_CODE_HIT);

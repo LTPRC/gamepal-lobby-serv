@@ -14,4 +14,5 @@ public class Item {
     private String name;
     private BigDecimal weight;
     private String description;
+    private int itemIndex;
 }
