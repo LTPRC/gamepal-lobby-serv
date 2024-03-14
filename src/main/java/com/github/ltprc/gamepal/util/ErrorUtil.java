@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.util;
 import com.github.ltprc.gamepal.model.GamepalError;
 
 public class ErrorUtil {
+    private ErrorUtil() {}
     public static final String CODE_SUCCESS = "0200";
     public static final GamepalError ERROR_1001 = new GamepalError("1001", "Generating UUID code failed.");
     public static final GamepalError ERROR_1002 = new GamepalError("1002", "Validating and converting request failed.");
@@ -31,7 +32,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1025 = new GamepalError("1025", "Game type is not supported.");
     public static final GamepalError ERROR_1026 = new GamepalError("1026", "Game status is not supported.");
     public static final GamepalError ERROR_1027 = new GamepalError("1027", "Invalid regionNo.");
-    public static final GamepalError ERROR_1028 = new GamepalError("1028", "Invalid sceneCoordinate.");
+    public static final GamepalError ERROR_1028 = new GamepalError("1028", "Invalid skillNo.");
     public static final GamepalError ERROR_1029 = new GamepalError("1029", "Invalid skillMode.");
     public static final GamepalError ERROR_1030 = new GamepalError("1030", "Invalid drop id.");
 }

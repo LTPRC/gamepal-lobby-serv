@@ -16,6 +16,8 @@ import com.alibaba.fastjson.JSONObject;
 
 public class ContentUtil {
 
+    private ContentUtil() {}
+
     public static JSONObject request2JSONObject(HttpServletRequest request) throws IOException {
         BufferedReader br = request.getReader();
         String str = "";

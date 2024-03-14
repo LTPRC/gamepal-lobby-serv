@@ -245,7 +245,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Static information
         if (webStage == GamePalConstants.WEB_STAGE_START) {
             JSONObject itemsObj = new JSONObject();
-            worldService.getItemMap().forEach((key, value) -> itemsObj.put(key, value));
+            itemsObj.putAll(worldService.getItemMap());
             rst.put("items", itemsObj);
             playerService.getFlagSet().add(GamePalConstants.FLAG_UPDATE_ITEMS);
             playerService.getFlagSet().add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
@@ -275,7 +275,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Return flags
         JSONArray flags = new JSONArray();
-        playerService.getFlagSet().stream().forEach(flag -> flags.add(flag));
+        playerService.getFlagSet().stream().forEach(flags::add);
         rst.put("flags", flags);
         playerService.getFlagSet().clear();
 
@@ -330,20 +330,17 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONArray blocks = new JSONArray();
         // Put floors and collect walls
         IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
-        Queue<Block> rankingQueue = new PriorityQueue<>(new Comparator<Block>() {
-            @Override
-            public int compare(Block o1, Block o2) {
-                IntegerCoordinate level1 = PlayerUtil.ConvertBlockType2Level(o1.getType());
-                IntegerCoordinate level2 = PlayerUtil.ConvertBlockType2Level(o2.getType());
-                if (level1.getX() != level2.getX()) {
-                    return level1.getX() - level2.getX();
-                }
-                // Please use equals() instead of == 24/02/10
-                if (!o1.getY().equals(o2.getY())) {
-                    return o1.getY().compareTo(o2.getY());
-                }
-                return level1.getY() - level2.getY();
+        Queue<Block> rankingQueue = new PriorityQueue<>((o1, o2) -> {
+            IntegerCoordinate level1 = PlayerUtil.ConvertBlockType2Level(o1.getType());
+            IntegerCoordinate level2 = PlayerUtil.ConvertBlockType2Level(o2.getType());
+            if (!Objects.equals(level1.getX(), level2.getX())) {
+                return level1.getX() - level2.getX();
             }
+            // Please use equals() instead of == 24/02/10
+            if (!o1.getY().equals(o2.getY())) {
+                return o1.getY().compareTo(o2.getY());
+            }
+            return level1.getY() - level2.getY();
         });
         for (int i = sceneCoordinate.getY() - 2; i <= sceneCoordinate.getY() + 2; i++) {
             for (int j = sceneCoordinate.getX() - 2; j <= sceneCoordinate.getX() + 2; j++) {

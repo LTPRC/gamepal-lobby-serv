@@ -30,7 +30,7 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 @Service
 public class MessageServiceImpl implements MessageService {
 
-    private static final Log logger = LogFactory.getLog(UserServiceImpl.class);
+    private static final Log logger = LogFactory.getLog(MessageServiceImpl.class);
     private Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // userCode, message queue
 
     @Autowired

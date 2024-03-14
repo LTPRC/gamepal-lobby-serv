@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class LasVegasGameUtil {
+    private LasVegasGameUtil() {}
     private static final Log logger = LogFactory.getLog(LasVegasGameUtil.class);
     public static LasVegasGame getInstance() {
         LasVegasGame lasVegasGame = new LasVegasGame();

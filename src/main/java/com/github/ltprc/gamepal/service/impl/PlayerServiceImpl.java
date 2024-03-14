@@ -216,7 +216,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Map<String, Integer> getRelationMapByUserCode(String userCode) {
         if (!relationMap.containsKey(userCode)) {
-            relationMap.put(userCode, new ConcurrentHashMap<String, Integer>());
+            relationMap.put(userCode, new ConcurrentHashMap<>());
         }
         return relationMap.get(userCode);
     }
@@ -566,6 +566,10 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public ResponseEntity useSkill(String userCode, int skillNo, boolean isDown) {
         JSONObject rst = ContentUtil.generateRst();
+        if (null == playerInfoMap.get(userCode).getSkill() || playerInfoMap.get(userCode).getSkill().length <= skillNo) {
+            logger.error(ErrorUtil.ERROR_1028 + " skillNo: " + skillNo);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1028));
+        }
         if (isDown) {
             // Skill button is pushed down
             if (playerInfoMap.get(userCode).getSkill()[skillNo][2] == 0) {
