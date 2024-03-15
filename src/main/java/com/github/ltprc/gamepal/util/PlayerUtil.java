@@ -366,6 +366,11 @@ public class PlayerUtil {
         newBlock.setId(String.valueOf(event.getFrame()));
         newBlock.setCode(String.valueOf(event.getCode()));
         switch (event.getCode()) {
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_BLEED:
+                newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
+                break;
             case GamePalConstants.EVENT_CODE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
@@ -373,14 +378,7 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_UPGRADE:
             case GamePalConstants.EVENT_CODE_FIRE:
             case GamePalConstants.EVENT_CODE_SHOOT:
-            case GamePalConstants.EVENT_CODE_BLEED:
             case GamePalConstants.EVENT_CODE_HEAL:
-                newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
-                break;
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-            case GamePalConstants.EVENT_CODE_BLOCK:
-                newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
-                break;
             default:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;

@@ -1,7 +1,8 @@
 [
-  {"itemNo": "t001", "name": "小米手机", "weight": 0.1, "description": "", "itemIndex": 1},
-  {"itemNo": "t002", "name": "三星手机", "weight": 0.1, "description": "", "itemIndex": 1},
-  {"itemNo": "t003", "name": "诺基亚手机", "weight": 0.1, "description": "", "itemIndex": 1},
+  {"itemNo": "t001", "name": "G19手枪", "weight": 0.6, "description": "", "itemIndex": 1},
+  {"itemNo": "t002", "name": "AK47突击步枪", "weight": 4.3, "description": "", "itemIndex": 1},
+  {"itemNo": "t003", "name": "R870霰弹枪", "weight": 3.5, "description": "", "itemIndex": 1},
+  {"itemNo": "t004", "name": "P90冲锋枪", "weight": 2.5, "description": "", "itemIndex": 1},
   {"itemNo": "a001", "name": "秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},
   {"itemNo": "c001", "name": "血浆", "weight": 0.5, "description": "", "effects": {"hp": 50}},
   {"itemNo": "c002", "name": "肾上腺素", "weight": 0.1, "description": "", "effects": {"vp": 50}},

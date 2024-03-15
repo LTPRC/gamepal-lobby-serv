@@ -2,6 +2,8 @@ package com.github.ltprc.gamepal.config;
 
 public class GamePalConstants {
 
+    private GamePalConstants() {}
+
     // Frontend constants
 
     public static final int WEB_STAGE_START = 0;
@@ -59,8 +61,8 @@ public class GamePalConstants {
     public static final char ITEM_CHARACTER_NOTE = 'n';
     public static final char ITEM_CHARACTER_RECORDING = 'r';
     public static final int TOOL_INDEX_DEFAULT = 0;
-    public static final int TOOL_INDEX_ONE_HANDED = 1;
-    public static final int TOOL_INDEX_TWO_HANDED = 2;
+    public static final int TOOL_INDEX_PRIMARY = 1;
+    public static final int TOOL_INDEX_SECONDARY = 2;
     public static final int OUTFIT_INDEX_DEFAULT = 0;
     public static final int OUTFIT_INDEX_CLOTHES = 1;
 

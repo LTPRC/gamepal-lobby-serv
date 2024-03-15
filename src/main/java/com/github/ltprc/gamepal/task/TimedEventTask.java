@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -47,7 +48,7 @@ public class TimedEventTask {
                         String userCode = entry2.getKey();
                         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
                             if (playerInfoMap.get(userCode).getBuff()[i] <= 0) {
-                                break;
+                                continue;
                             }
                             playerInfoMap.get(userCode).getBuff()[i] = playerInfoMap.get(userCode).getBuff()[i] - 1;
                             if (i == GamePalConstants.BUFF_CODE_DEAD) {
@@ -57,6 +58,9 @@ public class TimedEventTask {
                                     playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
                                     playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
                                     playerService.generateNotificationMessage(userCode, "复活成功。");
+                                    WorldBlock healEventBlock = playerService.generateEventByUserCode(userCode);
+                                    healEventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
+                                    worldService.addEvent(userCode, healEventBlock);
                                 } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
                                     playerService.generateNotificationMessage(userCode, "距离复活还有"
                                             + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");
@@ -75,7 +79,7 @@ public class TimedEventTask {
                         double randomNumber;
 
                         // Change hp
-//                        playerService.changeHp(entry2.getKey(), -1, false);
+//                        playerService.changeHp(entry2.getKey(), -10, false);
 
                         // Change vp
                         int newVp = 1;
