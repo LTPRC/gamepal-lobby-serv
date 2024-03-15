@@ -286,6 +286,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        // All playerInfos are provided, but only blocks of running players or player himself will be collected 24/03/16
         rst.put("playerInfos", playerInfoMap);
         // Return relations
         JSONObject relations = new JSONObject();
@@ -342,39 +343,47 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             return level1.getY() - level2.getY();
         });
-        for (int i = sceneCoordinate.getY() - 2; i <= sceneCoordinate.getY() + 2; i++) {
-            for (int j = sceneCoordinate.getX() - 2; j <= sceneCoordinate.getX() + 2; j++) {
+        // Collect blocks from MAP_RADIUS * MAP_RADIUS scenes 24/03/16
+        for (int i = sceneCoordinate.getY() - GamePalConstants.MAP_RADIUS;
+             i <= sceneCoordinate.getY() + GamePalConstants.MAP_RADIUS; i++) {
+            for (int j = sceneCoordinate.getX() - GamePalConstants.MAP_RADIUS;
+                 j <= sceneCoordinate.getX() + GamePalConstants.MAP_RADIUS; j++) {
                 Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
                 if (null == scene) {
                     continue;
                 }
-                // Collect blocks from 25 scenes 24/02/10
-                scene.getBlocks().stream().forEach(block -> {
-                    Block newBlock = PlayerUtil.copyBlock(block);
-                    PlayerUtil.adjustCoordinate(newBlock,
-                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
-                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(newBlock);
-                });
+                if (null != scene.getBlocks()) {
+                    scene.getBlocks().stream().forEach(block -> {
+                        Block newBlock = PlayerUtil.copyBlock(block);
+                        PlayerUtil.adjustCoordinate(newBlock,
+                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                                BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                        rankingQueue.add(newBlock);
+                    });
+                }
                 // Generate blocks from scene events 24/02/16
-                scene.getEvents().stream().forEach(event -> {
-                    // TODO Check existing event
-                    Block newBlock = PlayerUtil.generateBlockByEvent(event);
-                    PlayerUtil.adjustCoordinate(newBlock,
-                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
-                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(newBlock);
-                });
+                if (null != scene.getEvents()) {
+                    scene.getEvents().stream().forEach(event -> {
+                        Block newBlock = PlayerUtil.generateBlockByEvent(event);
+                        PlayerUtil.adjustCoordinate(newBlock,
+                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                                BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
+                        rankingQueue.add(newBlock);
+                    });
+                }
             }
         }
         // Collect detected playerInfos
-        // Player block is included 23/09/01
         playerInfoMap.entrySet().stream()
+                // Detected
                 .filter(entry -> {
                     IntegerCoordinate integerCoordinate
                             = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
-                    return Math.abs(integerCoordinate.getX()) <= 1 && Math.abs(integerCoordinate.getY()) <= 1;
+                    return Math.abs(integerCoordinate.getX()) <= GamePalConstants.MAP_RADIUS
+                            && Math.abs(integerCoordinate.getY()) <= GamePalConstants.MAP_RADIUS;
                 })
+                // playerInfos contains running players only 24/03/16
+                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(entry -> {
                     Block block = new Block();
                     block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);

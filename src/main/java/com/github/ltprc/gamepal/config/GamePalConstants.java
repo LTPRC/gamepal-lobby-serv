@@ -1,5 +1,7 @@
 package com.github.ltprc.gamepal.config;
 
+import java.math.BigDecimal;
+
 public class GamePalConstants {
 
     private GamePalConstants() {}
@@ -43,6 +45,8 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_HOLLOW_WALL = 18;
     public static final int BLOCK_TYPE_BLOCKED_CEILING = 19;
 
+    public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+
     public static final int INTERACTION_USE = 0;
     public static final int INTERACTION_EXCHANGE = 1;
     public static final int INTERACTION_SLEEP = 2;
@@ -84,6 +88,17 @@ public class GamePalConstants {
     public static final int EVENT_CODE_BLOCK = 110;
     public static final int EVENT_CODE_HEAL = 111;
 
+    public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
+    public static final BigDecimal EVENT_MAX_DISTANCE_HIT = BigDecimal.ONE;
+    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT = BigDecimal.valueOf(10);
+    public static final BigDecimal EVENT_MAX_ANGLE_HIT = BigDecimal.valueOf(120D);
+    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(5);
+    public static final int EVENT_DAMAGE_PER_FRAME_FIRE = 1;
+    public static final int EVENT_DAMAGE_HIT = 10;
+    public static final int EVENT_DAMAGE_SHOOT = 200;
+    public static final int EVENT_DAMAGE_EXPLODE = 500;
+    public static final int EVENT_HEAL_HEAL = 100;
+
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;
     public static final int BUFF_CODE_BLEEDING = 3;
@@ -104,6 +119,8 @@ public class GamePalConstants {
     public static final int SKILL_MODE_AUTO = 1;
 
     // Backend constants
+
+    public static final int MAP_RADIUS = 2;
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;
     public static final int LAYER_BOTTOM = 1;

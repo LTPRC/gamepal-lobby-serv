@@ -5,6 +5,7 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class PlayerUtil {
 
@@ -220,7 +221,7 @@ public class PlayerUtil {
      * @param type
      * @return
      */
-    public static IntegerCoordinate ConvertBlockType2LevelOld(int type) {
+    public static IntegerCoordinate convertBlockType2LevelOld(int type) {
         IntegerCoordinate rst = new IntegerCoordinate();
         switch (type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
@@ -384,5 +385,127 @@ public class PlayerUtil {
                 break;
         }
         return newBlock;
+    }
+
+    public static BigDecimal calculateDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        Coordinate c1 = new Coordinate();
+        c1.setX(wc1.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c1.setY(wc1.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c2 = new Coordinate();
+        c2.setX(wc2.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c2.setY(wc2.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        return calculateDistance(c1, c2);
+    }
+
+    public static BigDecimal calculateDistance(Coordinate c1, Coordinate c2) {
+        return BigDecimal.valueOf(Math.sqrt(Math.pow(c1.getX().subtract(c2.getX()).doubleValue(), 2)
+                + Math.pow(c1.getY().subtract(c2.getY()).doubleValue(), 2)));
+    }
+
+    public static BigDecimal calculateAngle(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        Coordinate c1 = new Coordinate();
+        c1.setX(wc1.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c1.setY(wc1.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c2 = new Coordinate();
+        c2.setX(wc2.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c2.setY(wc2.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        return calculateAngle(c1, c2);
+    }
+
+    /**
+     * calculateAngle from c1 to c2 based on x-axis
+     * @param c1
+     * @param c2
+     * @return in degrees
+     */
+    public static BigDecimal calculateAngle(Coordinate c1, Coordinate c2) {
+        if (c1.getX().equals(c2.getX())) {
+            switch (c1.getY().compareTo(c2.getY())) {
+                case 1:
+                    return BigDecimal.valueOf(90D);
+                case -1:
+                    return BigDecimal.valueOf(270D);
+                default:
+                    return BigDecimal.ZERO;
+            }
+        }
+        if (c1.getY().equals(c2.getY())) {
+            switch (c1.getX().compareTo(c2.getX())) {
+                case 1:
+                    return BigDecimal.valueOf(180D);
+                default:
+                    return BigDecimal.ZERO;
+            }
+        }
+        BigDecimal rst = BigDecimal.valueOf(Math.atan(c2.getY().subtract(c1.getY())
+                .divide(c1.getX().subtract(c2.getX()), 2, RoundingMode.HALF_UP).doubleValue()) / Math.PI * 180);
+        if (c1.getX().compareTo(c2.getX()) > 0) {
+            rst = rst.add(BigDecimal.valueOf(180D));
+        }
+        if (c1.getX().compareTo(c2.getX()) < 0 && c1.getY().compareTo(c2.getY()) < 0) {
+            rst = rst.add(BigDecimal.valueOf(360D));
+        }
+        return rst;
+    }
+
+    public static double compareAnglesInDegrees(double a1, double a2) {
+        while (a1 < 0) {
+            a1 += 360;
+        }
+        while (a1 >= 360) {
+            a1 -= 360;
+        }
+        while (a2 < 0) {
+            a2 += 360;
+        }
+        while (a2 >= 360) {
+            a2 -= 360;
+        }
+        return Math.abs(a2 - a1);
+    }
+
+    public static BigDecimal calculateBallisticDistance(RegionInfo regionInfo, WorldCoordinate wc1,
+                                                        BigDecimal ballisticAngle, WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        Coordinate c1 = new Coordinate();
+        c1.setX(wc1.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c1.setY(wc1.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c2 = new Coordinate();
+        c2.setX(wc2.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c2.setY(wc2.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        return calculateBallisticDistance(c1, ballisticAngle, c2);
+    }
+
+    public static BigDecimal calculateBallisticDistance(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
+        if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
+                || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
+            return c1.getX().subtract(c2.getX()).abs();
+        }
+        double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
+        return BigDecimal.valueOf(Math.abs(slope * c2.getX().doubleValue() - c2.getY().doubleValue()
+                + c1.getY().doubleValue() - slope * c1.getX().doubleValue()) / Math.sqrt(slope * slope + 1));
     }
 }

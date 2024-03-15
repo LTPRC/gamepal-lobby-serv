@@ -36,6 +36,8 @@ public interface PlayerService {
 
     ResponseEntity getPreservedItem(String userCode, String itemNo, int itemAmount);
 
+    ResponseEntity damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute);
+
     ResponseEntity changeHp(String userCode, int value, boolean isAbsolute);
 
     ResponseEntity changeVp(String userCode, int value, boolean isAbsolute);

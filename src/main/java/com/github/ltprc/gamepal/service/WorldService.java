@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;

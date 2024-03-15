@@ -340,6 +340,11 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public ResponseEntity damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute) {
+        return changeHp(userCode, value, isAbsolute);
+    }
+
+    @Override
     public ResponseEntity changeHp(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.Consumable;
 import com.github.ltprc.gamepal.model.item.Item;
@@ -415,6 +416,7 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private WorldEvent updateEvent(WorldEvent oldEvent) {
+        triggerEvent(oldEvent);
         WorldEvent newEvent = new WorldEvent();
         newEvent.setUserCode(oldEvent.getUserCode());
         newEvent.setCode(oldEvent.getCode());
@@ -439,5 +441,105 @@ public class WorldServiceImpl implements WorldService {
             }
         }
         return newEvent;
+    }
+
+    private void triggerEvent(WorldEvent worldEvent) {
+        switch (worldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_FIRE:
+                // Continuous event
+                break;
+            default:
+                // Immediate event
+                if (worldEvent.getFrame() != 0) {
+                    return;
+                }
+        }
+        switch (worldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_HEAL:
+                // Self event
+                playerService.changeHp(worldEvent.getUserCode(), GamePalConstants.EVENT_HEAL_HEAL, false);
+                break;
+            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_HIT_FIRE:
+            case GamePalConstants.EVENT_CODE_HIT_ICE:
+            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
+            case GamePalConstants.EVENT_CODE_SHOOT:
+                // Non-self event
+                playerService.getPlayerInfoMap().entrySet().stream()
+                        .filter(entry -> !entry.getValue().getId().equals(worldEvent.getUserCode())
+                                && entry.getValue().getRegionNo() == worldEvent.getRegionNo())
+                        .forEach(entry -> activateEvent(worldEvent, entry.getValue()));
+                break;
+            default:
+                // Global event
+                playerService.getPlayerInfoMap().entrySet().stream()
+                        .filter(entry -> entry.getValue().getRegionNo() == worldEvent.getRegionNo())
+                        .forEach(entry -> activateEvent(worldEvent, entry.getValue()));
+                break;
+        }
+    }
+
+    private void activateEvent(WorldEvent worldEvent, PlayerInfo playerInfo) {
+        PlayerInfo fromPlayerInfo = playerService.getPlayerInfoMap().get(worldEvent.getUserCode());
+        switch (worldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_FIRE:
+                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, playerInfo)
+                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_FIRE) <= 0) {
+                    playerService.damageHp(playerInfo.getId(), worldEvent.getUserCode(),
+                            -GamePalConstants.EVENT_DAMAGE_PER_FRAME_FIRE, false);
+                }
+                break;
+            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_HIT_FIRE:
+            case GamePalConstants.EVENT_CODE_HIT_ICE:
+            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
+                double angle1 = PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+                        playerInfo).doubleValue();
+                double angle2 = fromPlayerInfo.getFaceDirection().doubleValue();
+                double deltaAngle = PlayerUtil.compareAnglesInDegrees(angle1, angle2);
+                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, playerInfo)
+                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_HIT) <= 0
+                        && deltaAngle < GamePalConstants.EVENT_MAX_ANGLE_HIT.doubleValue()) {
+                    int damageValue = -GamePalConstants.EVENT_DAMAGE_HIT;
+                    if (userService.getWorldByUserCode(playerInfo.getId()).getEventQueue().stream()
+                            .anyMatch(event -> GamePalConstants.EVENT_CODE_BLOCK == event.getCode()
+                                    && playerInfo.getId().equals(event.getUserCode()))) {
+                        // This player is blocking 24/03/15
+                        damageValue /= 2;
+                    } else {
+                        WorldBlock bleedEventBlock = playerService.generateEventByUserCode(playerInfo.getId());
+                        bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+                        addEvent(playerInfo.getId(), bleedEventBlock);
+                    }
+                    playerService.damageHp(playerInfo.getId(), worldEvent.getUserCode(), damageValue, false);
+                }
+                break;
+            case GamePalConstants.EVENT_CODE_SHOOT:
+                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, playerInfo)
+                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
+                        && PlayerUtil.calculateBallisticDistance(regionMap.get(worldEvent.getRegionNo()),
+                                fromPlayerInfo, fromPlayerInfo.getFaceDirection(), playerInfo).doubleValue()
+                        < GamePalConstants.PLAYER_RADIUS.doubleValue() / 2
+                        && PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+                        playerInfo).subtract(fromPlayerInfo.getFaceDirection()).abs().doubleValue() < 90D) {
+                    WorldBlock bleedEventBlock = playerService.generateEventByUserCode(playerInfo.getId());
+                    bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+                    addEvent(playerInfo.getId(), bleedEventBlock);
+                    playerService.damageHp(playerInfo.getId(), worldEvent.getUserCode(), -GamePalConstants.EVENT_DAMAGE_SHOOT, false);
+                }
+                break;
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, playerInfo)
+                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_EXPLODE) <= 0) {
+                    WorldBlock bleedEventBlock = playerService.generateEventByUserCode(playerInfo.getId());
+                    bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+                    addEvent(playerInfo.getId(), bleedEventBlock);
+                    playerService.damageHp(playerInfo.getId(), worldEvent.getUserCode(),
+                            -GamePalConstants.EVENT_DAMAGE_EXPLODE, false);
+                }
+                break;
+            default:
+                break;
+        }
     }
 }
