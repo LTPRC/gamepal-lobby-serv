@@ -12,4 +12,9 @@ import java.math.BigDecimal;
 public class Coordinate {
     private BigDecimal x;
     private BigDecimal y;
+
+    public Coordinate(Coordinate coordinate) {
+        this.x = coordinate.getX();
+        this.y = coordinate.getY();
+    }
 }

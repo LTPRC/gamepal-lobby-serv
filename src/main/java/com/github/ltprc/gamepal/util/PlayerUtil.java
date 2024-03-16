@@ -6,6 +6,8 @@ import com.github.ltprc.gamepal.model.map.world.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerUtil {
 
@@ -124,27 +126,28 @@ public class PlayerUtil {
     /**
      * Keep the coordinate inside the range of width multiply height based on its sceneCoordinate.
      * @param worldCoordinate
+     * @param regionInfo
      */
-    public static void fixWorldCoordinate(WorldCoordinate worldCoordinate, Region region) {
+    public static void fixWorldCoordinate(WorldCoordinate worldCoordinate, RegionInfo regionInfo) {
         while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(-1)) < 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
             worldCoordinate.getCoordinate()
-                    .setY(worldCoordinate.getCoordinate().getY().add(new BigDecimal(region.getHeight())));
+                    .setY(worldCoordinate.getCoordinate().getY().add(new BigDecimal(regionInfo.getHeight())));
         }
-        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(region.getHeight() - 1)) >= 0) {
+        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(regionInfo.getHeight() - 1)) >= 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
             worldCoordinate.getCoordinate()
-                    .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(region.getHeight())));
+                    .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(regionInfo.getHeight())));
         }
         while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(-0.5)) < 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
             worldCoordinate.getCoordinate()
-                    .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(region.getWidth())));
+                    .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(regionInfo.getWidth())));
         }
-        while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(region.getWidth() - 0.5)) >= 0) {
+        while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(regionInfo.getWidth() - 0.5)) >= 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
             worldCoordinate.getCoordinate()
-                    .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(region.getWidth())));
+                    .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(regionInfo.getWidth())));
         }
     }
 
@@ -370,21 +373,60 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_EXPLODE:
             case GamePalConstants.EVENT_CODE_BLOCK:
             case GamePalConstants.EVENT_CODE_BLEED:
+            case GamePalConstants.EVENT_CODE_UPGRADE:
+            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_SACRIFICE:
+            case GamePalConstants.EVENT_CODE_TAIL_SMOKE:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
                 break;
             case GamePalConstants.EVENT_CODE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
-            case GamePalConstants.EVENT_CODE_UPGRADE:
             case GamePalConstants.EVENT_CODE_FIRE:
             case GamePalConstants.EVENT_CODE_SHOOT:
-            case GamePalConstants.EVENT_CODE_HEAL:
             default:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;
         }
         return newBlock;
+    }
+
+    public static BigDecimal calculateHorizontalDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        Coordinate c1 = new Coordinate();
+        c1.setX(wc1.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        Coordinate c2 = new Coordinate();
+        c2.setX(wc2.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        return calculateHorizontalDistance(c1, c2);
+    }
+
+    public static BigDecimal calculateHorizontalDistance(Coordinate c1, Coordinate c2) {
+        return c2.getX().subtract(c1.getX());
+    }
+
+    public static BigDecimal calculateVerticalDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        Coordinate c1 = new Coordinate();
+        c1.setY(wc1.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c2 = new Coordinate();
+        c2.setY(wc2.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        return calculateVerticalDistance(c1, c2);
+    }
+
+    public static BigDecimal calculateVerticalDistance(Coordinate c1, Coordinate c2) {
+        return c2.getY().subtract(c1.getY());
     }
 
     public static BigDecimal calculateDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
@@ -482,8 +524,7 @@ public class PlayerUtil {
 
     public static BigDecimal calculateBallisticDistance(RegionInfo regionInfo, WorldCoordinate wc1,
                                                         BigDecimal ballisticAngle, WorldCoordinate wc2) {
-        if (wc1.getRegionNo() != regionInfo.getRegionNo()
-                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
         Coordinate c1 = new Coordinate();
@@ -507,5 +548,48 @@ public class PlayerUtil {
         double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
         return BigDecimal.valueOf(Math.abs(slope * c2.getX().doubleValue() - c2.getY().doubleValue()
                 + c1.getY().doubleValue() - slope * c1.getX().doubleValue()) / Math.sqrt(slope * slope + 1));
+    }
+
+    public static List<WorldCoordinate> collectEquidistantPoints(RegionInfo regionInfo, WorldCoordinate wc1,
+                                                                 WorldCoordinate wc2, int amount) {
+        List<WorldCoordinate> rst = new ArrayList<>();
+        if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()
+                || amount < 2) {
+            return rst;
+        }
+        BigDecimal deltaWidth = calculateHorizontalDistance(regionInfo, wc1, wc2)
+                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        BigDecimal deltaHeight = calculateVerticalDistance(regionInfo, wc1, wc2)
+                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        WorldCoordinate wc3 = new WorldCoordinate();
+        copyWorldCoordinate(wc1, wc3);
+        for (int i = 1; i < amount; i++) {
+            wc3.getCoordinate().setX(wc3.getCoordinate().getX().add(deltaWidth));
+            wc3.getCoordinate().setY(wc3.getCoordinate().getY().add(deltaHeight));
+            fixWorldCoordinate(wc3, regionInfo);
+            WorldCoordinate wc4 = new WorldCoordinate();
+            copyWorldCoordinate(wc3, wc4);
+            rst.add(wc4);
+        }
+        return rst;
+    }
+
+    public static List<Coordinate> collectEquidistantPoints(Coordinate c1, Coordinate c2, int amount) {
+        List<Coordinate> rst = new ArrayList<>();
+        if (amount < 2) {
+            return rst;
+        }
+        BigDecimal deltaWidth = calculateHorizontalDistance(c1, c2)
+                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        BigDecimal deltaHeight = calculateVerticalDistance(c1, c2)
+                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        Coordinate c3 = new Coordinate(c1);
+        for (int i = 1; i < amount; i++) {
+            c3.setX(c3.getX().add(deltaWidth));
+            c3.setY(c3.getY().add(deltaHeight));
+            Coordinate c4 = new Coordinate(c3);
+            rst.add(c4);
+        }
+        return rst;
     }
 }

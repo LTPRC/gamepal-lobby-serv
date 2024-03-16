@@ -58,9 +58,9 @@ public class TimedEventTask {
                                     playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
                                     playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
                                     playerService.generateNotificationMessage(userCode, "复活成功。");
-                                    WorldBlock healEventBlock = playerService.generateEventByUserCode(userCode);
-                                    healEventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
-                                    worldService.addEvent(userCode, healEventBlock);
+                                    WorldBlock rebirthEventBlock = playerService.generateEventByUserCode(userCode);
+                                    rebirthEventBlock.setType(GamePalConstants.EVENT_CODE_SACRIFICE);
+                                    worldService.addEvent(userCode, rebirthEventBlock);
                                 } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
                                     playerService.generateNotificationMessage(userCode, "距离复活还有"
                                             + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");

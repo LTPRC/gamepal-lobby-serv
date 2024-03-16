@@ -87,6 +87,9 @@ public class GamePalConstants {
     public static final int EVENT_CODE_BLEED = 109;
     public static final int EVENT_CODE_BLOCK = 110;
     public static final int EVENT_CODE_HEAL = 111;
+    public static final int EVENT_CODE_DISTURB = 112;
+    public static final int EVENT_CODE_SACRIFICE = 113;
+    public static final int EVENT_CODE_TAIL_SMOKE = 114;
 
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal EVENT_MAX_DISTANCE_HIT = BigDecimal.ONE;

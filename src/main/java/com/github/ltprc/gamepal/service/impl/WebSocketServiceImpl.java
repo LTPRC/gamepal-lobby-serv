@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thymeleaf.util.StringUtils;
 
 import javax.websocket.Session;
@@ -352,7 +353,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 if (null == scene) {
                     continue;
                 }
-                if (null != scene.getBlocks()) {
+                if (!CollectionUtils.isEmpty(scene.getBlocks())) {
                     scene.getBlocks().stream().forEach(block -> {
                         Block newBlock = PlayerUtil.copyBlock(block);
                         PlayerUtil.adjustCoordinate(newBlock,
@@ -362,7 +363,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     });
                 }
                 // Generate blocks from scene events 24/02/16
-                if (null != scene.getEvents()) {
+                if (!CollectionUtils.isEmpty(scene.getEvents())) {
                     scene.getEvents().stream().forEach(event -> {
                         Block newBlock = PlayerUtil.generateBlockByEvent(event);
                         PlayerUtil.adjustCoordinate(newBlock,

@@ -537,7 +537,7 @@ public class PlayerServiceImpl implements PlayerService {
                 playerInfoMap.get(userCode).getSkill()[i][2] = playerInfoMap.get(userCode).getSkill()[i][3];
             }
             WorldBlock bleedEventBlock = generateEventByUserCode(userCode);
-            bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+            bleedEventBlock.setType(GamePalConstants.EVENT_CODE_DISTURB);
             worldService.addEvent(userCode, bleedEventBlock);
         } else if (0 < playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
@@ -613,18 +613,18 @@ public class PlayerServiceImpl implements PlayerService {
         switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
             case GamePalConstants.SKILL_CODE_SHOOT:
                 eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        .add(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        .subtract(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 PlayerUtil.fixWorldCoordinate(eventBlock, worldService.getRegionMap().get(eventBlock.getRegionNo()));
                 eventBlock.setType(GamePalConstants.EVENT_CODE_SHOOT);
                 worldService.addEvent(userCode, eventBlock);
                 break;
             case GamePalConstants.SKILL_CODE_HIT:
                 eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random() + 1) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        .add(BigDecimal.valueOf((Math.random()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random() + 1) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        .subtract(BigDecimal.valueOf((Math.random()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 PlayerUtil.fixWorldCoordinate(eventBlock, worldService.getRegionMap().get(eventBlock.getRegionNo()));
                 eventBlock.setType(GamePalConstants.EVENT_CODE_HIT);
                 worldService.addEvent(userCode, eventBlock);
