@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import org.springframework.util.StringUtils;
 
 import java.util.Random;
@@ -7,12 +8,6 @@ import java.util.Random;
 public class NameUtil {
 
     private NameUtil() {}
-
-    protected static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
-    protected static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
-    protected static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
-    protected static final String GENDER_MALE = "1";
-    protected static final String GENDER_FEMALE = "2";
 
     protected static final String[] chineseLastnames = new String[] { "王", "李", "张", "刘", "陈", "杨", "黄", "吴", "赵", "周",
             "徐", "孙", "马", "朱", "胡", "郭", "何", "林", "高", "罗", "郑", "梁", "谢", "宋", "唐", "许", "邓", "冯", "韩", "曹", "彭",
@@ -97,35 +92,49 @@ public class NameUtil {
     }
 
     public static String[] generateNames(String origin, String gender) {
-        if (StringUtils.hasText(origin) || (!ORIGIN_CHINESE.equals(origin) && !ORIGIN_JAPANESE.equals(origin)
-                && !ORIGIN_INTERNATIONAL.equals(origin))) {
-            double r = Math.random();
-            if (r < 0.9D) {
-                origin = ORIGIN_CHINESE;
-            } else if (r < 0.92D) {
-                origin = ORIGIN_JAPANESE;
-            } else {
-                origin = ORIGIN_INTERNATIONAL;
-            }
+        if (StringUtils.hasText(origin) || (!GamePalConstants.ORIGIN_CHINESE.equals(origin)
+                && !GamePalConstants.ORIGIN_JAPANESE.equals(origin)
+                && !GamePalConstants.ORIGIN_INTERNATIONAL.equals(origin))) {
+            origin = generateOrigin();
         }
-        if (StringUtils.hasText(gender) || (!GENDER_MALE.equals(gender) && !GENDER_FEMALE.equals(gender))) {
-            double r = Math.random();
-            if (r < 0.5D) {
-                gender = GENDER_MALE;
-            } else {
-                gender = GENDER_FEMALE;
-            }
+        if (StringUtils.hasText(gender) || (!GamePalConstants.GENDER_MALE.equals(gender)
+                && !GamePalConstants.GENDER_FEMALE.equals(gender))) {
+            gender = generateGender();
         }
         switch (origin) {
-            case ORIGIN_CHINESE:
+            case GamePalConstants.ORIGIN_CHINESE:
                 return generateChineseNames(gender);
-            case ORIGIN_JAPANESE:
+            case GamePalConstants.ORIGIN_JAPANESE:
                 return generateJapaneseNames(gender);
-            case ORIGIN_INTERNATIONAL:
+            case GamePalConstants.ORIGIN_INTERNATIONAL:
                 return generateInternationalNames(gender);
             default:
                 return new String[] { "", "佚名", "佚名" };
         }
+    }
+
+    public static String generateOrigin() {
+        double r = Math.random();
+        String origin;
+        if (r < 0.9D) {
+            origin = GamePalConstants.ORIGIN_CHINESE;
+        } else if (r < 0.92D) {
+            origin = GamePalConstants.ORIGIN_JAPANESE;
+        } else {
+            origin = GamePalConstants.ORIGIN_INTERNATIONAL;
+        }
+        return origin;
+    }
+
+    public static String generateGender() {
+        String gender;
+        double r = Math.random();
+        if (r < 0.5D) {
+            gender = GamePalConstants.GENDER_MALE;
+        } else {
+            gender = GamePalConstants.GENDER_FEMALE;
+        }
+        return gender;
     }
 
     public static String[] generateChineseNames(String gender) {
@@ -158,7 +167,7 @@ public class NameUtil {
     public static String generateChineseFirstname(String gender) {
         Random random = new Random();
         int num = random.nextInt(100);
-        if (GENDER_FEMALE.equals(gender)) {
+        if (GamePalConstants.GENDER_FEMALE.equals(gender)) {
             return chineseFemaleFirstnames[num];
         } else {
             return chineseMaleFirstnames[num];
@@ -180,7 +189,7 @@ public class NameUtil {
     public static String generateJapaneseFirstname(String gender) {
         Random random = new Random();
         int num = random.nextInt(100);
-        if (GENDER_FEMALE.equals(gender)) {
+        if (GamePalConstants.GENDER_FEMALE.equals(gender)) {
             return japaneseFemaleFirstnames[num];
         } else {
             return japaneseMaleFirstnames[num];
@@ -202,10 +211,74 @@ public class NameUtil {
     public static String generateInternationalFirstname(String gender) {
         Random random = new Random();
         int num = random.nextInt(100);
-        if (GENDER_FEMALE.equals(gender)) {
+        if (GamePalConstants.GENDER_FEMALE.equals(gender)) {
             return internationalFemaleFirstnames[num];
         } else {
             return internationalMaleFirstnames[num];
         }
+    }
+
+    public static String generateSkinColorByOrigin(String origin) {
+        double r = Math.random();
+        int rst;
+        switch (origin) {
+            case GamePalConstants.ORIGIN_CHINESE:
+                if (r < 0.01D) {
+                    rst = GamePalConstants.SKIN_COLOR_B;
+                } else if (r < 0.03D) {
+                    rst = GamePalConstants.SKIN_COLOR_C;
+                } else if (r < 0.1D) {
+                    rst = GamePalConstants.SKIN_COLOR_L;
+                } else if (r < 0.2D) {
+                    rst = GamePalConstants.SKIN_COLOR_M;
+                } else {
+                    rst = GamePalConstants.SKIN_COLOR_A;
+                }
+                break;
+            case GamePalConstants.ORIGIN_JAPANESE:
+                if (r < 0.01D) {
+                    rst = GamePalConstants.SKIN_COLOR_C;
+                } else if (r < 0.03D) {
+                    rst = GamePalConstants.SKIN_COLOR_B;
+                } else if (r < 0.1D) {
+                    rst = GamePalConstants.SKIN_COLOR_L;
+                } else if (r < 0.2D) {
+                    rst = GamePalConstants.SKIN_COLOR_M;
+                } else {
+                    rst = GamePalConstants.SKIN_COLOR_A;
+                }
+                break;
+            case GamePalConstants.ORIGIN_INTERNATIONAL:
+            default:
+                if (r < 0.2D) {
+                    rst = GamePalConstants.SKIN_COLOR_C;
+                } else if (r < 0.4D) {
+                    rst = GamePalConstants.SKIN_COLOR_B;
+                } else if (r < 0.6D) {
+                    rst = GamePalConstants.SKIN_COLOR_A;
+                } else if (r < 0.8D) {
+                    rst = GamePalConstants.SKIN_COLOR_M;
+                } else {
+                    rst = GamePalConstants.SKIN_COLOR_L;
+                }
+                break;
+        }
+        return String.valueOf(rst);
+    }
+
+    public static String generateHairStyleByGender(String gender) {
+        int rst;
+        switch (gender) {
+            case GamePalConstants.GENDER_MALE:
+                rst = (int) (Math.floor(Math.random() * 6) + 1);
+                break;
+            case GamePalConstants.GENDER_FEMALE:
+                rst = (int) (Math.floor(Math.random() * 6) + 7);
+                break;
+            default:
+                rst = (int) (Math.floor(Math.random() * 12) + 1);
+                break;
+        }
+        return String.valueOf(rst);
     }
 }

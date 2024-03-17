@@ -9,6 +9,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
@@ -48,6 +49,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserInfoRepository userInfoRepository;
+
+    @Autowired
+    private PlayerInfoFactory playerInfoFactory;
 
     private Map<String, GameWorld> userWorldMap = new LinkedHashMap<>(); // userCode, world
 
@@ -131,8 +135,7 @@ public class UserServiceImpl implements UserService {
         world.getOnlineMap().remove(userCode);
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         if (!playerService.getPlayerInfoMap().containsKey(userCode)) {
-            PlayerInfo playerInfo = new PlayerInfo();
-            initiatePlayerInfo(playerInfo);
+            PlayerInfo playerInfo = playerInfoFactory.createPlayerInfoInstance();
             playerInfo.setId(userCode);
             playerInfo.setCode("");
             playerService.getPlayerInfoMap().put(userCode, playerInfo);
@@ -140,55 +143,6 @@ public class UserServiceImpl implements UserService {
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));
         return ResponseEntity.ok().body(rst.toString());
-    }
-
-    private void initiatePlayerInfo(PlayerInfo playerInfo) {
-        playerInfo.setPlayerType(0);
-        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-        playerInfo.setRegionNo(1);
-        playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
-        playerInfo.setCoordinate(new Coordinate(new BigDecimal(5), new BigDecimal(5)));
-        playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        playerInfo.setFaceDirection(BigDecimal.ZERO);
-        playerInfo.setAvatar("1");
-        playerInfo.setFirstName("克强");
-        playerInfo.setLastName("曾");
-        playerInfo.setNickname("大曾");
-        playerInfo.setNameColor("#990000");
-        playerInfo.setCreature("1");
-        playerInfo.setGender("2");
-        playerInfo.setSkinColor("3");
-        playerInfo.setHairstyle("2");
-        playerInfo.setHairColor("2");
-        playerInfo.setEyes("2");
-        playerInfo.setFaceCoefs(Arrays.stream(new int[GamePalConstants.FACE_COEFS_LENGTH])
-                .map(faceCoef -> 50).toArray());
-        playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
-        playerInfo.setAcceleration(BigDecimal.valueOf(0.01));
-        playerInfo.setHpMax(1000);
-        playerInfo.setHp(playerInfo.getHpMax() / 2);
-        playerInfo.setVpMax(1000);
-        playerInfo.setVp(playerInfo.getVpMax() / 2);
-        playerInfo.setHungerMax(1000);
-        playerInfo.setHunger(playerInfo.getHungerMax() / 2);
-        playerInfo.setThirstMax(1000);
-        playerInfo.setThirst(playerInfo.getThirstMax() / 2);
-        playerInfo.setLevel(1);
-        playerInfo.setExp(0);
-        playerInfo.setExpMax(100);
-        playerInfo.setMoney(1);
-        playerInfo.setCapacity(new BigDecimal(0));
-        playerInfo.setCapacityMax(new BigDecimal(500));
-        playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
-        int[][] skill = new int[4][4];
-        skill[0] = new int[]{GamePalConstants.SKILL_CODE_SHOOT, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                1 * GamePalConstants.FRAME_PER_SECOND};
-        skill[1] = new int[]{GamePalConstants.SKILL_CODE_HIT, GamePalConstants.SKILL_MODE_AUTO, 0, 5};
-        skill[2] = new int[]{GamePalConstants.SKILL_CODE_BLOCK, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        skill[3] = new int[]{GamePalConstants.SKILL_CODE_HEAL, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        playerInfo.setSkill(skill);
     }
 
     @Override

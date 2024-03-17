@@ -9,6 +9,4 @@ public interface WebSocketService {
     void onOpen(Session session, String userCode);
 
     void onClose(String userCode);
-
-    void communicate(String userCode, int webStage);
 }

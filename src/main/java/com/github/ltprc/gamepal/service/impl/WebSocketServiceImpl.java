@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Block;
 import com.github.ltprc.gamepal.model.map.Coordinate;
@@ -14,7 +15,6 @@ import com.github.ltprc.gamepal.model.map.SceneInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
-import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
@@ -31,7 +31,6 @@ import lombok.val;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thymeleaf.util.StringUtils;
@@ -63,12 +62,15 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Autowired
     private StateMachineService stateMachineService;
 
+    @Autowired
+    private PlayerInfoFactory playerInfoFactory;
+
     @Override
     public void onOpen(Session session, String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         world.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
-        communicate(userCode, GamePalConstants.WEB_STAGE_START);
+        communicate(userCode, GamePalConstants.WEB_STAGE_START, null);
     }
 
     @Override
@@ -94,8 +96,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Update onlineMap
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         // Check functions
+        JSONObject functions = null;
         if (jsonObject.containsKey("functions")) {
-            JSONObject functions = jsonObject.getJSONObject("functions");
+            functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfo")) {
                 playerService.getPlayerInfoMap().put(userCode,
                         functions.getObject("updatePlayerInfo", PlayerInfo.class));
@@ -236,11 +239,10 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         }
         // Reply automatically
-        communicate(userCode, webStage);
+        communicate(userCode, webStage, functions);
     }
 
-    @Override
-    public void communicate(String userCode, int webStage) {
+    public void communicate(String userCode, int webStage, JSONObject functions) {
         JSONObject rst = ContentUtil.generateRst();
 
         // Static information
@@ -439,6 +441,19 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         rst.put("blocks", blocks);
 
+        // Response of functions 24/03/17
+        JSONObject functionsResponse = new JSONObject();
+        if (null != functions) {
+            if (functions.containsKey("createPlayerInfoInstance") && functions.getBoolean("createPlayerInfoInstance")) {
+                functionsResponse.put("createPlayerInfoInstance", playerInfoFactory.createPlayerInfoInstance());
+            }
+        }
+        rst.put("functions", functionsResponse);
+
+        transmit(rst, userCode, world);
+    }
+
+    private void transmit(JSONObject rst, String userCode, GameWorld world) {
         // Communicate
         String content = JSON.toJSONString(rst);
         Session session = world.getSessionMap().get(userCode);

@@ -121,6 +121,20 @@ public class GamePalConstants {
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
 
+
+    public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
+    public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
+    public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
+    public static final String GENDER_MALE = "1";
+    public static final String GENDER_FEMALE = "2";
+    public static final int AVATARS_LENGTH = 10;
+    public static final int SKIN_COLOR_C = 1;
+    public static final int SKIN_COLOR_M = 2;
+    public static final int SKIN_COLOR_A = 3;
+    public static final int SKIN_COLOR_L = 4;
+    public static final int SKIN_COLOR_B = 5;
+    public static final int HAIRSTYLE_LENGTH = 5;
+    public static final int EYES_LENGTH = 5;
     public static final int FACE_COEFS_LENGTH = 9;
 
     // Backend constants
