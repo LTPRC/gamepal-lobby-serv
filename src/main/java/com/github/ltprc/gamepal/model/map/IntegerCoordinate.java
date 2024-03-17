@@ -10,4 +10,9 @@ import lombok.NoArgsConstructor;
 public class IntegerCoordinate {
     private Integer x;
     private Integer y;
+
+    public IntegerCoordinate(IntegerCoordinate integerCoordinate) {
+        x = integerCoordinate.getX();
+        y = integerCoordinate.getY();
+    }
 }

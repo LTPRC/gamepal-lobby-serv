@@ -6,12 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Block;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.Region;
-import com.github.ltprc.gamepal.model.map.Scene;
-import com.github.ltprc.gamepal.model.map.SceneInfo;
+import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
@@ -313,9 +308,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             rst.put("terminalOutputs", terminalOutputs);
         }
 
-        // Return region
+        // Return regionInfo not region 24/03/18
         Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
-        rst.put("region", JSON.toJSON(region));
+        rst.put("regionInfo", JSON.toJSON(new RegionInfo(region)));
 
         // Return SceneInfos
         // sceneInfos is almost useless 24/02/22
@@ -346,12 +341,13 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             return level1.getY() - level2.getY();
         });
-        // Collect blocks from MAP_RADIUS * MAP_RADIUS scenes 24/03/16
-        for (int i = sceneCoordinate.getY() - GamePalConstants.MAP_RADIUS;
-             i <= sceneCoordinate.getY() + GamePalConstants.MAP_RADIUS; i++) {
-            for (int j = sceneCoordinate.getX() - GamePalConstants.MAP_RADIUS;
-                 j <= sceneCoordinate.getX() + GamePalConstants.MAP_RADIUS; j++) {
-                Scene scene = region.getScenes().get(new IntegerCoordinate(j, i));
+        // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
+        for (int i = sceneCoordinate.getY() - GamePalConstants.SCENE_SCAN_RADIUS;
+             i <= sceneCoordinate.getY() + GamePalConstants.SCENE_SCAN_RADIUS; i++) {
+            for (int j = sceneCoordinate.getX() - GamePalConstants.SCENE_SCAN_RADIUS;
+                 j <= sceneCoordinate.getX() + GamePalConstants.SCENE_SCAN_RADIUS; j++) {
+                final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
+                Scene scene = region.getScenes().get(newSceneCoordinate);
                 if (null == scene) {
                     continue;
                 }
@@ -359,7 +355,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     scene.getBlocks().stream().forEach(block -> {
                         Block newBlock = PlayerUtil.copyBlock(block);
                         PlayerUtil.adjustCoordinate(newBlock,
-                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
                                 BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
                         rankingQueue.add(newBlock);
                     });
@@ -369,7 +365,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     scene.getEvents().stream().forEach(event -> {
                         Block newBlock = PlayerUtil.generateBlockByEvent(event);
                         PlayerUtil.adjustCoordinate(newBlock,
-                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), scene.getSceneCoordinate()),
+                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
                                 BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
                         rankingQueue.add(newBlock);
                     });
@@ -382,8 +378,8 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .filter(entry -> {
                     IntegerCoordinate integerCoordinate
                             = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
-                    return Math.abs(integerCoordinate.getX()) <= GamePalConstants.MAP_RADIUS
-                            && Math.abs(integerCoordinate.getY()) <= GamePalConstants.MAP_RADIUS;
+                    return Math.abs(integerCoordinate.getX()) <= GamePalConstants.SCENE_SCAN_RADIUS
+                            && Math.abs(integerCoordinate.getY()) <= GamePalConstants.SCENE_SCAN_RADIUS;
                 })
                 // playerInfos contains running players only 24/03/16
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)

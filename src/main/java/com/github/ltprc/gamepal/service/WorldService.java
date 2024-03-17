@@ -4,7 +4,7 @@ import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.map.world.WorldEvent;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -32,4 +32,6 @@ public interface WorldService {
     ResponseEntity addEvent(String userCode, WorldBlock event);
 
     void updateEvents(GameWorld world);
+
+    void expandScene(WorldCoordinate worldCoordinate);
 }

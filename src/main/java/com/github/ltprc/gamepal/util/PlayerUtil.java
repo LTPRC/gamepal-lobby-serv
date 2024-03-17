@@ -351,13 +351,13 @@ public class PlayerUtil {
         to.setRegionNo(from.getRegionNo());
         Coordinate coordinate = from.getCoordinate();
         if (null != coordinate) {
-            to.setCoordinate(new Coordinate(coordinate.getX(), coordinate.getY()));
+            to.setCoordinate(new Coordinate(coordinate));
         } else {
             to.setCoordinate(null);
         }
         IntegerCoordinate sceneCoordinate = from.getSceneCoordinate();
         if (null != sceneCoordinate) {
-            to.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY()));
+            to.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
         } else {
             to.setSceneCoordinate(null);
         }

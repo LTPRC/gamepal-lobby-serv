@@ -24,6 +24,8 @@ public class GamePalConstants {
     public static final int SCOPE_INDIVIDUAL = 1;
     public static final int SCOPE_SELF = 2;
 
+    public static final int SCENE_DEFAULT_WIDTH = 10;
+    public static final int SCENE_DEFAULT_HEIGHT = 10;
     public static final int BLOCK_TYPE_GROUND = 0;
     public static final int BLOCK_TYPE_WALL = 1;
     public static final int BLOCK_TYPE_PLAYER = 2;
@@ -139,7 +141,7 @@ public class GamePalConstants {
 
     // Backend constants
 
-    public static final int MAP_RADIUS = 2;
+    public static final int SCENE_SCAN_RADIUS = 2;
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;
     public static final int LAYER_BOTTOM = 1;

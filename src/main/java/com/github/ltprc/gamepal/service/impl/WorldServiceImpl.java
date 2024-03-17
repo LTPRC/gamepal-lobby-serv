@@ -287,52 +287,6 @@ public class WorldServiceImpl implements WorldService {
         });
     }
 
-    public void loadItemsOld() {
-        JSONObject items = ContentUtil.jsonFile2JSONObject("src/main/resources/json/items.json");
-        items.entrySet().stream().forEach(entry -> {
-            switch (entry.getKey().charAt(0)) {
-                case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
-                    Consumable consumable = new Consumable();
-                    consumable.setItemNo(entry.getKey());
-                    consumable.setName(((JSONObject) entry.getValue()).getString("name"));
-                    consumable.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
-                    consumable.setDescription(((JSONObject) entry.getValue()).getString("description"));
-                    JSONObject effects = ((JSONObject) entry.getValue()).getJSONObject("effects");
-                    effects.entrySet().stream().forEach(entry2 ->
-                        consumable.getEffects().put(String.valueOf(entry2.getKey()), (int) entry2.getValue())
-                    );
-                    itemMap.put(consumable.getItemNo(), consumable);
-                    break;
-                case GamePalConstants.ITEM_CHARACTER_JUNK:
-                    Junk junk = new Junk();
-                    junk.setItemNo(entry.getKey());
-                    junk.setName(((JSONObject) entry.getValue()).getString("name"));
-                    junk.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
-                    junk.setDescription(((JSONObject) entry.getValue()).getString("description"));
-                    JSONObject materials = ((JSONObject) entry.getValue()).getJSONObject("materials");
-                    materials.entrySet().stream().forEach(entry2 ->
-                        junk.getMaterials().put(String.valueOf(entry2.getKey()), (int) entry2.getValue())
-                    );
-                    itemMap.put(junk.getItemNo(), junk);
-                    break;
-                case GamePalConstants.ITEM_CHARACTER_TOOL:
-                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
-                case GamePalConstants.ITEM_CHARACTER_MATERIAL:
-                case GamePalConstants.ITEM_CHARACTER_NOTE:
-                case GamePalConstants.ITEM_CHARACTER_RECORDING:
-                    Item item = new Item();
-                    item.setItemNo(entry.getKey());
-                    item.setName(((JSONObject) entry.getValue()).getString("name"));
-                    item.setWeight(((JSONObject) entry.getValue()).getBigDecimal("weight"));
-                    item.setDescription(((JSONObject) entry.getValue()).getString("description"));
-                    itemMap.put(item.getItemNo(), item);
-                    break;
-                default:
-                    break;
-            }
-        });
-    }
-
     @Override
     public void initiateGame(GameWorld world) {
         Game game = LasVegasGameUtil.getInstance();
@@ -419,6 +373,59 @@ public class WorldServiceImpl implements WorldService {
             }
         }
         eventQueue.poll();
+    }
+
+    @Override
+    public void expandScene(WorldCoordinate worldCoordinate) {
+        expandScene(worldCoordinate, 1);
+    }
+
+    private void expandScene(WorldCoordinate worldCoordinate, int depth) {
+        Region region;
+        if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
+            region = new Region();
+            region.setRegionNo(worldCoordinate.getRegionNo());
+            region.setName("Auto Region " + region.getRegionNo());
+            region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
+            region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
+            regionMap.put(worldCoordinate.getRegionNo(), region);
+        }
+        region = regionMap.get(worldCoordinate.getRegionNo());
+        if (null == region.getScenes()) {
+            region.setScenes(new HashMap<>());
+        }
+        Scene scene;
+        if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
+            scene = new Scene();
+            scene.setSceneCoordinate(new IntegerCoordinate(worldCoordinate.getSceneCoordinate()));
+            scene.setName("Auto Scene (" + scene.getSceneCoordinate().getX() + "," + scene.getSceneCoordinate().getY()
+                    + ")");
+            scene.setBlocks(new ArrayList<>());
+            // TODO Improve map generation logics
+            for (int k = 0; k < region.getHeight(); k++) {
+                for (int l = 0; l < region.getWidth(); l++) {
+                    Block block = new Block();
+                    block.setX(BigDecimal.valueOf(l));
+                    block.setY(BigDecimal.valueOf(k));
+                    block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
+                    block.setCode("1020");
+                    scene.getBlocks().add(block);
+                }
+            }
+            region.getScenes().put(worldCoordinate.getSceneCoordinate(), scene);
+        }
+        if (depth > 0) {
+            WorldCoordinate newWorldCoordinate = new WorldCoordinate();
+            PlayerUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
+            for (int i = - 1; i <= 1; i++) {
+                for (int j = - 1; j <= 1; j++) {
+                    newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
+                            worldCoordinate.getSceneCoordinate().getX() + i,
+                            worldCoordinate.getSceneCoordinate().getY() + j));
+                    expandScene(newWorldCoordinate, depth - 1);
+                }
+            }
+        }
     }
 
     private WorldEvent updateEvent(WorldEvent oldEvent) {
