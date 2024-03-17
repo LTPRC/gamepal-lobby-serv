@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class PlayerInfo extends WorldBlock {
 
     // Basic properties
-    private int playerType; // 0-human 1-npc
+    private int playerType; // 0-human 1-AI
 
     // Character properties
     private String avatar;
@@ -32,6 +32,7 @@ public class PlayerInfo extends WorldBlock {
     private String hairstyle;
     private String hairColor;
     private String eyes;
+    private int[] faceCoefs;
 
     // Movement properties
     private Coordinate speed;

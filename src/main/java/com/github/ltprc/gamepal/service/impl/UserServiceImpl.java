@@ -161,6 +161,8 @@ public class UserServiceImpl implements UserService {
         playerInfo.setHairstyle("2");
         playerInfo.setHairColor("2");
         playerInfo.setEyes("2");
+        playerInfo.setFaceCoefs(Arrays.stream(new int[GamePalConstants.FACE_COEFS_LENGTH])
+                .map(faceCoef -> 50).toArray());
         playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
         playerInfo.setAcceleration(BigDecimal.valueOf(0.01));
         playerInfo.setHpMax(1000);
@@ -213,7 +215,6 @@ public class UserServiceImpl implements UserService {
             world.getTokenMap().remove(userCode);
             world.getOnlineMap().remove(userCode);
             world.getSessionMap().remove(userCode);
-            playerService.getPlayerInfoMap().remove(userCode);
             webSocketService.onClose(userCode);
         } else {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));

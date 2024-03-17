@@ -121,6 +121,8 @@ public class GamePalConstants {
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
 
+    public static final int FACE_COEFS_LENGTH = 9;
+
     // Backend constants
 
     public static final int MAP_RADIUS = 2;

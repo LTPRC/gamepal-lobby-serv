@@ -180,6 +180,11 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != faceDirection) {
             playerInfo.setFaceDirection(faceDirection);
         }
+        // Changing playerStatus 24/03/17
+        Integer playerStatus = req.getInteger("playerStatus");
+        if (null != playerStatus) {
+            playerInfo.setPlayerStatus(playerStatus);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
