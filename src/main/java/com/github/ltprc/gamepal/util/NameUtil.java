@@ -267,16 +267,17 @@ public class NameUtil {
     }
 
     public static String generateHairStyleByGender(String gender) {
+        Random random = new Random();
         int rst;
         switch (gender) {
             case GamePalConstants.GENDER_MALE:
-                rst = (int) (Math.floor(Math.random() * 6) + 1);
+                rst = random.nextInt(6) + 1;
                 break;
             case GamePalConstants.GENDER_FEMALE:
-                rst = (int) (Math.floor(Math.random() * 6) + 7);
+                rst = random.nextInt(6) + 7;
                 break;
             default:
-                rst = (int) (Math.floor(Math.random() * 12) + 1);
+                rst = random.nextInt(12) + 1;
                 break;
         }
         return String.valueOf(rst);

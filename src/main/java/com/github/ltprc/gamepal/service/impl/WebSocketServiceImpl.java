@@ -440,7 +440,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Response of functions 24/03/17
         JSONObject functionsResponse = new JSONObject();
         if (null != functions) {
-            if (functions.containsKey("createPlayerInfoInstance") && functions.getBoolean("createPlayerInfoInstance")) {
+            if (functions.containsKey("createPlayerInfoInstance")
+                    && Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
                 functionsResponse.put("createPlayerInfoInstance", playerInfoFactory.createPlayerInfoInstance());
             }
         }

@@ -1,5 +1,7 @@
 package com.github.ltprc.gamepal.util;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -214,6 +216,9 @@ public class PlayerUtil {
             case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
                 rst = new IntegerCoordinate(2, 105);
                 break;
+            case GamePalConstants.BLOCK_TYPE_TREE:
+                rst = new IntegerCoordinate(1, 106);
+                break;
             default:
         }
         return rst;
@@ -238,6 +243,7 @@ public class PlayerUtil {
             case GamePalConstants.BLOCK_TYPE_PLAYER:
             case GamePalConstants.BLOCK_TYPE_DROP:
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
+            case GamePalConstants.BLOCK_TYPE_TREE:
             default:
                 rst.setX(GamePalConstants.LAYER_CENTER);
                 break;
@@ -254,6 +260,7 @@ public class PlayerUtil {
             case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
+            case GamePalConstants.BLOCK_TYPE_TREE:
                 rst.setY(0);
                 break;
             case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
@@ -272,35 +279,7 @@ public class PlayerUtil {
     }
 
     public static Block copyBlock(Block block) {
-        switch (block.getType()) {
-            case GamePalConstants.BLOCK_TYPE_DROP:
-                Drop newDrop = new Drop();
-                newDrop.setType(block.getType());
-                newDrop.setCode(block.getCode());
-                newDrop.setId(block.getId());
-                newDrop.setX(block.getX());
-                newDrop.setY(block.getY());
-                newDrop.setAmount(((Drop) block).getAmount());
-                newDrop.setItemNo(((Drop) block).getItemNo());
-                return newDrop;
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                Teleport newTeleport = new Teleport();
-                newTeleport.setType(block.getType());
-                newTeleport.setCode(block.getCode());
-                newTeleport.setId(block.getId());
-                newTeleport.setX(block.getX());
-                newTeleport.setY(block.getY());
-                newTeleport.setTo(((Teleport) block).getTo());
-                return newTeleport;
-            default:
-                Block newBlock = new Block();
-                newBlock.setType(block.getType());
-                newBlock.setCode(block.getCode());
-                newBlock.setId(block.getId());
-                newBlock.setX(block.getX());
-                newBlock.setY(block.getY());
-                return newBlock;
-        }
+        return JSON.parseObject(JSON.toJSONString(block), block.getClass());
     }
 
     public static Block convertWorldBlock2Block(WorldBlock worldBlock) {

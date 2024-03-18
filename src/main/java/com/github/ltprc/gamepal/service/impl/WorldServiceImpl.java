@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.Consumable;
@@ -45,6 +46,9 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private SceneManager sceneManager;
 
     @Override
     public Map<String, GameWorld> getWorldMap() {
@@ -266,11 +270,11 @@ public class WorldServiceImpl implements WorldService {
         items.stream().forEach(itemObj -> {
             switch (((JSONObject) itemObj).getString("itemNo").charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
-                    Consumable consumable = JSON.parseObject(String.valueOf(itemObj),Consumable.class);
+                    Consumable consumable = JSON.parseObject(String.valueOf(itemObj), Consumable.class);
                     itemMap.put(consumable.getItemNo(), consumable);
                     break;
                 case GamePalConstants.ITEM_CHARACTER_JUNK:
-                    Junk junk = JSON.parseObject(String.valueOf(itemObj),Junk.class);
+                    Junk junk = JSON.parseObject(String.valueOf(itemObj), Junk.class);
                     itemMap.put(junk.getItemNo(), junk);
                     break;
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
@@ -278,7 +282,7 @@ public class WorldServiceImpl implements WorldService {
                 case GamePalConstants.ITEM_CHARACTER_MATERIAL:
                 case GamePalConstants.ITEM_CHARACTER_NOTE:
                 case GamePalConstants.ITEM_CHARACTER_RECORDING:
-                    Item item = JSON.parseObject(String.valueOf(itemObj),Item.class);
+                    Item item = JSON.parseObject(String.valueOf(itemObj), Item.class);
                     itemMap.put(item.getItemNo(), item);
                     break;
                 default:
@@ -308,6 +312,17 @@ public class WorldServiceImpl implements WorldService {
         event.setCode(eventBlock.getType());
         event.setFrame(0);
         switch (eventBlock.getType()) {
+            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_DISTURB:
+                // Finite 50-frame event
+                event.setPeriod(50);
+                event.setFrameMax(50);
+                break;
+            case GamePalConstants.EVENT_CODE_FIRE:
+                // Infinite 25-frame event
+                event.setPeriod(25);
+                event.setFrameMax(-1);
+                break;
             case GamePalConstants.EVENT_CODE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
@@ -320,20 +335,9 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_TAIL_SMOKE:
             default:
-                // 25-frame event
+                // Finite 25-frame event
                 event.setPeriod(25);
                 event.setFrameMax(25);
-                break;
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-                // 50-frame event
-                event.setPeriod(50);
-                event.setFrameMax(50);
-                break;
-            case GamePalConstants.EVENT_CODE_FIRE:
-                // Infinite 25-frame event
-                event.setPeriod(25);
-                event.setFrameMax(-1);
                 break;
         }
         world.getEventQueue().add(event);
@@ -383,46 +387,30 @@ public class WorldServiceImpl implements WorldService {
     private void expandScene(WorldCoordinate worldCoordinate, int depth) {
         Region region;
         if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
-            region = new Region();
-            region.setRegionNo(worldCoordinate.getRegionNo());
-            region.setName("Auto Region " + region.getRegionNo());
-            region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
-            region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
+            region = sceneManager.generateRegion(worldCoordinate.getRegionNo());
             regionMap.put(worldCoordinate.getRegionNo(), region);
         }
         region = regionMap.get(worldCoordinate.getRegionNo());
         if (null == region.getScenes()) {
             region.setScenes(new HashMap<>());
         }
-        Scene scene;
         if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
-            scene = new Scene();
-            scene.setSceneCoordinate(new IntegerCoordinate(worldCoordinate.getSceneCoordinate()));
-            scene.setName("Auto Scene (" + scene.getSceneCoordinate().getX() + "," + scene.getSceneCoordinate().getY()
-                    + ")");
-            scene.setBlocks(new ArrayList<>());
-            // TODO Improve map generation logics
-            for (int k = 0; k < region.getHeight(); k++) {
-                for (int l = 0; l < region.getWidth(); l++) {
-                    Block block = new Block();
-                    block.setX(BigDecimal.valueOf(l));
-                    block.setY(BigDecimal.valueOf(k));
-                    block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
-                    block.setCode("1020");
-                    scene.getBlocks().add(block);
-                }
-            }
-            region.getScenes().put(worldCoordinate.getSceneCoordinate(), scene);
+            sceneManager.fillScene(region, worldCoordinate.getSceneCoordinate(), GamePalConstants.REGION_INDEX_GRASSLAND);
         }
         if (depth > 0) {
             WorldCoordinate newWorldCoordinate = new WorldCoordinate();
             PlayerUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
             for (int i = - 1; i <= 1; i++) {
                 for (int j = - 1; j <= 1; j++) {
-                    newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
-                            worldCoordinate.getSceneCoordinate().getX() + i,
-                            worldCoordinate.getSceneCoordinate().getY() + j));
-                    expandScene(newWorldCoordinate, depth - 1);
+                    if (worldCoordinate.getSceneCoordinate().getX() + i >= -GamePalConstants.SCENE_SCAN_MAX_RADIUS
+                            && worldCoordinate.getSceneCoordinate().getX() + i <= GamePalConstants.SCENE_SCAN_MAX_RADIUS
+                            && worldCoordinate.getSceneCoordinate().getY() + j >= -GamePalConstants.SCENE_SCAN_MAX_RADIUS
+                            && worldCoordinate.getSceneCoordinate().getY() + j <= GamePalConstants.SCENE_SCAN_MAX_RADIUS) {
+                        newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
+                                worldCoordinate.getSceneCoordinate().getX() + i,
+                                worldCoordinate.getSceneCoordinate().getY() + j));
+                        expandScene(newWorldCoordinate, depth - 1);
+                    }
                 }
             }
         }

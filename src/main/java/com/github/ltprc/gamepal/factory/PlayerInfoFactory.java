@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Random;
 
 @Component
 public class PlayerInfoFactory {
@@ -53,10 +54,11 @@ public class PlayerInfoFactory {
     }
 
     public void randomlyPersonalizePlayerInfo(PlayerInfo playerInfo) {
+        Random random = new Random();
         String origin = NameUtil.generateOrigin();
         String gender = NameUtil.generateGender();
         String[] names = NameUtil.generateNames(origin, gender);
-        playerInfo.setAvatar(String.valueOf((int) Math.floor(Math.random() * GamePalConstants.AVATARS_LENGTH)));
+        playerInfo.setAvatar(String.valueOf(random.nextInt(GamePalConstants.AVATARS_LENGTH)));
         playerInfo.setGender(gender);
         playerInfo.setFirstName(names[0]);
         playerInfo.setLastName(names[1]);
@@ -65,9 +67,9 @@ public class PlayerInfoFactory {
         playerInfo.setCreature("1");
         playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
         playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
-        playerInfo.setHairColor(String.valueOf((int) (Math.floor(Math.random() * 3) + 1)));
-        playerInfo.setEyes(String.valueOf((int) Math.floor(Math.random() * GamePalConstants.EYES_LENGTH)));
+        playerInfo.setHairColor(String.valueOf(random.nextInt(3) + 1));
+        playerInfo.setEyes(String.valueOf(random.nextInt(GamePalConstants.EYES_LENGTH)));
         playerInfo.setFaceCoefs(Arrays.stream(new int[GamePalConstants.FACE_COEFS_LENGTH])
-                .map(faceCoef -> (int) Math.floor(Math.random() * 100)).toArray());
+                .map(faceCoef -> random.nextInt(100)).toArray());
     }
 }

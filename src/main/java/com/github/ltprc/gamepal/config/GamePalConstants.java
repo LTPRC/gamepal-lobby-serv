@@ -46,8 +46,11 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_BLOCKED_GROUND = 17;
     public static final int BLOCK_TYPE_HOLLOW_WALL = 18;
     public static final int BLOCK_TYPE_BLOCKED_CEILING = 19;
+    public static final int BLOCK_TYPE_TREE = 20;
 
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+
+    public static final int TREE_TYPE_PINE = 1;
 
     public static final int INTERACTION_USE = 0;
     public static final int INTERACTION_EXCHANGE = 1;
@@ -141,7 +144,10 @@ public class GamePalConstants {
 
     // Backend constants
 
+    public static final int REGION_INDEX_NOTHING = 1;
+    public static final int REGION_INDEX_GRASSLAND = 2;
     public static final int SCENE_SCAN_RADIUS = 2;
+    public static final int SCENE_SCAN_MAX_RADIUS = 50;
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;
     public static final int LAYER_BOTTOM = 1;
