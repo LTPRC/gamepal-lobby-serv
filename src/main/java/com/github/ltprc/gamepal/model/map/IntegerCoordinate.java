@@ -12,7 +12,7 @@ public class IntegerCoordinate {
     private Integer y;
 
     public IntegerCoordinate(IntegerCoordinate integerCoordinate) {
-        x = integerCoordinate.getX();
-        y = integerCoordinate.getY();
+        x = integerCoordinate.getX().intValue();
+        y = integerCoordinate.getY().intValue();
     }
 }

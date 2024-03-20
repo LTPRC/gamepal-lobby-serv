@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -9,7 +8,9 @@ import com.github.ltprc.gamepal.model.map.world.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PlayerUtil {
 
@@ -326,7 +327,7 @@ public class PlayerUtil {
         return newEvent;
     }
 
-    public static void copyWorldCoordinate(WorldCoordinate from, WorldCoordinate to) {
+    public static void copyWorldCoordinate(final WorldCoordinate from, WorldCoordinate to) {
         to.setRegionNo(from.getRegionNo());
         Coordinate coordinate = from.getCoordinate();
         if (null != coordinate) {
@@ -570,5 +571,66 @@ public class PlayerUtil {
             rst.add(c4);
         }
         return rst;
+    }
+
+    public static List<IntegerCoordinate> preSelectSceneCoordinates(Region region, WorldCoordinate wc1,
+                                                                       WorldCoordinate wc2) {
+        List<IntegerCoordinate> rst = new ArrayList<>();
+        int x1 = Math.min(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
+        int x2 = Math.max(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
+        int y1 = Math.min(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
+        int y2 = Math.max(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
+        for (int i = x1; i <= x2; i++) {
+            for (int j = y1; j <= y2; j++) {
+                IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, j);
+                if (region.getScenes().containsKey(sceneCoordinate)) {
+                    rst.add(sceneCoordinate);
+                }
+            }
+        }
+        return rst;
+    }
+
+    public static WorldCoordinate convertCoordinate2WorldCoordinate(RegionInfo regionInfo, IntegerCoordinate sceneCoordinate,
+                                                         Coordinate coordinate) {
+        WorldCoordinate wc = new WorldCoordinate();
+        wc.setRegionNo(regionInfo.getRegionNo());
+        wc.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
+        wc.setCoordinate(new Coordinate(coordinate));
+        fixWorldCoordinate(wc, regionInfo);
+        return wc;
+    }
+
+    public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldCoordinate wc1,
+                                                    BigDecimal ballisticAngle, WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        Coordinate c1 = new Coordinate();
+        c1.setX(wc1.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c1.setY(wc1.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c2 = new Coordinate();
+        c2.setX(wc2.getCoordinate().getX()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        c2.setY(wc2.getCoordinate().getY()
+                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        return detectLineSquareCollision(c1, ballisticAngle, c2);
+    }
+
+    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
+        double thresholdDistance = 0.5D;
+        if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
+                || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
+            return c1.getX().subtract(c2.getX()).abs().doubleValue() < thresholdDistance;
+        }
+        double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
+        double yLeft = slope * (c2.getX().doubleValue() - thresholdDistance - c1.getX().doubleValue())
+                + c1.getY().doubleValue();
+        double yRight = slope * (c2.getX().doubleValue() - thresholdDistance - c1.getX().doubleValue())
+                + c1.getY().doubleValue();
+        return Math.abs(c2.getY().doubleValue() - yLeft) < thresholdDistance
+                || Math.abs(c2.getY().doubleValue() - yRight) < thresholdDistance;
     }
 }

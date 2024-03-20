@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Random;
 
@@ -92,12 +92,12 @@ public class NameUtil {
     }
 
     public static String[] generateNames(String origin, String gender) {
-        if (StringUtils.hasText(origin) || (!GamePalConstants.ORIGIN_CHINESE.equals(origin)
+        if (StringUtils.isNotBlank(origin) || (!GamePalConstants.ORIGIN_CHINESE.equals(origin)
                 && !GamePalConstants.ORIGIN_JAPANESE.equals(origin)
                 && !GamePalConstants.ORIGIN_INTERNATIONAL.equals(origin))) {
             origin = generateOrigin();
         }
-        if (StringUtils.hasText(gender) || (!GamePalConstants.GENDER_MALE.equals(gender)
+        if (StringUtils.isNotBlank(gender) || (!GamePalConstants.GENDER_MALE.equals(gender)
                 && !GamePalConstants.GENDER_FEMALE.equals(gender))) {
             gender = generateGender();
         }

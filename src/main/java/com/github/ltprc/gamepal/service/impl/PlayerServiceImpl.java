@@ -21,12 +21,12 @@ import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -106,47 +106,47 @@ public class PlayerServiceImpl implements PlayerService {
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         String firstName = req.getString("firstName");
-        if (StringUtils.hasText(firstName)) {
+        if (StringUtils.isNotBlank(firstName)) {
             playerInfo.setFirstName(firstName);
         }
         String lastName = req.getString("lastName");
-        if (StringUtils.hasText(lastName)) {
+        if (StringUtils.isNotBlank(lastName)) {
             playerInfo.setLastName(lastName);
         }
         String nickname = req.getString("nickname");
-        if (StringUtils.hasText(nickname)) {
+        if (StringUtils.isNotBlank(nickname)) {
             playerInfo.setNickname(nickname);
         }
         String nameColor = req.getString("nameColor");
-        if (StringUtils.hasText(nameColor)) {
+        if (StringUtils.isNotBlank(nameColor)) {
             playerInfo.setNameColor(nameColor);
         }
         String creature = req.getString("creature");
-        if (StringUtils.hasText(creature)) {
+        if (StringUtils.isNotBlank(creature)) {
             playerInfo.setCreature(creature);
         }
         String gender = req.getString("gender");
-        if (StringUtils.hasText(gender)) {
+        if (StringUtils.isNotBlank(gender)) {
             playerInfo.setGender(gender);
         }
         String skinColor = req.getString("skinColor");
-        if (StringUtils.hasText(skinColor)) {
+        if (StringUtils.isNotBlank(skinColor)) {
             playerInfo.setSkinColor(skinColor);
         }
         String hairstyle = req.getString("hairstyle");
-        if (StringUtils.hasText(hairstyle)) {
+        if (StringUtils.isNotBlank(hairstyle)) {
             playerInfo.setHairstyle(hairstyle);
         }
         String hairColor = req.getString("hairColor");
-        if (StringUtils.hasText(hairColor)) {
+        if (StringUtils.isNotBlank(hairColor)) {
             playerInfo.setHairColor(hairColor);
         }
         String eyes = req.getString("eyes");
-        if (StringUtils.hasText(eyes)) {
+        if (StringUtils.isNotBlank(eyes)) {
             playerInfo.setEyes(eyes);
         }
         String avatar = req.getString("avatar");
-        if (StringUtils.hasText(avatar)) {
+        if (StringUtils.isNotBlank(avatar)) {
             playerInfo.setAvatar(avatar);
         }
         return ResponseEntity.ok().body(rst.toString());
@@ -240,7 +240,7 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity useItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (!StringUtils.hasText(itemNo) || !playerInfo.getItems().containsKey(itemNo)
+        if (!StringUtils.isNotBlank(itemNo) || !playerInfo.getItems().containsKey(itemNo)
                 || playerInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
         }
