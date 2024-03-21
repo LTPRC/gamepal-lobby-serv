@@ -485,36 +485,52 @@ public class WorldServiceImpl implements WorldService {
                 // Detect the nearest blocker (including playerInfos) 24/03/21
                 List<IntegerCoordinate> preSelectedSceneCoordinates = PlayerUtil.preSelectSceneCoordinates(
                         regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo, nearestPlayerCoordinate);
-                preSelectedSceneCoordinates.stream().forEach(sceneCoordinate ->
-                        regionMap.get(worldEvent.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
-                                .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_GROUND)
-                                .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_DROP)
-                                .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_GROUND_DECORATION)
-                                .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_WALL_DECORATION)
-                                .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_CEILING_DECORATION)
-                                .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_HOLLOW_WALL)
-                                .forEach(blocker -> {
-                                    WorldCoordinate wc = PlayerUtil.convertCoordinate2WorldCoordinate(
-                                            regionMap.get(worldEvent.getRegionNo()), sceneCoordinate, blocker);
-                                    WorldBlock wb = new WorldBlock();
-                                    PlayerUtil.copyWorldCoordinate(wc, wb);
-                                    wb.setType(blocker.getType());
-                                    wb.setId(blocker.getId());
-                                    wb.setCode(blocker.getCode());
-                                    if (checkEvent(worldEvent, wb)) {
-                                        BigDecimal distanceOld =
-                                                PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
-                                                        eventPlayerInfo, nearestPlayerCoordinate);
-                                        BigDecimal distanceNew =
-                                                PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
-                                                        eventPlayerInfo, wb);
-                                        if (distanceOld.compareTo(distanceNew) > 0) {
-                                            PlayerUtil.copyWorldCoordinate(wb, nearestPlayerCoordinate);
-                                            activatedWorldBlock.setId(null);
-                                        }
-                                    }
-                                })
-                        );
+                List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>();
+                preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
+                    GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
+                    world.getOnlineMap().entrySet().stream()
+                            .filter(entry -> {
+                                PlayerInfo playerInfo = playerService.getPlayerInfoMap().get(entry.getKey());
+                                return !entry.getKey().equals(worldEvent.getUserCode())
+                                        && playerInfo.getRegionNo() == worldEvent.getRegionNo()
+                                        && GamePalConstants.PLAYER_STATUS_RUNNING == playerInfo.getPlayerStatus()
+                                        && 0 == playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD];})
+                            .forEach(entry ->
+                                    preSelectedWorldBlocks.add(playerService.getPlayerInfoMap().get(entry.getKey())));
+                    regionMap.get(worldEvent.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_GROUND)
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_DROP)
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_TELEPORT)
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_GROUND_DECORATION)
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_WALL_DECORATION)
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_CEILING_DECORATION)
+                            .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_HOLLOW_WALL)
+                            .forEach(blocker -> {
+                                WorldCoordinate wc = PlayerUtil.convertCoordinate2WorldCoordinate(
+                                        regionMap.get(worldEvent.getRegionNo()), sceneCoordinate, blocker);
+                                WorldBlock wb = new WorldBlock();
+                                PlayerUtil.copyWorldCoordinate(wc, wb);
+                                wb.setType(blocker.getType());
+                                wb.setId(blocker.getId());
+                                wb.setCode(blocker.getCode());
+                                preSelectedWorldBlocks.add(wb);
+                            });
+                });
+                preSelectedWorldBlocks.stream()
+                        .filter(wb -> checkEvent(worldEvent, wb))
+                        .forEach(wb -> {
+                            BigDecimal distanceOld =
+                                    PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
+                                                eventPlayerInfo, nearestPlayerCoordinate);
+                            BigDecimal distanceNew =
+                                    PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
+                                                eventPlayerInfo, wb);
+                            if (distanceOld.compareTo(distanceNew) > 0) {
+                                PlayerUtil.copyWorldCoordinate(wb, nearestPlayerCoordinate);
+                                activatedWorldBlock.setId(GamePalConstants.BLOCK_TYPE_PLAYER == wb.getType()
+                                        ? wb.getId() : null);
+                            }
+                        });
                 PlayerUtil.copyWorldCoordinate(nearestPlayerCoordinate, worldEvent);
                 if (StringUtils.isNotBlank(activatedWorldBlock.getId())) {
                     activateEvent(worldEvent, activatedWorldBlock.getId());
@@ -554,7 +570,7 @@ public class WorldServiceImpl implements WorldService {
      * @param blocker player/blocker block
      * @return whether this player can be hit by the event
      */
-    private boolean checkEvent(WorldEvent worldEvent, WorldBlock blocker) {
+    private boolean checkEvent(final WorldEvent worldEvent, final WorldBlock blocker) {
         PlayerInfo fromPlayerInfo = playerService.getPlayerInfoMap().get(worldEvent.getUserCode());
         boolean rst = false;
         switch (worldEvent.getCode()) {
@@ -580,31 +596,32 @@ public class WorldServiceImpl implements WorldService {
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT:
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
-                if (blocker.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-                        || blocker.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
-                    // Detect figure: round
-                    if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
-                            .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
-                            && PlayerUtil.calculateBallisticDistance(regionMap.get(worldEvent.getRegionNo()),
-                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker).doubleValue()
-                            < GamePalConstants.PLAYER_RADIUS.doubleValue()
-                            && PlayerUtil.compareAnglesInDegrees(
-                            PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
-                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 90D) {
-                        rst = true;
-                    }
-                } else {
+//                if (blocker.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
+//                        || blocker.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
+//                    // Detect figure: round
+//                    if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
+//                            .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
+//                            && PlayerUtil.calculateBallisticDistance(regionMap.get(worldEvent.getRegionNo()),
+//                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker).doubleValue()
+//                            < GamePalConstants.PLAYER_RADIUS.doubleValue()
+//                            && PlayerUtil.compareAnglesInDegrees(
+//                            PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+//                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 90D) {
+//                        rst = true;
+//                    }
+//                } else {
                     // Detect figure: square
                     if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
                             .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
                             && PlayerUtil.detectLineSquareCollision(regionMap.get(worldEvent.getRegionNo()),
-                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker)
+                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
+                            blocker.getType())
                             && PlayerUtil.compareAnglesInDegrees(
                             PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
                                     blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 90D) {
                         rst = true;
                     }
-                }
+//                }
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, blocker)

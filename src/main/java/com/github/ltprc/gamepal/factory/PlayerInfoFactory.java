@@ -16,6 +16,7 @@ public class PlayerInfoFactory {
 
     public PlayerInfo createPlayerInfoInstance() {
         PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
         playerInfo.setPlayerType(0);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         playerInfo.setRegionNo(1);

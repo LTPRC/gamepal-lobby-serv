@@ -382,6 +382,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                             && Math.abs(integerCoordinate.getY()) <= GamePalConstants.SCENE_SCAN_RADIUS;
                 })
                 // playerInfos contains running players only 24/03/16
+                .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(entry -> {
                     Block block = new Block();

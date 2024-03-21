@@ -358,6 +358,7 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_DISTURB:
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_TAIL_SMOKE:
+            case GamePalConstants.EVENT_CODE_SHOOT:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
                 break;
             case GamePalConstants.EVENT_CODE_HIT:
@@ -365,7 +366,6 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
             case GamePalConstants.EVENT_CODE_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT:
             default:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;
@@ -409,7 +409,8 @@ public class PlayerUtil {
         return c2.getY().subtract(c1.getY());
     }
 
-    public static BigDecimal calculateDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+    public static BigDecimal calculateDistance(final RegionInfo regionInfo, final WorldCoordinate wc1,
+                                               final WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
@@ -427,12 +428,13 @@ public class PlayerUtil {
         return calculateDistance(c1, c2);
     }
 
-    public static BigDecimal calculateDistance(Coordinate c1, Coordinate c2) {
+    public static BigDecimal calculateDistance(final Coordinate c1, final Coordinate c2) {
         return BigDecimal.valueOf(Math.sqrt(Math.pow(c1.getX().subtract(c2.getX()).doubleValue(), 2)
                 + Math.pow(c1.getY().subtract(c2.getY()).doubleValue(), 2)));
     }
 
-    public static BigDecimal calculateAngle(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+    public static BigDecimal calculateAngle(final RegionInfo regionInfo, final WorldCoordinate wc1,
+                                            final WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
@@ -456,7 +458,7 @@ public class PlayerUtil {
      * @param c2
      * @return in degrees
      */
-    public static BigDecimal calculateAngle(Coordinate c1, Coordinate c2) {
+    public static BigDecimal calculateAngle(final Coordinate c1, final Coordinate c2) {
         if (c1.getX().equals(c2.getX())) {
             switch (c1.getY().compareTo(c2.getY())) {
                 case 1:
@@ -602,7 +604,7 @@ public class PlayerUtil {
     }
 
     public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldCoordinate wc1,
-                                                    BigDecimal ballisticAngle, WorldCoordinate wc2) {
+                                                    BigDecimal ballisticAngle, WorldCoordinate wc2, int blockType) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
@@ -616,21 +618,27 @@ public class PlayerUtil {
                 .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
         c2.setY(wc2.getCoordinate().getY()
                 .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
-        return detectLineSquareCollision(c1, ballisticAngle, c2);
+        return detectLineSquareCollision(c1, ballisticAngle, c2, blockType);
     }
 
-    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
+    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
+                                                    int blockType) {
         double thresholdDistance = 0.5D;
+        if (blockType == GamePalConstants.BLOCK_TYPE_PLAYER || blockType == GamePalConstants.BLOCK_TYPE_TREE) {
+            thresholdDistance = GamePalConstants.PLAYER_RADIUS.doubleValue();
+        }
         if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
                 || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
             return c1.getX().subtract(c2.getX()).abs().doubleValue() < thresholdDistance;
         }
         double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
-        double yLeft = slope * (c2.getX().doubleValue() - thresholdDistance - c1.getX().doubleValue())
+        double yLeft = slope * ((c2.getX().doubleValue() - 0.5D) - thresholdDistance - c1.getX().doubleValue())
                 + c1.getY().doubleValue();
-        double yRight = slope * (c2.getX().doubleValue() - thresholdDistance - c1.getX().doubleValue())
+        double yRight = slope * ((c2.getX().doubleValue() + 0.5D) - thresholdDistance - c1.getX().doubleValue())
                 + c1.getY().doubleValue();
-        return Math.abs(c2.getY().doubleValue() - yLeft) < thresholdDistance
-                || Math.abs(c2.getY().doubleValue() - yRight) < thresholdDistance;
+        return !((yLeft - c2.getY().doubleValue() > thresholdDistance
+                && yRight - c2.getY().doubleValue() > thresholdDistance)
+                || (c2.getY().doubleValue() - yLeft > thresholdDistance
+                && c2.getY().doubleValue() - yRight > thresholdDistance));
     }
 }

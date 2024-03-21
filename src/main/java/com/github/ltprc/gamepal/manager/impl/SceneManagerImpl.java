@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 
@@ -20,6 +21,7 @@ public class SceneManagerImpl implements SceneManager {
         region.setName("Auto Region " + region.getRegionNo());
         region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
         region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
+        region.setScenes(new HashMap<>());
         return region;
     }
 
