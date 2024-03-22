@@ -26,8 +26,6 @@ public interface PlayerService {
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);
 
-    Set<String> getFlagSet();
-
     Map<String, Terminal> getTerminalMap();
 
     ResponseEntity useItem(String userCode, String itemNo, int itemAmount);

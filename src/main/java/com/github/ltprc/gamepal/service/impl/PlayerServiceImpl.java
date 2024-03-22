@@ -1,6 +1,5 @@
 package com.github.ltprc.gamepal.service.impl;
 
-import cn.hutool.core.collection.ConcurrentHashSet;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
@@ -32,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +46,6 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Log logger = LogFactory.getLog(PlayerServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
-    private Set<String> flagSet = new ConcurrentHashSet<>();
     private Map<String, Terminal> terminalMap = new ConcurrentHashMap<>(); // interactionId, terminal
 
     @Autowired
@@ -227,11 +226,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Set<String> getFlagSet() {
-        return flagSet;
-    }
-
-    @Override
     public Map<String, Terminal> getTerminalMap() {
         return terminalMap;
     }
@@ -298,8 +292,12 @@ public class PlayerServiceImpl implements PlayerService {
             default:
                 break;
         }
-        flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (!world.getFlagMap().containsKey(userCode)) {
+            world.getFlagMap().put(userCode, new HashSet<>());
+        }
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -323,8 +321,12 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        flagSet.add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        flagSet.add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (!world.getFlagMap().containsKey(userCode)) {
+            world.getFlagMap().put(userCode, new HashSet<>());
+        }
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
