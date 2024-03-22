@@ -19,8 +19,6 @@ public interface PlayerService {
 
     ResponseEntity getPlayerInfo(HttpServletRequest request);
 
-    Map<String, PlayerInfo> getPlayerInfoMap();
-
     ResponseEntity generateNotificationMessage(String userCode, String content);
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);

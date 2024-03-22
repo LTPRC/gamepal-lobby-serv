@@ -7,7 +7,9 @@ import com.github.ltprc.gamepal.model.game.Cash;
 import com.github.ltprc.gamepal.model.game.Dice;
 import com.github.ltprc.gamepal.model.game.lv.LasVegasGame;
 import com.github.ltprc.gamepal.model.game.lv.LasVegasPlayer;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.StateMachineService;
+import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -31,10 +33,14 @@ public class StateMachineServiceImpl implements StateMachineService {
     @Autowired
     private PlayerService playerService;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public ResponseEntity gameTerminalState(GameTerminal gameTerminal) {
         JSONObject rst = ContentUtil.generateRst();
-        if (null == gameTerminal.getWorld()) {
+        GameWorld world = gameTerminal.getWorld();
+        if (null == world) {
             gameTerminal.addOutput("用户信息错误，终端机载入失败。");
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1021));
         }
@@ -51,7 +57,7 @@ public class StateMachineServiceImpl implements StateMachineService {
             case GamePalConstants.GAME_PLAYER_STATUS_SEEKING:
                 gameTerminal.addOutput("");
                 gameTerminal.addOutput("以下是当前正在进行的游戏列表：");
-                gameTerminal.getWorld().getGameMap().entrySet().stream().forEach(entry -> {
+                world.getGameMap().entrySet().stream().forEach(entry -> {
                     gameTerminal.addOutput("[" + entry.getKey() + "] "
                             + convertGameType2Name(entry.getValue().getGameType()) + ": "
                             + entry.getValue().getPlayerMap().size() + " / "
@@ -66,15 +72,15 @@ public class StateMachineServiceImpl implements StateMachineService {
                     notifyAllTerminals(gameTerminal, "桌游局信息发生更新。");
                     notifyAllTerminals(gameTerminal, "玩家如下：");
                     gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                        Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
+                        Terminal terminal = world.getTerminalMap().get(entry.getValue().getId());
                         notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
-                                + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                                + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                     });
                     notifyAllTerminals(gameTerminal, "游客如下：");
                     gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
-                        Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(standBy);
+                        Terminal terminal = world.getTerminalMap().get(standBy);
                         notifyAllTerminals(gameTerminal, "- "
-                                + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                                + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                     });
                     notifyAllTerminals(gameTerminal, "输入【0】退出桌游局");
                     notifyAllTerminals(gameTerminal, "输入【1】进入准备状态");
@@ -87,15 +93,15 @@ public class StateMachineServiceImpl implements StateMachineService {
                 notifyAllTerminals(gameTerminal, "桌游局信息发生更新。");
                 notifyAllTerminals(gameTerminal, "玩家如下：");
                 gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                    Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
+                    Terminal terminal = world.getTerminalMap().get(entry.getValue().getId());
                     notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
-                            + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                            + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                 });
                 notifyAllTerminals(gameTerminal, "游客如下：");
                 gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
-                    Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(standBy);
+                    Terminal terminal = world.getTerminalMap().get(standBy);
                     notifyAllTerminals(gameTerminal, "- "
-                            + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                            + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                 });
                 notifyAllTerminals(gameTerminal, "输入【0】退出桌游局");
                 notifyAllTerminals(gameTerminal, "输入【1】取消准备状态");
@@ -120,7 +126,8 @@ public class StateMachineServiceImpl implements StateMachineService {
 
     @Override
     public ResponseEntity gameTerminalInput(GameTerminal gameTerminal, String input) {
-        if (null == gameTerminal.getWorld()) {
+        GameWorld world = gameTerminal.getWorld();
+        if (null == world) {
             gameTerminal.addOutput("用户信息错误，终端机载入失败。");
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1021));
         }
@@ -136,8 +143,8 @@ public class StateMachineServiceImpl implements StateMachineService {
                     break;
                 }
                 inputInt = Integer.valueOf(input);
-                if (gameTerminal.getWorld().getGameMap().containsKey(inputInt)) {
-                    gameTerminal.setGame(gameTerminal.getWorld().getGameMap().get(inputInt));
+                if (world.getGameMap().containsKey(inputInt)) {
+                    gameTerminal.setGame(world.getGameMap().get(inputInt));
                     gameTerminal.addOutput("已加入编号" + inputInt + "的桌游局。");
                     gameTerminal.addOutput("桌游的类型为" + convertGameType2Name(gameTerminal.getGame().getGameType()) + "。");
                     switch (gameTerminal.getGame().getGameType()) {
@@ -168,7 +175,7 @@ public class StateMachineServiceImpl implements StateMachineService {
                     gameTerminal.setStatus(GamePalConstants.GAME_PLAYER_STATUS_PREPARED);
                     LasVegasPlayer lasVegasPlayer = new LasVegasPlayer();
                     lasVegasPlayer.setId(gameTerminal.getId());
-                    lasVegasPlayer.setName(playerService.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
+                    lasVegasPlayer.setName(world.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
                     for (int i = 0; i < 8; i++) {
                         lasVegasPlayer.getDiceQueue().add(new Dice());
                     }
@@ -179,7 +186,7 @@ public class StateMachineServiceImpl implements StateMachineService {
                     gameTerminal.getGame().setGameStatus(GamePalConstants.GAME_STATUS_RUNNING);
                     gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
                         GameTerminal gameTerminal2 =
-                                (GameTerminal) gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
+                                (GameTerminal) world.getTerminalMap().get(entry.getValue().getId());
                         gameTerminal2.setStatus(GamePalConstants.GAME_PLAYER_STATUS_PLAYING);
                     });
                     notifyAllTerminals(gameTerminal, "");
@@ -225,6 +232,7 @@ public class StateMachineServiceImpl implements StateMachineService {
     @Override
     public ResponseEntity lasVegasState(GameTerminal gameTerminal) {
         JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = gameTerminal.getWorld();
         LasVegasGame game = (LasVegasGame) gameTerminal.getGame();
 //        if (game.getPlayerMap().entrySet().stream().filter(entry -> entry.getValue().getId().equals(gameTerminal.getId())).count() == 0) {
 //            gameTerminal.addOutput("游戏已开始，请寻找其他房间。");
@@ -234,8 +242,8 @@ public class StateMachineServiceImpl implements StateMachineService {
             notifyAllTerminals(gameTerminal, "货币全部入场，游戏结束！获胜者：");
             List<String> winners = LasVegasGameUtil.calculateWinners(game);
             winners.stream().forEach(winner -> {
-                Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(winner);
-                gameTerminal.addOutput("- " + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                Terminal terminal = world.getTerminalMap().get(winner);
+                gameTerminal.addOutput("- " + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
             });
             game.setGameStatus(GamePalConstants.GAME_STATUS_END);
         }
@@ -257,7 +265,7 @@ public class StateMachineServiceImpl implements StateMachineService {
         // Play
         notifyAllTerminals(gameTerminal, "局数[" + game.getGameNumber() + "] 轮数[" + game.getRoundNumber() + "] 玩家["
                 + game.getPlayerNumber() + "]"
-                + playerService.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
+                + world.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
         if (GamePalConstants.GAME_PLAYER_STATUS_PLAYING == gameTerminal.getStatus()
                 && game.getPlayerNumber() == gameTerminal.getPlayer().getPlayerNo()) {
             LasVegasPlayer player = (LasVegasPlayer) gameTerminal.getPlayer();
@@ -331,9 +339,10 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     private void notifyAllTerminals(GameTerminal gameTerminal, String content) {
+        GameWorld world = gameTerminal.getWorld();
         gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
             GameTerminal gameTerminal2 =
-                    (GameTerminal) gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
+                    (GameTerminal) world.getTerminalMap().get(entry.getValue().getId());
             gameTerminal2.addOutput(content);
         });
     }

@@ -95,7 +95,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfo")) {
-                playerService.getPlayerInfoMap().put(userCode,
+                world.getPlayerInfoMap().put(userCode,
                         functions.getObject("updatePlayerInfo", PlayerInfo.class));
             }
             if (functions.containsKey("updateplayerinfoCharacter")) {
@@ -105,7 +105,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
             }
             // Detect and expand scenes after updating player's location
-            worldService.expandScene(playerService.getPlayerInfoMap().get(userCode));
+            worldService.expandScene(world.getPlayerInfoMap().get(userCode));
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.stream().forEach(useItem -> {
@@ -285,7 +285,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         world.getFlagMap().get(userCode).clear();
 
         // Return playerInfos
-        Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return;

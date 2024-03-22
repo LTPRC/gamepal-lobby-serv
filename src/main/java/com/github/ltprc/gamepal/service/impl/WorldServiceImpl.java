@@ -93,6 +93,8 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private void initiateWorld(GameWorld world) {
+        world.setPlayerInfoMap(new ConcurrentHashMap<>());
+        world.setRelationMap(new ConcurrentHashMap<>());
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
         world.setOnlineMap(new ConcurrentHashMap<>()); // userCode, timestamp
@@ -416,6 +418,7 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private WorldEvent updateEvent(WorldEvent oldEvent) {
+        GameWorld world = userService.getWorldByUserCode(oldEvent.getUserCode());
         triggerEvent(oldEvent);
         WorldEvent newEvent = new WorldEvent();
         newEvent.setUserCode(oldEvent.getUserCode());
@@ -426,7 +429,7 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_HEAL:
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_DISTURB:
-                PlayerUtil.copyWorldCoordinate(playerService.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
+                PlayerUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
                 break;
             default:
                 PlayerUtil.copyWorldCoordinate(oldEvent, newEvent);
@@ -446,6 +449,7 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private void triggerEvent(WorldEvent worldEvent) {
+        GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
         switch (worldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_FIRE:
                 // Continuous event
@@ -466,7 +470,7 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
                 // Non-self event
-                playerService.getPlayerInfoMap().entrySet().stream()
+                world.getPlayerInfoMap().entrySet().stream()
                         .filter(entry -> !entry.getValue().getId().equals(worldEvent.getUserCode())
                                 && entry.getValue().getRegionNo() == worldEvent.getRegionNo()
                                 && GamePalConstants.PLAYER_STATUS_RUNNING == entry.getValue().getPlayerStatus()
@@ -476,7 +480,7 @@ public class WorldServiceImpl implements WorldService {
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT:
                 // Non-self event, move to the nearest player/blocker
-                PlayerInfo eventPlayerInfo = playerService.getPlayerInfoMap().get(worldEvent.getUserCode());
+                PlayerInfo eventPlayerInfo = world.getPlayerInfoMap().get(worldEvent.getUserCode());
                 WorldCoordinate nearestPlayerCoordinate = new WorldCoordinate();
                 PlayerUtil.copyWorldCoordinate(worldEvent, nearestPlayerCoordinate);
                 WorldBlock activatedWorldBlock = new WorldBlock();
@@ -485,16 +489,15 @@ public class WorldServiceImpl implements WorldService {
                         regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo, nearestPlayerCoordinate);
                 List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>();
                 preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
-                    GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
                     world.getOnlineMap().entrySet().stream()
                             .filter(entry -> {
-                                PlayerInfo playerInfo = playerService.getPlayerInfoMap().get(entry.getKey());
+                                PlayerInfo playerInfo = world.getPlayerInfoMap().get(entry.getKey());
                                 return !entry.getKey().equals(worldEvent.getUserCode())
                                         && playerInfo.getRegionNo() == worldEvent.getRegionNo()
                                         && GamePalConstants.PLAYER_STATUS_RUNNING == playerInfo.getPlayerStatus()
                                         && 0 == playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD];})
                             .forEach(entry ->
-                                    preSelectedWorldBlocks.add(playerService.getPlayerInfoMap().get(entry.getKey())));
+                                    preSelectedWorldBlocks.add(world.getPlayerInfoMap().get(entry.getKey())));
                     regionMap.get(worldEvent.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
                             .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_GROUND)
                             .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_DROP)
@@ -560,7 +563,7 @@ public class WorldServiceImpl implements WorldService {
                 break;
             default:
                 // Global event
-                playerService.getPlayerInfoMap().entrySet().stream()
+                world.getPlayerInfoMap().entrySet().stream()
                         .filter(entry -> entry.getValue().getRegionNo() == worldEvent.getRegionNo())
                         .filter(entry -> checkEvent(worldEvent, entry.getValue()))
                         .forEach(entry -> activateEvent(worldEvent, entry.getValue().getId()));
@@ -575,7 +578,8 @@ public class WorldServiceImpl implements WorldService {
      * @return whether this player can be hit by the event
      */
     private boolean checkEvent(final WorldEvent worldEvent, final WorldBlock blocker) {
-        PlayerInfo fromPlayerInfo = playerService.getPlayerInfoMap().get(worldEvent.getUserCode());
+        GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
+        PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(worldEvent.getUserCode());
         boolean rst = false;
         switch (worldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_FIRE:

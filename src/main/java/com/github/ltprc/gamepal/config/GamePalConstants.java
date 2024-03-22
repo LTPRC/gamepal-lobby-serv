@@ -14,6 +14,8 @@ public class GamePalConstants {
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
     public static final int FRAME_PER_SECOND = 25;
+    public static final int PLAYER_TYPE_HUMAN = 0;
+    public static final int PLAYER_TYPE_AI = 1;
 
     public static final String COMMAND_PREFIX = "/";
     public static final int MESSAGE_TYPE_PRINTED = 1;

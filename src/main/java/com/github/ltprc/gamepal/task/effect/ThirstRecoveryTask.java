@@ -25,7 +25,7 @@ public class ThirstRecoveryTask {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
             Map<String, Long> onlineMap = world.getOnlineMap();
-            Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
+            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
             onlineMap.entrySet().stream()
                     .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey())
                             && playerInfoMap.get(entry2.getKey()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)

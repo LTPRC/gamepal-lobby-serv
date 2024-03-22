@@ -38,7 +38,7 @@ public class TimedEventTask {
             worldService.updateEvents(world);
 
             Map<String, Long> onlineMap = world.getOnlineMap();
-            Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
+            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
             // Count buff remaining time
             onlineMap.entrySet().stream()
