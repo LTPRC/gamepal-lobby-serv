@@ -3,19 +3,19 @@ package com.github.ltprc.gamepal.model.map.world;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
+import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;
 
 import javax.websocket.Session;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 @Data
 public class GameWorld {
+    private Map<Integer, Region> regionMap; // regionNo, region
     private Map<String, PlayerInfo> playerInfoMap;
     private Map<String, Map<String, Integer>> relationMap;
     private Map<String, Session> sessionMap; // userCode, session

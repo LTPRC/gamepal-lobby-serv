@@ -39,7 +39,6 @@ public class WorldServiceImpl implements WorldService {
 
     private static final Log logger = LogFactory.getLog(WorldServiceImpl.class);
     private Map<String, GameWorld> worldMap = new LinkedHashMap<>(); // worldCode, world (We only allow 1 world now 24/02/16)
-    private Map<Integer, Region> regionMap = new HashMap<>(); // regionNo, region
     private Map<String, Item> itemMap = new HashMap<>(); // itemNo, item
 
     @Autowired
@@ -83,16 +82,12 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public Map<Integer, Region> getRegionMap() {
-        return regionMap;
-    }
-
-    @Override
     public Map<String, Item> getItemMap() {
         return itemMap;
     }
 
     private void initiateWorld(GameWorld world) {
+        world.setRegionMap(new ConcurrentHashMap<>());
         world.setPlayerInfoMap(new ConcurrentHashMap<>());
         world.setRelationMap(new ConcurrentHashMap<>());
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
@@ -105,12 +100,12 @@ public class WorldServiceImpl implements WorldService {
         world.setFlagMap(new ConcurrentHashMap<>());
         world.setTerminalMap(new ConcurrentHashMap<>());
         world.setNpcMap(new ConcurrentHashMap<>());
+        loadScenes(world);
         loadBlocks(world);
         initiateGame(world);
     }
 
-    @Override
-    public void loadScenes() {
+    private void loadScenes(GameWorld world) {
         JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/json/regions.json");
         for (Object obj : regions) {
             JSONObject region = JSON.parseObject(String.valueOf(obj));
@@ -205,13 +200,12 @@ public class WorldServiceImpl implements WorldService {
                 }
                 newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
             }
-            regionMap.put(regionNo, newRegion);
+            world.getRegionMap().put(regionNo, newRegion);
         }
     }
 
-    @Override
-    public void loadBlocks(GameWorld world) {
-        regionMap.entrySet().stream().forEach(entry1 -> {
+    private void loadBlocks(GameWorld world) {
+        world.getRegionMap().entrySet().stream().forEach(entry1 -> {
             Region region = entry1.getValue();
             region.getScenes().entrySet().stream().forEach(entry2 -> {
                 Scene scene = entry2.getValue();
@@ -353,6 +347,7 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void updateEvents(GameWorld world) {
+        Map<Integer, Region> regionMap = world.getRegionMap();
         // Clear events from scene 24/02/16
         regionMap.entrySet().stream().forEach(region ->
             region.getValue().getScenes().entrySet().forEach(scene ->
@@ -371,7 +366,7 @@ public class WorldServiceImpl implements WorldService {
                 } else {
                     if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
                         // Detect and expand scenes after updating event's location
-                        expandScene(newEvent);
+                        expandScene(world, newEvent);
                     }
                     regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
                             .add(PlayerUtil.convertWorldEvent2Event(newEvent));
@@ -382,11 +377,12 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public void expandScene(WorldCoordinate worldCoordinate) {
-        expandScene(worldCoordinate, 1);
+    public void expandScene(GameWorld world, WorldCoordinate worldCoordinate) {
+        expandScene(world, worldCoordinate, 1);
     }
 
-    private void expandScene(WorldCoordinate worldCoordinate, int depth) {
+    private void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth) {
+        Map<Integer, Region> regionMap = world.getRegionMap();
         Region region;
         if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
             region = sceneManager.generateRegion(worldCoordinate.getRegionNo());
@@ -411,7 +407,7 @@ public class WorldServiceImpl implements WorldService {
                         newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
                                 worldCoordinate.getSceneCoordinate().getX() + i,
                                 worldCoordinate.getSceneCoordinate().getY() + j));
-                        expandScene(newWorldCoordinate, depth - 1);
+                        expandScene(world, newWorldCoordinate, depth - 1);
                     }
                 }
             }
@@ -451,6 +447,7 @@ public class WorldServiceImpl implements WorldService {
 
     private void triggerEvent(WorldEvent worldEvent) {
         GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
+        Map<Integer, Region> regionMap = world.getRegionMap();
         switch (worldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_FIRE:
                 // Continuous event
@@ -580,6 +577,7 @@ public class WorldServiceImpl implements WorldService {
      */
     private boolean checkEvent(final WorldEvent worldEvent, final WorldBlock blocker) {
         GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
+        Map<Integer, Region> regionMap = world.getRegionMap();
         PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(worldEvent.getUserCode());
         boolean rst = false;
         switch (worldEvent.getCode()) {

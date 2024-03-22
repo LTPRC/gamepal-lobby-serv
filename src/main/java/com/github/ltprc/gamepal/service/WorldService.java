@@ -17,13 +17,7 @@ public interface WorldService {
 
     ResponseEntity<String> removeWorld(String worldCode);
 
-    Map<Integer, Region> getRegionMap();
-
     Map<String, Item> getItemMap();
-
-    void loadScenes();
-
-    void loadBlocks(GameWorld world);
 
     void loadItems();
 
@@ -33,5 +27,5 @@ public interface WorldService {
 
     void updateEvents(GameWorld world);
 
-    void expandScene(WorldCoordinate worldCoordinate);
+    void expandScene(GameWorld world, WorldCoordinate worldCoordinate);
 }

@@ -105,7 +105,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
             }
             // Detect and expand scenes after updating player's location
-            worldService.expandScene(world.getPlayerInfoMap().get(userCode));
+            worldService.expandScene(world, world.getPlayerInfoMap().get(userCode));
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.stream().forEach(useItem -> {
@@ -164,7 +164,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     logger.warn(ErrorUtil.ERROR_1013 + " id: " + id);
                 } else {
                     playerService.getItem(userCode, worldDrop.getItemNo(), -1 * worldDrop.getAmount());
-                    Region region = worldService.getRegionMap().get(worldDrop.getRegionNo());
+                    Region region = world.getRegionMap().get(worldDrop.getRegionNo());
                     Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
                     scene.getBlocks().add(PlayerUtil.convertWorldBlock2Block(worldDrop));
                     world.getBlockMap().put(id, worldDrop);
@@ -178,7 +178,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 } else {
                     WorldDrop worldDrop = (WorldDrop) world.getBlockMap().get(id);
                     playerService.getItem(userCode, worldDrop.getItemNo(), worldDrop.getAmount());
-                    Region region = worldService.getRegionMap().get(worldDrop.getRegionNo());
+                    Region region = world.getRegionMap().get(worldDrop.getRegionNo());
                     Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
                     scene.setBlocks(scene.getBlocks().stream()
                             .filter(block -> !id.equals(block.getId())).collect(Collectors.toList()));
@@ -316,7 +316,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         // Return regionInfo not region 24/03/18
-        Region region = worldService.getRegionMap().get(playerInfo.getRegionNo());
+        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         rst.put("regionInfo", JSON.toJSON(new RegionInfo(region)));
 
         // Return SceneInfos
