@@ -59,7 +59,7 @@ public class LasVegasGameUtil {
         if (null == casino.getCashQueue() || casino.getCashQueue().isEmpty()) {
             return BigDecimal.ZERO;
         }
-        return casino.getCashQueue().stream().map(cash -> cash.getValue()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return casino.getCashQueue().stream().map(Cash::getValue).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public static void addPlayer2Map(Map<Integer, Player> playerMap, Player player) {
@@ -77,9 +77,9 @@ public class LasVegasGameUtil {
     }
 
     public static void rollDiceQueue(LasVegasPlayer player) {
-        player.getDiceQueue().stream().forEach(dice -> {
-            dice.setPoint(Double.valueOf(1 + Math.random() * 6).intValue());
-        });
+        player.getDiceQueue().stream().forEach(dice ->
+            dice.setPoint(Double.valueOf(1 + Math.random() * 6).intValue())
+        );
     }
 
     public static String printDiceQueue(LasVegasPlayer player) {

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
-import java.util.Set;
 
 public interface PlayerService {
 
@@ -25,8 +24,6 @@ public interface PlayerService {
     ResponseEntity generateNotificationMessage(String userCode, String content);
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);
-
-    Map<String, Terminal> getTerminalMap();
 
     ResponseEntity useItem(String userCode, String itemNo, int itemAmount);
 

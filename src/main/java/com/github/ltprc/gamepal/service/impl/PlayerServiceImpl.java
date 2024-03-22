@@ -46,7 +46,6 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Log logger = LogFactory.getLog(PlayerServiceImpl.class);
     private Map<String, PlayerInfo> playerInfoMap = new ConcurrentHashMap<>();
     private Map<String, Map<String, Integer>> relationMap = new ConcurrentHashMap<>();
-    private Map<String, Terminal> terminalMap = new ConcurrentHashMap<>(); // interactionId, terminal
 
     @Autowired
     private UserService userService;
@@ -223,11 +222,6 @@ public class PlayerServiceImpl implements PlayerService {
             relationMap.put(userCode, new ConcurrentHashMap<>());
         }
         return relationMap.get(userCode);
-    }
-
-    @Override
-    public Map<String, Terminal> getTerminalMap() {
-        return terminalMap;
     }
 
     @Override
@@ -481,15 +475,15 @@ public class PlayerServiceImpl implements PlayerService {
                         break;
                     case GamePalConstants.BLOCK_TYPE_GAME:
                         generateNotificationMessage(userCode, "你开启了桌游。");
-                        if (!terminalMap.containsKey(id)) {
+                        if (!world.getTerminalMap().containsKey(id)) {
                             GameTerminal gameTerminal = new GameTerminal(world);
                             gameTerminal.setId(id);
                             gameTerminal.setUserCode(userCode);
                             gameTerminal.setStatus(GamePalConstants.GAME_PLAYER_STATUS_START);
                             gameTerminal.setOutputs(new ArrayList<>());
-                            terminalMap.put(id, gameTerminal);
+                            world.getTerminalMap().put(id, gameTerminal);
                         }
-                        stateMachineService.gameTerminalInput((GameTerminal) terminalMap.get(id), "1");
+                        stateMachineService.gameTerminalInput((GameTerminal) world.getTerminalMap().get(id), "1");
                         break;
                     case GamePalConstants.BLOCK_TYPE_COOKER:
                         generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");

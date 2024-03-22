@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.model.map.world;
 
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.game.Game;
+import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;
 
 import javax.websocket.Session;
@@ -20,4 +21,5 @@ public class GameWorld {
     private Queue<WorldEvent> eventQueue; // event
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
     private Map<String, Set<String>> flagMap; // userCode, token
+    private Map<String, Terminal> terminalMap; // interactionId, terminal
 }

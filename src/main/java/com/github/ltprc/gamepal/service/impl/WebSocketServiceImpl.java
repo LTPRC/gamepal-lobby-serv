@@ -221,7 +221,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
                 for (Object terminalInput : terminalInputs) {
                     String id = ((JSONObject) terminalInput).getString("id");
-                    Terminal terminal = playerService.getTerminalMap().get(id);
+                    Terminal terminal = world.getTerminalMap().get(id);
                     if (null == terminal) {
                         logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
                     } else {
@@ -298,7 +298,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
         rst.put("relations", relations);
         JSONArray terminalOutputs = new JSONArray();
-        playerService.getTerminalMap().entrySet().stream()
+        world.getTerminalMap().entrySet().stream()
                 .filter(entry -> userCode.equals(entry.getValue().getUserCode()))
                 .forEach(entry -> {
                     entry.getValue().flushOutput().stream().forEach(output -> {

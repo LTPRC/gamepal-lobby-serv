@@ -66,13 +66,15 @@ public class StateMachineServiceImpl implements StateMachineService {
                     notifyAllTerminals(gameTerminal, "桌游局信息发生更新。");
                     notifyAllTerminals(gameTerminal, "玩家如下：");
                     gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                        Terminal terminal = playerService.getTerminalMap().get(entry.getValue().getId());
-                        notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] " + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                        Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
+                        notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
+                                + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                     });
                     notifyAllTerminals(gameTerminal, "游客如下：");
                     gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
-                        Terminal terminal = playerService.getTerminalMap().get(standBy);
-                        notifyAllTerminals(gameTerminal, "- " + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                        Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(standBy);
+                        notifyAllTerminals(gameTerminal, "- "
+                                + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                     });
                     notifyAllTerminals(gameTerminal, "输入【0】退出桌游局");
                     notifyAllTerminals(gameTerminal, "输入【1】进入准备状态");
@@ -85,13 +87,15 @@ public class StateMachineServiceImpl implements StateMachineService {
                 notifyAllTerminals(gameTerminal, "桌游局信息发生更新。");
                 notifyAllTerminals(gameTerminal, "玩家如下：");
                 gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                    Terminal terminal = playerService.getTerminalMap().get(entry.getValue().getId());
-                    notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] " + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                    Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
+                    notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
+                            + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                 });
                 notifyAllTerminals(gameTerminal, "游客如下：");
                 gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
-                    Terminal terminal = playerService.getTerminalMap().get(standBy);
-                    notifyAllTerminals(gameTerminal, "- " + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+                    Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(standBy);
+                    notifyAllTerminals(gameTerminal, "- "
+                            + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
                 });
                 notifyAllTerminals(gameTerminal, "输入【0】退出桌游局");
                 notifyAllTerminals(gameTerminal, "输入【1】取消准备状态");
@@ -174,7 +178,8 @@ public class StateMachineServiceImpl implements StateMachineService {
                     // Check whether the game can start now
                     gameTerminal.getGame().setGameStatus(GamePalConstants.GAME_STATUS_RUNNING);
                     gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                        GameTerminal gameTerminal2 = (GameTerminal) playerService.getTerminalMap().get(entry.getValue().getId());
+                        GameTerminal gameTerminal2 =
+                                (GameTerminal) gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
                         gameTerminal2.setStatus(GamePalConstants.GAME_PLAYER_STATUS_PLAYING);
                     });
                     notifyAllTerminals(gameTerminal, "");
@@ -229,7 +234,7 @@ public class StateMachineServiceImpl implements StateMachineService {
             notifyAllTerminals(gameTerminal, "货币全部入场，游戏结束！获胜者：");
             List<String> winners = LasVegasGameUtil.calculateWinners(game);
             winners.stream().forEach(winner -> {
-                Terminal terminal = playerService.getTerminalMap().get(winner);
+                Terminal terminal = gameTerminal.getWorld().getTerminalMap().get(winner);
                 gameTerminal.addOutput("- " + playerService.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
             });
             game.setGameStatus(GamePalConstants.GAME_STATUS_END);
@@ -327,7 +332,8 @@ public class StateMachineServiceImpl implements StateMachineService {
 
     private void notifyAllTerminals(GameTerminal gameTerminal, String content) {
         gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-            GameTerminal gameTerminal2 = (GameTerminal) playerService.getTerminalMap().get(entry.getValue().getId());
+            GameTerminal gameTerminal2 =
+                    (GameTerminal) gameTerminal.getWorld().getTerminalMap().get(entry.getValue().getId());
             gameTerminal2.addOutput(content);
         });
     }
