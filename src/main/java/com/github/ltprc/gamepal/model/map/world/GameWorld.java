@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;
 
 import javax.websocket.Session;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -26,4 +27,6 @@ public class GameWorld {
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
     private Map<String, Set<String>> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal
+
+    private Map<String, PlayerInfo> npcMap; // userCode, npcPlayerInfo
 }

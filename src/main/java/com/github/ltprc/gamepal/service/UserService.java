@@ -17,4 +17,6 @@ public interface UserService {
     ResponseEntity<String> logoff(String userCode, String token, boolean needToken);
 
     GameWorld getWorldByUserCode(String userCode);
+
+    void addUserIntoMap(GameWorld world, String userCode);
 }

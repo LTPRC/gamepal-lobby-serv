@@ -104,6 +104,7 @@ public class WorldServiceImpl implements WorldService {
         world.setMessageMap(new ConcurrentHashMap<>());
         world.setFlagMap(new ConcurrentHashMap<>());
         world.setTerminalMap(new ConcurrentHashMap<>());
+        world.setNpcMap(new ConcurrentHashMap<>());
         loadBlocks(world);
         initiateGame(world);
     }

@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        userWorldMap.put(userCode, world);
+        addUserIntoMap(world, userCode);
         // Update online token
         String token = UUID.randomUUID().toString();
         world.getTokenMap().put(userCode, token);
@@ -180,5 +180,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public GameWorld getWorldByUserCode(String userCode) {
         return userWorldMap.get(userCode);
+    }
+
+    @Override
+    public void addUserIntoMap(GameWorld world, String userCode) {
+        userWorldMap.put(userCode, world);
     }
 }
