@@ -362,16 +362,11 @@ public class WorldServiceImpl implements WorldService {
                 eventQueue.add(newEvent);
                 if (!regionMap.containsKey(newEvent.getRegionNo())) {
                     logger.error(ErrorUtil.ERROR_1027);
-                } else if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
-                    Scene tempScene = new Scene();
-                    tempScene.setName("temp");
-                    tempScene.setSceneCoordinate(newEvent.getSceneCoordinate());
-                    tempScene.setBlocks(new ArrayList<>());
-                    tempScene.setEvents(new ArrayList<>());
-                    regionMap.get(newEvent.getRegionNo()).getScenes().put(newEvent.getSceneCoordinate(), tempScene);
-                    regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
-                            .add(PlayerUtil.convertWorldEvent2Event(newEvent));
                 } else {
+                    if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
+                        // Detect and expand scenes after updating event's location
+                        expandScene(newEvent);
+                    }
                     regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
                             .add(PlayerUtil.convertWorldEvent2Event(newEvent));
                 }
@@ -531,6 +526,12 @@ public class WorldServiceImpl implements WorldService {
                                         ? wb.getId() : null);
                             }
                         });
+                // Shake the final position of event 24/03/22
+                nearestPlayerCoordinate.getCoordinate().setX(nearestPlayerCoordinate.getCoordinate().getX()
+                        .add(BigDecimal.valueOf(Math.random() - 0.5D)));
+                nearestPlayerCoordinate.getCoordinate().setY(nearestPlayerCoordinate.getCoordinate().getY()
+                        .add(BigDecimal.valueOf(Math.random() - 0.5D)));
+                PlayerUtil.fixWorldCoordinate(nearestPlayerCoordinate, regionMap.get(worldEvent.getRegionNo()));
                 PlayerUtil.copyWorldCoordinate(nearestPlayerCoordinate, worldEvent);
                 if (StringUtils.isNotBlank(activatedWorldBlock.getId())) {
                     activateEvent(worldEvent, activatedWorldBlock.getId());
@@ -618,7 +619,7 @@ public class WorldServiceImpl implements WorldService {
                             blocker.getType())
                             && PlayerUtil.compareAnglesInDegrees(
                             PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
-                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 90D) {
+                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D) {
                         rst = true;
                     }
 //                }

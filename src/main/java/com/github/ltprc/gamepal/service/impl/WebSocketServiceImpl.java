@@ -104,6 +104,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updateMovingBlock")) {
                 playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
             }
+            // Detect and expand scenes after updating player's location
+            worldService.expandScene(playerService.getPlayerInfoMap().get(userCode));
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.stream().forEach(useItem -> {
@@ -155,7 +157,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 WorldDrop worldDrop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
                 String id = UUID.randomUUID().toString();
                 worldDrop.setId(id);
-                worldDrop.setCode("3000");
+                worldDrop.setCode("3000"); // TODO characterize it
                 worldDrop.setType(GamePalConstants.BLOCK_TYPE_DROP);
                 if (world.getBlockMap().containsKey(id)) {
                     logger.warn(ErrorUtil.ERROR_1013 + " id: " + id);

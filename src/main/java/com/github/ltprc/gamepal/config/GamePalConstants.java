@@ -166,5 +166,5 @@ public class GamePalConstants {
     public static final int GAME_PLAYER_STATUS_PLAYING = 4;
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
-    public static final int SKILL_DEFAULT_TIME = 10;
+    public static final int SKILL_DEFAULT_TIME = 25;
 }

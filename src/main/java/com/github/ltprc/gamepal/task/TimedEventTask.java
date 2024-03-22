@@ -40,10 +40,6 @@ public class TimedEventTask {
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, PlayerInfo> playerInfoMap = playerService.getPlayerInfoMap();
 
-            onlineMap.entrySet().stream()
-                    .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey()))
-                    .forEach(entry2 -> worldService.expandScene(playerService.getPlayerInfoMap().get(entry2.getKey())));
-
             // Count buff remaining time
             onlineMap.entrySet().stream()
                     .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey())
