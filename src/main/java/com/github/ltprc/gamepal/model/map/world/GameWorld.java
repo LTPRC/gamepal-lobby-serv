@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.model.map.world;
 
+import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.game.Game;
 import lombok.Data;
 
@@ -16,4 +17,5 @@ public class GameWorld {
     private Map<String, WorldBlock> blockMap; // code, WorldBlock
     private Map<Integer, Game> gameMap; // gameNo, game
     private Queue<WorldEvent> eventQueue; // event
+    private Map<String, Queue<Message>> messageMap; // userCode, message queue
 }

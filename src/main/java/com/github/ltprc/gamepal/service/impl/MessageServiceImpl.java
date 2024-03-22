@@ -31,7 +31,6 @@ import com.github.ltprc.gamepal.util.ErrorUtil;
 public class MessageServiceImpl implements MessageService {
 
     private static final Log logger = LogFactory.getLog(MessageServiceImpl.class);
-    private Map<String, Queue<Message>> messageMap = new ConcurrentHashMap<>(); // userCode, message queue
 
     @Autowired
     private UserService userService;
@@ -50,16 +49,12 @@ public class MessageServiceImpl implements MessageService {
             logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1009);
         }
+        Map<String, Queue<Message>> messageMap = world.getMessageMap();
         if(!messageMap.containsKey(userCode)) {
             messageMap.put(userCode, new LinkedBlockingDeque<>());
         }
         messageMap.get(userCode).add(message);
         return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public Map<String, Queue<Message>> getMessageMap() {
-        return messageMap;
     }
 
     /**

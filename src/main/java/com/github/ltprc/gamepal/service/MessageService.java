@@ -13,6 +13,4 @@ public interface MessageService {
     ResponseEntity sendMessage(HttpServletRequest request);
 
     ResponseEntity sendMessage(String userCode, Message message);
-
-    Map<String, Queue<Message>> getMessageMap();
 }

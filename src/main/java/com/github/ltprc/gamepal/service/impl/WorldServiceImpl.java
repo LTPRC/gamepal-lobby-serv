@@ -99,6 +99,7 @@ public class WorldServiceImpl implements WorldService {
         world.setBlockMap(new ConcurrentSkipListMap<>());
         world.setGameMap(new ConcurrentHashMap<>());
         world.setEventQueue(new ConcurrentLinkedQueue<>());
+        world.setMessageMap(new ConcurrentHashMap<>());
         loadBlocks(world);
         initiateGame(world);
     }

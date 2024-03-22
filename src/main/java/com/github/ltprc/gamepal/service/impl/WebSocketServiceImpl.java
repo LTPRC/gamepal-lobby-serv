@@ -132,6 +132,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             // Check incoming messages
             JSONArray messages = functions.getJSONArray("addMessages");
+            Map<String, Queue<Message>> messageMap = world.getMessageMap();
             for (Object obj : messages) {
                 Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
                 if (null != msg.getContent() && msg.getContent().indexOf(GamePalConstants.COMMAND_PREFIX) == 0) {
@@ -142,14 +143,14 @@ public class WebSocketServiceImpl implements WebSocketService {
                     }
                     // TODO command logics
                 } else if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
-                    messageService.getMessageMap().entrySet().stream()
+                    messageMap.entrySet().stream()
                             .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
                             .forEach(entry -> entry.getValue().add(msg));
                 } else if (GamePalConstants.SCOPE_INDIVIDUAL == msg.getScope()) {
-                    if (!messageService.getMessageMap().containsKey(msg.getToUserCode())) {
-                        messageService.getMessageMap().put(msg.getToUserCode(), new LinkedList<>());
+                    if (!messageMap.containsKey(msg.getToUserCode())) {
+                        messageMap.put(msg.getToUserCode(), new LinkedList<>());
                     }
-                    messageService.getMessageMap().get(msg.getToUserCode()).add(msg);
+                    messageMap.get(msg.getToUserCode()).add(msg);
                 }
             }
             JSONArray drops = functions.getJSONArray("addDrops");
@@ -265,7 +266,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("token", token);
 
         // Flush messages automatically
-        Map<String, Queue<Message>> messageMap = messageService.getMessageMap();
+        Map<String, Queue<Message>> messageMap = world.getMessageMap();
         if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
             JSONArray messages = new JSONArray();
             messages.addAll(messageMap.get(userCode));
