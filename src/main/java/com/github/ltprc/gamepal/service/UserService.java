@@ -18,5 +18,5 @@ public interface UserService {
 
     GameWorld getWorldByUserCode(String userCode);
 
-    void addUserIntoMap(GameWorld world, String userCode);
+    void addUserIntoWorldMap(GameWorld world, String userCode);
 }

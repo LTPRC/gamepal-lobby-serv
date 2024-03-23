@@ -5,6 +5,7 @@ import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.PlayerUtil;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.UUID;
 
 public class NpcManagerImpl implements NpcManager {
@@ -32,8 +34,10 @@ public class NpcManagerImpl implements NpcManager {
         playerInfo.setId(userCode);
         playerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_AI);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-        world.getNpcMap().put(userCode, playerInfo);
-        userService.addUserIntoMap(world, userCode);
+        world.getPlayerInfoMap().put(userCode, playerInfo);
+        userService.addUserIntoWorldMap(world, userCode);
+        NpcBrain npcBrain = generateNpcBrain();
+        world.getNpcBrainMap().put(userCode, npcBrain);
         return userCode;
     }
 
@@ -49,5 +53,13 @@ public class NpcManagerImpl implements NpcManager {
         playerInfoMap.get(npcUserCode).getCoordinate().setY(playerInfoMap.get(npcUserCode).getCoordinate().getY()
                 .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue()
                         / 180 * Math.PI))));
+    }
+
+    private NpcBrain generateNpcBrain() {
+        NpcBrain npcBrain = new NpcBrain();
+        npcBrain.setObserveTaskQueue(new PriorityQueue<>());
+        npcBrain.setMoveTaskQueue(new PriorityQueue<>());
+        npcBrain.setAttackTaskQueue(new PriorityQueue<>());
+        return npcBrain;
     }
 }

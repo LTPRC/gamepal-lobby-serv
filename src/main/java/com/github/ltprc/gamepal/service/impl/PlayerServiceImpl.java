@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.item.Consumable;
@@ -26,13 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -55,6 +51,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private StateMachineService stateMachineService;
+
+    @Autowired
+    private SceneManager sceneManager;
 
     @Override
     public ResponseEntity setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
@@ -100,7 +99,16 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity updateplayerinfoCharacter(String userCode, JSONObject req) {
+    public ResponseEntity updatePlayerinfo(String userCode, PlayerInfo playerInfo) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        playerInfoMap.put(userCode, playerInfo);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity updatePlayerinfoCharacter(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
@@ -190,23 +198,9 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != playerStatus) {
             playerInfo.setPlayerStatus(playerStatus);
         }
-        return ResponseEntity.ok().body(rst.toString());
-    }
 
-    @Override
-    public ResponseEntity getPlayerInfo(HttpServletRequest request) {
-        JSONObject rst = ContentUtil.generateRst();
-        JSONObject req = null;
-        try {
-            req = ContentUtil.request2JSONObject(request);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1002));
-        }
-        String userCode = req.getString("userCode");
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        rst.put("playerInfo", playerInfo);
+        // Collect blocks
+        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -644,7 +638,7 @@ public class PlayerServiceImpl implements PlayerService {
                         .add(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
                         .subtract(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                PlayerUtil.fixWorldCoordinate(eventBlock, world.getRegionMap().get(eventBlock.getRegionNo()));
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
                 eventBlock.setType(GamePalConstants.EVENT_CODE_SHOOT);
                 worldService.addEvent(userCode, eventBlock);
                 break;
@@ -653,19 +647,19 @@ public class PlayerServiceImpl implements PlayerService {
                         .add(BigDecimal.valueOf((Math.random()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
                         .subtract(BigDecimal.valueOf((Math.random()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                PlayerUtil.fixWorldCoordinate(eventBlock, world.getRegionMap().get(eventBlock.getRegionNo()));
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
                 eventBlock.setType(GamePalConstants.EVENT_CODE_HIT);
                 worldService.addEvent(userCode, eventBlock);
                 break;
             case GamePalConstants.SKILL_CODE_BLOCK:
-                PlayerUtil.fixWorldCoordinate(eventBlock, world.getRegionMap().get(eventBlock.getRegionNo()));
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
                 eventBlock.setType(GamePalConstants.EVENT_CODE_BLOCK);
                 worldService.addEvent(userCode, eventBlock);
                 break;
             case GamePalConstants.SKILL_CODE_HEAL:
                 // Subtracted 0.01 for event under player's feet 24/03/05
                 eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY().subtract(BigDecimal.valueOf(0.01)));
-                PlayerUtil.fixWorldCoordinate(eventBlock, world.getRegionMap().get(eventBlock.getRegionNo()));
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
                 eventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
                 worldService.addEvent(userCode, eventBlock);
                 break;

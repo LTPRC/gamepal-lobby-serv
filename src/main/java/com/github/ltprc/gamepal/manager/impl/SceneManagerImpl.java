@@ -2,17 +2,24 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.util.PlayerUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 
 @Component
 public class SceneManagerImpl implements SceneManager {
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -107,5 +114,94 @@ public class SceneManagerImpl implements SceneManager {
         scene.setEvents(new ArrayList<>());
 
         region.getScenes().put(sceneCoordinate, scene);
+    }
+
+    @Override
+    public Queue<Block> collectBlocksByUserCode(String userCode) {
+        Queue<Block> rankingQueue = new PriorityQueue<>((o1, o2) -> {
+            IntegerCoordinate level1 = PlayerUtil.ConvertBlockType2Level(o1.getType());
+            IntegerCoordinate level2 = PlayerUtil.ConvertBlockType2Level(o2.getType());
+            if (!Objects.equals(level1.getX(), level2.getX())) {
+                return level1.getX() - level2.getX();
+            }
+            // Please use equals() instead of == 24/02/10
+            if (!o1.getY().equals(o2.getY())) {
+                return o1.getY().compareTo(o2.getY());
+            }
+            return level1.getY() - level2.getY();
+        });
+        collectBlocksFromScenes(rankingQueue, userCode);
+        collectBlocksFromPlayerInfoMap(rankingQueue, userCode);
+        return rankingQueue;
+    }
+
+    private void collectBlocksFromScenes(Queue<Block> rankingQueue, String userCode) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
+        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
+        for (int i = sceneCoordinate.getY() - GamePalConstants.SCENE_SCAN_RADIUS;
+             i <= sceneCoordinate.getY() + GamePalConstants.SCENE_SCAN_RADIUS; i++) {
+            for (int j = sceneCoordinate.getX() - GamePalConstants.SCENE_SCAN_RADIUS;
+                 j <= sceneCoordinate.getX() + GamePalConstants.SCENE_SCAN_RADIUS; j++) {
+                final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
+                Scene scene = region.getScenes().get(newSceneCoordinate);
+                if (null == scene) {
+                    continue;
+                }
+                if (!CollectionUtils.isEmpty(scene.getBlocks())) {
+                    scene.getBlocks().stream().forEach(block -> {
+                        Block newBlock = PlayerUtil.copyBlock(block);
+                        PlayerUtil.adjustCoordinate(newBlock,
+                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
+                                region.getHeight(), region.getWidth());
+                        rankingQueue.add(newBlock);
+                    });
+                }
+                // Generate blocks from scene events 24/02/16
+                if (!CollectionUtils.isEmpty(scene.getEvents())) {
+                    scene.getEvents().stream().forEach(event -> {
+                        Block newBlock = PlayerUtil.generateBlockByEvent(event);
+                        PlayerUtil.adjustCoordinate(newBlock,
+                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
+                                region.getHeight(), region.getWidth());
+                        rankingQueue.add(newBlock);
+                    });
+                }
+            }
+        }
+    }
+
+    private void collectBlocksFromPlayerInfoMap(Queue<Block> rankingQueue, String userCode){
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
+        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        // Collect detected playerInfos
+        playerInfoMap.entrySet().stream()
+                // Detected
+                .filter(entry -> {
+                    IntegerCoordinate integerCoordinate
+                            = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
+                    return Math.abs(integerCoordinate.getX()) <= GamePalConstants.SCENE_SCAN_RADIUS
+                            && Math.abs(integerCoordinate.getY()) <= GamePalConstants.SCENE_SCAN_RADIUS;
+                })
+                // playerInfos contains running players only 24/03/16
+                .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
+                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                .forEach(entry -> {
+                    Block block = new Block();
+                    block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
+                    block.setId(entry.getValue().getId());
+                    block.setCode(entry.getValue().getCode());
+                    block.setY(entry.getValue().getCoordinate().getY());
+                    block.setX(entry.getValue().getCoordinate().getX());
+                    PlayerUtil.adjustCoordinate(block, PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                            entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
+                    rankingQueue.add(block);
+                });
     }
 }

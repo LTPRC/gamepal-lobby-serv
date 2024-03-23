@@ -5,12 +5,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
-import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -32,7 +32,6 @@ import org.thymeleaf.util.StringUtils;
 
 import javax.websocket.Session;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,9 +48,6 @@ public class WebSocketServiceImpl implements WebSocketService {
     private PlayerService playerService;
 
     @Autowired
-    private MessageService messageService;
-
-    @Autowired
     private WorldService worldService;
 
     @Autowired
@@ -59,6 +55,9 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private PlayerInfoFactory playerInfoFactory;
+
+    @Autowired
+    private SceneManager sceneManager;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -90,16 +89,16 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         // Update onlineMap
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
+
         // Check functions
         JSONObject functions = null;
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfo")) {
-                world.getPlayerInfoMap().put(userCode,
-                        functions.getObject("updatePlayerInfo", PlayerInfo.class));
+                playerService.updatePlayerinfo(userCode, functions.getObject("updatePlayerInfo", PlayerInfo.class));
             }
             if (functions.containsKey("updateplayerinfoCharacter")) {
-                playerService.updateplayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
+                playerService.updatePlayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
             }
             if (functions.containsKey("updateMovingBlock")) {
                 playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
@@ -332,118 +331,28 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         });
         rst.put("sceneInfos", sceneInfos);
-        // Generate returned block map
-        JSONArray blocks = new JSONArray();
-        // Put floors and collect walls
-        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
-        Queue<Block> rankingQueue = new PriorityQueue<>((o1, o2) -> {
-            IntegerCoordinate level1 = PlayerUtil.ConvertBlockType2Level(o1.getType());
-            IntegerCoordinate level2 = PlayerUtil.ConvertBlockType2Level(o2.getType());
-            if (!Objects.equals(level1.getX(), level2.getX())) {
-                return level1.getX() - level2.getX();
-            }
-            // Please use equals() instead of == 24/02/10
-            if (!o1.getY().equals(o2.getY())) {
-                return o1.getY().compareTo(o2.getY());
-            }
-            return level1.getY() - level2.getY();
-        });
-        // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
-        for (int i = sceneCoordinate.getY() - GamePalConstants.SCENE_SCAN_RADIUS;
-             i <= sceneCoordinate.getY() + GamePalConstants.SCENE_SCAN_RADIUS; i++) {
-            for (int j = sceneCoordinate.getX() - GamePalConstants.SCENE_SCAN_RADIUS;
-                 j <= sceneCoordinate.getX() + GamePalConstants.SCENE_SCAN_RADIUS; j++) {
-                final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
-                Scene scene = region.getScenes().get(newSceneCoordinate);
-                if (null == scene) {
-                    continue;
-                }
-                if (!CollectionUtils.isEmpty(scene.getBlocks())) {
-                    scene.getBlocks().stream().forEach(block -> {
-                        Block newBlock = PlayerUtil.copyBlock(block);
-                        PlayerUtil.adjustCoordinate(newBlock,
-                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
-                                BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                        rankingQueue.add(newBlock);
-                    });
-                }
-                // Generate blocks from scene events 24/02/16
-                if (!CollectionUtils.isEmpty(scene.getEvents())) {
-                    scene.getEvents().stream().forEach(event -> {
-                        Block newBlock = PlayerUtil.generateBlockByEvent(event);
-                        PlayerUtil.adjustCoordinate(newBlock,
-                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
-                                BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-                        rankingQueue.add(newBlock);
-                    });
-                }
-            }
-        }
-        // Collect detected playerInfos
-        playerInfoMap.entrySet().stream()
-                // Detected
-                .filter(entry -> {
-                    IntegerCoordinate integerCoordinate
-                            = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
-                    return Math.abs(integerCoordinate.getX()) <= GamePalConstants.SCENE_SCAN_RADIUS
-                            && Math.abs(integerCoordinate.getY()) <= GamePalConstants.SCENE_SCAN_RADIUS;
-                })
-                // playerInfos contains running players only 24/03/16
-                .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
-                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .forEach(entry -> {
-                    Block block = new Block();
-                    block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-                    block.setId(entry.getValue().getId());
-                    block.setCode(entry.getValue().getCode());
-                    block.setY(entry.getValue().getCoordinate().getY());
-                    block.setX(entry.getValue().getCoordinate().getX());
-                    PlayerUtil.adjustCoordinate(block, PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                            entry.getValue().getSceneCoordinate()), BigDecimal.valueOf(region.getHeight()),
-                            BigDecimal.valueOf(region.getWidth()));
-                    rankingQueue.add(block);
-        });
-        // Collect detected special blocks from blockMap (duplicated) 23/09/08
-//        Map<String, WorldBlock> blockMap = world.getBlockMap();
-//        blockMap.entrySet().stream()
-//                .filter(entry -> PlayerUtil.getCoordinateRelation(sceneCoordinate,
-//                        entry.getValue().getSceneCoordinate()) != -1)
-//                .forEach(entry -> {
-//                    Block block;
-//                    switch (entry.getValue().getType()) {
-//                        case GamePalConstants.BLOCK_TYPE_DROP:
-//                            Drop drop = new Drop();
-//                            WorldDrop worldDrop = (WorldDrop) entry.getValue();
-//                            drop.setItemNo(worldDrop.getItemNo());
-//                            drop.setAmount(worldDrop.getAmount());
-//                            block = drop;
-//                            break;
-//                        case GamePalConstants.BLOCK_TYPE_TELEPORT:
-//                            Teleport teleport = new Teleport();
-//                            WorldTeleport worldTeleport = (WorldTeleport) entry.getValue();
-//                            teleport.setTo(worldTeleport.getTo());
-//                            block = teleport;
-//                            break;
-//                        default:
-//                            block = new Block();
-//                            break;
-//                    }
-//                    block.setType(entry.getValue().getType());
-//                    block.setId(entry.getValue().getId());
-//                    block.setCode(entry.getValue().getCode());
-//                    block.setY(entry.getValue().getCoordinate().getY());
-//                    block.setX(entry.getValue().getCoordinate().getX());
-//                    PlayerUtil.adjustCoordinate(block,
-//                            PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-//                                    entry.getValue().getSceneCoordinate()),
-//                            BigDecimal.valueOf(region.getHeight()), BigDecimal.valueOf(region.getWidth()));
-//                            rankingQueue.add(block);
-//        });
+
+        // Collect blocks
+        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode);
         // Poll all blocks
-        while (!rankingQueue.isEmpty()) {
-            blocks.add(rankingQueue.poll());
+        JSONArray blocks = new JSONArray();
+        while (!CollectionUtils.isEmpty(blockQueue)) {
+            blocks.add(blockQueue.poll());
         }
         rst.put("blocks", blocks);
+
+//        if (null != functions) {
+//            if (functions.containsKey("updatePlayerInfo")) {
+//                world.getPlayerInfoMap().put(userCode,
+//                        functions.getObject("updatePlayerInfo", PlayerInfo.class));
+//            }
+//            if (functions.containsKey("updateplayerinfoCharacter")) {
+//                playerService.updatePlayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
+//            }
+//            if (functions.containsKey("updateMovingBlock")) {
+//                playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
+//            }
+//        }
 
         // Response of functions 24/03/17
         JSONObject functionsResponse = new JSONObject();

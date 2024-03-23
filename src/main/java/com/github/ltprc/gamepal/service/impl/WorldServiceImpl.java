@@ -99,7 +99,7 @@ public class WorldServiceImpl implements WorldService {
         world.setMessageMap(new ConcurrentHashMap<>());
         world.setFlagMap(new ConcurrentHashMap<>());
         world.setTerminalMap(new ConcurrentHashMap<>());
-        world.setNpcMap(new ConcurrentHashMap<>());
+        world.setNpcBrainMap(new ConcurrentHashMap<>());
         loadScenes(world);
         loadBlocks(world);
         initiateGame(world);
@@ -442,6 +442,9 @@ public class WorldServiceImpl implements WorldService {
                 return null;
             }
         }
+        if (newEvent.getUserCode() == null) {
+            ;
+        }
         return newEvent;
     }
 
@@ -535,7 +538,7 @@ public class WorldServiceImpl implements WorldService {
                         .add(BigDecimal.valueOf(Math.random() - 0.5D)));
                 nearestPlayerCoordinate.getCoordinate().setY(nearestPlayerCoordinate.getCoordinate().getY()
                         .add(BigDecimal.valueOf(Math.random() - 0.5D)));
-                PlayerUtil.fixWorldCoordinate(nearestPlayerCoordinate, regionMap.get(worldEvent.getRegionNo()));
+                PlayerUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), nearestPlayerCoordinate);
                 PlayerUtil.copyWorldCoordinate(nearestPlayerCoordinate, worldEvent);
                 if (StringUtils.isNotBlank(activatedWorldBlock.getId())) {
                     activateEvent(worldEvent, activatedWorldBlock.getId());
@@ -555,7 +558,7 @@ public class WorldServiceImpl implements WorldService {
                             // Lift 0.5 height for tail smoke 24/03/17
                             tailSmokeEventBlock.getCoordinate().setY(tailSmokeEventBlock.getCoordinate().getY()
                                     .subtract(BigDecimal.valueOf(0.5D)));
-                            PlayerUtil.fixWorldCoordinate(tailSmokeEventBlock, regionMap.get(worldEvent.getRegionNo()));
+                            PlayerUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), tailSmokeEventBlock);
                             addEvent(worldEvent.getUserCode(), tailSmokeEventBlock);
                         });
                 break;

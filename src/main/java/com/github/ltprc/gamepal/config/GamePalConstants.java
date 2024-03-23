@@ -14,8 +14,6 @@ public class GamePalConstants {
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
     public static final int FRAME_PER_SECOND = 25;
-    public static final int PLAYER_TYPE_HUMAN = 0;
-    public static final int PLAYER_TYPE_AI = 1;
 
     public static final String COMMAND_PREFIX = "/";
     public static final int MESSAGE_TYPE_PRINTED = 1;
@@ -169,4 +167,11 @@ public class GamePalConstants {
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
     public static final int SKILL_DEFAULT_TIME = 25;
+
+    public static final int PLAYER_TYPE_HUMAN = 0;
+    public static final int PLAYER_TYPE_AI = 1;
+    public static final int NPC_TASK_TYPE_IDLE = 0;
+    public static final int NPC_TASK_TYPE_OBSERVE = 1;
+    public static final int NPC_TASK_TYPE_MOVE = 2;
+    public static final int NPC_TASK_TYPE_ATTACK = 3;
 }

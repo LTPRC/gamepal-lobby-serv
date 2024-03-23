@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.map.Region;
+import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;
 
@@ -27,6 +28,5 @@ public class GameWorld {
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
     private Map<String, Set<String>> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal
-
-    private Map<String, PlayerInfo> npcMap; // userCode, npcPlayerInfo
+    private Map<String, NpcBrain> npcBrainMap; // userCode, npcBrain
 }

@@ -1,19 +1,15 @@
 package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -127,7 +123,7 @@ public class UserServiceImpl implements UserService {
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        addUserIntoMap(world, userCode);
+        addUserIntoWorldMap(world, userCode);
         // Update online token
         String token = UUID.randomUUID().toString();
         world.getTokenMap().put(userCode, token);
@@ -183,7 +179,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addUserIntoMap(GameWorld world, String userCode) {
+    public void addUserIntoWorldMap(GameWorld world, String userCode) {
         userWorldMap.put(userCode, world);
     }
 }

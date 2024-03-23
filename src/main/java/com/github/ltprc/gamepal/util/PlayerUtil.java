@@ -8,9 +8,7 @@ import com.github.ltprc.gamepal.model.map.world.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class PlayerUtil {
 
@@ -73,57 +71,16 @@ public class PlayerUtil {
         return -1;
     }
 
-    public static void adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, BigDecimal height, BigDecimal width) {
-        // Pos-y is south, neg-y is north
-        coordinate.setX(coordinate.getX().add(height.multiply(BigDecimal.valueOf(integerCoordinate.getX()))));
-        coordinate.setY(coordinate.getY().add(width.multiply(BigDecimal.valueOf(integerCoordinate.getY()))));
+    public static Coordinate convertWorldCoordinate2Coordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
+        Coordinate coordinate = new Coordinate(worldCoordinate.getCoordinate());
+        adjustCoordinate(coordinate, worldCoordinate.getSceneCoordinate(), regionInfo.getHeight(), regionInfo.getWidth());
+        return coordinate;
     }
 
-    /**
-     * Only support 3*3 matrix
-     * @param coordinate
-     * @param relationValue
-     * @param height
-     * @param width
-     */
-    @Deprecated
-    public static void adjustCoordinateOld(Coordinate coordinate, int relationValue, BigDecimal height, BigDecimal width) {
+    public static void adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, int height, int width) {
         // Pos-y is south, neg-y is north
-        switch (relationValue) {
-            case 0:
-                coordinate.setY(coordinate.getY().subtract(height));
-                coordinate.setX(coordinate.getX().subtract(width));
-                break;
-            case 1:
-                coordinate.setY(coordinate.getY().subtract(height));
-                break;
-            case 2:
-                coordinate.setY(coordinate.getY().subtract(height));
-                coordinate.setX(coordinate.getX().add(width));
-                break;
-            case 3:
-                coordinate.setX(coordinate.getX().subtract(width));
-                break;
-            case 4:
-                break;
-            case 5:
-                coordinate.setX(coordinate.getX().add(width));
-                break;
-            case 6:
-                coordinate.setY(coordinate.getY().add(height));
-                coordinate.setX(coordinate.getX().subtract(width));
-                break;
-            case 7:
-                coordinate.setY(coordinate.getY().add(height));
-                break;
-            case 8:
-                coordinate.setY(coordinate.getY().add(height));
-                coordinate.setX(coordinate.getX().add(width));
-                break;
-            case -1:
-            default:
-                break;
-        }
+        coordinate.setX(coordinate.getX().add(BigDecimal.valueOf(integerCoordinate.getX() * width)));
+        coordinate.setY(coordinate.getY().add(BigDecimal.valueOf(integerCoordinate.getY() * height)));
     }
 
     /**
@@ -131,7 +88,7 @@ public class PlayerUtil {
      * @param worldCoordinate
      * @param regionInfo
      */
-    public static void fixWorldCoordinate(WorldCoordinate worldCoordinate, RegionInfo regionInfo) {
+    public static void fixWorldCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
         while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(-1)) < 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
             worldCoordinate.getCoordinate()
@@ -378,12 +335,8 @@ public class PlayerUtil {
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        Coordinate c1 = new Coordinate();
-        c1.setX(wc1.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        Coordinate c2 = new Coordinate();
-        c2.setX(wc2.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         return calculateHorizontalDistance(c1, c2);
     }
 
@@ -396,12 +349,8 @@ public class PlayerUtil {
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        Coordinate c1 = new Coordinate();
-        c1.setY(wc1.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
-        Coordinate c2 = new Coordinate();
-        c2.setY(wc2.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         return calculateVerticalDistance(c1, c2);
     }
 
@@ -415,16 +364,8 @@ public class PlayerUtil {
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        Coordinate c1 = new Coordinate();
-        c1.setX(wc1.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c1.setY(wc1.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
-        Coordinate c2 = new Coordinate();
-        c2.setX(wc2.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c2.setY(wc2.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         return calculateDistance(c1, c2);
     }
 
@@ -439,16 +380,8 @@ public class PlayerUtil {
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        Coordinate c1 = new Coordinate();
-        c1.setX(wc1.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c1.setY(wc1.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
-        Coordinate c2 = new Coordinate();
-        c2.setX(wc2.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c2.setY(wc2.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         return calculateAngle(c1, c2);
     }
 
@@ -509,16 +442,8 @@ public class PlayerUtil {
         if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        Coordinate c1 = new Coordinate();
-        c1.setX(wc1.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c1.setY(wc1.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
-        Coordinate c2 = new Coordinate();
-        c2.setX(wc2.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c2.setY(wc2.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         return calculateBallisticDistance(c1, ballisticAngle, c2);
     }
 
@@ -548,7 +473,7 @@ public class PlayerUtil {
         for (int i = 1; i < amount; i++) {
             wc3.getCoordinate().setX(wc3.getCoordinate().getX().add(deltaWidth));
             wc3.getCoordinate().setY(wc3.getCoordinate().getY().add(deltaHeight));
-            fixWorldCoordinate(wc3, regionInfo);
+            fixWorldCoordinate(regionInfo, wc3);
             WorldCoordinate wc4 = new WorldCoordinate();
             copyWorldCoordinate(wc3, wc4);
             rst.add(wc4);
@@ -599,7 +524,7 @@ public class PlayerUtil {
         wc.setRegionNo(regionInfo.getRegionNo());
         wc.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
         wc.setCoordinate(new Coordinate(coordinate));
-        fixWorldCoordinate(wc, regionInfo);
+        fixWorldCoordinate(regionInfo, wc);
         return wc;
     }
 
@@ -608,16 +533,8 @@ public class PlayerUtil {
         if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-        Coordinate c1 = new Coordinate();
-        c1.setX(wc1.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c1.setY(wc1.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc1.getSceneCoordinate().getY() * regionInfo.getHeight())));
-        Coordinate c2 = new Coordinate();
-        c2.setX(wc2.getCoordinate().getX()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getX() * regionInfo.getWidth())));
-        c2.setY(wc2.getCoordinate().getY()
-                .add(BigDecimal.valueOf(wc2.getSceneCoordinate().getY() * regionInfo.getHeight())));
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         return detectLineSquareCollision(c1, ballisticAngle, c2, blockType);
     }
 
@@ -640,5 +557,87 @@ public class PlayerUtil {
                 && yRight - c2.getY().doubleValue() > thresholdDistance)
                 || (c2.getY().doubleValue() - yLeft > thresholdDistance
                 && c2.getY().doubleValue() - yRight > thresholdDistance));
+    }
+
+    /**
+     * Detect round collision
+     * @param regionInfo regionInfo
+     * @param wc1 Start point
+     * @param wc2 End point
+     * @param wc3 Obstacle center point
+     * @param distance min distance between p1/p2 and p3
+     * @return whether they collide
+     */
+    public static boolean detectCollision(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
+                                          WorldCoordinate wc3, BigDecimal distance) {
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
+        Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
+        return detectCollision(c1, c2, c3, distance);
+    }
+
+    /**
+     * Detect round collision
+     * @param c1 Start point
+     * @param c2 End point
+     * @param c3 Obstacle center point
+     * @param distance min distance between p1/p2 and p3
+     * @return whether they collide
+     */
+    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal distance) {
+        if (Math.sqrt(Math.pow(c3.getX().subtract(c1.getX()).doubleValue(), 2)
+                + Math.pow(c3.getY().subtract(c1.getY()).doubleValue(), 2)) < distance.doubleValue()) {
+            // Already overlapped
+            return false;
+        }
+        if (Math.sqrt(Math.pow(c3.getX().subtract(c2.getX()).doubleValue(), 2)
+                + Math.pow(c3.getY().subtract(c2.getY()).doubleValue(), 2)) < distance.doubleValue()) {
+            // Too close
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Detect square collision
+     * @param regionInfo regionInfo
+     * @param wc1 Start point
+     * @param wc2 End point
+     * @param wc3 Obstacle center point
+     * @param distance min distance between p1/p2 and p3
+     * @param sideLength square side size
+     * @return whether they collide
+     */
+    public static boolean detectCollisionSquare(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
+                                                WorldCoordinate wc3, BigDecimal distance, BigDecimal sideLength) {
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
+        Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
+        return detectCollisionSquare(c1, c2, c3, distance, sideLength);
+    }
+
+    /**
+     * Detect square collision
+     * @param c1 Start point
+     * @param c2 End point
+     * @param c3 Obstacle center point
+     * @param distance min distance between p1/p2 and p3
+     * @param sideLength square side size
+     * @return whether they collide
+     */
+    public static boolean detectCollisionSquare(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal distance,
+                                                BigDecimal sideLength) {
+        double newDistance = distance.doubleValue() + sideLength.doubleValue() / 2;
+        if (Math.abs(c3.getX().subtract(c1.getX()).doubleValue()) < newDistance
+                && Math.abs(c3.getY().subtract(c1.getY()).doubleValue()) < newDistance) {
+            // Already overlapped
+            return false;
+        }
+        if (Math.abs(c3.getX().subtract(c2.getX()).doubleValue()) < newDistance
+                && Math.abs(c3.getY().subtract(c2.getY()).doubleValue()) <= newDistance) {
+            // Too close
+            return true;
+        }
+        return false;
     }
 }
