@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
@@ -49,6 +50,9 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private SceneManager sceneManager;
+
+    @Autowired
+    private BlockFactory blockFactory;
 
     @Override
     public Map<String, GameWorld> getWorldMap() {
@@ -304,7 +308,7 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public ResponseEntity addEvent(String userCode, WorldBlock eventBlock) {
+    public ResponseEntity<String> addEvent(String userCode, WorldBlock eventBlock) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         WorldEvent event = new WorldEvent();
@@ -690,5 +694,55 @@ public class WorldServiceImpl implements WorldService {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void updateNpcMovement() {
+        worldMap.entrySet().stream().forEach(entry1 -> {
+            Map<String, PlayerInfo> playerInfoMap = entry1.getValue().getPlayerInfoMap();
+            playerInfoMap.entrySet().stream()
+                    .filter(entry2 -> entry2.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_AI)
+                    .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .forEach(entry2 -> {
+                        PlayerInfo playerInfo = entry2.getValue();
+                        Region region = entry1.getValue().getRegionMap().get(playerInfo.getRegionNo());
+                        Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(entry2.getKey());
+                        rankingQueue.stream().forEach(block -> {
+                            if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
+                                    || block.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
+                                if (PlayerUtil.detectCollision(playerInfo.getCoordinate(),
+                                        new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
+                                                playerInfo.getCoordinate().getY()),
+                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
+                                    playerInfo.getSpeed().setX(BigDecimal.ZERO);
+                                }
+                                if (PlayerUtil.detectCollision(playerInfo.getCoordinate(),
+                                        new Coordinate(playerInfo.getCoordinate().getX(),
+                                                playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
+                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
+                                    playerInfo.getSpeed().setY(BigDecimal.ZERO);
+                                }
+                            } else {
+                                if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
+                                        new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
+                                                playerInfo.getCoordinate().getY()),
+                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)),
+                                        BigDecimal.ONE)) {
+                                    playerInfo.getSpeed().setX(BigDecimal.ZERO);
+                                }
+                                if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
+                                        new Coordinate(playerInfo.getCoordinate().getX(),
+                                                playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
+                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)),
+                                        BigDecimal.ONE)) {
+                                    playerInfo.getSpeed().setY(BigDecimal.ZERO);
+                                }
+                            }
+                        });
+                        playerInfo.getCoordinate().setX(playerInfo.getSpeed().getX());
+                        playerInfo.getCoordinate().setY(playerInfo.getSpeed().getY());
+                        PlayerUtil.fixWorldCoordinate(region, playerInfo);
+                    });
+        });
     }
 }

@@ -2,10 +2,14 @@ package com.github.ltprc.gamepal.model.npc;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigDecimal;
 
 public class NpcMoveTask implements INpcTask{
 
@@ -21,5 +25,22 @@ public class NpcMoveTask implements INpcTask{
     public void runNpcTask(String npcUserCode, WorldCoordinate wc) {
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
+        double newSpeed;
+        if (playerInfo.getRegionNo() != wc.getRegionNo()) {
+            newSpeed = 0D;
+            playerInfo.setFaceDirection(BigDecimal.ZERO);
+            playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+            return;
+        }
+        newSpeed = Math.sqrt(Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
+                + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)) + playerInfo.getAcceleration().doubleValue();
+        double maxSpeed = playerInfo.getVp() > 0 ? playerInfo.getMaxSpeed().doubleValue()
+                : playerInfo.getMaxSpeed().doubleValue() * 0.5D;
+        newSpeed = Math.min(newSpeed, maxSpeed);
+        double stopDistance = GamePalConstants.PLAYER_RADIUS.doubleValue() * 2;
+        newSpeed = Math.min(newSpeed, stopDistance);
+        playerInfo.setFaceDirection(PlayerUtil.calculateAngle(world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, wc));
+        playerInfo.setSpeed(new Coordinate(BigDecimal.valueOf(newSpeed * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI)),
+                BigDecimal.valueOf(-newSpeed * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
     }
 }

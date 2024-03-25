@@ -101,7 +101,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.updatePlayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
             }
             if (functions.containsKey("updateMovingBlock")) {
-                playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
+                playerService.updatePlayerMovement(userCode, functions.getJSONObject("updateMovingBlock"));
             }
             // Detect and expand scenes after updating player's location
             worldService.expandScene(world, world.getPlayerInfoMap().get(userCode));
@@ -340,19 +340,6 @@ public class WebSocketServiceImpl implements WebSocketService {
             blocks.add(blockQueue.poll());
         }
         rst.put("blocks", blocks);
-
-//        if (null != functions) {
-//            if (functions.containsKey("updatePlayerInfo")) {
-//                world.getPlayerInfoMap().put(userCode,
-//                        functions.getObject("updatePlayerInfo", PlayerInfo.class));
-//            }
-//            if (functions.containsKey("updateplayerinfoCharacter")) {
-//                playerService.updatePlayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
-//            }
-//            if (functions.containsKey("updateMovingBlock")) {
-//                playerService.updateMovingBlock(userCode, functions.getJSONObject("updateMovingBlock"));
-//            }
-//        }
 
         // Response of functions 24/03/17
         JSONObject functionsResponse = new JSONObject();

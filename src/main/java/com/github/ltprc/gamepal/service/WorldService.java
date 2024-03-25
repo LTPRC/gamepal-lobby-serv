@@ -2,7 +2,6 @@ package com.github.ltprc.gamepal.service;
 
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +22,11 @@ public interface WorldService {
 
     void initiateGame(GameWorld world);
 
-    ResponseEntity addEvent(String userCode, WorldBlock event);
+    ResponseEntity<String> addEvent(String userCode, WorldBlock event);
 
     void updateEvents(GameWorld world);
 
     void expandScene(GameWorld world, WorldCoordinate worldCoordinate);
+
+    void updateNpcMovement();
 }

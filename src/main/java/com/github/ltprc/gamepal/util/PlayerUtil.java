@@ -240,6 +240,11 @@ public class PlayerUtil {
         return JSON.parseObject(JSON.toJSONString(block), block.getClass());
     }
 
+    /**
+     * Ignore sceneCoordinate
+     * @param worldBlock WorldBlock
+     * @return Block
+     */
     public static Block convertWorldBlock2Block(WorldBlock worldBlock) {
         switch (worldBlock.getType()) {
             case GamePalConstants.BLOCK_TYPE_DROP:

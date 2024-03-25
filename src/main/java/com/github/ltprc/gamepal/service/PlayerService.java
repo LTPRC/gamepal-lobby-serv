@@ -9,39 +9,39 @@ import java.util.Map;
 
 public interface PlayerService {
 
-    ResponseEntity setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute);
+    ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute);
 
-    ResponseEntity updatePlayerinfo(String userCode, PlayerInfo playerInfo);
+    ResponseEntity<String> updatePlayerinfo(String userCode, PlayerInfo playerInfo);
 
-    ResponseEntity updatePlayerinfoCharacter(String userCode, JSONObject req);
+    ResponseEntity<String> updatePlayerinfoCharacter(String userCode, JSONObject req);
 
-    ResponseEntity updateMovingBlock(String userCode, JSONObject req);
+    ResponseEntity<String> updatePlayerMovement(String userCode, JSONObject req);
 
-    ResponseEntity generateNotificationMessage(String userCode, String content);
+    ResponseEntity<String> generateNotificationMessage(String userCode, String content);
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);
 
-    ResponseEntity useItem(String userCode, String itemNo, int itemAmount);
+    ResponseEntity<String> useItem(String userCode, String itemNo, int itemAmount);
 
-    ResponseEntity getItem(String userCode, String itemNo, int itemAmount);
+    ResponseEntity<String> getItem(String userCode, String itemNo, int itemAmount);
 
-    ResponseEntity getPreservedItem(String userCode, String itemNo, int itemAmount);
+    ResponseEntity<String> getPreservedItem(String userCode, String itemNo, int itemAmount);
 
-    ResponseEntity damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute);
+    ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute);
 
-    ResponseEntity changeHp(String userCode, int value, boolean isAbsolute);
+    ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute);
 
-    ResponseEntity changeVp(String userCode, int value, boolean isAbsolute);
+    ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute);
 
-    ResponseEntity changeHunger(String userCode, int value, boolean isAbsolute);
+    ResponseEntity<String> changeHunger(String userCode, int value, boolean isAbsolute);
 
-    ResponseEntity changeThirst(String userCode, int value, boolean isAbsolute);
+    ResponseEntity<String> changeThirst(String userCode, int value, boolean isAbsolute);
 
-    ResponseEntity interactBlocks(String userCode, int interactionCode, String id);
+    ResponseEntity<String> interactBlocks(String userCode, int interactionCode, String id);
 
-    ResponseEntity updateBuff(String userCode);
+    ResponseEntity<String> updateBuff(String userCode);
 
-    ResponseEntity useSkill(String userCode, int skillNo, boolean isDown);
+    ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown);
 
     WorldBlock generateEventByUserCode(String userCode);
 }

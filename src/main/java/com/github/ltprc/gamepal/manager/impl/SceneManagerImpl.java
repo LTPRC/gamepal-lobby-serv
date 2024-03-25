@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.manager.impl;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
@@ -20,6 +21,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BlockFactory blockFactory;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -118,18 +122,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Queue<Block> collectBlocksByUserCode(String userCode) {
-        Queue<Block> rankingQueue = new PriorityQueue<>((o1, o2) -> {
-            IntegerCoordinate level1 = PlayerUtil.ConvertBlockType2Level(o1.getType());
-            IntegerCoordinate level2 = PlayerUtil.ConvertBlockType2Level(o2.getType());
-            if (!Objects.equals(level1.getX(), level2.getX())) {
-                return level1.getX() - level2.getX();
-            }
-            // Please use equals() instead of == 24/02/10
-            if (!o1.getY().equals(o2.getY())) {
-                return o1.getY().compareTo(o2.getY());
-            }
-            return level1.getY() - level2.getY();
-        });
+        Queue<Block> rankingQueue = blockFactory.createRankingQueue();
         collectBlocksFromScenes(rankingQueue, userCode);
         collectBlocksFromPlayerInfoMap(rankingQueue, userCode);
         return rankingQueue;

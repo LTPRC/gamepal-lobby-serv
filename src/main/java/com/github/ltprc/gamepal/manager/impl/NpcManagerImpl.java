@@ -30,11 +30,11 @@ public class NpcManagerImpl implements NpcManager {
     @Override
     public String createNpc(GameWorld world) {
         String userCode = UUID.randomUUID().toString();
-        PlayerInfo playerInfo = playerInfoFactory.createPlayerInfoInstance();
-        playerInfo.setId(userCode);
-        playerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_AI);
-        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-        world.getPlayerInfoMap().put(userCode, playerInfo);
+        PlayerInfo npcPlayerInfo = playerInfoFactory.createPlayerInfoInstance();
+        npcPlayerInfo.setId(userCode);
+        npcPlayerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_AI);
+        npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
+        world.getPlayerInfoMap().put(userCode, npcPlayerInfo);
         userService.addUserIntoWorldMap(world, userCode);
         NpcBrain npcBrain = generateNpcBrain();
         world.getNpcBrainMap().put(userCode, npcBrain);
@@ -45,14 +45,15 @@ public class NpcManagerImpl implements NpcManager {
     public void putNpc(String userCode, String npcUserCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        PlayerInfo npcPlayerInfo = playerInfoMap.get(npcUserCode);
+        npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
         PlayerUtil.copyWorldCoordinate(playerInfoMap.get(userCode), playerInfoMap.get(npcUserCode));
-        playerInfoMap.get(npcUserCode).setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
-        playerInfoMap.get(npcUserCode).getCoordinate().setX(playerInfoMap.get(npcUserCode).getCoordinate().getX()
-                .add(BigDecimal.valueOf(1 * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue()
-                        / 180 * Math.PI))));
-        playerInfoMap.get(npcUserCode).getCoordinate().setY(playerInfoMap.get(npcUserCode).getCoordinate().getY()
-                .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue()
-                        / 180 * Math.PI))));
+        npcPlayerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
+        npcPlayerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
+                .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+        npcPlayerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
+                .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
     }
 
     private NpcBrain generateNpcBrain() {

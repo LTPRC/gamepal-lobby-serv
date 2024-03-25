@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.task;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Block;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Queue;
 
 import static com.github.ltprc.gamepal.config.GamePalConstants.FRAME_PER_SECOND;
 
@@ -117,6 +119,9 @@ public class TimedEventTask {
                         // Update buff
                         playerService.updateBuff(entry2.getKey());
                     });
+
+            // Other movements
+            worldService.updateNpcMovement();
         }
     }
 
