@@ -739,8 +739,10 @@ public class WorldServiceImpl implements WorldService {
                                 }
                             }
                         });
-                        playerInfo.getCoordinate().setX(playerInfo.getSpeed().getX());
-                        playerInfo.getCoordinate().setY(playerInfo.getSpeed().getY());
+                        playerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
+                                .add(playerInfo.getSpeed().getX()));
+                        playerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
+                                .add(playerInfo.getSpeed().getY()));
                         PlayerUtil.fixWorldCoordinate(region, playerInfo);
                     });
         });

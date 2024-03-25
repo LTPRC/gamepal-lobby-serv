@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 
 public interface MessageService {
 
-    ResponseEntity sendMessage(HttpServletRequest request);
+    ResponseEntity<String> sendMessage(HttpServletRequest request);
 
-    ResponseEntity sendMessage(String userCode, Message message);
+    ResponseEntity<String> sendMessage(String userCode, Message message);
+
+    ResponseEntity<String> useCommand(String userCode, String commandContent);
 }

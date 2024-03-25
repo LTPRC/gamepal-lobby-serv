@@ -35,38 +35,13 @@ public class MessageServiceImpl implements MessageService {
     private UserService userService;
 
     /**
-     * 发送消息
-     *
-     * @param userCode
-     * @param message
-     */
-    public ResponseEntity sendMessage(String userCode, Message message) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Session session = world.getSessionMap().get(userCode);
-        if (null == session) {
-            logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
-            return ResponseEntity.badRequest().body(ErrorUtil.ERROR_1009);
-        }
-        // AI cannot receive msg 24/03/23
-        if (world.getPlayerInfoMap().get(userCode).getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
-            Map<String, Queue<Message>> messageMap = world.getMessageMap();
-            if (!messageMap.containsKey(userCode)) {
-                messageMap.put(userCode, new LinkedBlockingDeque<>());
-            }
-            messageMap.get(userCode).add(message);
-        }
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    /**
      * Send one message to the specific receiver.
      * As long as voice message cannot be transmitted by websocket, this method must be used.
      * @param request
      * @return
      */
     @Override
-    public ResponseEntity sendMessage(HttpServletRequest request) {
+    public ResponseEntity<String> sendMessage(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
         try {
@@ -105,6 +80,39 @@ public class MessageServiceImpl implements MessageService {
         }
         rst.put("success", success);
         rst.put("failure", failure);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param userCode
+     * @param message
+     */
+    public ResponseEntity<String> sendMessage(String userCode, Message message) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Session session = world.getSessionMap().get(userCode);
+        if (null == session) {
+            logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
+        }
+        // AI cannot receive msg 24/03/23
+        if (world.getPlayerInfoMap().get(userCode).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN) {
+            logger.warn(ErrorUtil.ERROR_1032 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1032));
+        }
+        Map<String, Queue<Message>> messageMap = world.getMessageMap();
+        if (!messageMap.containsKey(userCode)) {
+            messageMap.put(userCode, new LinkedBlockingDeque<>());
+        }
+        messageMap.get(userCode).add(message);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> useCommand(String userCode, String commandContent) {
+        JSONObject rst = ContentUtil.generateRst();
         return ResponseEntity.ok().body(rst.toString());
     }
 }

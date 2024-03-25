@@ -182,7 +182,7 @@ public class SceneManagerImpl implements SceneManager {
                     return Math.abs(integerCoordinate.getX()) <= GamePalConstants.SCENE_SCAN_RADIUS
                             && Math.abs(integerCoordinate.getY()) <= GamePalConstants.SCENE_SCAN_RADIUS;
                 })
-                // playerInfos contains running players only 24/03/16
+                // playerInfos contains running players or NPC 24/03/25
                 .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(entry -> {

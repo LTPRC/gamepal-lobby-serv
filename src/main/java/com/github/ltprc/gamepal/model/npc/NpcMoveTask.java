@@ -25,22 +25,24 @@ public class NpcMoveTask implements INpcTask{
     public void runNpcTask(String npcUserCode, WorldCoordinate wc) {
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
-        double newSpeed;
-        if (playerInfo.getRegionNo() != wc.getRegionNo()) {
-            newSpeed = 0D;
+        double distance = PlayerUtil.calculateDistance(
+                world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, wc).doubleValue();
+        double stopDistance = GamePalConstants.PLAYER_RADIUS.doubleValue() * 2;
+        if (playerInfo.getRegionNo() != wc.getRegionNo() || distance <= stopDistance) {
             playerInfo.setFaceDirection(BigDecimal.ZERO);
             playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
             return;
         }
-        newSpeed = Math.sqrt(Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
+        double newSpeed = Math.sqrt(Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
                 + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)) + playerInfo.getAcceleration().doubleValue();
         double maxSpeed = playerInfo.getVp() > 0 ? playerInfo.getMaxSpeed().doubleValue()
                 : playerInfo.getMaxSpeed().doubleValue() * 0.5D;
         newSpeed = Math.min(newSpeed, maxSpeed);
-        double stopDistance = GamePalConstants.PLAYER_RADIUS.doubleValue() * 2;
-        newSpeed = Math.min(newSpeed, stopDistance);
-        playerInfo.setFaceDirection(PlayerUtil.calculateAngle(world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, wc));
-        playerInfo.setSpeed(new Coordinate(BigDecimal.valueOf(newSpeed * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI)),
+        newSpeed = Math.min(newSpeed, distance - stopDistance);
+        playerInfo.setFaceDirection(PlayerUtil.calculateAngle(world.getRegionMap().get(playerInfo.getRegionNo()),
+                playerInfo, wc));
+        playerInfo.setSpeed(new Coordinate(BigDecimal.valueOf(
+                newSpeed * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI)),
                 BigDecimal.valueOf(-newSpeed * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
     }
 }

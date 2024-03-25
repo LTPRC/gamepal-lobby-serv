@@ -1,8 +1,8 @@
 package com.github.ltprc.gamepal.task;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Block;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Queue;
 
 import static com.github.ltprc.gamepal.config.GamePalConstants.FRAME_PER_SECOND;
 
@@ -30,6 +29,9 @@ public class TimedEventTask {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private NpcManager npcManager;
 
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
@@ -125,18 +127,41 @@ public class TimedEventTask {
         }
     }
 
+    /**
+     * This method is used for checking idle user which is not under anyone's control.
+     * All worlds are to be checked. 23/08/28
+     */
     @Scheduled(cron = "* */2 * * * ?")
     public void executeBy120s() {
-        for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
-            GameWorld world = entry.getValue();
-            Map<String, Long> onlineMap = world.getOnlineMap();
+        long timestamp = Instant.now().getEpochSecond();
+        for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
+            GameWorld world = entry1.getValue();
+            world.getOnlineMap().entrySet().stream()
+                    .forEach(entry2 -> {
+                        PlayerInfo playerInfo = world.getPlayerInfoMap().get(entry2.getKey());
+                        if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN
+                                && timestamp - entry2.getValue() > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
+                            userService.logoff(entry2.getKey(), null, false);
+                        }
+                    });
+        }
+    }
 
-            // Check idle user which is not under anyone's control.
-            if (!onlineMap.isEmpty() && Instant.now().getEpochSecond() - onlineMap.entrySet().iterator().next().getValue()
-                    > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
-                String userCode = onlineMap.entrySet().iterator().next().getKey();
-                userService.logoff(userCode, null, false);
-            }
+    @Scheduled(cron = "*/5 * * * * ?")
+    public void executeBy5s() {
+        for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
+            GameWorld world = entry1.getValue();
+            Map<String, Long> onlineMap = world.getOnlineMap();
+            onlineMap.entrySet().stream()
+                    .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType()
+                            == GamePalConstants.PLAYER_TYPE_HUMAN)
+                    .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerStatus()
+                            == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .forEach(entry2 -> {
+                        String userCode = entry2.getKey();
+                        String npcUserCode = npcManager.createNpc(world);
+                        npcManager.putNpc(userCode, npcUserCode);
+                    });
         }
     }
 }

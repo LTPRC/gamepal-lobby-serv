@@ -70,7 +70,7 @@ public class PlayerInfoFactory {
         playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
         playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
         playerInfo.setHairColor(String.valueOf(random.nextInt(3) + 1));
-        playerInfo.setEyes(String.valueOf(random.nextInt(GamePalConstants.EYES_LENGTH)));
+        playerInfo.setEyes(String.valueOf(random.nextInt(GamePalConstants.EYES_LENGTH) + 1));
         playerInfo.setFaceCoefs(Arrays.stream(new int[GamePalConstants.FACE_COEFS_LENGTH])
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }

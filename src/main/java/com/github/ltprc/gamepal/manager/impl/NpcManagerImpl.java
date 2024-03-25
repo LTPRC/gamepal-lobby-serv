@@ -10,12 +10,14 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.UUID;
 
+@Component
 public class NpcManagerImpl implements NpcManager {
 
     @Autowired
@@ -50,10 +52,14 @@ public class NpcManagerImpl implements NpcManager {
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
         PlayerUtil.copyWorldCoordinate(playerInfoMap.get(userCode), playerInfoMap.get(npcUserCode));
         npcPlayerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
+        npcPlayerInfo.setRegionNo(playerInfo.getRegionNo());
+        npcPlayerInfo.setSceneCoordinate(playerInfo.getSceneCoordinate());
         npcPlayerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
                 .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
         npcPlayerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
                 .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+        PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(playerInfo.getRegionNo()), npcPlayerInfo);
+        world.getOnlineMap().put(npcUserCode, -1L);
     }
 
     private NpcBrain generateNpcBrain() {
