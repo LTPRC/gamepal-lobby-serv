@@ -122,13 +122,14 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Queue<Block> collectBlocksByUserCode(String userCode) {
-        Queue<Block> rankingQueue = blockFactory.createRankingQueue();
-        collectBlocksFromScenes(rankingQueue, userCode);
-        collectBlocksFromPlayerInfoMap(rankingQueue, userCode);
+        Queue<Block> rankingQueue = collectBlocksFromScenes(userCode);
+        rankingQueue.addAll(collectBlocksFromPlayerInfoMap(userCode));
         return rankingQueue;
     }
 
-    private void collectBlocksFromScenes(Queue<Block> rankingQueue, String userCode) {
+    @Override
+    public Queue<Block> collectBlocksFromScenes(String userCode) {
+        Queue<Block> rankingQueue = blockFactory.createRankingQueue();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -165,9 +166,12 @@ public class SceneManagerImpl implements SceneManager {
                 }
             }
         }
+        return rankingQueue;
     }
 
-    private void collectBlocksFromPlayerInfoMap(Queue<Block> rankingQueue, String userCode){
+    @Override
+    public Queue<Block> collectBlocksFromPlayerInfoMap(String userCode){
+        Queue<Block> rankingQueue = blockFactory.createRankingQueue();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -196,5 +200,6 @@ public class SceneManagerImpl implements SceneManager {
                             entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
                     rankingQueue.add(block);
                 });
+        return rankingQueue;
     }
 }

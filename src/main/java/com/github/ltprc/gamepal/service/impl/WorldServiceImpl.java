@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
+import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
@@ -13,6 +14,7 @@ import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
+import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -33,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -53,6 +56,9 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private BlockFactory blockFactory;
+
+    @Autowired
+    private NpcManager npcManager;
 
     @Override
     public Map<String, GameWorld> getWorldMap() {
@@ -699,6 +705,30 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void updateNpcMovement() {
         worldMap.entrySet().stream().forEach(entry1 -> {
+            // Run NPC tasks
+            Map<String, NpcBrain> npcBrainMap = entry1.getValue().getNpcBrainMap();
+            npcBrainMap.entrySet().stream()
+                    .forEach(entry2 -> {
+                        String npcUserCode = entry2.getKey();
+                        JSONObject observeReq = new JSONObject();
+                        observeReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_OBSERVE);
+                        observeReq.put("userCode", npcUserCode);
+                        JSONObject observeResp = npcManager.runNpcTask(observeReq);
+                        WorldCoordinate wc = observeResp.getObject("wc", WorldCoordinate.class);
+                        if (null != wc) {
+                            JSONObject moveReq = new JSONObject();
+                            moveReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_MOVE);
+                            moveReq.put("userCode", npcUserCode);
+                            moveReq.put("wc", wc);
+                            JSONObject moveResp = npcManager.runNpcTask(moveReq);
+                        } else {
+                            JSONObject idleReq = new JSONObject();
+                            idleReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_IDLE);
+                            idleReq.put("userCode", npcUserCode);
+                            JSONObject idleResp = npcManager.runNpcTask(idleReq);
+                        }
+                    });
+            // Settle NPC speed
             Map<String, PlayerInfo> playerInfoMap = entry1.getValue().getPlayerInfoMap();
             playerInfoMap.entrySet().stream()
                     .filter(entry2 -> entry2.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_AI)
@@ -707,8 +737,19 @@ public class WorldServiceImpl implements WorldService {
                         PlayerInfo playerInfo = entry2.getValue();
                         Region region = entry1.getValue().getRegionMap().get(playerInfo.getRegionNo());
                         Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(entry2.getKey());
-                        rankingQueue.stream().forEach(block -> {
-                            if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
+                        WorldCoordinate teleportWc = null;
+                        List<Block> rankingQueueList = rankingQueue.stream().collect(Collectors.toList());
+                        for (int i = 0; i < rankingQueueList.size(); i ++) {
+                            Block block = rankingQueueList.get(i);
+                            if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT) {
+                                if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
+                                        new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
+                                                playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
+                                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
+                                    teleportWc = ((Teleport) block).getTo();
+                                    break;
+                                }
+                            } else if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
                                     || block.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
                                 if (PlayerUtil.detectCollision(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
@@ -722,27 +763,31 @@ public class WorldServiceImpl implements WorldService {
                                         block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
                                     playerInfo.getSpeed().setY(BigDecimal.ZERO);
                                 }
-                            } else {
+                            } else if (PlayerUtil.checkBlockSolid(block.getType())) {
                                 if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
                                                 playerInfo.getCoordinate().getY()),
-                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)),
-                                        BigDecimal.ONE)) {
+                                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
                                     playerInfo.getSpeed().setX(BigDecimal.ZERO);
                                 }
                                 if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX(),
                                                 playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
-                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)),
-                                        BigDecimal.ONE)) {
+                                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
                                     playerInfo.getSpeed().setY(BigDecimal.ZERO);
                                 }
                             }
-                        });
-                        playerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
-                                .add(playerInfo.getSpeed().getX()));
-                        playerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
-                                .add(playerInfo.getSpeed().getY()));
+                        }
+                        // Settle playerInfo position
+                        if (null == teleportWc) {
+                            playerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
+                                    .add(playerInfo.getSpeed().getX()));
+                            playerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
+                                    .add(playerInfo.getSpeed().getY()));
+                        } else {
+                            PlayerUtil.copyWorldCoordinate(teleportWc, playerInfo);
+                            playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+                        }
                         PlayerUtil.fixWorldCoordinate(region, playerInfo);
                     });
         });

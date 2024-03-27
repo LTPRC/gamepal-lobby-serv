@@ -13,4 +13,8 @@ public interface SceneManager {
     void fillScene(final Region region, final IntegerCoordinate sceneCoordinate, int regionIndex);
 
     Queue<Block> collectBlocksByUserCode(final String userCode);
+
+    Queue<Block> collectBlocksFromScenes(final String userCode);
+
+    Queue<Block> collectBlocksFromPlayerInfoMap(final String userCode);
 }

@@ -174,4 +174,6 @@ public class GamePalConstants {
     public static final int NPC_TASK_TYPE_OBSERVE = 1;
     public static final int NPC_TASK_TYPE_MOVE = 2;
     public static final int NPC_TASK_TYPE_ATTACK = 3;
+    public static final BigDecimal NPC_MAX_OBSERVE_RANGE = BigDecimal.valueOf(5);
+    public static final BigDecimal NPC_MAX_CHASE_DISTANCE = BigDecimal.valueOf(1);
 }

@@ -645,4 +645,21 @@ public class PlayerUtil {
         }
         return false;
     }
+
+    public static boolean checkBlockSolid(int blockType) {
+        switch (blockType) {
+            case GamePalConstants.BLOCK_TYPE_GROUND:
+            case GamePalConstants.BLOCK_TYPE_DROP:
+            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                return false;
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+            case GamePalConstants.BLOCK_TYPE_TREE:
+            default:
+                return true;
+        }
+    }
 }
