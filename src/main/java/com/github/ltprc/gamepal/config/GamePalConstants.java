@@ -49,6 +49,7 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_TREE = 20;
 
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+    public static final BigDecimal PLAYER_VIEW_RADIUS = BigDecimal.valueOf(10);
 
     public static final int TREE_TYPE_PINE = 1;
 

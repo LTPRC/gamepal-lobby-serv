@@ -121,14 +121,14 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksByUserCode(String userCode) {
-        Queue<Block> rankingQueue = collectBlocksFromScenes(userCode);
-        rankingQueue.addAll(collectBlocksFromPlayerInfoMap(userCode));
+    public Queue<Block> collectBlocksByUserCode(String userCode, final int sceneScanRadius) {
+        Queue<Block> rankingQueue = collectBlocksFromScenes(userCode, sceneScanRadius);
+        rankingQueue.addAll(collectBlocksFromPlayerInfoMap(userCode, sceneScanRadius));
         return rankingQueue;
     }
 
     @Override
-    public Queue<Block> collectBlocksFromScenes(String userCode) {
+    public Queue<Block> collectBlocksFromScenes(String userCode, final int sceneScanRadius) {
         Queue<Block> rankingQueue = blockFactory.createRankingQueue();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
@@ -136,10 +136,10 @@ public class SceneManagerImpl implements SceneManager {
         IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
-        for (int i = sceneCoordinate.getY() - GamePalConstants.SCENE_SCAN_RADIUS;
-             i <= sceneCoordinate.getY() + GamePalConstants.SCENE_SCAN_RADIUS; i++) {
-            for (int j = sceneCoordinate.getX() - GamePalConstants.SCENE_SCAN_RADIUS;
-                 j <= sceneCoordinate.getX() + GamePalConstants.SCENE_SCAN_RADIUS; j++) {
+        for (int i = sceneCoordinate.getY() - sceneScanRadius;
+             i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
+            for (int j = sceneCoordinate.getX() - sceneScanRadius;
+                 j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
                 final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
                 Scene scene = region.getScenes().get(newSceneCoordinate);
                 if (null == scene) {
@@ -170,7 +170,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksFromPlayerInfoMap(String userCode){
+    public Queue<Block> collectBlocksFromPlayerInfoMap(String userCode, final int sceneScanRadius) {
         Queue<Block> rankingQueue = blockFactory.createRankingQueue();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
@@ -183,8 +183,8 @@ public class SceneManagerImpl implements SceneManager {
                 .filter(entry -> {
                     IntegerCoordinate integerCoordinate
                             = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
-                    return Math.abs(integerCoordinate.getX()) <= GamePalConstants.SCENE_SCAN_RADIUS
-                            && Math.abs(integerCoordinate.getY()) <= GamePalConstants.SCENE_SCAN_RADIUS;
+                    return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
+                            && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
                 })
                 // playerInfos contains running players or NPC 24/03/25
                 .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))

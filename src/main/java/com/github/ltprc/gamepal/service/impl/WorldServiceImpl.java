@@ -452,9 +452,6 @@ public class WorldServiceImpl implements WorldService {
                 return null;
             }
         }
-        if (newEvent.getUserCode() == null) {
-            ;
-        }
         return newEvent;
     }
 
@@ -736,7 +733,7 @@ public class WorldServiceImpl implements WorldService {
                     .forEach(entry2 -> {
                         PlayerInfo playerInfo = entry2.getValue();
                         Region region = entry1.getValue().getRegionMap().get(playerInfo.getRegionNo());
-                        Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(entry2.getKey());
+                        Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(entry2.getKey(), 1);
                         WorldCoordinate teleportWc = null;
                         List<Block> rankingQueueList = rankingQueue.stream().collect(Collectors.toList());
                         for (int i = 0; i < rankingQueueList.size(); i ++) {

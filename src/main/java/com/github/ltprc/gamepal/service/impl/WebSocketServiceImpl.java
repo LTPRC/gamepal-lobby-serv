@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -331,7 +332,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("sceneInfos", sceneInfos);
 
         // Collect blocks
-        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode);
+        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, GamePalConstants.SCENE_SCAN_RADIUS);
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
