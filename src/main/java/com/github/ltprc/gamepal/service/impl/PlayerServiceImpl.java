@@ -62,6 +62,9 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1017));
         }
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
         if (!playerInfoMap.containsKey(userCode)) {
@@ -102,6 +105,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> updatePlayerinfo(String userCode, PlayerInfo playerInfo) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         playerInfoMap.put(userCode, playerInfo);
         return ResponseEntity.ok().body(rst.toString());
@@ -111,6 +117,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> updatePlayerinfoCharacter(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
@@ -167,6 +176,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> updatePlayerMovement(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
@@ -207,6 +219,10 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Map<String, Integer> getRelationMapByUserCode(String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
+            return null;
+        }
         Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
         if (!relationMap.containsKey(userCode)) {
             relationMap.put(userCode, new ConcurrentHashMap<>());
@@ -218,6 +234,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> useItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (!StringUtils.isNotBlank(itemNo) || !playerInfo.getItems().containsKey(itemNo)
@@ -290,6 +309,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> getItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldItemAmount = playerInfo.getItems().getOrDefault(itemNo, 0);
@@ -320,6 +342,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> getPreservedItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldItemAmount = playerInfo.getPreservedItems().getOrDefault(itemNo, 0);
@@ -343,6 +368,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldHp = playerInfo.getHp();
@@ -355,6 +383,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldVp = playerInfo.getVp();
@@ -367,6 +398,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> changeHunger(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldHunger = playerInfo.getHunger();
@@ -379,6 +413,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> changeThirst(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldThirst = playerInfo.getThirst();
@@ -390,6 +427,9 @@ public class PlayerServiceImpl implements PlayerService {
     private ResponseEntity<String> useConsumable(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         for (int i = 0; i < itemAmount; i++) {
             ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet().stream()
@@ -466,6 +506,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> interactBlocks(String userCode, int interactionCode, String id) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         WorldBlock block = world.getBlockMap().getOrDefault(id, null);
@@ -521,6 +564,9 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.INTERACTION_SET:
                 generateNotificationMessage(userCode, "你捯饬了起来。");
                 break;
+            case GamePalConstants.INTERACTION_YIELD:
+                // setMember()
+                break;
             default:
                 break;
         }
@@ -530,6 +576,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> updateBuff(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
         // Check death 24/02/23
@@ -583,6 +632,9 @@ public class PlayerServiceImpl implements PlayerService {
     public ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (null == playerInfoMap.get(userCode).getSkill() || playerInfoMap.get(userCode).getSkill().length <= skillNo) {
             logger.error(ErrorUtil.ERROR_1028 + " skillNo: " + skillNo);
@@ -620,6 +672,10 @@ public class PlayerServiceImpl implements PlayerService {
 
     private void generateEventBySkill(String userCode, int skillNo) {
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
+            return;
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         WorldBlock eventBlock = generateEventByUserCode(userCode);
         switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
@@ -666,6 +722,10 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public WorldBlock generateEventByUserCode(String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
+            return null;
+        }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         WorldBlock eventBlock = new WorldBlock();
         eventBlock.setCode(userCode);
@@ -679,5 +739,37 @@ public class PlayerServiceImpl implements PlayerService {
         newCoordinate.setY(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getY().toString()));
         eventBlock.setCoordinate(newCoordinate);
         return eventBlock;
+    }
+
+    @Override
+    public ResponseEntity<String> setMember(String userCode, String nextUserCode) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        if (!world.getPlayerInfoMap().containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (StringUtils.isBlank(nextUserCode)) {
+            generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
+            world.getPlayerInfoMap().get(userCode).setBossId(null);
+            return ResponseEntity.ok().body(rst.toString());
+        }
+        if (!world.getPlayerInfoMap().containsKey(nextUserCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        String nextUserCodeBossId = nextUserCode;
+        while (StringUtils.isNotBlank(nextUserCodeBossId)) {
+            if (nextUserCodeBossId.equals(userCode)) {
+                generateNotificationMessage(userCode, world.getPlayerInfoMap().get(nextUserCode).getNickname() + "是你的下级，你不可以为其效忠。");
+                return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
+            }
+            nextUserCodeBossId = world.getPlayerInfoMap().get(nextUserCodeBossId).getBossId();
+        }
+        generateNotificationMessage(userCode, "你向" + world.getPlayerInfoMap().get(nextUserCode).getNickname()
+                + "屈从了，自此为其效忠。");
+        world.getPlayerInfoMap().get(userCode).setBossId(nextUserCode);
+        return ResponseEntity.ok().body(rst.toString());
     }
 }

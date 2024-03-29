@@ -147,7 +147,7 @@ public class TimedEventTask {
         }
     }
 
-    @Scheduled(cron = "*/5 * * * * ?")
+//    @Scheduled(cron = "*/5 * * * * ?")
     public void executeBy5s() {
         for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry1.getValue();

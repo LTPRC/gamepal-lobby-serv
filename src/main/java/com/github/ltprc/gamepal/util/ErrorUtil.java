@@ -37,4 +37,5 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1030 = new GamepalError("1030", "Invalid drop id.");
     public static final GamepalError ERROR_1031 = new GamepalError("1031", "Player is not running or alive.");
     public static final GamepalError ERROR_1032 = new GamepalError("1032", "AI is not allowed to receive msg.");
+    public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
 }

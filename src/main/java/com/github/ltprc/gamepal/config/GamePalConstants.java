@@ -62,6 +62,7 @@ public class GamePalConstants {
     public static final int INTERACTION_ATTACK = 6;
     public static final int INTERACTION_FLIRT = 7;
     public static final int INTERACTION_SET = 8;
+    public static final int INTERACTION_YIELD = 9;
 
     public static final char ITEM_CHARACTER_TOOL = 't';
     public static final char ITEM_CHARACTER_OUTFIT = 'a';

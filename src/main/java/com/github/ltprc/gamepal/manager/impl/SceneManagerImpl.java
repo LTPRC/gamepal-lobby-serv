@@ -179,16 +179,17 @@ public class SceneManagerImpl implements SceneManager {
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect detected playerInfos
         playerInfoMap.entrySet().stream()
+                // playerInfos contains running players or NPC 24/03/25
+                .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
+                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 // Detected
+                .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
                 .filter(entry -> {
                     IntegerCoordinate integerCoordinate
                             = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
                     return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
                             && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
                 })
-                // playerInfos contains running players or NPC 24/03/25
-                .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
-                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(entry -> {
                     Block block = new Block();
                     block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);

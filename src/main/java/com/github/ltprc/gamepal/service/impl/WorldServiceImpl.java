@@ -784,6 +784,7 @@ public class WorldServiceImpl implements WorldService {
                         } else {
                             PlayerUtil.copyWorldCoordinate(teleportWc, playerInfo);
                             playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+                            region = entry1.getValue().getRegionMap().get(teleportWc.getRegionNo());
                         }
                         PlayerUtil.fixWorldCoordinate(region, playerInfo);
                     });

@@ -233,6 +233,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
                 }
             }
+            if (functions.containsKey("setMember")) {
+                JSONObject setMember = functions.getJSONObject("setMember");
+                String userCode1 = setMember.getString("userCode");
+                String userCode2 = setMember.getString("nextUserCode");
+                playerService.setMember(userCode1, userCode2);
+            }
         }
         // Reply automatically
         communicate(userCode, webStage, functions);
