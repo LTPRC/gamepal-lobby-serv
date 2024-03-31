@@ -109,6 +109,9 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (null == playerInfo.getSceneCoordinate()){
+            System.out.println("100");
+        }
         playerInfoMap.put(userCode, playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -221,7 +224,7 @@ public class PlayerServiceImpl implements PlayerService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
-            return null;
+            return new ConcurrentHashMap<>();
         }
         Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
         if (!relationMap.containsKey(userCode)) {
@@ -502,6 +505,13 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
+    /**
+     * Not all cases need to be implemented
+     * @param userCode
+     * @param interactionCode
+     * @param id
+     * @return
+     */
     @Override
     public ResponseEntity<String> interactBlocks(String userCode, int interactionCode, String id) {
         JSONObject rst = ContentUtil.generateRst();
@@ -762,7 +772,8 @@ public class PlayerServiceImpl implements PlayerService {
         String nextUserCodeBossId = nextUserCode;
         while (StringUtils.isNotBlank(nextUserCodeBossId)) {
             if (nextUserCodeBossId.equals(userCode)) {
-                generateNotificationMessage(userCode, world.getPlayerInfoMap().get(nextUserCode).getNickname() + "是你的下级，你不可以为其效忠。");
+                generateNotificationMessage(userCode, world.getPlayerInfoMap().get(nextUserCode).getNickname()
+                        + "是你的下级，你不可以为其效忠。");
                 return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
             }
             nextUserCodeBossId = world.getPlayerInfoMap().get(nextUserCodeBossId).getBossId();

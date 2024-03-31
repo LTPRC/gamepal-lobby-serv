@@ -28,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 
 import javax.websocket.Session;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -104,7 +103,8 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.updatePlayerMovement(userCode, functions.getJSONObject("updateMovingBlock"));
             }
             // Detect and expand scenes after updating player's location
-            worldService.expandScene(world, world.getPlayerInfoMap().get(userCode));
+            PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+            worldService.expandScene(world, playerInfo);
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.stream().forEach(useItem -> {
@@ -356,6 +356,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         rst.put("functions", functionsResponse);
 
+        // Latest timestamp
+        rst.put("timestamp", world.getOnlineMap().get(userCode));
+
         transmit(rst, userCode, world);
     }
 
@@ -369,7 +372,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         try {
             session.getBasicRemote().sendText(content);
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
         }
     }

@@ -148,7 +148,7 @@ public class GamePalConstants {
 
     public static final int REGION_INDEX_NOTHING = 1;
     public static final int REGION_INDEX_GRASSLAND = 2;
-    public static final int SCENE_SCAN_RADIUS = 2;
+    public static final int SCENE_SCAN_RADIUS = 1;
     public static final int SCENE_SCAN_MAX_RADIUS = 50;
 
     public static final long ONLINE_TIMEOUT_SECOND = 300;

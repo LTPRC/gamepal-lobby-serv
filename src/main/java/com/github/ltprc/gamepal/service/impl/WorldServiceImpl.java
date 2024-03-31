@@ -664,6 +664,7 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_FIRE:
                 playerService.damageHp(userCode, worldEvent.getUserCode(),
                         -GamePalConstants.EVENT_DAMAGE_PER_FRAME_FIRE, false);
+                break;
             case GamePalConstants.EVENT_CODE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
@@ -705,6 +706,10 @@ public class WorldServiceImpl implements WorldService {
             // Run NPC tasks
             Map<String, NpcBrain> npcBrainMap = entry1.getValue().getNpcBrainMap();
             npcBrainMap.entrySet().stream()
+                    .filter(entry2 -> entry1.getValue().getPlayerInfoMap().get(entry2.getKey()).getPlayerStatus()
+                            == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .filter(entry2 -> entry1.getValue().getPlayerInfoMap().get(entry2.getKey())
+                            .getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0)
                     .forEach(entry2 -> {
                         String npcUserCode = entry2.getKey();
                         JSONObject observeReq = new JSONObject();
