@@ -136,9 +136,6 @@ public class SceneManagerImpl implements SceneManager {
         IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
-        if (null == sceneCoordinate){
-            System.out.println("100");
-        }
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
              i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
             for (int j = sceneCoordinate.getX() - sceneScanRadius;
