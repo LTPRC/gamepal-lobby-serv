@@ -46,4 +46,8 @@ public interface PlayerService {
     WorldBlock generateEventByUserCode(String userCode);
 
     ResponseEntity<String> setMember(String userCode, String nextUserCode);
+
+    ResponseEntity<String> useTools(String userCode, String itemNo);
+
+    ResponseEntity<String> useOutfits(String userCode, String itemNo);
 }

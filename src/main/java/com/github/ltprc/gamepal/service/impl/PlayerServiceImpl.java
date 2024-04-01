@@ -248,40 +248,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         switch (itemNo.charAt(0)) {
             case GamePalConstants.ITEM_CHARACTER_TOOL:
-                int toolIndex = worldService.getItemMap().get(itemNo).getItemIndex();
-                Set<String> newTools = new ConcurrentSkipListSet<>();
-                if (playerInfo.getTools().contains(itemNo)) {
-                    playerInfo.getTools().stream()
-                            .filter(toolNo -> !itemNo.equals(toolNo))
-                            .forEach(newTools::add);
-                    playerInfo.setTools(newTools);
-                } else if (toolIndex != GamePalConstants.TOOL_INDEX_DEFAULT){
-                    playerInfo.getTools().stream()
-                            .filter(toolNo -> toolIndex != worldService.getItemMap().get(toolNo).getItemIndex())
-                            .forEach(newTools::add);
-                    playerInfo.setTools(newTools);
-                    playerInfo.getTools().add(itemNo);
-                } else {
-                    playerInfo.getTools().add(itemNo);
-                }
+                useTools(userCode, itemNo);
                 break;
             case GamePalConstants.ITEM_CHARACTER_OUTFIT:
-                int outfitIndex = worldService.getItemMap().get(itemNo).getItemIndex();
-                Set<String> newOutfits = new ConcurrentSkipListSet<>();
-                if (playerInfo.getOutfits().contains(itemNo)) {
-                    playerInfo.getOutfits().stream()
-                            .filter(outfitNo -> !itemNo.equals(outfitNo))
-                            .forEach(newOutfits::add);
-                    playerInfo.setOutfits(newOutfits);
-                } else if (outfitIndex != GamePalConstants.OUTFIT_INDEX_DEFAULT){
-                    playerInfo.getOutfits().stream()
-                            .filter(outfitNo -> outfitIndex != worldService.getItemMap().get(outfitNo).getItemIndex())
-                            .forEach(newOutfits::add);
-                    playerInfo.setOutfits(newOutfits);
-                    playerInfo.getOutfits().add(itemNo);
-                } else {
-                    playerInfo.getOutfits().add(itemNo);
-                }
+                useOutfits(userCode, itemNo);
                 break;
             case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(userCode, itemNo, itemAmount);
@@ -320,8 +290,14 @@ public class PlayerServiceImpl implements PlayerService {
         int oldItemAmount = playerInfo.getItems().getOrDefault(itemNo, 0);
         playerInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (playerInfo.getItems().get(itemNo) == 0) {
-            playerInfo.getTools().remove(itemNo);
-            playerInfo.getOutfits().remove(itemNo);
+            switch (itemNo.charAt(0)) {
+                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                    useTools(userCode, itemNo);
+                    break;
+                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                    useOutfits(userCode, itemNo);
+                    break;
+            }
         }
         BigDecimal capacity = playerInfo.getCapacity();
         playerInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
@@ -719,6 +695,11 @@ public class PlayerServiceImpl implements PlayerService {
                 eventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
                 worldService.addEvent(userCode, eventBlock);
                 break;
+            case GamePalConstants.SKILL_CODE_CURSE:
+            case GamePalConstants.SKILL_CODE_CHEER:
+            case GamePalConstants.SKILL_CODE_KICK:
+            case GamePalConstants.SKILL_CODE_SCRATCH:
+            case GamePalConstants.SKILL_CODE_CLEAVE:
             default:
                 break;
         }
@@ -781,6 +762,56 @@ public class PlayerServiceImpl implements PlayerService {
         generateNotificationMessage(userCode, "你向" + world.getPlayerInfoMap().get(nextUserCode).getNickname()
                 + "屈从了，自此为其效忠。");
         world.getPlayerInfoMap().get(userCode).setBossId(nextUserCode);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> useTools(String userCode, String itemNo) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int toolIndex = worldService.getItemMap().get(itemNo).getItemIndex();
+        Set<String> newTools = new ConcurrentSkipListSet<>();
+        if (playerInfo.getTools().contains(itemNo)) {
+            playerInfo.getTools().stream()
+                    .filter(toolNo -> !itemNo.equals(toolNo))
+                    .forEach(newTools::add);
+            playerInfo.setTools(newTools);
+        } else if (toolIndex != GamePalConstants.TOOL_INDEX_DEFAULT){
+            playerInfo.getTools().stream()
+                    .filter(toolNo -> toolIndex != worldService.getItemMap().get(toolNo).getItemIndex())
+                    .forEach(newTools::add);
+            playerInfo.setTools(newTools);
+            playerInfo.getTools().add(itemNo);
+        } else {
+            playerInfo.getTools().add(itemNo);
+        }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> useOutfits(String userCode, String itemNo) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int outfitIndex = worldService.getItemMap().get(itemNo).getItemIndex();
+        Set<String> newOutfits = new ConcurrentSkipListSet<>();
+        if (playerInfo.getOutfits().contains(itemNo)) {
+            playerInfo.getOutfits().stream()
+                    .filter(outfitNo -> !itemNo.equals(outfitNo))
+                    .forEach(newOutfits::add);
+            playerInfo.setOutfits(newOutfits);
+        } else if (outfitIndex != GamePalConstants.OUTFIT_INDEX_DEFAULT){
+            playerInfo.getOutfits().stream()
+                    .filter(outfitNo -> outfitIndex != worldService.getItemMap().get(outfitNo).getItemIndex())
+                    .forEach(newOutfits::add);
+            playerInfo.setOutfits(newOutfits);
+            playerInfo.getOutfits().add(itemNo);
+        } else {
+            playerInfo.getOutfits().add(itemNo);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 }

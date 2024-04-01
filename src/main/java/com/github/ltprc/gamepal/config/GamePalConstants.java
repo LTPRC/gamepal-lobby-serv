@@ -125,6 +125,11 @@ public class GamePalConstants {
     public static final int SKILL_CODE_HIT = 2;
     public static final int SKILL_CODE_BLOCK = 3;
     public static final int SKILL_CODE_HEAL = 4;
+    public static final int SKILL_CODE_CURSE = 5;
+    public static final int SKILL_CODE_CHEER = 6;
+    public static final int SKILL_CODE_KICK = 7;
+    public static final int SKILL_CODE_SCRATCH = 8;
+    public static final int SKILL_CODE_CLEAVE = 9;
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
 

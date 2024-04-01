@@ -1,10 +1,12 @@
 package com.github.ltprc.gamepal.factory;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.SkillManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.util.NameUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -13,6 +15,9 @@ import java.util.Random;
 
 @Component
 public class PlayerInfoFactory {
+
+    @Autowired
+    private SkillManager skillManager;
 
     public PlayerInfo createPlayerInfoInstance() {
         PlayerInfo playerInfo = new PlayerInfo();
@@ -42,16 +47,7 @@ public class PlayerInfoFactory {
         playerInfo.setCapacity(new BigDecimal(0));
         playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
-        int[][] skill = new int[4][4];
-        skill[0] = new int[]{GamePalConstants.SKILL_CODE_SHOOT, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        skill[1] = new int[]{GamePalConstants.SKILL_CODE_HIT, GamePalConstants.SKILL_MODE_AUTO, 0,
-                GamePalConstants.FRAME_PER_SECOND / 5};
-        skill[2] = new int[]{GamePalConstants.SKILL_CODE_BLOCK, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        skill[3] = new int[]{GamePalConstants.SKILL_CODE_HEAL, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        playerInfo.setSkill(skill);
+        skillManager.updateSkills(playerInfo);
         return playerInfo;
     }
 

@@ -74,7 +74,8 @@
   {"itemNo": "t230", "name": "加利尔突击步枪", "weight": 3.9, "description": "", "itemIndex": 1},
   {"itemNo": "t231", "name": "Auto-5霰弹枪", "weight": 3.2, "description": "", "itemIndex": 1},
 
-  {"itemNo": "a001", "name": "秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},
+  {"itemNo": "a001", "name": "高中秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},
+  {"itemNo": "a002", "name": "初中秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},
 
   {"itemNo": "c001", "name": "血浆", "weight": 0.5, "description": "", "effects": {"hp": 50}},
   {"itemNo": "c002", "name": "肾上腺素", "weight": 0.1, "description": "", "effects": {"vp": 50}},
