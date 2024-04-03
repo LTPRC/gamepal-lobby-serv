@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.task;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
@@ -33,6 +34,9 @@ public class TimedEventTask {
     @Autowired
     private NpcManager npcManager;
 
+    @Autowired
+    private BlockFactory blockFactory;
+
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
@@ -62,8 +66,11 @@ public class TimedEventTask {
                                     playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
                                     playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
                                     playerService.generateNotificationMessage(userCode, "复活成功。");
-                                    WorldBlock rebirthEventBlock = playerService.generateEventByUserCode(userCode);
-                                    rebirthEventBlock.setType(GamePalConstants.EVENT_CODE_SACRIFICE);
+                                    WorldBlock rebirthEventBlock = blockFactory.createEventBlock(
+                                            world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                                            playerInfoMap.get(userCode),
+                                            GamePalConstants.EVENT_CODE_SACRIFICE,
+                                            GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
                                     worldService.addEvent(userCode, rebirthEventBlock);
                                 } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
                                     playerService.generateNotificationMessage(userCode, "距离复活还有"

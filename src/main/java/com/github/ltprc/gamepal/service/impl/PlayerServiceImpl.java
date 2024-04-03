@@ -3,7 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.item.Consumable;
@@ -22,6 +22,7 @@ import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +56,7 @@ public class PlayerServiceImpl implements PlayerService {
     private StateMachineService stateMachineService;
 
     @Autowired
-    private SceneManager sceneManager;
+    private BlockFactory blockFactory;
 
     @Override
     public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
@@ -581,8 +582,11 @@ public class PlayerServiceImpl implements PlayerService {
             for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
                 playerInfoMap.get(userCode).getSkill()[i][2] = playerInfoMap.get(userCode).getSkill()[i][3];
             }
-            WorldBlock bleedEventBlock = generateEventByUserCode(userCode);
-            bleedEventBlock.setType(GamePalConstants.EVENT_CODE_DISTURB);
+            WorldBlock bleedEventBlock = blockFactory.createEventBlock(
+                    world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                    playerInfoMap.get(userCode),
+                    GamePalConstants.EVENT_CODE_DISTURB,
+                    GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
             worldService.addEvent(userCode, bleedEventBlock);
         } else if (0 < playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
@@ -665,85 +669,107 @@ public class PlayerServiceImpl implements PlayerService {
             return;
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        WorldBlock eventBlock = generateEventByUserCode(userCode);
         switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
             case GamePalConstants.SKILL_CODE_BLOCK:
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_BLOCK);
-                worldService.addEvent(userCode, eventBlock);
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_BLOCK,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT));
                 break;
             case GamePalConstants.SKILL_CODE_HEAL:
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
-                worldService.addEvent(userCode, eventBlock);
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_HEAL,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT));
                 break;
             case GamePalConstants.SKILL_CODE_CHEER:
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_CHEER);
-                worldService.addEvent(userCode, eventBlock);
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_CHEER,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT));
                 break;
             case GamePalConstants.SKILL_CODE_CURSE:
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_CURSE);
-                worldService.addEvent(userCode, eventBlock);
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_CURSE,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_HIT:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_HIT,
+                        GamePalConstants.EVENT_LOCATION_TYPE_MELEE));
+                break;
             case GamePalConstants.SKILL_CODE_MELEE_KICK:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_MELEE_KICK,
+                        GamePalConstants.EVENT_LOCATION_TYPE_MELEE));
+                break;
             case GamePalConstants.SKILL_CODE_MELEE_SCRATCH:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_MELEE_SCRATCH,
+                        GamePalConstants.EVENT_LOCATION_TYPE_MELEE));
+                break;
             case GamePalConstants.SKILL_CODE_MELEE_CLEAVE:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_MELEE_CLEAVE,
+                        GamePalConstants.EVENT_LOCATION_TYPE_MELEE));
+                break;
             case GamePalConstants.SKILL_CODE_MELEE_STAB:
-                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_HIT);
-                worldService.addEvent(userCode, eventBlock);
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_MELEE_STAB,
+                        GamePalConstants.EVENT_LOCATION_TYPE_MELEE));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_HIT:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_HIT,
+                        GamePalConstants.EVENT_LOCATION_TYPE_SHOOT));
+                break;
             case GamePalConstants.SKILL_CODE_SHOOT_ARROW:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_MELEE_STAB,
+                        GamePalConstants.EVENT_LOCATION_TYPE_SHOOT));
+                break;
             case GamePalConstants.SKILL_CODE_SHOOT_GUN:
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_SHOOT_SLUG,
+                        GamePalConstants.EVENT_LOCATION_TYPE_SHOOT));
+                break;
             case GamePalConstants.SKILL_CODE_SHOOT_SHOTGUN:
+                // TODO
+                break;
             case GamePalConstants.SKILL_CODE_SHOOT_MAGNUM:
+                // TODO
+                break;
             case GamePalConstants.SKILL_CODE_SHOOT_ROCKET:
-                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_SHOOT);
-                worldService.addEvent(userCode, eventBlock);
+                worldService.addEvent(userCode, blockFactory.createEventBlock(
+                        world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
+                        playerInfoMap.get(userCode),
+                        GamePalConstants.EVENT_CODE_SHOOT_ROCKET,
+                        GamePalConstants.EVENT_LOCATION_TYPE_SHOOT));
                 break;
             default:
                 break;
         }
-    }
-
-    /**
-     * No type of the event
-     * @param userCode userCode
-     * @return WorldBlock
-     */
-    @Override
-    public WorldBlock generateEventByUserCode(String userCode) {
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
-            return null;
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        WorldBlock eventBlock = new WorldBlock();
-        eventBlock.setCode(userCode);
-        eventBlock.setRegionNo(playerInfoMap.get(userCode).getRegionNo());
-        IntegerCoordinate newSceneCoordinate = new IntegerCoordinate();
-        newSceneCoordinate.setX(playerInfoMap.get(userCode).getSceneCoordinate().getX());
-        newSceneCoordinate.setY(playerInfoMap.get(userCode).getSceneCoordinate().getY());
-        eventBlock.setSceneCoordinate(newSceneCoordinate);
-        Coordinate newCoordinate = new Coordinate();
-        newCoordinate.setX(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getX().toString()));
-        newCoordinate.setY(new BigDecimal(playerInfoMap.get(userCode).getCoordinate().getY().toString()));
-        eventBlock.setCoordinate(newCoordinate);
-        return eventBlock;
     }
 
     @Override
@@ -801,6 +827,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getTools().add(itemNo);
         }
+        SkillUtil.updateSkills(playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -826,6 +853,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getOutfits().add(itemNo);
         }
+        SkillUtil.updateSkills(playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 }

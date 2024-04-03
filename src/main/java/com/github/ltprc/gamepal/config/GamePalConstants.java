@@ -84,7 +84,7 @@ public class GamePalConstants {
     public static final int EVENT_CODE_HIT_ELECTRICITY = 104;
     public static final int EVENT_CODE_UPGRADE = 105;
     public static final int EVENT_CODE_FIRE = 106;
-    public static final int EVENT_CODE_SHOOT = 107;
+    public static final int EVENT_CODE_SHOOT_SLUG = 107;
     public static final int EVENT_CODE_EXPLODE = 108;
     public static final int EVENT_CODE_BLEED = 109;
     public static final int EVENT_CODE_BLOCK = 110;
@@ -94,6 +94,11 @@ public class GamePalConstants {
     public static final int EVENT_CODE_TAIL_SMOKE = 114;
     public static final int EVENT_CODE_CHEER = 115;
     public static final int EVENT_CODE_CURSE = 116;
+    public static final int EVENT_CODE_MELEE_SCRATCH = 117;
+    public static final int EVENT_CODE_MELEE_CLEAVE = 118;
+    public static final int EVENT_CODE_MELEE_STAB = 119;
+    public static final int EVENT_CODE_MELEE_KICK = 120;
+    public static final int EVENT_CODE_SHOOT_ROCKET = 121;
 
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal EVENT_MAX_DISTANCE_HIT = BigDecimal.ONE;
@@ -184,6 +189,9 @@ public class GamePalConstants {
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
     public static final int SKILL_DEFAULT_TIME = 25;
+    public static final int EVENT_LOCATION_TYPE_ADJACENT = 0;
+    public static final int EVENT_LOCATION_TYPE_MELEE = 1;
+    public static final int EVENT_LOCATION_TYPE_SHOOT = 2;
 
     public static final int PLAYER_TYPE_HUMAN = 0;
     public static final int PLAYER_TYPE_AI = 1;

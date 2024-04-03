@@ -329,7 +329,12 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
             case GamePalConstants.EVENT_CODE_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
             default:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
                 break;

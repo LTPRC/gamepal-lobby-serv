@@ -43,8 +43,6 @@ public interface PlayerService {
 
     ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown);
 
-    WorldBlock generateEventByUserCode(String userCode);
-
     ResponseEntity<String> setMember(String userCode, String nextUserCode);
 
     ResponseEntity<String> useTools(String userCode, String itemNo);

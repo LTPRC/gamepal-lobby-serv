@@ -346,12 +346,17 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
             case GamePalConstants.EVENT_CODE_UPGRADE:
-            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_EXPLODE:
             case GamePalConstants.EVENT_CODE_BLEED:
             case GamePalConstants.EVENT_CODE_BLOCK:
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_TAIL_SMOKE:
+            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
             default:
                 // Finite 25-frame event
                 event.setPeriod(25);
@@ -445,6 +450,12 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_DISTURB:
                 PlayerUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
                 break;
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_CURSE:
+                PlayerUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
+                newEvent.getCoordinate().setY(newEvent.getCoordinate().getY().subtract(BigDecimal.ONE));
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(newEvent.getRegionNo()), newEvent);
+                break;
             default:
                 PlayerUtil.copyWorldCoordinate(oldEvent, newEvent);
                 break;
@@ -464,6 +475,10 @@ public class WorldServiceImpl implements WorldService {
 
     private void triggerEvent(WorldEvent worldEvent) {
         GameWorld world = userService.getWorldByUserCode(worldEvent.getUserCode());
+        if (null == world) {
+            logger.error(ErrorUtil.ERROR_1016);
+            return;
+        }
         Map<Integer, Region> regionMap = world.getRegionMap();
         switch (worldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_FIRE:
@@ -493,7 +508,8 @@ public class WorldServiceImpl implements WorldService {
                         .filter(entry -> checkEvent(worldEvent, entry.getValue()))
                         .forEach(entry -> activateEvent(worldEvent, entry.getValue().getId()));
                 break;
-            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
                 // Non-self event, move to the nearest player/blocker
                 PlayerInfo eventPlayerInfo = world.getPlayerInfoMap().get(worldEvent.getUserCode());
                 WorldCoordinate nearestPlayerCoordinate = new WorldCoordinate();
@@ -557,24 +573,27 @@ public class WorldServiceImpl implements WorldService {
                 if (StringUtils.isNotBlank(activatedWorldBlock.getId())) {
                     activateEvent(worldEvent, activatedWorldBlock.getId());
                 }
-                // Add tail smoke 24/03/16
-                BigDecimal tailSmokeLength = PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
-                        eventPlayerInfo, worldEvent);
-                int tailSmokeAmount = tailSmokeLength.intValue() + 1;
-                List<WorldCoordinate> equidistantPoints = PlayerUtil.collectEquidistantPoints(
-                        regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo, worldEvent, tailSmokeAmount);
-                equidistantPoints.stream()
-                        .forEach(tailSmokeCoordinate -> {
-                            WorldBlock tailSmokeEventBlock =
-                                    playerService.generateEventByUserCode(worldEvent.getUserCode());
-                            PlayerUtil.copyWorldCoordinate(tailSmokeCoordinate, tailSmokeEventBlock);
-                            tailSmokeEventBlock.setType(GamePalConstants.EVENT_CODE_TAIL_SMOKE);
-                            // Lift 0.5 height for tail smoke 24/03/17
-                            tailSmokeEventBlock.getCoordinate().setY(tailSmokeEventBlock.getCoordinate().getY()
-                                    .subtract(BigDecimal.valueOf(0.5D)));
-                            PlayerUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), tailSmokeEventBlock);
-                            addEvent(worldEvent.getUserCode(), tailSmokeEventBlock);
-                        });
+                if (worldEvent.getCode() == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
+                    // Add tail smoke 24/03/16
+                    BigDecimal tailSmokeLength = PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
+                            eventPlayerInfo, worldEvent);
+                    int tailSmokeAmount = tailSmokeLength.intValue() + 1;
+                    List<WorldCoordinate> equidistantPoints = PlayerUtil.collectEquidistantPoints(
+                            regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo, worldEvent, tailSmokeAmount);
+                    equidistantPoints.stream()
+                            .forEach(tailSmokeCoordinate -> {
+                                WorldBlock tailSmokeEventBlock = blockFactory.createEventBlock(
+                                        regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo,
+                                        GamePalConstants.EVENT_CODE_TAIL_SMOKE,
+                                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
+                                PlayerUtil.copyWorldCoordinate(tailSmokeCoordinate, tailSmokeEventBlock);
+                                // Lift 0.5 height for tail smoke 24/03/17
+                                tailSmokeEventBlock.getCoordinate().setY(tailSmokeEventBlock.getCoordinate().getY()
+                                        .subtract(BigDecimal.valueOf(0.5D)));
+                                PlayerUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), tailSmokeEventBlock);
+                                addEvent(worldEvent.getUserCode(), tailSmokeEventBlock);
+                            });
+                }
                 break;
             default:
                 // Global event
@@ -618,7 +637,7 @@ public class WorldServiceImpl implements WorldService {
                     rst = true;
                 }
                 break;
-            case GamePalConstants.EVENT_CODE_SHOOT:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
 //                if (blocker.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
 //                        || blocker.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
@@ -684,20 +703,29 @@ public class WorldServiceImpl implements WorldService {
                     damageValue /= 2;
                 }
                 playerService.damageHp(userCode, worldEvent.getUserCode(), damageValue, false);
-                bleedEventBlock = playerService.generateEventByUserCode(userCode);
-                bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+                bleedEventBlock = blockFactory.createEventBlock(
+                        userService.getWorldByUserCode(userCode).getRegionMap().get(worldEvent.getRegionNo()),
+                        userService.getWorldByUserCode(userCode).getPlayerInfoMap().get(userCode),
+                        GamePalConstants.EVENT_CODE_BLEED,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
                 addEvent(userCode, bleedEventBlock);
                 break;
-            case GamePalConstants.EVENT_CODE_SHOOT:
-                bleedEventBlock = playerService.generateEventByUserCode(userCode);
-                bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+                bleedEventBlock = blockFactory.createEventBlock(
+                        userService.getWorldByUserCode(userCode).getRegionMap().get(worldEvent.getRegionNo()),
+                        userService.getWorldByUserCode(userCode).getPlayerInfoMap().get(userCode),
+                        GamePalConstants.EVENT_CODE_BLEED,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
                 addEvent(userCode, bleedEventBlock);
                 playerService.damageHp(userCode, worldEvent.getUserCode(),
                         -GamePalConstants.EVENT_DAMAGE_SHOOT, false);
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                bleedEventBlock = playerService.generateEventByUserCode(userCode);
-                bleedEventBlock.setType(GamePalConstants.EVENT_CODE_BLEED);
+                bleedEventBlock = blockFactory.createEventBlock(
+                        userService.getWorldByUserCode(userCode).getRegionMap().get(worldEvent.getRegionNo()),
+                        userService.getWorldByUserCode(userCode).getPlayerInfoMap().get(userCode),
+                        GamePalConstants.EVENT_CODE_BLEED,
+                        GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
                 addEvent(userCode, bleedEventBlock);
                 playerService.damageHp(userCode, worldEvent.getUserCode(),
                         -GamePalConstants.EVENT_DAMAGE_EXPLODE, false);
