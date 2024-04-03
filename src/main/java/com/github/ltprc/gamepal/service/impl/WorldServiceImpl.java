@@ -9,9 +9,7 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
-import com.github.ltprc.gamepal.model.item.Consumable;
-import com.github.ltprc.gamepal.model.item.Item;
-import com.github.ltprc.gamepal.model.item.Junk;
+import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.npc.NpcBrain;
@@ -21,6 +19,7 @@ import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import com.github.ltprc.gamepal.util.lv.LasVegasGameUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -280,6 +279,15 @@ public class WorldServiceImpl implements WorldService {
         JSONArray items = ContentUtil.jsonFile2JSONArray("src/main/resources/json/items.json");
         items.stream().forEach(itemObj -> {
             switch (((JSONObject) itemObj).getString("itemNo").charAt(0)) {
+                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                    Tool tool = JSON.parseObject(String.valueOf(itemObj), Tool.class);
+                    SkillUtil.defineToolProps(tool);
+                    itemMap.put(tool.getItemNo(), tool);
+                    break;
+                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                    Outfit outfit = JSON.parseObject(String.valueOf(itemObj), Outfit.class);
+                    itemMap.put(outfit.getItemNo(), outfit);
+                    break;
                 case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
                     Consumable consumable = JSON.parseObject(String.valueOf(itemObj), Consumable.class);
                     itemMap.put(consumable.getItemNo(), consumable);
@@ -288,15 +296,12 @@ public class WorldServiceImpl implements WorldService {
                     Junk junk = JSON.parseObject(String.valueOf(itemObj), Junk.class);
                     itemMap.put(junk.getItemNo(), junk);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_TOOL:
-                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
                 case GamePalConstants.ITEM_CHARACTER_MATERIAL:
                 case GamePalConstants.ITEM_CHARACTER_NOTE:
                 case GamePalConstants.ITEM_CHARACTER_RECORDING:
+                default:
                     Item item = JSON.parseObject(String.valueOf(itemObj), Item.class);
                     itemMap.put(item.getItemNo(), item);
-                    break;
-                default:
                     break;
             }
         });
@@ -323,16 +328,18 @@ public class WorldServiceImpl implements WorldService {
         event.setCode(eventBlock.getType());
         event.setFrame(0);
         switch (eventBlock.getType()) {
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-                // Finite 50-frame event
-                event.setPeriod(50);
-                event.setFrameMax(50);
-                break;
             case GamePalConstants.EVENT_CODE_FIRE:
                 // Infinite 25-frame event
                 event.setPeriod(25);
                 event.setFrameMax(-1);
+                break;
+            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_CURSE:
+                // Finite 50-frame event
+                event.setPeriod(50);
+                event.setFrameMax(50);
                 break;
             case GamePalConstants.EVENT_CODE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:

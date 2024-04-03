@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Item {
-    private String itemNo;
-    private String name;
-    private BigDecimal weight;
-    private String description;
+public class Tool extends Item {
+    // 0 - 默认共用
+    private int itemIndex;
+    // 0 - 默认
+    private int itemType;
+    private int itemMode;
+    private int itemTime;
 }

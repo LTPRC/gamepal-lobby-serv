@@ -71,11 +71,6 @@ public class GamePalConstants {
     public static final char ITEM_CHARACTER_JUNK = 'j';
     public static final char ITEM_CHARACTER_NOTE = 'n';
     public static final char ITEM_CHARACTER_RECORDING = 'r';
-    public static final int TOOL_INDEX_DEFAULT = 0;
-    public static final int TOOL_INDEX_PRIMARY = 1;
-    public static final int TOOL_INDEX_SECONDARY = 2;
-    public static final int OUTFIT_INDEX_DEFAULT = 0;
-    public static final int OUTFIT_INDEX_CLOTHES = 1;
 
     public static final String FLAG_UPDATE_ITEMS = "updateItems";
     public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";
@@ -97,6 +92,8 @@ public class GamePalConstants {
     public static final int EVENT_CODE_DISTURB = 112;
     public static final int EVENT_CODE_SACRIFICE = 113;
     public static final int EVENT_CODE_TAIL_SMOKE = 114;
+    public static final int EVENT_CODE_CHEER = 115;
+    public static final int EVENT_CODE_CURSE = 116;
 
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal EVENT_MAX_DISTANCE_HIT = BigDecimal.ONE;
@@ -121,15 +118,21 @@ public class GamePalConstants {
     public static final int BUFF_CODE_LENGTH = 10;
 
     public static final int SKILL_LENGTH = 4;
-    public static final int SKILL_CODE_SHOOT = 1;
-    public static final int SKILL_CODE_HIT = 2;
     public static final int SKILL_CODE_BLOCK = 3;
     public static final int SKILL_CODE_HEAL = 4;
     public static final int SKILL_CODE_CURSE = 5;
     public static final int SKILL_CODE_CHEER = 6;
-    public static final int SKILL_CODE_KICK = 7;
-    public static final int SKILL_CODE_SCRATCH = 8;
-    public static final int SKILL_CODE_CLEAVE = 9;
+    public static final int SKILL_CODE_MELEE_HIT = 11;
+    public static final int SKILL_CODE_MELEE_KICK = 12;
+    public static final int SKILL_CODE_MELEE_SCRATCH = 13;
+    public static final int SKILL_CODE_MELEE_CLEAVE = 14;
+    public static final int SKILL_CODE_MELEE_STAB = 15;
+    public static final int SKILL_CODE_SHOOT_HIT = 21;
+    public static final int SKILL_CODE_SHOOT_ARROW = 22;
+    public static final int SKILL_CODE_SHOOT_GUN = 23;
+    public static final int SKILL_CODE_SHOOT_SHOTGUN = 24;
+    public static final int SKILL_CODE_SHOOT_MAGNUM = 25;
+    public static final int SKILL_CODE_SHOOT_ROCKET = 26;
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
 
@@ -171,6 +174,13 @@ public class GamePalConstants {
     public static final int GAME_PLAYER_STATUS_STANDBY = 2;
     public static final int GAME_PLAYER_STATUS_PREPARED = 3;
     public static final int GAME_PLAYER_STATUS_PLAYING = 4;
+
+    public static final int TOOL_INDEX_DEFAULT = 0;
+    public static final int TOOL_INDEX_PRIMARY = 1;
+    public static final int TOOL_INDEX_SECONDARY = 2;
+
+    public static final int OUTFIT_INDEX_DEFAULT = 0;
+    public static final int OUTFIT_INDEX_CLOTHES = 1;
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
     public static final int SKILL_DEFAULT_TIME = 25;

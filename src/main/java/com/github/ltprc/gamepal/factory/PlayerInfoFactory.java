@@ -1,12 +1,11 @@
 package com.github.ltprc.gamepal.factory;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.manager.SkillManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.util.NameUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -15,9 +14,6 @@ import java.util.Random;
 
 @Component
 public class PlayerInfoFactory {
-
-    @Autowired
-    private SkillManager skillManager;
 
     public PlayerInfo createPlayerInfoInstance() {
         PlayerInfo playerInfo = new PlayerInfo();
@@ -47,7 +43,7 @@ public class PlayerInfoFactory {
         playerInfo.setCapacity(new BigDecimal(0));
         playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
-        skillManager.updateSkills(playerInfo);
+        SkillUtil.updateSkills(playerInfo);
         return playerInfo;
     }
 

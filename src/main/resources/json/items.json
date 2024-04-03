@@ -9,7 +9,7 @@
   {"itemNo": "t007", "name": "弹弓", "weight": 0.1, "description": "", "itemIndex": 1},
   {"itemNo": "t008", "name": "水壶", "weight": 0.5, "description": "", "itemIndex": 1},
   {"itemNo": "t009", "name": "军号", "weight": 1.0, "description": "", "itemIndex": 1},
-  {"itemNo": "t010", "name": "菜刀", "weight": 1.0, "description": "", "itemIndex": 1},
+  {"itemNo": "t010", "name": "砍骨刀", "weight": 1.0, "description": "", "itemIndex": 1},
   {"itemNo": "t011", "name": "小型灭火器", "weight": 2.0, "description": "", "itemIndex": 1},
   {"itemNo": "t012", "name": "工兵锤", "weight": 1.0, "description": "", "itemIndex": 1},
   {"itemNo": "t013", "name": "重锤", "weight": 5.0, "description": "", "itemIndex": 1},

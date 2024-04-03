@@ -9,9 +9,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Item {
-    private String itemNo;
-    private String name;
-    private BigDecimal weight;
-    private String description;
+public class Outfit extends Item {
+    // 0 - 默认共用
+    private int itemIndex;
 }

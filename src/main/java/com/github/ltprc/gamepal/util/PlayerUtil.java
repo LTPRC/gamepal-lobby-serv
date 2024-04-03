@@ -320,6 +320,8 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_DISTURB:
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_TAIL_SMOKE:
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_CURSE:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
                 break;
             case GamePalConstants.EVENT_CODE_HIT:

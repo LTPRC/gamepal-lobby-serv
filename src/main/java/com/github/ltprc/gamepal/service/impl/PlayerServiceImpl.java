@@ -8,6 +8,8 @@ import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.item.Consumable;
 import com.github.ltprc.gamepal.model.item.Junk;
+import com.github.ltprc.gamepal.model.item.Outfit;
+import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
@@ -665,16 +667,31 @@ public class PlayerServiceImpl implements PlayerService {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         WorldBlock eventBlock = generateEventByUserCode(userCode);
         switch (playerInfoMap.get(userCode).getSkill()[skillNo][0]) {
-            case GamePalConstants.SKILL_CODE_SHOOT:
-                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
-                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+            case GamePalConstants.SKILL_CODE_BLOCK:
                 PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_SHOOT);
+                eventBlock.setType(GamePalConstants.EVENT_CODE_BLOCK);
                 worldService.addEvent(userCode, eventBlock);
                 break;
-            case GamePalConstants.SKILL_CODE_HIT:
+            case GamePalConstants.SKILL_CODE_HEAL:
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
+                eventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
+                worldService.addEvent(userCode, eventBlock);
+                break;
+            case GamePalConstants.SKILL_CODE_CHEER:
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
+                eventBlock.setType(GamePalConstants.EVENT_CODE_CHEER);
+                worldService.addEvent(userCode, eventBlock);
+                break;
+            case GamePalConstants.SKILL_CODE_CURSE:
+                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
+                eventBlock.setType(GamePalConstants.EVENT_CODE_CURSE);
+                worldService.addEvent(userCode, eventBlock);
+                break;
+            case GamePalConstants.SKILL_CODE_MELEE_HIT:
+            case GamePalConstants.SKILL_CODE_MELEE_KICK:
+            case GamePalConstants.SKILL_CODE_MELEE_SCRATCH:
+            case GamePalConstants.SKILL_CODE_MELEE_CLEAVE:
+            case GamePalConstants.SKILL_CODE_MELEE_STAB:
                 eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
                         .add(BigDecimal.valueOf((Math.random()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
@@ -683,23 +700,20 @@ public class PlayerServiceImpl implements PlayerService {
                 eventBlock.setType(GamePalConstants.EVENT_CODE_HIT);
                 worldService.addEvent(userCode, eventBlock);
                 break;
-            case GamePalConstants.SKILL_CODE_BLOCK:
+            case GamePalConstants.SKILL_CODE_SHOOT_HIT:
+            case GamePalConstants.SKILL_CODE_SHOOT_ARROW:
+            case GamePalConstants.SKILL_CODE_SHOOT_GUN:
+            case GamePalConstants.SKILL_CODE_SHOOT_SHOTGUN:
+            case GamePalConstants.SKILL_CODE_SHOOT_MAGNUM:
+            case GamePalConstants.SKILL_CODE_SHOOT_ROCKET:
+                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
+                        .add(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.cos(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
+                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
+                        .subtract(BigDecimal.valueOf((Math.random() + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue()) * Math.sin(playerInfoMap.get(userCode).getFaceDirection().doubleValue() / 180 * Math.PI))));
                 PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_BLOCK);
+                eventBlock.setType(GamePalConstants.EVENT_CODE_SHOOT);
                 worldService.addEvent(userCode, eventBlock);
                 break;
-            case GamePalConstants.SKILL_CODE_HEAL:
-                // Subtracted 0.01 for event under player's feet 24/03/05
-                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY().subtract(BigDecimal.valueOf(0.01)));
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock);
-                eventBlock.setType(GamePalConstants.EVENT_CODE_HEAL);
-                worldService.addEvent(userCode, eventBlock);
-                break;
-            case GamePalConstants.SKILL_CODE_CURSE:
-            case GamePalConstants.SKILL_CODE_CHEER:
-            case GamePalConstants.SKILL_CODE_KICK:
-            case GamePalConstants.SKILL_CODE_SCRATCH:
-            case GamePalConstants.SKILL_CODE_CLEAVE:
             default:
                 break;
         }
@@ -771,7 +785,7 @@ public class PlayerServiceImpl implements PlayerService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int toolIndex = worldService.getItemMap().get(itemNo).getItemIndex();
+        int toolIndex = ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex();
         Set<String> newTools = new ConcurrentSkipListSet<>();
         if (playerInfo.getTools().contains(itemNo)) {
             playerInfo.getTools().stream()
@@ -780,7 +794,7 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.setTools(newTools);
         } else if (toolIndex != GamePalConstants.TOOL_INDEX_DEFAULT){
             playerInfo.getTools().stream()
-                    .filter(toolNo -> toolIndex != worldService.getItemMap().get(toolNo).getItemIndex())
+                    .filter(toolNo -> toolIndex != ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex())
                     .forEach(newTools::add);
             playerInfo.setTools(newTools);
             playerInfo.getTools().add(itemNo);
@@ -796,7 +810,7 @@ public class PlayerServiceImpl implements PlayerService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int outfitIndex = worldService.getItemMap().get(itemNo).getItemIndex();
+        int outfitIndex = ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex();
         Set<String> newOutfits = new ConcurrentSkipListSet<>();
         if (playerInfo.getOutfits().contains(itemNo)) {
             playerInfo.getOutfits().stream()
@@ -805,7 +819,7 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.setOutfits(newOutfits);
         } else if (outfitIndex != GamePalConstants.OUTFIT_INDEX_DEFAULT){
             playerInfo.getOutfits().stream()
-                    .filter(outfitNo -> outfitIndex != worldService.getItemMap().get(outfitNo).getItemIndex())
+                    .filter(outfitNo -> outfitIndex != ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex())
                     .forEach(newOutfits::add);
             playerInfo.setOutfits(newOutfits);
             playerInfo.getOutfits().add(itemNo);
