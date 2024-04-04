@@ -10,4 +10,10 @@ import lombok.NoArgsConstructor;
 public class Drop extends Block {
     private String itemNo;
     private int amount;
+
+    public Drop(Drop drop) {
+        super(drop);
+        itemNo = drop.itemNo;
+        amount = drop.amount;
+    }
 }

@@ -143,7 +143,18 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 if (!CollectionUtils.isEmpty(scene.getBlocks())) {
                     scene.getBlocks().stream().forEach(block -> {
-                        Block newBlock = new Block(block);
+                        Block newBlock;
+                        switch (block.getType()) {
+                            case GamePalConstants.BLOCK_TYPE_DROP:
+                                newBlock = new Drop((Drop) block);
+                                break;
+                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                                newBlock = new Teleport((Teleport) block);
+                                break;
+                            default:
+                                newBlock = new Block(block);
+                                break;
+                        }
                         BlockUtil.adjustCoordinate(newBlock,
                                 BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
                                 region.getHeight(), region.getWidth());

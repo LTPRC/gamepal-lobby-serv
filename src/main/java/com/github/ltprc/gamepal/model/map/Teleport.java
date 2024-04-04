@@ -10,4 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Teleport extends Block {
     private WorldCoordinate to;
+
+    public Teleport(Teleport teleport) {
+        super(teleport);
+        to = teleport.to;
+    }
 }
