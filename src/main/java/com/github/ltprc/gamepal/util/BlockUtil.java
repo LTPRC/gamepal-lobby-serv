@@ -1,8 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
-import com.alibaba.fastjson.JSON;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 
@@ -236,10 +234,6 @@ public class BlockUtil {
         return rst;
     }
 
-    public static Block copyBlock(Block block) {
-        return JSON.parseObject(JSON.toJSONString(block), block.getClass());
-    }
-
     /**
      * Ignore sceneCoordinate
      * @param worldBlock WorldBlock
@@ -303,43 +297,6 @@ public class BlockUtil {
         } else {
             to.setSceneCoordinate(null);
         }
-    }
-
-    public static Block displayEventBlock(Event event) {
-        Block newBlock = new Block();
-        newBlock.setX(event.getX());
-        newBlock.setY(event.getY());
-        newBlock.setId(String.valueOf(event.getFrame()));
-        newBlock.setCode(String.valueOf(event.getCode()));
-        switch (event.getCode()) {
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_BLEED:
-            case GamePalConstants.EVENT_CODE_UPGRADE:
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_SACRIFICE:
-            case GamePalConstants.EVENT_CODE_TAIL_SMOKE:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
-                break;
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-            case GamePalConstants.EVENT_CODE_HIT_FIRE:
-            case GamePalConstants.EVENT_CODE_HIT_ICE:
-            case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
-            case GamePalConstants.EVENT_CODE_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-            default:
-                newBlock.setType(GamePalConstants.BLOCK_TYPE_WALL_DECORATION);
-                break;
-        }
-        return newBlock;
     }
 
     public static BigDecimal calculateHorizontalDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
@@ -701,41 +658,66 @@ public class BlockUtil {
                 coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
     }
 
-    public static WorldBlock createEventBlock(RegionInfo regionInfo, PlayerInfo playerInfo, int eventType,
-                                              int eventLocationType) {
-        WorldBlock eventBlock = new WorldBlock();
-        eventBlock.setType(eventType);
-        eventBlock.setCode(playerInfo.getId());
-        eventBlock.setRegionNo(playerInfo.getRegionNo());
-        IntegerCoordinate newSceneCoordinate = new IntegerCoordinate();
-        newSceneCoordinate.setX(playerInfo.getSceneCoordinate().getX());
-        newSceneCoordinate.setY(playerInfo.getSceneCoordinate().getY());
-        eventBlock.setSceneCoordinate(newSceneCoordinate);
-        // BigDecimal is immutable, no need to copy a new BigDecimal instance 24/04/04
-        eventBlock.setCoordinate(new Coordinate(playerInfo.getCoordinate()));
-        switch (eventLocationType) {
-            case GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT:
-                break;
-            case GamePalConstants.EVENT_LOCATION_TYPE_MELEE:
-                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random())
-                                * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random())
-                                * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-                break;
-            case GamePalConstants.EVENT_LOCATION_TYPE_SHOOT:
-                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
-                        .add(BigDecimal.valueOf((Math.random()
-                                + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue())
-                                * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
-                        .subtract(BigDecimal.valueOf((Math.random()
-                                + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue())
-                                * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-                break;
-        }
+    public static WorldBlock createEventWorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
+                                                   WorldCoordinate worldCoordinate) {
+        WorldBlock eventBlock = new WorldBlock(convertEventCode2BlockType(eventCode), userCode,
+                String.valueOf(eventCode), worldCoordinate);
         BlockUtil.fixWorldCoordinate(regionInfo, eventBlock);
         return eventBlock;
+    }
+
+    public static Block convertEvent2Block(Event event) {
+        return new Block(convertEventCode2BlockType(event.getCode()), String.valueOf(event.getFrame()),
+                String.valueOf(event.getCode()), event);
+    }
+
+    private static int convertEventCode2BlockType(int eventCode) {
+        int blockType;
+        switch (eventCode) {
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_BLEED:
+            case GamePalConstants.EVENT_CODE_UPGRADE:
+            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_SACRIFICE:
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_CURSE:
+                blockType = GamePalConstants.BLOCK_TYPE_CEILING_DECORATION;
+                break;
+            default:
+                blockType = GamePalConstants.BLOCK_TYPE_WALL_DECORATION;
+                break;
+        }
+        return blockType;
+    }
+
+    public static WorldEvent createWorldEvent(String userCode, int code, WorldCoordinate worldCoordinate) {
+        WorldEvent event = new WorldEvent();
+        BlockUtil.copyWorldCoordinate(worldCoordinate, event);
+        event.setUserCode(userCode);
+        event.setCode(code);
+        event.setFrame(0);
+        switch (code) {
+            case GamePalConstants.EVENT_CODE_FIRE:
+                // Infinite 25-frame event
+                event.setPeriod(25);
+                event.setFrameMax(-1);
+                break;
+            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_CURSE:
+                // Finite 50-frame event
+                event.setPeriod(50);
+                event.setFrameMax(50);
+                break;
+            default:
+                // Finite 25-frame event
+                event.setPeriod(25);
+                event.setFrameMax(25);
+                break;
+        }
+        return event;
     }
 }

@@ -2,7 +2,6 @@ package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;

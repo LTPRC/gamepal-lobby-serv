@@ -202,19 +202,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.interactBlocks(userCode, interactionCode, id);
                 });
             }
-            // Deprecated 24/03/04
-            if (functions.containsKey("addEvents")) {
-                JSONArray addEvents = functions.getJSONArray("addEvents");
-                addEvents.stream().forEach(addEvent -> {
-                    WorldBlock event = new WorldBlock();
-                    event.setType(((JSONObject) addEvent).getInteger("type"));
-                    event.setCode(((JSONObject) addEvent).getString("code"));
-                    event.setRegionNo(((JSONObject) addEvent).getInteger("regionNo"));
-                    event.setSceneCoordinate(((JSONObject) addEvent).getObject("sceneCoordinate", IntegerCoordinate.class));
-                    event.setCoordinate(((JSONObject) addEvent).getObject("coordinate", Coordinate.class));
-                    worldService.addEvent(userCode, event);
-                });
-            }
             if (functions.containsKey("terminalInputs")) {
                 JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
                 for (Object terminalInput : terminalInputs) {

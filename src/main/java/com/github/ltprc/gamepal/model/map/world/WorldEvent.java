@@ -13,4 +13,8 @@ public class WorldEvent extends WorldCoordinate {
     private int frame;
     private int frameMax;
     private int period;
+
+    public WorldEvent(WorldCoordinate worldCoordinate) {
+        super(worldCoordinate);
+    }
 }

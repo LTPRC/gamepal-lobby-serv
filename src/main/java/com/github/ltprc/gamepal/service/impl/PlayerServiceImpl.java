@@ -13,6 +13,7 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
@@ -579,9 +580,9 @@ public class PlayerServiceImpl implements PlayerService {
             for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
                 playerInfoMap.get(userCode).getSkill()[i][2] = playerInfoMap.get(userCode).getSkill()[i][3];
             }
-            WorldBlock bleedEventBlock = new WorldBlock(GamePalConstants.EVENT_CODE_DISTURB, userCode, null,
+            WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
                     playerInfoMap.get(userCode));
-            worldService.addEvent(userCode, bleedEventBlock);
+            world.getEventQueue().add(worldEvent);
         } else if (0 < playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
@@ -675,52 +676,64 @@ public class PlayerServiceImpl implements PlayerService {
                 GamePalConstants.EVENT_MAX_DISTANCE_SHOOT);
         switch (playerInfo.getSkill()[skillNo][0]) {
             case GamePalConstants.SKILL_CODE_BLOCK:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_BLOCK, userCode, null,
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_BLOCK,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_HEAL:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_HEAL, userCode, null,
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_HEAL,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_CHEER:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_CHEER, userCode, null,
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CHEER,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_CURSE:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_CURSE, userCode, null,
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CURSE,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_HIT:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_MELEE_HIT, userCode, null,
-                        meleeWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_HIT, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_KICK:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_MELEE_KICK, userCode, null,
-                        meleeWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_KICK, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_SCRATCH:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_MELEE_SCRATCH, userCode, null,
-                        meleeWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_SCRATCH, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_CLEAVE:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode, null,
-                        meleeWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_CLEAVE, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_STAB:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_MELEE_STAB, userCode, null,
-                        meleeWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_STAB, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_HIT:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_SHOOT_HIT, userCode, null,
-                        meleeWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_HIT, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_ARROW:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_SHOOT_ARROW, userCode, null,
-                        shootWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_ARROW, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_GUN:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_SHOOT_SLUG, userCode, null,
-                        shootWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_SHOTGUN:
                 for (int i = 0; i < 10; i++) {
@@ -728,17 +741,20 @@ public class PlayerServiceImpl implements PlayerService {
                             world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
                                     GamePalConstants.EVENT_MAX_ANGLE_SHOOT_SHOTGUN.doubleValue() * 2 * (random.nextDouble() - 0.5D))),
                             GamePalConstants.EVENT_MAX_DISTANCE_SHOOT_SHOTGUN);
-                    worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_SHOOT_SLUG, userCode, null,
-                            shootShotgunWc));
+                    worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                            world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                            GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootShotgunWc));
                 }
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_MAGNUM:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_SHOOT_MAGNUM, userCode, null,
-                        shootWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_MAGNUM, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_ROCKET:
-                worldService.addEvent(userCode, new WorldBlock(GamePalConstants.EVENT_CODE_SHOOT_ROCKET, userCode, null,
-                        shootWc));
+                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_ROCKET, shootWc));
                 break;
             default:
                 break;

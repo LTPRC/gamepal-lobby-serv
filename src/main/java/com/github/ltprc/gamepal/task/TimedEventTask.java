@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -55,24 +56,26 @@ public class TimedEventTask {
                             && playerInfoMap.get(entry2.getKey()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(entry2 -> {
                         String userCode = entry2.getKey();
+                        PlayerInfo playerInfo = playerInfoMap.get(userCode);
                         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
-                            if (playerInfoMap.get(userCode).getBuff()[i] <= 0) {
+                            if (playerInfo.getBuff()[i] <= 0) {
                                 continue;
                             }
-                            playerInfoMap.get(userCode).getBuff()[i] = playerInfoMap.get(userCode).getBuff()[i] - 1;
+                            playerInfo.getBuff()[i] = playerInfo.getBuff()[i] - 1;
                             if (i == GamePalConstants.BUFF_CODE_DEAD) {
-                                if (playerInfoMap.get(userCode).getBuff()[i] == 0) {
-                                    playerService.changeHp(userCode, playerInfoMap.get(userCode).getHpMax(), true);
-                                    playerService.changeVp(userCode, playerInfoMap.get(userCode).getVpMax(), true);
-                                    playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
-                                    playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
+                                if (playerInfo.getBuff()[i] == 0) {
+                                    playerService.changeHp(userCode, playerInfo.getHpMax(), true);
+                                    playerService.changeVp(userCode, playerInfo.getVpMax(), true);
+                                    playerService.changeHunger(userCode, playerInfo.getHungerMax(), true);
+                                    playerService.changeThirst(userCode, playerInfo.getThirstMax(), true);
                                     playerService.generateNotificationMessage(userCode, "复活成功。");
-                                    WorldBlock rebirthEventBlock = new WorldBlock(GamePalConstants.EVENT_CODE_SACRIFICE,
-                                            userCode, null, playerInfoMap.get(userCode));
-                                    worldService.addEvent(userCode, rebirthEventBlock);
-                                } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
+                                    WorldEvent worldEvent = BlockUtil.createWorldEvent(playerInfo.getId(),
+                                            GamePalConstants.EVENT_CODE_SACRIFICE, playerInfo);
+                                    userService.getWorldByUserCode(playerInfo.getId()).getEventQueue().add(worldEvent);
+                                    world.getEventQueue().add(new WorldEvent());
+                                } else if (playerInfo.getBuff()[i] % FRAME_PER_SECOND == 0) {
                                     playerService.generateNotificationMessage(userCode, "距离复活还有"
-                                            + playerInfoMap.get(userCode).getBuff()[i] / FRAME_PER_SECOND + "秒。");
+                                            + playerInfo.getBuff()[i] / FRAME_PER_SECOND + "秒。");
                                 }
                             }
                         }
