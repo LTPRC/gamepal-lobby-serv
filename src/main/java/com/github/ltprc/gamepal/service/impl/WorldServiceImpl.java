@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
@@ -16,9 +15,9 @@ import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.PlayerUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import com.github.ltprc.gamepal.util.lv.LasVegasGameUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -52,9 +51,6 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private SceneManager sceneManager;
-
-    @Autowired
-    private BlockFactory blockFactory;
 
     @Autowired
     private NpcManager npcManager;
@@ -323,7 +319,7 @@ public class WorldServiceImpl implements WorldService {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         WorldEvent event = new WorldEvent();
-        PlayerUtil.copyWorldCoordinate(eventBlock, event);
+        BlockUtil.copyWorldCoordinate(eventBlock, event);
         event.setUserCode(userCode);
         event.setCode(eventBlock.getType());
         event.setFrame(0);
@@ -341,7 +337,7 @@ public class WorldServiceImpl implements WorldService {
                 event.setPeriod(50);
                 event.setFrameMax(50);
                 break;
-            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
@@ -391,7 +387,7 @@ public class WorldServiceImpl implements WorldService {
                         expandScene(world, newEvent);
                     }
                     regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
-                            .add(PlayerUtil.convertWorldEvent2Event(newEvent));
+                            .add(BlockUtil.convertWorldEvent2Event(newEvent));
                 }
             }
         }
@@ -419,7 +415,7 @@ public class WorldServiceImpl implements WorldService {
         }
         if (depth > 0) {
             WorldCoordinate newWorldCoordinate = new WorldCoordinate();
-            PlayerUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
+            BlockUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
             for (int i = - 1; i <= 1; i++) {
                 for (int j = - 1; j <= 1; j++) {
                     if (worldCoordinate.getSceneCoordinate().getX() + i >= -GamePalConstants.SCENE_SCAN_MAX_RADIUS
@@ -448,16 +444,16 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_HEAL:
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_DISTURB:
-                PlayerUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
+                BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
                 break;
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
-                PlayerUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
+                BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
                 newEvent.getCoordinate().setY(newEvent.getCoordinate().getY().subtract(BigDecimal.ONE));
-                PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(newEvent.getRegionNo()), newEvent);
+                BlockUtil.fixWorldCoordinate(world.getRegionMap().get(newEvent.getRegionNo()), newEvent);
                 break;
             default:
-                PlayerUtil.copyWorldCoordinate(oldEvent, newEvent);
+                BlockUtil.copyWorldCoordinate(oldEvent, newEvent);
                 break;
         }
         newEvent.setFrame(oldEvent.getFrame() + 1);
@@ -495,7 +491,7 @@ public class WorldServiceImpl implements WorldService {
                 // Self event
                 playerService.changeHp(worldEvent.getUserCode(), GamePalConstants.EVENT_HEAL_HEAL, false);
                 break;
-            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
@@ -513,10 +509,10 @@ public class WorldServiceImpl implements WorldService {
                 // Non-self event, move to the nearest player/blocker
                 PlayerInfo eventPlayerInfo = world.getPlayerInfoMap().get(worldEvent.getUserCode());
                 WorldCoordinate nearestPlayerCoordinate = new WorldCoordinate();
-                PlayerUtil.copyWorldCoordinate(worldEvent, nearestPlayerCoordinate);
+                BlockUtil.copyWorldCoordinate(worldEvent, nearestPlayerCoordinate);
                 WorldBlock activatedWorldBlock = new WorldBlock();
                 // Detect the nearest blocker (including playerInfos) 24/03/21
-                List<IntegerCoordinate> preSelectedSceneCoordinates = PlayerUtil.preSelectSceneCoordinates(
+                List<IntegerCoordinate> preSelectedSceneCoordinates = BlockUtil.preSelectSceneCoordinates(
                         regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo, nearestPlayerCoordinate);
                 List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>();
                 preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
@@ -538,10 +534,10 @@ public class WorldServiceImpl implements WorldService {
                             .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_CEILING_DECORATION)
                             .filter(blocker -> blocker.getType() != GamePalConstants.BLOCK_TYPE_HOLLOW_WALL)
                             .forEach(blocker -> {
-                                WorldCoordinate wc = PlayerUtil.convertCoordinate2WorldCoordinate(
+                                WorldCoordinate wc = BlockUtil.convertCoordinate2WorldCoordinate(
                                         regionMap.get(worldEvent.getRegionNo()), sceneCoordinate, blocker);
                                 WorldBlock wb = new WorldBlock();
-                                PlayerUtil.copyWorldCoordinate(wc, wb);
+                                BlockUtil.copyWorldCoordinate(wc, wb);
                                 wb.setType(blocker.getType());
                                 wb.setId(blocker.getId());
                                 wb.setCode(blocker.getCode());
@@ -552,13 +548,13 @@ public class WorldServiceImpl implements WorldService {
                         .filter(wb -> checkEvent(worldEvent, wb))
                         .forEach(wb -> {
                             BigDecimal distanceOld =
-                                    PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
+                                    BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
                                                 eventPlayerInfo, nearestPlayerCoordinate);
                             BigDecimal distanceNew =
-                                    PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
+                                    BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
                                                 eventPlayerInfo, wb);
                             if (distanceOld.compareTo(distanceNew) > 0) {
-                                PlayerUtil.copyWorldCoordinate(wb, nearestPlayerCoordinate);
+                                BlockUtil.copyWorldCoordinate(wb, nearestPlayerCoordinate);
                                 activatedWorldBlock.setId(GamePalConstants.BLOCK_TYPE_PLAYER == wb.getType()
                                         ? wb.getId() : null);
                             }
@@ -568,29 +564,26 @@ public class WorldServiceImpl implements WorldService {
                         .add(BigDecimal.valueOf(Math.random() - 0.5D)));
                 nearestPlayerCoordinate.getCoordinate().setY(nearestPlayerCoordinate.getCoordinate().getY()
                         .add(BigDecimal.valueOf(Math.random() - 0.5D)));
-                PlayerUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), nearestPlayerCoordinate);
-                PlayerUtil.copyWorldCoordinate(nearestPlayerCoordinate, worldEvent);
+                BlockUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), nearestPlayerCoordinate);
+                BlockUtil.copyWorldCoordinate(nearestPlayerCoordinate, worldEvent);
                 if (StringUtils.isNotBlank(activatedWorldBlock.getId())) {
                     activateEvent(worldEvent, activatedWorldBlock.getId());
                 }
                 if (worldEvent.getCode() == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
                     // Add tail smoke 24/03/16
-                    BigDecimal tailSmokeLength = PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
+                    BigDecimal tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()),
                             eventPlayerInfo, worldEvent);
                     int tailSmokeAmount = tailSmokeLength.intValue() + 1;
-                    List<WorldCoordinate> equidistantPoints = PlayerUtil.collectEquidistantPoints(
+                    List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
                             regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo, worldEvent, tailSmokeAmount);
                     equidistantPoints.stream()
                             .forEach(tailSmokeCoordinate -> {
-                                WorldBlock tailSmokeEventBlock = blockFactory.createEventBlock(
+                                WorldBlock tailSmokeEventBlock = BlockUtil.createEventBlock(
                                         regionMap.get(worldEvent.getRegionNo()), eventPlayerInfo,
                                         GamePalConstants.EVENT_CODE_TAIL_SMOKE,
                                         GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
-                                PlayerUtil.copyWorldCoordinate(tailSmokeCoordinate, tailSmokeEventBlock);
-                                // Lift 0.5 height for tail smoke 24/03/17
-                                tailSmokeEventBlock.getCoordinate().setY(tailSmokeEventBlock.getCoordinate().getY()
-                                        .subtract(BigDecimal.valueOf(0.5D)));
-                                PlayerUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), tailSmokeEventBlock);
+                                BlockUtil.copyWorldCoordinate(tailSmokeCoordinate, tailSmokeEventBlock);
+                                BlockUtil.fixWorldCoordinate(regionMap.get(worldEvent.getRegionNo()), tailSmokeEventBlock);
                                 addEvent(worldEvent.getUserCode(), tailSmokeEventBlock);
                             });
                 }
@@ -618,20 +611,20 @@ public class WorldServiceImpl implements WorldService {
         boolean rst = false;
         switch (worldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_FIRE:
-                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, blocker)
+                if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_FIRE) <= 0) {
                     rst = true;
                 }
                 break;
-            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
-                double angle1 = PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+                double angle1 = BlockUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
                         blocker).doubleValue();
                 double angle2 = fromPlayerInfo.getFaceDirection().doubleValue();
-                double deltaAngle = PlayerUtil.compareAnglesInDegrees(angle1, angle2);
-                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
+                double deltaAngle = BlockUtil.compareAnglesInDegrees(angle1, angle2);
+                if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_HIT) <= 0
                         && deltaAngle < GamePalConstants.EVENT_MAX_ANGLE_HIT.doubleValue()) {
                     rst = true;
@@ -642,32 +635,32 @@ public class WorldServiceImpl implements WorldService {
 //                if (blocker.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
 //                        || blocker.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
 //                    // Detect figure: round
-//                    if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
+//                    if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
 //                            .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
-//                            && PlayerUtil.calculateBallisticDistance(regionMap.get(worldEvent.getRegionNo()),
+//                            && BlockUtil.calculateBallisticDistance(regionMap.get(worldEvent.getRegionNo()),
 //                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker).doubleValue()
 //                            < GamePalConstants.PLAYER_RADIUS.doubleValue()
-//                            && PlayerUtil.compareAnglesInDegrees(
-//                            PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+//                            && BlockUtil.compareAnglesInDegrees(
+//                            BlockUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
 //                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 90D) {
 //                        rst = true;
 //                    }
 //                } else {
                     // Detect figure: square
-                    if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
+                    if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
                             .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
-                            && PlayerUtil.detectLineSquareCollision(regionMap.get(worldEvent.getRegionNo()),
+                            && BlockUtil.detectLineSquareCollision(regionMap.get(worldEvent.getRegionNo()),
                             fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
                             blocker.getType())
-                            && PlayerUtil.compareAnglesInDegrees(
-                            PlayerUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+                            && BlockUtil.compareAnglesInDegrees(
+                            BlockUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
                                     blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D) {
                         rst = true;
                     }
 //                }
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                if (PlayerUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, blocker)
+                if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_EXPLODE) <= 0) {
                     rst = true;
                 }
@@ -691,7 +684,7 @@ public class WorldServiceImpl implements WorldService {
                 playerService.damageHp(userCode, worldEvent.getUserCode(),
                         -GamePalConstants.EVENT_DAMAGE_PER_FRAME_FIRE, false);
                 break;
-            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
@@ -703,7 +696,7 @@ public class WorldServiceImpl implements WorldService {
                     damageValue /= 2;
                 }
                 playerService.damageHp(userCode, worldEvent.getUserCode(), damageValue, false);
-                bleedEventBlock = blockFactory.createEventBlock(
+                bleedEventBlock = BlockUtil.createEventBlock(
                         userService.getWorldByUserCode(userCode).getRegionMap().get(worldEvent.getRegionNo()),
                         userService.getWorldByUserCode(userCode).getPlayerInfoMap().get(userCode),
                         GamePalConstants.EVENT_CODE_BLEED,
@@ -711,7 +704,7 @@ public class WorldServiceImpl implements WorldService {
                 addEvent(userCode, bleedEventBlock);
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-                bleedEventBlock = blockFactory.createEventBlock(
+                bleedEventBlock = BlockUtil.createEventBlock(
                         userService.getWorldByUserCode(userCode).getRegionMap().get(worldEvent.getRegionNo()),
                         userService.getWorldByUserCode(userCode).getPlayerInfoMap().get(userCode),
                         GamePalConstants.EVENT_CODE_BLEED,
@@ -721,7 +714,7 @@ public class WorldServiceImpl implements WorldService {
                         -GamePalConstants.EVENT_DAMAGE_SHOOT, false);
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                bleedEventBlock = blockFactory.createEventBlock(
+                bleedEventBlock = BlockUtil.createEventBlock(
                         userService.getWorldByUserCode(userCode).getRegionMap().get(worldEvent.getRegionNo()),
                         userService.getWorldByUserCode(userCode).getPlayerInfoMap().get(userCode),
                         GamePalConstants.EVENT_CODE_BLEED,
@@ -779,7 +772,7 @@ public class WorldServiceImpl implements WorldService {
                         for (int i = 0; i < rankingQueueList.size(); i ++) {
                             Block block = rankingQueueList.get(i);
                             if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT) {
-                                if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
+                                if (BlockUtil.detectCollisionSquare(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
                                                 playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
                                         block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
@@ -788,26 +781,26 @@ public class WorldServiceImpl implements WorldService {
                                 }
                             } else if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
                                     || block.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
-                                if (PlayerUtil.detectCollision(playerInfo.getCoordinate(),
+                                if (BlockUtil.detectCollision(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
                                                 playerInfo.getCoordinate().getY()),
                                         block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
                                     playerInfo.getSpeed().setX(BigDecimal.ZERO);
                                 }
-                                if (PlayerUtil.detectCollision(playerInfo.getCoordinate(),
+                                if (BlockUtil.detectCollision(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX(),
                                                 playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
                                         block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
                                     playerInfo.getSpeed().setY(BigDecimal.ZERO);
                                 }
-                            } else if (PlayerUtil.checkBlockSolid(block.getType())) {
-                                if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
+                            } else if (BlockUtil.checkBlockSolid(block.getType())) {
+                                if (BlockUtil.detectCollisionSquare(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
                                                 playerInfo.getCoordinate().getY()),
                                         block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
                                     playerInfo.getSpeed().setX(BigDecimal.ZERO);
                                 }
-                                if (PlayerUtil.detectCollisionSquare(playerInfo.getCoordinate(),
+                                if (BlockUtil.detectCollisionSquare(playerInfo.getCoordinate(),
                                         new Coordinate(playerInfo.getCoordinate().getX(),
                                                 playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
                                         block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
@@ -822,11 +815,11 @@ public class WorldServiceImpl implements WorldService {
                             playerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
                                     .add(playerInfo.getSpeed().getY()));
                         } else {
-                            PlayerUtil.copyWorldCoordinate(teleportWc, playerInfo);
+                            BlockUtil.copyWorldCoordinate(teleportWc, playerInfo);
                             playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
                             region = entry1.getValue().getRegionMap().get(teleportWc.getRegionNo());
                         }
-                        PlayerUtil.fixWorldCoordinate(region, playerInfo);
+                        BlockUtil.fixWorldCoordinate(region, playerInfo);
                     });
         });
     }

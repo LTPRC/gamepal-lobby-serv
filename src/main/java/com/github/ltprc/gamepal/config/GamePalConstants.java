@@ -78,13 +78,11 @@ public class GamePalConstants {
     public static final int TERMINAL_TYPE_GAME = 1;
     public static final int GAME_TYPE_LAS_VEGAS = 1;
 
-    public static final int EVENT_CODE_HIT = 101;
     public static final int EVENT_CODE_HIT_FIRE = 102;
     public static final int EVENT_CODE_HIT_ICE = 103;
     public static final int EVENT_CODE_HIT_ELECTRICITY = 104;
     public static final int EVENT_CODE_UPGRADE = 105;
     public static final int EVENT_CODE_FIRE = 106;
-    public static final int EVENT_CODE_SHOOT_SLUG = 107;
     public static final int EVENT_CODE_EXPLODE = 108;
     public static final int EVENT_CODE_BLEED = 109;
     public static final int EVENT_CODE_BLOCK = 110;
@@ -94,10 +92,14 @@ public class GamePalConstants {
     public static final int EVENT_CODE_TAIL_SMOKE = 114;
     public static final int EVENT_CODE_CHEER = 115;
     public static final int EVENT_CODE_CURSE = 116;
+    public static final int EVENT_CODE_MELEE_HIT = 101;
     public static final int EVENT_CODE_MELEE_SCRATCH = 117;
     public static final int EVENT_CODE_MELEE_CLEAVE = 118;
     public static final int EVENT_CODE_MELEE_STAB = 119;
     public static final int EVENT_CODE_MELEE_KICK = 120;
+    public static final int EVENT_CODE_SHOOT_HIT = 122;
+    public static final int EVENT_CODE_SHOOT_ARROW = 123;
+    public static final int EVENT_CODE_SHOOT_SLUG = 107;
     public static final int EVENT_CODE_SHOOT_ROCKET = 121;
 
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);

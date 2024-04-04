@@ -17,7 +17,7 @@ import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.PlayerUtil;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -164,7 +164,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.getItem(userCode, worldDrop.getItemNo(), -1 * worldDrop.getAmount());
                     Region region = world.getRegionMap().get(worldDrop.getRegionNo());
                     Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
-                    scene.getBlocks().add(PlayerUtil.convertWorldBlock2Block(worldDrop));
+                    scene.getBlocks().add(BlockUtil.convertWorldBlock2Block(worldDrop));
                     world.getBlockMap().put(id, worldDrop);
                 }
             });

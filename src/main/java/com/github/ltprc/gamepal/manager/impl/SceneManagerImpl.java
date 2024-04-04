@@ -1,13 +1,12 @@
 package com.github.ltprc.gamepal.manager.impl;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.util.PlayerUtil;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -21,9 +20,6 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private BlockFactory blockFactory;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -129,7 +125,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Queue<Block> collectBlocksFromScenes(String userCode, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = blockFactory.createRankingQueue();
+        Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -147,9 +143,9 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 if (!CollectionUtils.isEmpty(scene.getBlocks())) {
                     scene.getBlocks().stream().forEach(block -> {
-                        Block newBlock = PlayerUtil.copyBlock(block);
-                        PlayerUtil.adjustCoordinate(newBlock,
-                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
+                        Block newBlock = BlockUtil.copyBlock(block);
+                        BlockUtil.adjustCoordinate(newBlock,
+                                BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
                                 region.getHeight(), region.getWidth());
                         rankingQueue.add(newBlock);
                     });
@@ -157,9 +153,9 @@ public class SceneManagerImpl implements SceneManager {
                 // Generate blocks from scene events 24/02/16
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
                     scene.getEvents().stream().forEach(event -> {
-                        Block newBlock = PlayerUtil.generateBlockByEvent(event);
-                        PlayerUtil.adjustCoordinate(newBlock,
-                                PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
+                        Block newBlock = BlockUtil.generateBlockByEvent(event);
+                        BlockUtil.adjustCoordinate(newBlock,
+                                BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
                                 region.getHeight(), region.getWidth());
                         rankingQueue.add(newBlock);
                     });
@@ -171,7 +167,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Queue<Block> collectBlocksFromPlayerInfoMap(String userCode, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = blockFactory.createRankingQueue();
+        Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -186,7 +182,7 @@ public class SceneManagerImpl implements SceneManager {
                 .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
                 .filter(entry -> {
                     IntegerCoordinate integerCoordinate
-                            = PlayerUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
+                            = BlockUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
                     return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
                             && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
                 })
@@ -197,7 +193,7 @@ public class SceneManagerImpl implements SceneManager {
                     block.setCode(entry.getValue().getCode());
                     block.setY(entry.getValue().getCoordinate().getY());
                     block.setX(entry.getValue().getCoordinate().getX());
-                    PlayerUtil.adjustCoordinate(block, PlayerUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                    BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                             entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
                     rankingQueue.add(block);
                 });

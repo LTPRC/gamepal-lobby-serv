@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.task;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
@@ -10,6 +9,7 @@ import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -33,9 +33,6 @@ public class TimedEventTask {
 
     @Autowired
     private NpcManager npcManager;
-
-    @Autowired
-    private BlockFactory blockFactory;
 
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
@@ -66,7 +63,7 @@ public class TimedEventTask {
                                     playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
                                     playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
                                     playerService.generateNotificationMessage(userCode, "复活成功。");
-                                    WorldBlock rebirthEventBlock = blockFactory.createEventBlock(
+                                    WorldBlock rebirthEventBlock = BlockUtil.createEventBlock(
                                             world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
                                             playerInfoMap.get(userCode),
                                             GamePalConstants.EVENT_CODE_SACRIFICE,

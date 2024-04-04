@@ -2,15 +2,15 @@ package com.github.ltprc.gamepal.util;
 
 import com.alibaba.fastjson.JSON;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class PlayerUtil {
+public class BlockUtil {
 
     @Deprecated
     public static int getCoordinateRelation(SceneModel from, int toSceneNo) {
@@ -324,7 +324,7 @@ public class PlayerUtil {
             case GamePalConstants.EVENT_CODE_CURSE:
                 newBlock.setType(GamePalConstants.BLOCK_TYPE_CEILING_DECORATION);
                 break;
-            case GamePalConstants.EVENT_CODE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_HIT_FIRE:
             case GamePalConstants.EVENT_CODE_HIT_ICE:
             case GamePalConstants.EVENT_CODE_HIT_ELECTRICITY:
@@ -668,5 +668,59 @@ public class PlayerUtil {
             default:
                 return true;
         }
+    }
+
+    public static Queue<Block> createRankingQueue() {
+        Queue<Block> rankingQueue = new PriorityQueue<>((o1, o2) -> {
+            IntegerCoordinate level1 = BlockUtil.ConvertBlockType2Level(o1.getType());
+            IntegerCoordinate level2 = BlockUtil.ConvertBlockType2Level(o2.getType());
+            if (!Objects.equals(level1.getX(), level2.getX())) {
+                return level1.getX() - level2.getX();
+            }
+            // Please use equals() instead of == 24/02/10
+            if (!o1.getY().equals(o2.getY())) {
+                return o1.getY().compareTo(o2.getY());
+            }
+            return level1.getY() - level2.getY();
+        });
+        return rankingQueue;
+    }
+
+    public static WorldBlock createEventBlock(RegionInfo regionInfo, PlayerInfo playerInfo, int eventType,
+                                       int eventLocationType) {
+        WorldBlock eventBlock = new WorldBlock();
+        eventBlock.setType(eventType);
+        eventBlock.setCode(playerInfo.getId());
+        eventBlock.setRegionNo(playerInfo.getRegionNo());
+        IntegerCoordinate newSceneCoordinate = new IntegerCoordinate();
+        newSceneCoordinate.setX(playerInfo.getSceneCoordinate().getX());
+        newSceneCoordinate.setY(playerInfo.getSceneCoordinate().getY());
+        eventBlock.setSceneCoordinate(newSceneCoordinate);
+        // BigDecimal is immutable, no need to copy a new BigDecimal instance 24/04/04
+        eventBlock.setCoordinate(new Coordinate(playerInfo.getCoordinate()));
+        switch (eventLocationType) {
+            case GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT:
+                break;
+            case GamePalConstants.EVENT_LOCATION_TYPE_MELEE:
+                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
+                        .add(BigDecimal.valueOf((Math.random())
+                                * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
+                        .subtract(BigDecimal.valueOf((Math.random())
+                                * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+                break;
+            case GamePalConstants.EVENT_LOCATION_TYPE_SHOOT:
+                eventBlock.getCoordinate().setX(eventBlock.getCoordinate().getX()
+                        .add(BigDecimal.valueOf((Math.random()
+                                + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue())
+                                * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+                eventBlock.getCoordinate().setY(eventBlock.getCoordinate().getY()
+                        .subtract(BigDecimal.valueOf((Math.random()
+                                + GamePalConstants.EVENT_MAX_DISTANCE_SHOOT.intValue())
+                                * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+                break;
+        }
+        BlockUtil.fixWorldCoordinate(regionInfo, eventBlock);
+        return eventBlock;
     }
 }

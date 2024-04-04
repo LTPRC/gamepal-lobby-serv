@@ -13,8 +13,8 @@ import com.github.ltprc.gamepal.model.npc.NpcMoveTask;
 import com.github.ltprc.gamepal.model.npc.NpcObserveTask;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
-import com.github.ltprc.gamepal.util.PlayerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +56,7 @@ public class NpcManagerImpl implements NpcManager {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         PlayerInfo npcPlayerInfo = playerInfoMap.get(npcUserCode);
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-        PlayerUtil.copyWorldCoordinate(playerInfoMap.get(userCode), playerInfoMap.get(npcUserCode));
+        BlockUtil.copyWorldCoordinate(playerInfoMap.get(userCode), playerInfoMap.get(npcUserCode));
         npcPlayerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         npcPlayerInfo.setRegionNo(playerInfo.getRegionNo());
         npcPlayerInfo.setSceneCoordinate(playerInfo.getSceneCoordinate());
@@ -64,7 +64,7 @@ public class NpcManagerImpl implements NpcManager {
                 .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
         npcPlayerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
                 .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-        PlayerUtil.fixWorldCoordinate(world.getRegionMap().get(playerInfo.getRegionNo()), npcPlayerInfo);
+        BlockUtil.fixWorldCoordinate(world.getRegionMap().get(playerInfo.getRegionNo()), npcPlayerInfo);
         world.getOnlineMap().put(npcUserCode, -1L);
     }
 
@@ -120,7 +120,7 @@ public class NpcManagerImpl implements NpcManager {
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .filter(entry -> entry.getValue().getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0)
                 .forEach(entry -> {
-                    BigDecimal distance = PlayerUtil.calculateDistance(world.getRegionMap().get(playerInfo.getRegionNo()),
+                    BigDecimal distance = BlockUtil.calculateDistance(world.getRegionMap().get(playerInfo.getRegionNo()),
                             playerInfo, entry.getValue());
                     if (distance.compareTo(rst.getBigDecimal("minDistance")) < 0
                             && distance.compareTo(GamePalConstants.NPC_MAX_CHASE_DISTANCE) > 0) {
@@ -141,7 +141,7 @@ public class NpcManagerImpl implements NpcManager {
         WorldCoordinate wc = request.getObject("wc", WorldCoordinate.class);
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
-        double distance = PlayerUtil.calculateDistance(
+        double distance = BlockUtil.calculateDistance(
                 world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, wc).doubleValue();
         double stopDistance = GamePalConstants.PLAYER_RADIUS.doubleValue() * 2;
         if (playerInfo.getRegionNo() != wc.getRegionNo() || distance <= stopDistance) {
@@ -155,7 +155,7 @@ public class NpcManagerImpl implements NpcManager {
                 : playerInfo.getMaxSpeed().doubleValue() * 0.5D;
         newSpeed = Math.min(newSpeed, maxSpeed);
         newSpeed = Math.min(newSpeed, distance - stopDistance);
-        playerInfo.setFaceDirection(PlayerUtil.calculateAngle(world.getRegionMap().get(playerInfo.getRegionNo()),
+        playerInfo.setFaceDirection(BlockUtil.calculateAngle(world.getRegionMap().get(playerInfo.getRegionNo()),
                 playerInfo, wc));
         playerInfo.setSpeed(new Coordinate(BigDecimal.valueOf(
                 newSpeed * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI)),
