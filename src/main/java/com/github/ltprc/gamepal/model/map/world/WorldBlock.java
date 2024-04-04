@@ -1,5 +1,7 @@
 package com.github.ltprc.gamepal.model.map.world;
 
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,4 +13,11 @@ public class WorldBlock extends WorldCoordinate {
     private Integer type;
     private String id;
     private String code;
+
+    public WorldBlock(Integer type, String id, String code, WorldCoordinate worldCoordinate) {
+        super(worldCoordinate);
+        this.type = type;
+        this.id = id;
+        this.code = code;
+    }
 }

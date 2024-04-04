@@ -305,7 +305,7 @@ public class BlockUtil {
         }
     }
 
-    public static Block generateBlockByEvent(Event event) {
+    public static Block displayEventBlock(Event event) {
         Block newBlock = new Block();
         newBlock.setX(event.getX());
         newBlock.setY(event.getY());
@@ -671,7 +671,7 @@ public class BlockUtil {
     }
 
     public static Queue<Block> createRankingQueue() {
-        Queue<Block> rankingQueue = new PriorityQueue<>((o1, o2) -> {
+        return new PriorityQueue<>((o1, o2) -> {
             IntegerCoordinate level1 = BlockUtil.ConvertBlockType2Level(o1.getType());
             IntegerCoordinate level2 = BlockUtil.ConvertBlockType2Level(o2.getType());
             if (!Objects.equals(level1.getX(), level2.getX())) {
@@ -683,11 +683,26 @@ public class BlockUtil {
             }
             return level1.getY() - level2.getY();
         });
-        return rankingQueue;
+    }
+
+    public static WorldCoordinate locateCoordinateWithDirectionAndDistance(RegionInfo regionInfo,
+                                                                           WorldCoordinate worldCoordinate,
+                                                                           BigDecimal direction, BigDecimal distance) {
+        WorldCoordinate rst = new WorldCoordinate(worldCoordinate);
+        rst.setCoordinate(locateCoordinateWithDirectionAndDistance(rst.getCoordinate(), direction, distance));
+        BlockUtil.fixWorldCoordinate(regionInfo, rst);
+        return rst;
+    }
+
+    public static Coordinate locateCoordinateWithDirectionAndDistance(Coordinate coordinate, BigDecimal direction,
+                                                                      BigDecimal distance) {
+        double angle = direction.doubleValue() / 180 * Math.PI;
+        return new Coordinate(coordinate.getX().add(BigDecimal.valueOf(distance.doubleValue() * Math.cos(angle))),
+                coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
     }
 
     public static WorldBlock createEventBlock(RegionInfo regionInfo, PlayerInfo playerInfo, int eventType,
-                                       int eventLocationType) {
+                                              int eventLocationType) {
         WorldBlock eventBlock = new WorldBlock();
         eventBlock.setType(eventType);
         eventBlock.setCode(playerInfo.getId());

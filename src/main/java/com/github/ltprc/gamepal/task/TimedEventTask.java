@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -14,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Random;
 
 import static com.github.ltprc.gamepal.config.GamePalConstants.FRAME_PER_SECOND;
 
@@ -36,6 +39,7 @@ public class TimedEventTask {
 
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
+        Random random = new Random();
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
 
@@ -63,11 +67,8 @@ public class TimedEventTask {
                                     playerService.changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
                                     playerService.changeThirst(userCode, playerInfoMap.get(userCode).getThirstMax(), true);
                                     playerService.generateNotificationMessage(userCode, "复活成功。");
-                                    WorldBlock rebirthEventBlock = BlockUtil.createEventBlock(
-                                            world.getRegionMap().get(playerInfoMap.get(userCode).getRegionNo()),
-                                            playerInfoMap.get(userCode),
-                                            GamePalConstants.EVENT_CODE_SACRIFICE,
-                                            GamePalConstants.EVENT_LOCATION_TYPE_ADJACENT);
+                                    WorldBlock rebirthEventBlock = new WorldBlock(GamePalConstants.EVENT_CODE_SACRIFICE,
+                                            userCode, null, playerInfoMap.get(userCode));
                                     worldService.addEvent(userCode, rebirthEventBlock);
                                 } else if (playerInfoMap.get(userCode).getBuff()[i] % FRAME_PER_SECOND == 0) {
                                     playerService.generateNotificationMessage(userCode, "距离复活还有"

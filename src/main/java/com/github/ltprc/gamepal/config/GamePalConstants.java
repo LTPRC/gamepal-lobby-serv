@@ -100,12 +100,16 @@ public class GamePalConstants {
     public static final int EVENT_CODE_SHOOT_HIT = 122;
     public static final int EVENT_CODE_SHOOT_ARROW = 123;
     public static final int EVENT_CODE_SHOOT_SLUG = 107;
+    public static final int EVENT_CODE_SHOOT_MAGNUM = 124;
     public static final int EVENT_CODE_SHOOT_ROCKET = 121;
 
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal EVENT_MAX_DISTANCE_HIT = BigDecimal.ONE;
+    public static final BigDecimal EVENT_MAX_DISTANCE_MELEE = BigDecimal.ONE;
     public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT = BigDecimal.valueOf(10);
-    public static final BigDecimal EVENT_MAX_ANGLE_HIT = BigDecimal.valueOf(120D);
+    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT_SHOTGUN = BigDecimal.valueOf(5);
+    public static final BigDecimal EVENT_MAX_ANGLE_MELEE = BigDecimal.valueOf(120D);
+    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT = BigDecimal.valueOf(5D);
+    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT_SHOTGUN = BigDecimal.valueOf(10D);
     public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(5);
     public static final int EVENT_DAMAGE_PER_FRAME_FIRE = 1;
     public static final int EVENT_DAMAGE_HIT = 10;

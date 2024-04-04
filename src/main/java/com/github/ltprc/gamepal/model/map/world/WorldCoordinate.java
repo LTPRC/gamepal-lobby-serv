@@ -13,4 +13,10 @@ public class WorldCoordinate {
     private int regionNo;
     private IntegerCoordinate sceneCoordinate;
     private Coordinate coordinate;
+
+    public WorldCoordinate(WorldCoordinate worldCoordinate) {
+        this.setRegionNo(worldCoordinate.getRegionNo());
+        this.setSceneCoordinate(new IntegerCoordinate(worldCoordinate.getSceneCoordinate()));
+        this.setCoordinate(new Coordinate(worldCoordinate.getCoordinate()));
+    }
 }

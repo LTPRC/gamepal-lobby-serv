@@ -153,7 +153,7 @@ public class SceneManagerImpl implements SceneManager {
                 // Generate blocks from scene events 24/02/16
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
                     scene.getEvents().stream().forEach(event -> {
-                        Block newBlock = BlockUtil.generateBlockByEvent(event);
+                        Block newBlock = BlockUtil.displayEventBlock(event);
                         BlockUtil.adjustCoordinate(newBlock,
                                 BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
                                 region.getHeight(), region.getWidth());
