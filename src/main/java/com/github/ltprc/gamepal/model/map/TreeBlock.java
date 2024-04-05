@@ -13,4 +13,11 @@ public class TreeBlock extends Block {
     private int treeType;
     private int treeHeight;
     private BigDecimal radius;
+
+    public TreeBlock(TreeBlock treeBlock) {
+        super(treeBlock);
+        treeType = treeBlock.treeType;
+        treeHeight = treeBlock.treeHeight;
+        radius = treeBlock.radius;
+    }
 }

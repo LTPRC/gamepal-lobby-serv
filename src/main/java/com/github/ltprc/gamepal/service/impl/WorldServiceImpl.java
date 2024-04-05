@@ -392,6 +392,12 @@ public class WorldServiceImpl implements WorldService {
         Map<Integer, Region> regionMap = world.getRegionMap();
         WorldEvent worldEvent;
         switch (Integer.valueOf(eventBlock.getCode())) {
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_CURSE:
+            case GamePalConstants.EVENT_CODE_CHEER:
+                worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
+                world.getEventQueue().add(worldEvent);
+                break;
             case GamePalConstants.EVENT_CODE_HEAL:
                 playerService.changeHp(eventBlock.getId(), GamePalConstants.EVENT_HEAL_HEAL, false);
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);

@@ -151,6 +151,9 @@ public class SceneManagerImpl implements SceneManager {
                             case GamePalConstants.BLOCK_TYPE_TELEPORT:
                                 newBlock = new Teleport((Teleport) block);
                                 break;
+                            case GamePalConstants.BLOCK_TYPE_TREE:
+                                newBlock = new TreeBlock((TreeBlock) block);
+                                break;
                             default:
                                 newBlock = new Block(block);
                                 break;
