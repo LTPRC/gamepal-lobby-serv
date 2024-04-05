@@ -10,4 +10,10 @@ import lombok.NoArgsConstructor;
 public class WorldDrop extends WorldBlock {
     private String itemNo;
     private int amount;
+
+    public WorldDrop(String itemNo, int amount, WorldBlock worldBlock) {
+        super(worldBlock);
+        this.itemNo = itemNo;
+        this.amount = amount;
+    }
 }

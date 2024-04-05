@@ -3,6 +3,8 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.item.Consumable;
@@ -10,10 +12,7 @@ import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.item.Outfit;
 import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldEvent;
+import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
@@ -55,6 +54,12 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private StateMachineService stateMachineService;
+
+    @Autowired
+    private MovementManager movementManager;
+
+    @Autowired
+    private SceneManager sceneManager;
 
     @Override
     public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
@@ -293,10 +298,14 @@ public class PlayerServiceImpl implements PlayerService {
         if (playerInfo.getItems().get(itemNo) == 0) {
             switch (itemNo.charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
-                    useTools(userCode, itemNo);
+                    if (playerInfo.getTools().contains(itemNo)) {
+                        playerInfo.getTools().remove(itemNo);
+                    }
                     break;
                 case GamePalConstants.ITEM_CHARACTER_OUTFIT:
-                    useOutfits(userCode, itemNo);
+                    if (playerInfo.getOutfits().contains(itemNo)) {
+                        playerInfo.getOutfits().remove(itemNo);
+                    }
                     break;
             }
         }
@@ -843,6 +852,40 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.getOutfits().add(itemNo);
         }
         SkillUtil.updateSkills(playerInfo);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> addDrop(String userCode, String itemNo, int amount) {
+        JSONObject rst = ContentUtil.generateRst();
+        Random random = new Random();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        WorldMovingBlock worldMovingBlock = new WorldMovingBlock(playerInfo);
+        worldMovingBlock.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
+        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(playerInfo.getCoordinate(),
+                worldMovingBlock.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
+        worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));
+        worldMovingBlock.getSpeed().setY(newSpeed.getY().subtract(worldMovingBlock.getCoordinate().getY()));
+        movementManager.settleSpeed(userCode, worldMovingBlock);
+        worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
+        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
+            sceneManager.fillScene(region, worldMovingBlock.getSceneCoordinate(), GamePalConstants.REGION_INDEX_GRASSLAND);
+        }
+        Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
+        Drop drop = new Drop(itemNo, amount,
+                new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(), "3000", worldMovingBlock.getCoordinate())); // TODO characterize it
+        scene.getBlocks().add(drop);
+        WorldDrop worldDrop = new WorldDrop(drop.getItemNo(), drop.getAmount(), worldMovingBlock);
+        worldDrop.setType(drop.getType());
+        worldDrop.setId(drop.getId());
+        worldDrop.setCode(drop.getCode());
+        world.getBlockMap().put(drop.getId(), worldDrop);
+        getItem(userCode, itemNo, -1 * amount);
         return ResponseEntity.ok().body(rst.toString());
     }
 }

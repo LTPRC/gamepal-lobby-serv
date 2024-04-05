@@ -16,4 +16,10 @@ public class Drop extends Block {
         itemNo = drop.itemNo;
         amount = drop.amount;
     }
+
+    public Drop(String itemNo, int amount, Block block) {
+        super(block);
+        this.itemNo = itemNo;
+        this.amount = amount;
+    }
 }

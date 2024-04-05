@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.model;
 
 import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerInfo extends WorldBlock {
+public class PlayerInfo extends WorldMovingBlock {
 
     // Basic properties
     private int playerType; // 0-human 1-AI
@@ -33,10 +33,6 @@ public class PlayerInfo extends WorldBlock {
     private String hairColor;
     private String eyes;
     private int[] faceCoefs;
-
-    // Movement properties
-    private Coordinate speed;
-    private BigDecimal faceDirection; // from 0 to 360
 
     // Dynamic properties
     private int playerStatus;

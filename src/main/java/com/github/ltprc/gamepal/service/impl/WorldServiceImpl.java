@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
@@ -54,6 +55,9 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private NpcManager npcManager;
+
+    @Autowired
+    private MovementManager movementManager;
 
     @Override
     public Map<String, GameWorld> getWorldMap() {
@@ -946,64 +950,7 @@ public class WorldServiceImpl implements WorldService {
             playerInfoMap.entrySet().stream()
                     .filter(entry2 -> entry2.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_AI)
                     .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(entry2 -> {
-                        PlayerInfo playerInfo = entry2.getValue();
-                        Region region = entry1.getValue().getRegionMap().get(playerInfo.getRegionNo());
-                        Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(entry2.getKey(), 1);
-                        WorldCoordinate teleportWc = null;
-                        List<Block> rankingQueueList = rankingQueue.stream().collect(Collectors.toList());
-                        for (int i = 0; i < rankingQueueList.size(); i ++) {
-                            Block block = rankingQueueList.get(i);
-                            if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT) {
-                                if (BlockUtil.detectCollisionSquare(playerInfo.getCoordinate(),
-                                        new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
-                                                playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
-                                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
-                                    teleportWc = ((Teleport) block).getTo();
-                                    break;
-                                }
-                            } else if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-                                    || block.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
-                                if (BlockUtil.detectCollision(playerInfo.getCoordinate(),
-                                        new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
-                                                playerInfo.getCoordinate().getY()),
-                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
-                                    playerInfo.getSpeed().setX(BigDecimal.ZERO);
-                                }
-                                if (BlockUtil.detectCollision(playerInfo.getCoordinate(),
-                                        new Coordinate(playerInfo.getCoordinate().getX(),
-                                                playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
-                                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
-                                    playerInfo.getSpeed().setY(BigDecimal.ZERO);
-                                }
-                            } else if (BlockUtil.checkBlockSolid(block.getType())) {
-                                if (BlockUtil.detectCollisionSquare(playerInfo.getCoordinate(),
-                                        new Coordinate(playerInfo.getCoordinate().getX().add(playerInfo.getSpeed().getX()),
-                                                playerInfo.getCoordinate().getY()),
-                                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
-                                    playerInfo.getSpeed().setX(BigDecimal.ZERO);
-                                }
-                                if (BlockUtil.detectCollisionSquare(playerInfo.getCoordinate(),
-                                        new Coordinate(playerInfo.getCoordinate().getX(),
-                                                playerInfo.getCoordinate().getY().add(playerInfo.getSpeed().getY())),
-                                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
-                                    playerInfo.getSpeed().setY(BigDecimal.ZERO);
-                                }
-                            }
-                        }
-                        // Settle playerInfo position
-                        if (null == teleportWc) {
-                            playerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
-                                    .add(playerInfo.getSpeed().getX()));
-                            playerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
-                                    .add(playerInfo.getSpeed().getY()));
-                        } else {
-                            BlockUtil.copyWorldCoordinate(teleportWc, playerInfo);
-                            playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-                            region = entry1.getValue().getRegionMap().get(teleportWc.getRegionNo());
-                        }
-                        BlockUtil.fixWorldCoordinate(region, playerInfo);
-                    });
+                    .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
         });
     }
 }

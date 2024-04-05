@@ -194,11 +194,10 @@ public class GamePalConstants {
     public static final int OUTFIT_INDEX_DEFAULT = 0;
     public static final int OUTFIT_INDEX_CLOTHES = 1;
 
+    public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.ONE;
+
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
     public static final int SKILL_DEFAULT_TIME = 25;
-    public static final int EVENT_LOCATION_TYPE_ADJACENT = 0;
-    public static final int EVENT_LOCATION_TYPE_MELEE = 1;
-    public static final int EVENT_LOCATION_TYPE_SHOOT = 2;
 
     public static final int PLAYER_TYPE_HUMAN = 0;
     public static final int PLAYER_TYPE_AI = 1;

@@ -47,4 +47,6 @@ public interface PlayerService {
     ResponseEntity<String> useTools(String userCode, String itemNo);
 
     ResponseEntity<String> useOutfits(String userCode, String itemNo);
+
+    ResponseEntity<String> addDrop(String userCode, String itemNo, int amount);
 }

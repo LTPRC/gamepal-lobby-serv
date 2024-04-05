@@ -153,20 +153,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             JSONArray drops = functions.getJSONArray("addDrops");
             drops.stream().forEach(obj -> {
-                WorldDrop worldDrop = JSON.parseObject(String.valueOf(obj), WorldDrop.class);
-                String id = UUID.randomUUID().toString();
-                worldDrop.setId(id);
-                worldDrop.setCode("3000"); // TODO characterize it
-                worldDrop.setType(GamePalConstants.BLOCK_TYPE_DROP);
-                if (world.getBlockMap().containsKey(id)) {
-                    logger.warn(ErrorUtil.ERROR_1013 + " id: " + id);
-                } else {
-                    playerService.getItem(userCode, worldDrop.getItemNo(), -1 * worldDrop.getAmount());
-                    Region region = world.getRegionMap().get(worldDrop.getRegionNo());
-                    Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
-                    scene.getBlocks().add(BlockUtil.convertWorldBlock2Block(worldDrop));
-                    world.getBlockMap().put(id, worldDrop);
-                }
+                String itemNo = ((JSONObject) obj).getString("itemNo");
+                int itemAmount = ((JSONObject) obj).getInteger("itemAmount");
+                playerService.addDrop(userCode, itemNo, itemAmount);
             });
             if (functions.containsKey("useDrop")) {
                 JSONObject useDrop = functions.getJSONObject("useDrop");

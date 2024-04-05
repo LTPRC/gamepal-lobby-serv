@@ -487,8 +487,9 @@ public class BlockUtil {
         return rst;
     }
 
-    public static WorldCoordinate convertCoordinate2WorldCoordinate(RegionInfo regionInfo, IntegerCoordinate sceneCoordinate,
-                                                         Coordinate coordinate) {
+    public static WorldCoordinate convertCoordinate2WorldCoordinate(RegionInfo regionInfo,
+                                                                    IntegerCoordinate sceneCoordinate,
+                                                                    Coordinate coordinate) {
         WorldCoordinate wc = new WorldCoordinate();
         wc.setRegionNo(regionInfo.getRegionNo());
         wc.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
