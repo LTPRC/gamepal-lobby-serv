@@ -10,30 +10,7 @@ import java.util.*;
 
 public class BlockUtil {
 
-    @Deprecated
-    public static int getCoordinateRelation(SceneModel from, int toSceneNo) {
-        if (null != from.getNorthwest() && toSceneNo == from.getNorthwest()) {
-            return 0;
-        } else if (null != from.getNorth() && toSceneNo == from.getNorth()) {
-            return 1;
-        } else if (null != from.getNortheast() && toSceneNo == from.getNortheast()) {
-            return 2;
-        } else if (null != from.getWest() && toSceneNo == from.getWest()) {
-            return 3;
-        } else if (null != from.getCenter() && toSceneNo == from.getCenter()) {
-            return 4;
-        } else if (null != from.getEast() && toSceneNo == from.getEast()) {
-            return 5;
-        } else if (null != from.getSouthwest() && toSceneNo == from.getSouthwest()) {
-            return 6;
-        } else if (null != from.getSouth() && toSceneNo == from.getSouth()) {
-            return 7;
-        } else if (null != from.getSoutheast() && toSceneNo == from.getSoutheast()) {
-            return 8;
-        } else {
-            return -1;
-        }
-    }
+    private BlockUtil() {}
 
     public static IntegerCoordinate getCoordinateRelation(IntegerCoordinate from, IntegerCoordinate to) {
         return new IntegerCoordinate(to.getX() - from.getX(), to.getY() - from.getY());
@@ -97,19 +74,19 @@ public class BlockUtil {
             worldCoordinate.getCoordinate()
                     .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(regionInfo.getHeight())));
         }
-        while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(-0.5)) < 0) {
+        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(-0.5)) < 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
             worldCoordinate.getCoordinate()
                     .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(regionInfo.getWidth())));
         }
-        while (worldCoordinate.getCoordinate().getX().compareTo(new BigDecimal(regionInfo.getWidth() - 0.5)) >= 0) {
+        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth() - 0.5)) >= 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
             worldCoordinate.getCoordinate()
                     .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(regionInfo.getWidth())));
         }
     }
 
-    public static IntegerCoordinate ConvertBlockType2Level(int type) {
+    public static IntegerCoordinate convertBlockType2Level(int type) {
         IntegerCoordinate rst = new IntegerCoordinate(0, 0);
         switch (type) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
@@ -191,6 +168,11 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
                 rst.setX(GamePalConstants.LAYER_BOTTOM);
                 break;
+            case GamePalConstants.BLOCK_TYPE_CEILING:
+            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
+            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
+                rst.setX(GamePalConstants.LAYER_TOP);
+                break;
             case GamePalConstants.BLOCK_TYPE_WALL:
             case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
             case GamePalConstants.BLOCK_TYPE_PLAYER:
@@ -198,11 +180,6 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             default:
                 rst.setX(GamePalConstants.LAYER_CENTER);
-                break;
-            case GamePalConstants.BLOCK_TYPE_CEILING:
-            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
-                rst.setX(GamePalConstants.LAYER_TOP);
                 break;
         }
         switch (type) {
@@ -214,16 +191,16 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
                 rst.setY(0);
                 break;
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                rst.setY(20);
+                break;
             case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
             case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
             case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
             default:
                 rst.setY(10);
-                break;
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-            case GamePalConstants.BLOCK_TYPE_DROP:
-                rst.setY(20);
                 break;
         }
         return rst;
@@ -243,6 +220,7 @@ public class BlockUtil {
                 break;
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
                 newBlock = new Teleport(((WorldTeleport) worldBlock).getTo(), newBlock);
+                break;
             default:
                 break;
         }
@@ -400,14 +378,16 @@ public class BlockUtil {
     public static List<WorldCoordinate> collectEquidistantPoints(RegionInfo regionInfo, WorldCoordinate wc1,
                                                                  WorldCoordinate wc2, int amount) {
         List<WorldCoordinate> rst = new ArrayList<>();
-        if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()
-                || amount < 2) {
+        if (amount < 2) {
             return rst;
         }
-        BigDecimal deltaWidth = calculateHorizontalDistance(regionInfo, wc1, wc2)
-                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
-        BigDecimal deltaHeight = calculateVerticalDistance(regionInfo, wc1, wc2)
-                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        BigDecimal deltaWidth = calculateHorizontalDistance(regionInfo, wc1, wc2);
+        BigDecimal deltaHeight = calculateVerticalDistance(regionInfo, wc1, wc2);
+        if (null == deltaWidth || null == deltaHeight) {
+            return rst;
+        }
+        deltaWidth = deltaWidth.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        deltaHeight = deltaHeight.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         WorldCoordinate wc3 = new WorldCoordinate();
         copyWorldCoordinate(wc1, wc3);
         for (int i = 1; i < amount; i++) {
@@ -600,8 +580,8 @@ public class BlockUtil {
 
     public static Queue<Block> createRankingQueue() {
         return new PriorityQueue<>((o1, o2) -> {
-            IntegerCoordinate level1 = BlockUtil.ConvertBlockType2Level(o1.getType());
-            IntegerCoordinate level2 = BlockUtil.ConvertBlockType2Level(o2.getType());
+            IntegerCoordinate level1 = BlockUtil.convertBlockType2Level(o1.getType());
+            IntegerCoordinate level2 = BlockUtil.convertBlockType2Level(o2.getType());
             if (!Objects.equals(level1.getX(), level2.getX())) {
                 return level1.getX() - level2.getX();
             }

@@ -304,6 +304,8 @@ public class PlayerServiceImpl implements PlayerService {
                         playerInfo.getOutfits().remove(itemNo);
                     }
                     break;
+                default:
+                    break;
             }
         }
         BigDecimal capacity = playerInfo.getCapacity();

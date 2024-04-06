@@ -8,8 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SkillUtil {
 
+    private SkillUtil() {}
+
     public static void defineToolProps(Tool tool) {
-        int toolType, skillMode, skillTime;
+        int toolType;
+        int skillMode;
+        int skillTime;
         switch (tool.getItemNo()) {
             case "t005":
             case "t006":
