@@ -172,9 +172,6 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
                 rst = new IntegerCoordinate(2, 105);
                 break;
-            case GamePalConstants.BLOCK_TYPE_TREE:
-                rst = new IntegerCoordinate(1, 106);
-                break;
             default:
         }
         return rst;
@@ -199,7 +196,6 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_PLAYER:
             case GamePalConstants.BLOCK_TYPE_DROP:
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
-            case GamePalConstants.BLOCK_TYPE_TREE:
             default:
                 rst.setX(GamePalConstants.LAYER_CENTER);
                 break;
@@ -216,7 +212,6 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
-            case GamePalConstants.BLOCK_TYPE_TREE:
                 rst.setY(0);
                 break;
             case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
@@ -240,47 +235,23 @@ public class BlockUtil {
      * @return Block
      */
     public static Block convertWorldBlock2Block(WorldBlock worldBlock) {
+        Block newBlock = new Block(worldBlock.getType(), worldBlock.getId(), worldBlock.getCode(),
+                worldBlock.getStructure(), worldBlock.getCoordinate());
         switch (worldBlock.getType()) {
             case GamePalConstants.BLOCK_TYPE_DROP:
-                Drop newDrop = new Drop();
-                newDrop.setType(worldBlock.getType());
-                newDrop.setCode(worldBlock.getCode());
-                newDrop.setId(worldBlock.getId());
-                newDrop.setX(worldBlock.getCoordinate().getX());
-                newDrop.setY(worldBlock.getCoordinate().getY());
-                newDrop.setAmount(((WorldDrop) worldBlock).getAmount());
-                newDrop.setItemNo(((WorldDrop) worldBlock).getItemNo());
-                return newDrop;
+                newBlock = new Drop(((WorldDrop) worldBlock).getItemNo(), ((WorldDrop) worldBlock).getAmount(), newBlock);
+                break;
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                Teleport newTeleport = new Teleport();
-                newTeleport.setType(worldBlock.getType());
-                newTeleport.setCode(worldBlock.getCode());
-                newTeleport.setId(worldBlock.getId());
-                newTeleport.setX(worldBlock.getCoordinate().getX());
-                newTeleport.setY(worldBlock.getCoordinate().getY());
-                newTeleport.setTo(((WorldTeleport) worldBlock).getTo());
-                return newTeleport;
+                newBlock = new Teleport(((WorldTeleport) worldBlock).getTo(), newBlock);
             default:
-                Block newBlock = new Block();
-                newBlock.setType(worldBlock.getType());
-                newBlock.setCode(worldBlock.getCode());
-                newBlock.setId(worldBlock.getId());
-                newBlock.setX(worldBlock.getCoordinate().getX());
-                newBlock.setY(worldBlock.getCoordinate().getY());
-                return newBlock;
+                break;
         }
+        return newBlock;
     }
 
     public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
-        Event newEvent = new Event();
-        newEvent.setUserCode(worldEvent.getUserCode());
-        newEvent.setCode(worldEvent.getCode());
-        newEvent.setFrame(worldEvent.getFrame());
-        newEvent.setFrameMax(worldEvent.getFrameMax());
-        newEvent.setPeriod(worldEvent.getPeriod());
-        newEvent.setX(worldEvent.getCoordinate().getX());
-        newEvent.setY(worldEvent.getCoordinate().getY());
-        return newEvent;
+        return new Event(worldEvent.getUserCode(), worldEvent.getCode(), worldEvent.getFrame(),
+                worldEvent.getFrameMax(), worldEvent.getPeriod(), worldEvent.getCoordinate());
     }
 
     public static void copyWorldCoordinate(final WorldCoordinate from, WorldCoordinate to) {
@@ -499,21 +470,18 @@ public class BlockUtil {
     }
 
     public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldCoordinate wc1,
-                                                    BigDecimal ballisticAngle, WorldCoordinate wc2, int blockType) {
+                                                    BigDecimal ballisticAngle, WorldCoordinate wc2,
+                                                    double thresholdDistance) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        return detectLineSquareCollision(c1, ballisticAngle, c2, blockType);
+        return detectLineSquareCollision(c1, ballisticAngle, c2, thresholdDistance);
     }
 
     public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
-                                                    int blockType) {
-        double thresholdDistance = 0.5D;
-        if (blockType == GamePalConstants.BLOCK_TYPE_PLAYER || blockType == GamePalConstants.BLOCK_TYPE_TREE) {
-            thresholdDistance = GamePalConstants.PLAYER_RADIUS.doubleValue();
-        }
+                                                    double thresholdDistance) {
         if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
                 || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
             return c1.getX().subtract(c2.getX()).abs().doubleValue() < thresholdDistance;
@@ -621,8 +589,6 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
                 return false;
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-            case GamePalConstants.BLOCK_TYPE_TREE:
             default:
                 return true;
         }
@@ -662,14 +628,16 @@ public class BlockUtil {
     public static WorldBlock createEventWorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
                                                    WorldCoordinate worldCoordinate) {
         WorldBlock eventBlock = new WorldBlock(convertEventCode2BlockType(eventCode), userCode,
-                String.valueOf(eventCode), worldCoordinate);
+                String.valueOf(eventCode), new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                BigDecimal.valueOf(0.5D), BigDecimal.ZERO), worldCoordinate);
         BlockUtil.fixWorldCoordinate(regionInfo, eventBlock);
         return eventBlock;
     }
 
     public static Block convertEvent2Block(Event event) {
         return new Block(convertEventCode2BlockType(event.getCode()), String.valueOf(event.getFrame()),
-                String.valueOf(event.getCode()), event);
+                String.valueOf(event.getCode()), new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                BigDecimal.valueOf(0.5D), BigDecimal.ZERO), event);
     }
 
     private static int convertEventCode2BlockType(int eventCode) {

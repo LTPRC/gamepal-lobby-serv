@@ -365,13 +365,18 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+                if (null == blocker.getStructure()) {
+                    blocker.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                            BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
+                }
+                Structure structure = blocker.getStructure();
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
                 rst &= !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
                         && BlockUtil.detectLineSquareCollision(regionMap.get(eventBlock.getRegionNo()),
                         fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
-                        blocker.getType())
+                        structure.getRadius().doubleValue())
                         && BlockUtil.compareAnglesInDegrees(
                         BlockUtil.calculateAngle(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo,
                                 blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D;
@@ -530,7 +535,8 @@ public class WorldServiceImpl implements WorldService {
                     .forEach(blocker -> {
                         WorldCoordinate wc = BlockUtil.convertCoordinate2WorldCoordinate(
                                 regionMap.get(eventBlock.getRegionNo()), sceneCoordinate, blocker);
-                        WorldBlock wb = new WorldBlock(blocker.getType(), blocker.getId(), blocker.getCode(), wc);
+                        WorldBlock wb = new WorldBlock(blocker.getType(), blocker.getId(), blocker.getCode(),
+                                blocker.getStructure(), wc);
                         preSelectedWorldBlocks.add(wb);
                     });
         });
@@ -826,33 +832,22 @@ public class WorldServiceImpl implements WorldService {
                 }
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+                if (null == blocker.getStructure()) {
+                    blocker.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                            BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
+                }
+                Structure structure = blocker.getStructure();
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
-//                if (blocker.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-//                        || blocker.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
-//                    // Detect figure: round
-//                    if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
-//                            .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
-//                            && BlockUtil.calculateBallisticDistance(regionMap.get(worldEvent.getRegionNo()),
-//                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker).doubleValue()
-//                            < GamePalConstants.PLAYER_RADIUS.doubleValue()
-//                            && BlockUtil.compareAnglesInDegrees(
-//                            BlockUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
-//                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 90D) {
-//                        rst = true;
-//                    }
-//                } else {
-                    // Detect figure: square
-                    if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
-                            .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
-                            && BlockUtil.detectLineSquareCollision(regionMap.get(worldEvent.getRegionNo()),
-                            fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
-                            blocker.getType())
-                            && BlockUtil.compareAnglesInDegrees(
-                            BlockUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
-                                    blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D) {
-                        rst = true;
-                    }
-//                }
+                if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)
+                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
+                        && BlockUtil.detectLineSquareCollision(regionMap.get(worldEvent.getRegionNo()),
+                        fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
+                        structure.getRadius().doubleValue())
+                        && BlockUtil.compareAnglesInDegrees(
+                        BlockUtil.calculateAngle(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo,
+                                blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D) {
+                    rst = true;
+                }
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), worldEvent, blocker)

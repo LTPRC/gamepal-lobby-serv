@@ -100,14 +100,12 @@ public class SceneManagerImpl implements SceneManager {
         Random random = new Random();
         int treeAmount = random.nextInt(20);
         for (int i = 0; i < treeAmount; i++) {
-            TreeBlock treeBlock = new TreeBlock();
-            treeBlock.setX(BigDecimal.valueOf(random.nextDouble() * region.getWidth()));
-            treeBlock.setY(BigDecimal.valueOf(random.nextDouble() * region.getHeight()));
-            treeBlock.setType(GamePalConstants.BLOCK_TYPE_TREE);
-            treeBlock.setTreeType(GamePalConstants.TREE_TYPE_PINE);
-            treeBlock.setTreeHeight(2);
-            treeBlock.setRadius(GamePalConstants.PLAYER_RADIUS);
-            scene.getBlocks().add(treeBlock);
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f001",
+                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
+                            BigDecimal.ONE),
+                    new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                            BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            scene.getBlocks().add(block);
         }
 
         // Add events
@@ -150,9 +148,6 @@ public class SceneManagerImpl implements SceneManager {
                                 break;
                             case GamePalConstants.BLOCK_TYPE_TELEPORT:
                                 newBlock = new Teleport((Teleport) block);
-                                break;
-                            case GamePalConstants.BLOCK_TYPE_TREE:
-                                newBlock = new TreeBlock((TreeBlock) block);
                                 break;
                             default:
                                 newBlock = new Block(block);
@@ -201,12 +196,7 @@ public class SceneManagerImpl implements SceneManager {
                             && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
                 })
                 .forEach(entry -> {
-                    Block block = new Block();
-                    block.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-                    block.setId(entry.getValue().getId());
-                    block.setCode(entry.getValue().getCode());
-                    block.setY(entry.getValue().getCoordinate().getY());
-                    block.setX(entry.getValue().getCoordinate().getX());
+                    Block block = BlockUtil.convertWorldBlock2Block(entry.getValue());
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                             entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
                     rankingQueue.add(block);

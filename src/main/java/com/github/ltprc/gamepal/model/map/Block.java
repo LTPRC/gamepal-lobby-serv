@@ -11,18 +11,21 @@ public class Block extends Coordinate {
     private Integer type;
     private String id;
     private String code;
+    private Structure structure;
 
     public Block(Block block) {
         super(block);
         type = block.type;
         id = block.id;
         code = block.code;
+        structure = block.structure;
     }
 
-    public Block(Integer type, String id, String code, Coordinate coordinate) {
+    public Block(Integer type, String id, String code, Structure structure, Coordinate coordinate) {
         super(coordinate);
         this.type = type;
         this.id = id;
         this.code = code;
+        this.structure = structure;
     }
 }

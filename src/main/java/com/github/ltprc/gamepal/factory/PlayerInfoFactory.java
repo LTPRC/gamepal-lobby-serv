@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.Structure;
 import com.github.ltprc.gamepal.util.NameUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ public class PlayerInfoFactory {
 
     public PlayerInfo createPlayerInfoInstance() {
         PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND,
+                GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_HEIGHT));
         playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
         playerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_HUMAN);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);

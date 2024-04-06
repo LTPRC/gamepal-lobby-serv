@@ -46,9 +46,11 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_BLOCKED_GROUND = 17;
     public static final int BLOCK_TYPE_HOLLOW_WALL = 18;
     public static final int BLOCK_TYPE_BLOCKED_CEILING = 19;
-    public static final int BLOCK_TYPE_TREE = 20;
 
+    public static final int STRUCTURE_UNDERSIDE_TYPE_SQUARE = 1;
+    public static final int STRUCTURE_UNDERSIDE_TYPE_ROUND = 2;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+    public static final BigDecimal PLAYER_HEIGHT = BigDecimal.valueOf(1.6);
     public static final BigDecimal PLAYER_VIEW_RADIUS = BigDecimal.valueOf(10);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 

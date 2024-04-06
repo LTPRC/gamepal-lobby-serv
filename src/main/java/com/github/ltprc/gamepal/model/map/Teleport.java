@@ -15,4 +15,9 @@ public class Teleport extends Block {
         super(teleport);
         to = teleport.to;
     }
+
+    public Teleport(WorldCoordinate to, Block block) {
+        super(block);
+        this.to = to;
+    }
 }

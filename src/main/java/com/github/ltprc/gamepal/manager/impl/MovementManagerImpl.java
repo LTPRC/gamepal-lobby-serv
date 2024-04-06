@@ -43,33 +43,48 @@ public class MovementManagerImpl implements MovementManager {
                     teleportWc = ((Teleport) block).getTo();
                     break;
                 }
-            } else if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-                    || block.getType() == GamePalConstants.BLOCK_TYPE_TREE) {
-                if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                        new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
-                                worldMovingBlock.getCoordinate().getY()),
-                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
-                    worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
-                }
-                if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                        new Coordinate(worldMovingBlock.getCoordinate().getX(),
-                                worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                        block, GamePalConstants.PLAYER_RADIUS.multiply(BigDecimal.valueOf(2)))) {
-                    worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
-                }
-            } else if (BlockUtil.checkBlockSolid(block.getType())) {
-                if (BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
-                        new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
-                                worldMovingBlock.getCoordinate().getY()),
-                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
-                    worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
-                }
-                if (BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
-                        new Coordinate(worldMovingBlock.getCoordinate().getX(),
-                                worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                        block, GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE)) {
-                    worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
-                }
+            }
+            if (!BlockUtil.checkBlockSolid(block.getType())) {
+                continue;
+            }
+            if (null == block.getStructure()) {
+                block.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                        BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
+            }
+            Structure structure = block.getStructure();
+            switch (structure.getUndersideType()) {
+                case GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE:
+                    // Blocked by square
+                    if (BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
+                            new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
+                                    worldMovingBlock.getCoordinate().getY()),
+                            block, structure.getRadius(), BigDecimal.ONE)) {
+                        worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
+                    }
+                    if (BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
+                            new Coordinate(worldMovingBlock.getCoordinate().getX(),
+                                    worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
+                            block, structure.getRadius(), BigDecimal.ONE)) {
+                        worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
+                    }
+                    break;
+                case GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND:
+                    // Blocked by round
+                    if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
+                            new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
+                                    worldMovingBlock.getCoordinate().getY()),
+                            block, GamePalConstants.PLAYER_RADIUS.add(structure.getRadius()))) {
+                        worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
+                    }
+                    if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
+                            new Coordinate(worldMovingBlock.getCoordinate().getX(),
+                                    worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
+                            block, GamePalConstants.PLAYER_RADIUS.add(structure.getRadius()))) {
+                        worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
         // Settle worldMovingBlock position
