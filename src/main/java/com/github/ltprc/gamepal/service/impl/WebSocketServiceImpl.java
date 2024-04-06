@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -94,10 +95,10 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfo")) {
-                playerService.updatePlayerinfo(userCode, functions.getObject("updatePlayerInfo", PlayerInfo.class));
+                playerService.updatePlayerInfo(userCode, functions.getObject("updatePlayerInfo", PlayerInfo.class));
             }
             if (functions.containsKey("updateplayerinfoCharacter")) {
-                playerService.updatePlayerinfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
+                playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
             }
             if (functions.containsKey("updateMovingBlock")) {
                 playerService.updatePlayerMovement(userCode, functions.getJSONObject("updateMovingBlock"));
@@ -340,7 +341,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private void transmit(JSONObject rst, String userCode, GameWorld world) {
         // Communicate
-        String content = JSON.toJSONString(rst);
+        String content = JSON.toJSONString(rst, SerializerFeature.DisableCircularReferenceDetect);
         Session session = world.getSessionMap().get(userCode);
         if (null == session || null == session.getBasicRemote()) {
             logger.warn(ErrorUtil.ERROR_1003 + "userCode: " + userCode);

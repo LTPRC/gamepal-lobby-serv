@@ -10,9 +10,9 @@ public interface PlayerService {
 
     ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute);
 
-    ResponseEntity<String> updatePlayerinfo(String userCode, PlayerInfo playerInfo);
+    ResponseEntity<String> updatePlayerInfo(String userCode, PlayerInfo playerInfo);
 
-    ResponseEntity<String> updatePlayerinfoCharacter(String userCode, JSONObject req);
+    ResponseEntity<String> updatePlayerInfoCharacter(String userCode, JSONObject req);
 
     ResponseEntity<String> updatePlayerMovement(String userCode, JSONObject req);
 

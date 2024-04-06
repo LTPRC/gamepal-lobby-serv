@@ -503,15 +503,16 @@ public class BlockUtil {
      * @param wc1 Start point
      * @param wc2 End point
      * @param wc3 Obstacle center point
-     * @param distance min distance between p1/p2 and p3
+     * @param radius1 radius of p1
+     * @param radius2 radius of p2
      * @return whether they collide
      */
     public static boolean detectCollision(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
-                                          WorldCoordinate wc3, BigDecimal distance) {
+                                          WorldCoordinate wc3, BigDecimal radius1, BigDecimal radius2) {
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
-        return detectCollision(c1, c2, c3, distance);
+        return detectCollision(c1, c2, c3, radius1, radius2);
     }
 
     /**
@@ -519,17 +520,20 @@ public class BlockUtil {
      * @param c1 Start point
      * @param c2 End point
      * @param c3 Obstacle center point
-     * @param distance min distance between p1/p2 and p3
+     * @param radius1 radius of p1
+     * @param radius2 radius of p2
      * @return whether they collide
      */
-    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal distance) {
+    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal radius1,
+                                          BigDecimal radius2) {
+        double newDistance = radius1.doubleValue() + radius2.doubleValue();
         if (Math.sqrt(Math.pow(c3.getX().subtract(c1.getX()).doubleValue(), 2)
-                + Math.pow(c3.getY().subtract(c1.getY()).doubleValue(), 2)) < distance.doubleValue()) {
+                + Math.pow(c3.getY().subtract(c1.getY()).doubleValue(), 2)) < newDistance) {
             // Already overlapped
             return false;
         }
         if (Math.sqrt(Math.pow(c3.getX().subtract(c2.getX()).doubleValue(), 2)
-                + Math.pow(c3.getY().subtract(c2.getY()).doubleValue(), 2)) < distance.doubleValue()) {
+                + Math.pow(c3.getY().subtract(c2.getY()).doubleValue(), 2)) < newDistance) {
             // Too close
             return true;
         }
@@ -542,16 +546,16 @@ public class BlockUtil {
      * @param wc1 Start point
      * @param wc2 End point
      * @param wc3 Obstacle center point
-     * @param distance min distance between p1/p2 and p3
-     * @param sideLength square side size
+     * @param radius1 radius of p1
+     * @param radius2 radius of p2
      * @return whether they collide
      */
     public static boolean detectCollisionSquare(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
-                                                WorldCoordinate wc3, BigDecimal distance, BigDecimal sideLength) {
+                                                WorldCoordinate wc3, BigDecimal radius1, BigDecimal radius2) {
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
-        return detectCollisionSquare(c1, c2, c3, distance, sideLength);
+        return detectCollisionSquare(c1, c2, c3, radius1, radius2);
     }
 
     /**
@@ -559,13 +563,13 @@ public class BlockUtil {
      * @param c1 Start point
      * @param c2 End point
      * @param c3 Obstacle center point
-     * @param distance min distance between p1/p2 and p3
-     * @param sideLength square side size
+     * @param radius1 radius of p1
+     * @param radius2 radius of p2
      * @return whether they collide
      */
-    public static boolean detectCollisionSquare(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal distance,
-                                                BigDecimal sideLength) {
-        double newDistance = distance.doubleValue() + sideLength.doubleValue() / 2;
+    public static boolean detectCollisionSquare(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal radius1,
+                                                BigDecimal radius2) {
+        double newDistance = radius1.doubleValue() + radius2.doubleValue();
         if (Math.abs(c3.getX().subtract(c1.getX()).doubleValue()) < newDistance
                 && Math.abs(c3.getY().subtract(c1.getY()).doubleValue()) < newDistance) {
             // Already overlapped
@@ -579,7 +583,7 @@ public class BlockUtil {
         return false;
     }
 
-    public static boolean checkBlockSolid(int blockType) {
+    public static boolean checkBlockTypeSolid(int blockType) {
         switch (blockType) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_DROP:

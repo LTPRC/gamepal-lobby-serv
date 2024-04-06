@@ -335,15 +335,22 @@ public class WorldServiceImpl implements WorldService {
 
     private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {
         GameWorld world = userService.getWorldByUserCode(eventBlock.getId());
-        Map<Integer, Region> regionMap = world.getRegionMap();
         PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
         boolean rst = eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
                 || (GamePalConstants.PLAYER_STATUS_RUNNING == fromPlayerInfo.getPlayerStatus()
                 && 0 == fromPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD]));
+        return rst && checkEventConditionByEventCode(eventBlock, blocker);
+    }
+
+    private boolean checkEventConditionByEventCode(final WorldBlock eventBlock, final WorldBlock blocker) {
+        GameWorld world = userService.getWorldByUserCode(eventBlock.getId());
+        Map<Integer, Region> regionMap = world.getRegionMap();
+        PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
+        boolean rst = true;
         switch (Integer.valueOf(eventBlock.getCode())) {
             case GamePalConstants.EVENT_CODE_FIRE:
-                rst &= BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
+                rst = BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_FIRE) <= 0;
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
@@ -355,7 +362,7 @@ public class WorldServiceImpl implements WorldService {
                         blocker).doubleValue();
                 double angle2 = fromPlayerInfo.getFaceDirection().doubleValue();
                 double deltaAngle = BlockUtil.compareAnglesInDegrees(angle1, angle2);
-                rst &= !eventBlock.getId().equals(blocker.getId())
+                rst = !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_MELEE) <= 0
                         && deltaAngle < GamePalConstants.EVENT_MAX_ANGLE_MELEE.doubleValue();
@@ -371,7 +378,7 @@ public class WorldServiceImpl implements WorldService {
                 }
                 Structure structure = blocker.getStructure();
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
-                rst &= !eventBlock.getId().equals(blocker.getId())
+                rst = !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
                         && BlockUtil.detectLineSquareCollision(regionMap.get(eventBlock.getRegionNo()),
@@ -382,7 +389,7 @@ public class WorldServiceImpl implements WorldService {
                                 blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D;
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                rst &= BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
+                rst = BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_EXPLODE) <= 0;
                 break;
             default:
@@ -531,7 +538,7 @@ public class WorldServiceImpl implements WorldService {
         List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>(playerInfoList);
         preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
             regionMap.get(eventBlock.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
-                    .filter(blocker -> BlockUtil.checkBlockSolid(blocker.getType()))
+                    .filter(blocker -> BlockUtil.checkBlockTypeSolid(blocker.getType()))
                     .forEach(blocker -> {
                         WorldCoordinate wc = BlockUtil.convertCoordinate2WorldCoordinate(
                                 regionMap.get(eventBlock.getRegionNo()), sceneCoordinate, blocker);

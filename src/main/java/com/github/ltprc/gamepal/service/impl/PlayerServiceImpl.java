@@ -108,22 +108,19 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> updatePlayerinfo(String userCode, PlayerInfo playerInfo) {
+    public ResponseEntity<String> updatePlayerInfo(String userCode, PlayerInfo playerInfo) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (null == playerInfo.getSceneCoordinate()){
-            System.out.println("100");
-        }
         playerInfoMap.put(userCode, playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
-    public ResponseEntity<String> updatePlayerinfoCharacter(String userCode, JSONObject req) {
+    public ResponseEntity<String> updatePlayerInfoCharacter(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
