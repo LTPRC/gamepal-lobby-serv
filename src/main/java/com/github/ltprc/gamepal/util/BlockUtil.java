@@ -633,7 +633,7 @@ public class BlockUtil {
                                                    WorldCoordinate worldCoordinate) {
         WorldBlock eventBlock = new WorldBlock(convertEventCode2BlockType(eventCode), userCode,
                 String.valueOf(eventCode), new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                BigDecimal.valueOf(0.5D), BigDecimal.ZERO), worldCoordinate);
+                BigDecimal.valueOf(0.5D), BigDecimal.ONE, BigDecimal.ONE), worldCoordinate);
         BlockUtil.fixWorldCoordinate(regionInfo, eventBlock);
         return eventBlock;
     }
@@ -641,7 +641,7 @@ public class BlockUtil {
     public static Block convertEvent2Block(Event event) {
         return new Block(convertEventCode2BlockType(event.getCode()), String.valueOf(event.getFrame()),
                 String.valueOf(event.getCode()), new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                BigDecimal.valueOf(0.5D), BigDecimal.ZERO), event);
+                BigDecimal.valueOf(0.5D), BigDecimal.ONE, BigDecimal.ONE), event);
     }
 
     private static int convertEventCode2BlockType(int eventCode) {

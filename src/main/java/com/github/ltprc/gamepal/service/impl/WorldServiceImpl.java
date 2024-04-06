@@ -110,7 +110,7 @@ public class WorldServiceImpl implements WorldService {
         world.setTerminalMap(new ConcurrentHashMap<>());
         world.setNpcBrainMap(new ConcurrentHashMap<>());
         loadScenes(world);
-        loadBlocks(world);
+        registerInteractiveBlocks(world);
         initiateGame(world);
     }
 
@@ -144,22 +144,23 @@ public class WorldServiceImpl implements WorldService {
                         JSONArray blockRow = map.getJSONArray(i);
                         for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                             Integer value = blockRow.getInteger(j);
-                            Block block = new Block();
+                            int blockType;
                             switch (value / 10000) {
                                 case 2:
-                                    block.setType(GamePalConstants.BLOCK_TYPE_WALL);
+                                    blockType = GamePalConstants.BLOCK_TYPE_WALL;
                                     break;
                                 case 3:
-                                    block.setType(GamePalConstants.BLOCK_TYPE_CEILING);
+                                    blockType = GamePalConstants.BLOCK_TYPE_CEILING;
                                     break;
                                 case 1:
                                 default:
-                                    block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
+                                    blockType = GamePalConstants.BLOCK_TYPE_GROUND;
                                     break;
                             }
-                            block.setCode(String.valueOf(value % 10000));
-                            block.setX(BigDecimal.valueOf(j));
-                            block.setY(BigDecimal.valueOf(i));
+                            Block block = new Block(blockType, null, String.valueOf(value % 10000),
+                                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                                            BigDecimal.valueOf(0.5D), BigDecimal.ONE, BigDecimal.ONE),
+                                    new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
                             newScene.getBlocks().add(block);
                         }
                     }
@@ -169,36 +170,26 @@ public class WorldServiceImpl implements WorldService {
                     for (int i = 0; i < blocks.size(); i++) {
                         JSONArray blockRow = blocks.getJSONArray(i);
                         Integer type = blockRow.getInteger(0);
+                        Block block = new Block(type, null, String.valueOf(blockRow.getInteger(1)),
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+                                        BigDecimal.valueOf(0.5D), BigDecimal.ONE, BigDecimal.ONE),
+                                        new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
+                                                BigDecimal.valueOf(blockRow.getInteger(3))));
                         switch (type) {
                             case GamePalConstants.BLOCK_TYPE_DROP:
-                                Drop drop = new Drop();
-                                drop.setType(type);
-                                drop.setCode(String.valueOf(blockRow.getInteger(1)));
-                                drop.setX(BigDecimal.valueOf(blockRow.getInteger(2)));
-                                drop.setY(BigDecimal.valueOf(blockRow.getInteger(3)));
-                                drop.setItemNo(blockRow.getString(4));
-                                drop.setAmount(blockRow.getInteger(5));
+                                Drop drop = new Drop(blockRow.getString(4), blockRow.getInteger(5), block);
                                 newScene.getBlocks().add(drop);
                                 break;
                             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                                Teleport teleport = new Teleport();
-                                teleport.setType(type);
-                                teleport.setCode(String.valueOf(blockRow.getInteger(1)));
-                                teleport.setX(BigDecimal.valueOf(blockRow.getInteger(2)));
-                                teleport.setY(BigDecimal.valueOf(blockRow.getInteger(3)));
-                                WorldCoordinate to = new WorldCoordinate();
-                                to.setRegionNo(blockRow.getInteger(4));
-                                to.setSceneCoordinate(new IntegerCoordinate(blockRow.getInteger(5), blockRow.getInteger(6)));
-                                to.setCoordinate(new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)), BigDecimal.valueOf(blockRow.getInteger(8))));
-                                teleport.setTo(to);
+                                WorldCoordinate to = new WorldCoordinate(blockRow.getInteger(4),
+                                        new IntegerCoordinate(blockRow.getInteger(5),
+                                                blockRow.getInteger(6)),
+                                        new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
+                                                BigDecimal.valueOf(blockRow.getInteger(8))));
+                                Teleport teleport = new Teleport(to, block);
                                 newScene.getBlocks().add(teleport);
                                 break;
                             default:
-                                Block block = new Block();
-                                block.setType(type);
-                                block.setCode(String.valueOf(blockRow.getInteger(1)));
-                                block.setX(BigDecimal.valueOf(blockRow.getInteger(2)));
-                                block.setY(BigDecimal.valueOf(blockRow.getInteger(3)));
                                 newScene.getBlocks().add(block);
                                 break;
                         }
@@ -213,60 +204,37 @@ public class WorldServiceImpl implements WorldService {
         }
     }
 
-    private void loadBlocks(GameWorld world) {
+    private void registerInteractiveBlocks(GameWorld world) {
         world.getRegionMap().entrySet().stream().forEach(entry1 -> {
             Region region = entry1.getValue();
             region.getScenes().entrySet().stream().forEach(entry2 -> {
                 Scene scene = entry2.getValue();
                 scene.getBlocks().stream().forEach(block -> {
                     block.setId(UUID.randomUUID().toString());
+                    WorldBlock worldBlock =
+                            new WorldBlock(block.getType(), block.getId(), block.getCode(),block.getStructure(),
+                            new WorldCoordinate(region.getRegionNo(), scene.getSceneCoordinate(), block));
                     switch (block.getType()) {
                         case GamePalConstants.BLOCK_TYPE_DROP:
-                            WorldDrop worldDrop = new WorldDrop();
-                            worldDrop.setType(block.getType());
-                            worldDrop.setCode(block.getCode());
-                            worldDrop.setId(block.getId());
-                            worldDrop.setCoordinate(new Coordinate(block.getX(), block.getY()));
-                            worldDrop.setSceneCoordinate(scene.getSceneCoordinate());
-                            worldDrop.setRegionNo(region.getRegionNo());
-                            worldDrop.setAmount(((Drop) block).getAmount());
-                            worldDrop.setItemNo(((Drop) block).getItemNo());
+                            WorldDrop worldDrop = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(),
+                                    worldBlock);
                             world.getBlockMap().put(block.getId(), worldDrop);
                             break;
                         case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                            WorldTeleport worldTeleport = new WorldTeleport();
-                            worldTeleport.setType(block.getType());
-                            worldTeleport.setCode(block.getCode());
-                            worldTeleport.setId(block.getId());
-                            worldTeleport.setCoordinate(new Coordinate(block.getX(), block.getY()));
-                            worldTeleport.setSceneCoordinate(scene.getSceneCoordinate());
-                            worldTeleport.setRegionNo(region.getRegionNo());
-                            worldTeleport.setTo(((Teleport) block).getTo());
+                            WorldTeleport worldTeleport = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
                             world.getBlockMap().put(block.getId(), worldTeleport);
                             break;
-                        case GamePalConstants.BLOCK_TYPE_GROUND:
-                        case GamePalConstants.BLOCK_TYPE_WALL:
-                        case GamePalConstants.BLOCK_TYPE_CEILING:
-                        case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
-                        case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
-                        case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
-                            WorldBlock regularWorldBlock = new WorldBlock();
-                            regularWorldBlock.setType(block.getType());
-                            regularWorldBlock.setCode(block.getCode());
-                            regularWorldBlock.setId(block.getId());
-                            regularWorldBlock.setCoordinate(new Coordinate(block.getX(), block.getY()));
-                            regularWorldBlock.setSceneCoordinate(scene.getSceneCoordinate());
-                            regularWorldBlock.setRegionNo(region.getRegionNo());
+                        case GamePalConstants.BLOCK_TYPE_BED:
+                        case GamePalConstants.BLOCK_TYPE_TOILET:
+                        case GamePalConstants.BLOCK_TYPE_DRESSER:
+                        case GamePalConstants.BLOCK_TYPE_WORKSHOP:
+                        case GamePalConstants.BLOCK_TYPE_GAME:
+                        case GamePalConstants.BLOCK_TYPE_STORAGE:
+                        case GamePalConstants.BLOCK_TYPE_COOKER:
+                        case GamePalConstants.BLOCK_TYPE_SINK:
+                            world.getBlockMap().put(block.getId(), worldBlock);
                             break;
                         default:
-                            WorldBlock worldBlock = new WorldBlock();
-                            worldBlock.setType(block.getType());
-                            worldBlock.setCode(block.getCode());
-                            worldBlock.setId(block.getId());
-                            worldBlock.setCoordinate(new Coordinate(block.getX(), block.getY()));
-                            worldBlock.setSceneCoordinate(scene.getSceneCoordinate());
-                            worldBlock.setRegionNo(region.getRegionNo());
-                            world.getBlockMap().put(block.getId(), worldBlock);
                             break;
                     }
                 });
@@ -372,10 +340,10 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                if (null == blocker.getStructure()) {
-                    blocker.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                            BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
-                }
+//                if (null == blocker.getStructure()) {
+//                    blocker.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+//                            BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
+//                }
                 Structure structure = blocker.getStructure();
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
                 rst = !eventBlock.getId().equals(blocker.getId())
@@ -839,10 +807,10 @@ public class WorldServiceImpl implements WorldService {
                 }
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-                if (null == blocker.getStructure()) {
-                    blocker.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                            BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
-                }
+//                if (null == blocker.getStructure()) {
+//                    blocker.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+//                            BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
+//                }
                 Structure structure = blocker.getStructure();
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
                 if (BlockUtil.calculateDistance(regionMap.get(worldEvent.getRegionNo()), fromPlayerInfo, blocker)

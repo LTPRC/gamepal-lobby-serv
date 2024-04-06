@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.*;
 
 
@@ -78,6 +79,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private void fillSceneGrassland(final Region region, final IntegerCoordinate sceneCoordinate) {
+        Random random = new Random();
         Scene scene = new Scene();
         scene.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
         scene.setName("Auto Scene (" + scene.getSceneCoordinate().getX() + "," + scene.getSceneCoordinate().getY()
@@ -96,16 +98,77 @@ public class SceneManagerImpl implements SceneManager {
             }
         }
 
-        // Add extra blocks
-        Random random = new Random();
-        int treeAmount = random.nextInt(20);
-        for (int i = 0; i < treeAmount; i++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f001",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.ONE),
-                    new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
-                            BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
-            scene.getBlocks().add(block);
+        // Add extra
+        DecimalFormat df = new DecimalFormat("000");
+        for (int i = 0; i < 36; i++) {
+            String code = "f" + df.format(i);
+            for (int j = 0; j < random.nextInt(20); j++) {
+                Block block = null;
+                switch (i) {
+                    case 1:
+                        // 松树
+                    case 2:
+                        // 橡树
+                    case 3:
+                        // 死树
+                        block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, code,
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
+                                        BigDecimal.valueOf(2), BigDecimal.valueOf(2)),
+                                new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                                        BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                        break;
+                    case 4:
+                        // 细松树
+                    case 5:
+                        // 细橡树
+                    case 6:
+                        // 细死树
+                        block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, code,
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
+                                        BigDecimal.ONE, BigDecimal.valueOf(2)),
+                                new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                                        BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                        break;
+                    case 8:
+                        // 大石头
+                        block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, code,
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
+                                        BigDecimal.ONE, BigDecimal.ONE),
+                                new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                                        BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                        break;
+                    case 9:
+                        // 空心树干1
+                    case 10:
+                        // 空心树干2
+                        block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, code,
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE, BigDecimal.valueOf(0.5D),
+                                        BigDecimal.valueOf(2), BigDecimal.ONE),
+                                new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                                        BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                        break;
+                    case 15:
+                    case 16:
+                        // 树桩
+                        block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, code,
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.3D),
+                                        BigDecimal.ONE, BigDecimal.ONE),
+                                new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                                        BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                        break;
+                    default:
+                        // 植被
+                        block = new Block(GamePalConstants.BLOCK_TYPE_GROUND_DECORATION, null, code,
+                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
+                                        BigDecimal.ONE, BigDecimal.ONE),
+                                new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
+                                        BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                        break;
+                }
+                if (null != block) {
+                    scene.getBlocks().add(block);
+                }
+            }
         }
 
         // Add events

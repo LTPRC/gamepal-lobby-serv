@@ -42,10 +42,10 @@ public class MovementManagerImpl implements MovementManager {
             if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER && block.getId().equals(userCode)) {
                 continue;
             }
-            if (null == block.getStructure()) {
-                block.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                        BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
-            }
+//            if (null == block.getStructure()) {
+//                block.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
+//                        BigDecimal.valueOf(0.5D), BigDecimal.ZERO));
+//            }
             Structure structure = block.getStructure();
             Coordinate squareCoordinate = new Coordinate(block.getX(), block.getY().subtract(BigDecimal.valueOf(0.5)));
             if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT

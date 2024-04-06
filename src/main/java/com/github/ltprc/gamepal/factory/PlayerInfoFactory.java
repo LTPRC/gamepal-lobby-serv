@@ -19,7 +19,7 @@ public class PlayerInfoFactory {
     public PlayerInfo createPlayerInfoInstance() {
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setStructure(new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND,
-                GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_HEIGHT));
+                GamePalConstants.PLAYER_RADIUS, BigDecimal.ONE, BigDecimal.ONE));
         playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
         playerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_HUMAN);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);

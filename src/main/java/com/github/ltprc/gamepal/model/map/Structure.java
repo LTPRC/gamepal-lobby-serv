@@ -12,5 +12,6 @@ import java.math.BigDecimal;
 public class Structure {
     private Integer undersideType; // 0-hollow 1-round 2-square
     private BigDecimal radius;
-    private BigDecimal height;
+    private BigDecimal x;
+    private BigDecimal y;
 }

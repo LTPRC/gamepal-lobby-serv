@@ -9,4 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WorldTeleport extends WorldBlock {
     private WorldCoordinate to;
+
+    public WorldTeleport(WorldTeleport worldTeleport) {
+        super(worldTeleport);
+        to = worldTeleport.to;
+    }
+
+    public WorldTeleport(WorldCoordinate to, WorldBlock worldBlock) {
+        super(worldBlock);
+        this.to = to;
+    }
 }

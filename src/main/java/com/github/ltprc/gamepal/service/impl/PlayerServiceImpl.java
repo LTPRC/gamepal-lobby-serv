@@ -577,6 +577,7 @@ public class PlayerServiceImpl implements PlayerService {
         // Check death 24/02/23
         if (0 == playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
+            playerInfoMap.get(userCode).setSpeed(new Coordinate());
             changeVp(userCode, 0, true);
             changeHunger(userCode, 0, true);
             changeThirst(userCode, 0, true);
@@ -876,7 +877,7 @@ public class PlayerServiceImpl implements PlayerService {
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         Drop drop = new Drop(itemNo, amount, new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
                 "3000", new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                BigDecimal.valueOf(0.5D), BigDecimal.ZERO), worldMovingBlock.getCoordinate())); // TODO characterize it
+                BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)), worldMovingBlock.getCoordinate())); // TODO characterize it
         scene.getBlocks().add(drop);
         WorldDrop worldDrop = new WorldDrop(drop.getItemNo(), drop.getAmount(), worldMovingBlock);
         worldDrop.setType(drop.getType());
