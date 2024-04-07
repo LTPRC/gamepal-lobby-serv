@@ -579,7 +579,7 @@ public class PlayerServiceImpl implements PlayerService {
         // Check death 24/02/23
         if (0 == playerInfoMap.get(userCode).getHp()
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-            playerInfoMap.get(userCode).setSpeed(new Coordinate());
+            playerInfoMap.get(userCode).setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
             changeVp(userCode, 0, true);
             changeHunger(userCode, 0, true);
             changeThirst(userCode, 0, true);

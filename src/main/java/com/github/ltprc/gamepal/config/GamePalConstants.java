@@ -19,7 +19,6 @@ public class GamePalConstants {
     public static final int MESSAGE_TYPE_PRINTED = 1;
     public static final int MESSAGE_TYPE_VOICE = 2;
     public static final int MESSAGE_TYPE_TERMINAL = 3;
-
     public static final int SCOPE_GLOBAL = 0;
     public static final int SCOPE_INDIVIDUAL = 1;
     public static final int SCOPE_SELF = 2;
@@ -104,20 +103,6 @@ public class GamePalConstants {
     public static final int EVENT_CODE_SHOOT_ROCKET = 121;
     public static final int EVENT_CODE_SPARK = 125;
 
-    public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal EVENT_MAX_DISTANCE_MELEE = BigDecimal.ONE;
-    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT = BigDecimal.valueOf(10);
-    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT_SHOTGUN = BigDecimal.valueOf(5);
-    public static final BigDecimal EVENT_MAX_ANGLE_MELEE = BigDecimal.valueOf(120D);
-    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT = BigDecimal.valueOf(5D);
-    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT_SHOTGUN = BigDecimal.valueOf(10D);
-    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(5);
-    public static final int EVENT_DAMAGE_PER_FRAME_FIRE = 1;
-    public static final int EVENT_DAMAGE_MELEE = 10;
-    public static final int EVENT_DAMAGE_SHOOT = 200;
-    public static final int EVENT_DAMAGE_EXPLODE = 500;
-    public static final int EVENT_HEAL_HEAL = 100;
-
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;
     public static final int BUFF_CODE_BLEEDING = 3;
@@ -148,20 +133,6 @@ public class GamePalConstants {
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
 
-
-    public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
-    public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
-    public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
-    public static final String GENDER_MALE = "1";
-    public static final String GENDER_FEMALE = "2";
-    public static final int AVATARS_LENGTH = 10;
-    public static final int SKIN_COLOR_C = 1;
-    public static final int SKIN_COLOR_M = 2;
-    public static final int SKIN_COLOR_A = 3;
-    public static final int SKIN_COLOR_L = 4;
-    public static final int SKIN_COLOR_B = 5;
-    public static final int HAIRSTYLE_LENGTH = 5;
-    public static final int EYES_LENGTH = 5;
     public static final int FACE_COEFS_LENGTH = 9;
 
     // Backend constants
@@ -207,4 +178,32 @@ public class GamePalConstants {
     public static final int NPC_TASK_TYPE_ATTACK = 3;
     public static final BigDecimal NPC_MAX_OBSERVE_RANGE = BigDecimal.valueOf(5);
     public static final BigDecimal NPC_MAX_CHASE_DISTANCE = BigDecimal.valueOf(1);
+
+    public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
+    public static final BigDecimal EVENT_MAX_DISTANCE_MELEE = BigDecimal.ONE;
+    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT = BigDecimal.valueOf(10);
+    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT_SHOTGUN = BigDecimal.valueOf(5);
+    public static final BigDecimal EVENT_MAX_ANGLE_MELEE = BigDecimal.valueOf(120D);
+    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT = BigDecimal.valueOf(5D);
+    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT_SHOTGUN = BigDecimal.valueOf(10D);
+    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(5);
+    public static final int EVENT_DAMAGE_PER_FRAME_FIRE = 1;
+    public static final int EVENT_DAMAGE_MELEE = 10;
+    public static final int EVENT_DAMAGE_SHOOT = 200;
+    public static final int EVENT_DAMAGE_EXPLODE = 500;
+    public static final int EVENT_HEAL_HEAL = 100;
+
+    public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
+    public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
+    public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
+    public static final String GENDER_MALE = "1";
+    public static final String GENDER_FEMALE = "2";
+    public static final int AVATARS_LENGTH = 10;
+    public static final int SKIN_COLOR_C = 1;
+    public static final int SKIN_COLOR_M = 2;
+    public static final int SKIN_COLOR_A = 3;
+    public static final int SKIN_COLOR_L = 4;
+    public static final int SKIN_COLOR_B = 5;
+    public static final int HAIRSTYLE_LENGTH = 5;
+    public static final int EYES_LENGTH = 5;
 }

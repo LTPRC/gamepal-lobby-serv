@@ -604,9 +604,9 @@ public class BlockUtil {
             }
             // Please use equals() instead of == 24/02/10
             if (!o1.getY().equals(o2.getY())) {
-                return o1.getY().compareTo(o2.getY());
+                return level1.getY() - level2.getY();
             }
-            return level1.getY() - level2.getY();
+            return o1.getY().compareTo(o2.getY());
         });
     }
 
