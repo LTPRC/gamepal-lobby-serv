@@ -224,17 +224,10 @@ public class WorldServiceImpl implements WorldService {
                             WorldTeleport worldTeleport = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
                             world.getBlockMap().put(block.getId(), worldTeleport);
                             break;
-                        case GamePalConstants.BLOCK_TYPE_BED:
-                        case GamePalConstants.BLOCK_TYPE_TOILET:
-                        case GamePalConstants.BLOCK_TYPE_DRESSER:
-                        case GamePalConstants.BLOCK_TYPE_WORKSHOP:
-                        case GamePalConstants.BLOCK_TYPE_GAME:
-                        case GamePalConstants.BLOCK_TYPE_STORAGE:
-                        case GamePalConstants.BLOCK_TYPE_COOKER:
-                        case GamePalConstants.BLOCK_TYPE_SINK:
-                            world.getBlockMap().put(block.getId(), worldBlock);
-                            break;
                         default:
+                            if (BlockUtil.checkBlockTypeInteractive(block.getType())) {
+                                world.getBlockMap().put(block.getId(), worldBlock);
+                            }
                             break;
                     }
                 });

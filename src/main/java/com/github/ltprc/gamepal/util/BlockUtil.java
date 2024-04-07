@@ -578,6 +578,23 @@ public class BlockUtil {
         }
     }
 
+    public static boolean checkBlockTypeInteractive(int blockType) {
+        switch (blockType) {
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+            case GamePalConstants.BLOCK_TYPE_BED:
+            case GamePalConstants.BLOCK_TYPE_TOILET:
+            case GamePalConstants.BLOCK_TYPE_DRESSER:
+            case GamePalConstants.BLOCK_TYPE_WORKSHOP:
+            case GamePalConstants.BLOCK_TYPE_GAME:
+            case GamePalConstants.BLOCK_TYPE_STORAGE:
+            case GamePalConstants.BLOCK_TYPE_COOKER:
+            case GamePalConstants.BLOCK_TYPE_SINK:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static Queue<Block> createRankingQueue() {
         return new PriorityQueue<>((o1, o2) -> {
             IntegerCoordinate level1 = BlockUtil.convertBlockType2Level(o1.getType());
