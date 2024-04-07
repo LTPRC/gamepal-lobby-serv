@@ -43,7 +43,7 @@ public class MovementManagerImpl implements MovementManager {
                 continue;
             }
             Structure structure = block.getStructure();
-            Coordinate squareCoordinate = new Coordinate(block.getX(), block.getY().subtract(BigDecimal.valueOf(0.5)));
+            Coordinate squareCoordinate = block; // Not lifted anymore 24/04/07
             if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT
                     && BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
