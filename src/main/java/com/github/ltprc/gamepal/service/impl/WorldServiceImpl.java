@@ -11,7 +11,6 @@ import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.npc.NpcBrain;
@@ -148,24 +147,26 @@ public class WorldServiceImpl implements WorldService {
                         for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                             Integer value = blockRow.getInteger(j);
                             int blockType;
+                            Structure structure;
                             switch (value / 10000) {
                                 case 2:
                                     blockType = GamePalConstants.BLOCK_TYPE_WALL;
+                                    structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
+                                            GamePalConstants.STRUCTURE_LAYER_MIDDLE);
                                     break;
                                 case 3:
                                     blockType = GamePalConstants.BLOCK_TYPE_CEILING;
+                                    structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                            GamePalConstants.STRUCTURE_LAYER_TOP);
                                     break;
                                 case 1:
                                 default:
                                     blockType = GamePalConstants.BLOCK_TYPE_GROUND;
+                                    structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                            GamePalConstants.STRUCTURE_LAYER_GROUND);
                                     break;
                             }
-                            Block block = new Block(blockType, null, String.valueOf(value % 10000),
-                                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            GamePalConstants.STRUCTURE_LAYER_BOTTOM,
-                                            new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE,
-                                                    new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D)),
-                                                    new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D)))),
+                            Block block = new Block(blockType, null, String.valueOf(value % 10000), structure,
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
                             newScene.getBlocks().add(block);
                         }
@@ -179,16 +180,13 @@ public class WorldServiceImpl implements WorldService {
                         Integer type = blockRow.getInteger(0);
                         Block block = new Block(type, null, String.valueOf(blockRow.getInteger(1)),
                                 new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                        GamePalConstants.STRUCTURE_LAYER_MIDDLE,
-                                        new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE,
-                                                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D)),
-                                                new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)))),
+                                        GamePalConstants.STRUCTURE_LAYER_MIDDLE_DECORATION),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
                                                 BigDecimal.valueOf(blockRow.getInteger(3))));
                         switch (type) {
                             case GamePalConstants.BLOCK_TYPE_DROP:
                                 block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
-                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
+                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM);
                                 Drop drop = new Drop(blockRow.getString(4), blockRow.getInteger(5), block);
                                 newScene.getBlocks().add(drop);
                                 break;
@@ -198,7 +196,7 @@ public class WorldServiceImpl implements WorldService {
                                                 blockRow.getInteger(6)),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
                                                 BigDecimal.valueOf(blockRow.getInteger(8))));
-                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
+                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_GROUND_DECORATION);
                                 Teleport teleport = new Teleport(to, block);
                                 newScene.getBlocks().add(teleport);
                                 break;
@@ -508,7 +506,8 @@ public class WorldServiceImpl implements WorldService {
         List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>(playerInfoList);
         preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
             regionMap.get(eventBlock.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
-                    .filter(blocker -> BlockUtil.checkBlockTypeSolid(blocker.getType()))
+                    .filter(blocker -> GamePalConstants.STRUCTURE_MATERIAL_HOLLOW
+                            != BlockUtil.convertBlockType2Material(blocker.getType()))
                     .forEach(blocker -> {
                         WorldCoordinate wc = BlockUtil.convertCoordinate2WorldCoordinate(
                                 regionMap.get(eventBlock.getRegionNo()), sceneCoordinate, blocker);

@@ -139,8 +139,8 @@ public class UserServiceImpl implements UserService {
             playerInfo.setId(userCode);
             playerInfo.setCode("");
             world.getPlayerInfoMap().put(userCode, playerInfo);
-            String npcUserCode = npcManager.createNpc(world);
-            npcManager.putNpc(userCode, npcUserCode);
+//            String npcUserCode = npcManager.createNpc(world);
+//            npcManager.putNpc(userCode, npcUserCode);
         }
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));

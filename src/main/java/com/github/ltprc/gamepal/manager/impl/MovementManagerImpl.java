@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
 import com.github.ltprc.gamepal.service.UserService;
@@ -43,29 +44,27 @@ public class MovementManagerImpl implements MovementManager {
             if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER && block.getId().equals(userCode)) {
                 continue;
             }
-            Structure structure = block.getStructure();
+            Block movingBlock = BlockUtil.convertWorldBlock2Block(region, worldMovingBlock, false);
+            Block newMovingBlock = new Block(movingBlock);
+            newMovingBlock.setX(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()));
+            newMovingBlock.setY(worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()));
             if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT
-                    && BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                    new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
-                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                    block, worldMovingBlock.getStructure().getShape(), structure.getShape())) {
+                    && BlockUtil.detectCollision(newMovingBlock, block)) {
                     teleportWc = ((Teleport) block).getTo();
                     break;
             }
-            if (!BlockUtil.checkBlockTypeSolid(block.getType())) {
+            if (GamePalConstants.STRUCTURE_MATERIAL_HOLLOW
+                    != BlockUtil.convertBlockType2Material(block.getType())) {
                 continue;
             }
-            if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                    new Coordinate(worldMovingBlock.getCoordinate().getX()
-                            .add(worldMovingBlock.getSpeed().getX()),
-                            worldMovingBlock.getCoordinate().getY()),
-                    block, worldMovingBlock.getStructure().getShape(), structure.getShape())) {
+            newMovingBlock = new Block(movingBlock);
+            newMovingBlock.setX(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()));
+            if (!BlockUtil.detectCollision(movingBlock, block) && BlockUtil.detectCollision(newMovingBlock, block)) {
                 worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
             }
-            if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                    new Coordinate(worldMovingBlock.getCoordinate().getX(),
-                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                    block, worldMovingBlock.getStructure().getShape(), structure.getShape())) {
+            newMovingBlock = new Block(movingBlock);
+            newMovingBlock.setY(worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()));
+            if (!BlockUtil.detectCollision(movingBlock, block) && BlockUtil.detectCollision(newMovingBlock, block)) {
                 worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
             }
         }

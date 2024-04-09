@@ -49,12 +49,6 @@ public class GamePalConstants {
     public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
     public static final int STRUCTURE_MATERIAL_SOLID = 1;
     public static final int STRUCTURE_MATERIAL_FLESH = 2;
-    public static final int STRUCTURE_LAYER_BOTTOM = 10;
-    public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 20;
-    public static final int STRUCTURE_LAYER_MIDDLE = 30;
-    public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 40;
-    public static final int STRUCTURE_LAYER_TOP = 50;
-    public static final int STRUCTURE_LAYER_TOP_DECORATION = 60;
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
@@ -212,4 +206,15 @@ public class GamePalConstants {
     public static final int SKIN_COLOR_B = 5;
     public static final int HAIRSTYLE_LENGTH = 5;
     public static final int EYES_LENGTH = 5;
+
+    public static final int STRUCTURE_LAYER_GROUND = 10;
+    public static final int STRUCTURE_LAYER_GROUND_DECORATION = 15;
+    public static final int STRUCTURE_LAYER_BOTTOM = 20;
+    public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 25;
+    public static final int STRUCTURE_LAYER_MIDDLE = 30;
+    public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 35;
+    public static final int STRUCTURE_LAYER_TOP = 40;
+    public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
+    public static final int STRUCTURE_LAYER_SKY = 50;
+    public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 }

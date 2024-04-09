@@ -64,7 +64,7 @@ public class SceneManagerImpl implements SceneManager {
             for (int l = 0; l < region.getWidth(); l++) {
                 Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND, null, "1001",
                         new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+                                GamePalConstants.STRUCTURE_LAYER_GROUND),
                         new Coordinate(BigDecimal.valueOf(l), BigDecimal.valueOf(k)));
                 scene.getBlocks().add(block);
             }
@@ -91,7 +91,7 @@ public class SceneManagerImpl implements SceneManager {
             for (int l = 0; l < region.getWidth(); l++) {
                 Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND, null, "1010",
                         new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+                                GamePalConstants.STRUCTURE_LAYER_GROUND),
                         new Coordinate(BigDecimal.valueOf(l), BigDecimal.valueOf(k)));
                 scene.getBlocks().add(block);
             }
@@ -234,7 +234,7 @@ public class SceneManagerImpl implements SceneManager {
             for (int j = 0; j < random.nextInt(3); j++) {
                 Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND_DECORATION, null, "f-" + (i % 8) + "-" + (i / 8 + 5),
                         new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION),
+                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
                         new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                                 BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
                 scene.getBlocks().add(block);
@@ -273,33 +273,39 @@ public class SceneManagerImpl implements SceneManager {
                     continue;
                 }
                 if (!CollectionUtils.isEmpty(scene.getBlocks())) {
-                    scene.getBlocks().stream().forEach(block -> {
-                        Block newBlock;
-                        switch (block.getType()) {
-                            case GamePalConstants.BLOCK_TYPE_DROP:
-                                newBlock = new Drop((Drop) block);
-                                break;
-                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                                newBlock = new Teleport((Teleport) block);
-                                break;
-                            default:
-                                newBlock = new Block(block);
-                                break;
-                        }
-                        BlockUtil.adjustCoordinate(newBlock,
-                                BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
-                                region.getHeight(), region.getWidth());
-                        rankingQueue.add(newBlock);
+                    scene.getBlocks().stream()
+                            .forEach(block -> {
+                                Block newBlock;
+                                switch (block.getType()) {
+                                    case GamePalConstants.BLOCK_TYPE_DROP:
+                                        newBlock = new Drop((Drop) block);
+                                        break;
+                                    case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                                        newBlock = new Teleport((Teleport) block);
+                                        break;
+                                    default:
+                                        newBlock = new Block(block);
+                                        break;
+                                }
+                                BlockUtil.adjustCoordinate(newBlock,
+                                        BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                                                newSceneCoordinate), region.getHeight(), region.getWidth());
+                                // Save communication cost 24/04/09
+                                if (BlockUtil.calculateDistance(newBlock, playerInfo.getCoordinate())
+                                        .compareTo(GamePalConstants.PLAYER_VIEW_RADIUS) <= 0) {
+                                    rankingQueue.add(newBlock);
+                                }
                     });
                 }
                 // Generate blocks from scene events 24/02/16
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
-                    scene.getEvents().stream().forEach(event -> {
-                        Block newBlock = BlockUtil.convertEvent2Block(event);
-                        BlockUtil.adjustCoordinate(newBlock,
-                                BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(), newSceneCoordinate),
-                                region.getHeight(), region.getWidth());
-                        rankingQueue.add(newBlock);
+                    scene.getEvents().stream()
+                            .forEach(event -> {
+                                Block newBlock = BlockUtil.convertEvent2Block(event);
+                                BlockUtil.adjustCoordinate(newBlock,
+                                        BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                                                newSceneCoordinate), region.getHeight(), region.getWidth());
+                                rankingQueue.add(newBlock);
                     });
                 }
             }

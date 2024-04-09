@@ -163,7 +163,7 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
             case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
-                rst.setX(GamePalConstants.STRUCTURE_LAYER_BOTTOM);
+                rst.setX(GamePalConstants.STRUCTURE_LAYER_GROUND);
                 break;
             case GamePalConstants.BLOCK_TYPE_CEILING:
             case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
@@ -561,205 +561,62 @@ public class BlockUtil {
                 && c2.getY().doubleValue() - yRight > thresholdDistance));
     }
 
-    public static boolean detectCollision(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
-                                          WorldCoordinate wc3, Shape shape1, Shape shape2) {
-        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
-        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
-        return detectCollision(c1, c2, c3, shape1, shape2);
+    public static boolean detectCollision(RegionInfo regionInfo, WorldBlock worldBlock1, WorldBlock worldBlock2) {
+        Block block1 = convertWorldBlock2Block(regionInfo, worldBlock1, true);
+        Block block2 = convertWorldBlock2Block(regionInfo, worldBlock2, true);
+        return detectCollision(block1, block2);
     }
 
-    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, Shape shape1, Shape shape2) {
-        boolean rst = false;
-        switch (shape1.getShapeType()) {
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND:
-                rst = detectCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX()),
-                                c1.getY().add(shape1.getCenter().getY())),
-                        new Coordinate(c2.getX().add(shape1.getCenter().getX()),
-                                c2.getY().add(shape1.getCenter().getY())),
-                        c3, shape2, shape1.getRadius().getX().doubleValue());
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c1.getY().add(shape1.getCenter().getY())
-                                                .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
-                                new Coordinate(c2.getX().add(shape1.getCenter().getX())
-                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c2.getY().add(shape1.getCenter().getY())
-                                                .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
-                                c3, shape2, 0D);
-                    }
-                }
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c1.getY().add(shape1.getCenter().getY())
-                                                .add(shape1.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
-                                new Coordinate(c2.getX().add(shape1.getCenter().getX())
-                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c2.getY().add(shape1.getCenter().getY())
-                                                .add(shape1.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
-                                c3, shape2, 0D);
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        return rst;
-    }
-
-    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, Shape shape2,
-                                          double thresholdDistance) {
-        boolean rst = false;
-        switch (shape2.getShapeType()) {
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND:
-                rst = detectCollision(c1, c2,
-                        new Coordinate(c3.getX().add(shape2.getCenter().getX()),
-                                c3.getY().add(shape2.getCenter().getY())),
-                        thresholdDistance + shape2.getRadius().getX().doubleValue());
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectCollision(c1, c2,
-                                new Coordinate(c3.getX().add(shape2.getCenter().getX())
-                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c3.getY().add(shape2.getCenter().getY())
-                                                .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
-                                thresholdDistance);
-                    }
-                }
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectCollision(c1, c2,
-                                new Coordinate(c3.getX().add(shape2.getCenter().getX())
-                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c3.getY().add(shape2.getCenter().getY())
-                                                .add(shape2.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
-                                thresholdDistance);
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        return rst;
-    }
-
-    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, double newDistance) {
-        if (Math.sqrt(Math.pow(c3.getX().subtract(c1.getX()).doubleValue(), 2)
-                + Math.pow(c3.getY().subtract(c1.getY()).doubleValue(), 2)) < newDistance) {
-            // Already overlapped
+    public static boolean detectCollision(Block oldBlock1, Block oldBlock2) {
+        Block block1 = new Block(oldBlock1.getType(), oldBlock1.getId(), oldBlock1.getCode(), oldBlock1.getStructure(),
+                new Coordinate(oldBlock1.getX().add(oldBlock1.getStructure().getShape().getCenter().getX()),
+                        oldBlock1.getY().add(oldBlock1.getStructure().getShape().getCenter().getY())));
+        Block block2 = new Block(oldBlock2.getType(), oldBlock2.getId(), oldBlock2.getCode(), oldBlock2.getStructure(),
+                new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
+                        oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
+        // Round vs. round
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
+                && GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+            if (Math.sqrt(Math.pow(block1.getX().subtract(block2.getX()).doubleValue(), 2)
+                    + Math.pow(block1.getY().subtract(block2.getY()).doubleValue(), 2))
+                    <= block1.getStructure().getShape().getRadius().getX()
+                    .add(block2.getStructure().getShape().getRadius().getX()).doubleValue()) {
+                return true;
+            }
             return false;
         }
-        if (Math.sqrt(Math.pow(c3.getX().subtract(c2.getX()).doubleValue(), 2)
-                + Math.pow(c3.getY().subtract(c2.getY()).doubleValue(), 2)) < newDistance) {
-            // Too close
+        // Rectangle vs. rectangle
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
+                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
+            if (Math.abs(block1.getX().subtract(block2.getX()).doubleValue())
+                    <= block1.getStructure().getShape().getRadius().getX()
+                    .add(block2.getStructure().getShape().getRadius().getX()).doubleValue()
+                    && Math.abs(block1.getY().subtract(block2.getY()).doubleValue())
+                    <= block1.getStructure().getShape().getRadius().getY()
+                    .add(block2.getStructure().getShape().getRadius().getY()).doubleValue()) {
+                return true;
+            }
+            return false;
+        }
+        // Round vs. rectangle
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+            return detectCollision(oldBlock2, oldBlock1);
+        }
+        if (block1.getX().add(block1.getStructure().getShape().getRadius().getX()).doubleValue()
+                >= block2.getX().subtract(block2.getStructure().getShape().getRadius().getX()).doubleValue()
+                && block1.getX().subtract(block1.getStructure().getShape().getRadius().getX()).doubleValue()
+                <= block2.getX().add(block2.getStructure().getShape().getRadius().getX()).doubleValue()
+                && block1.getY().add(block1.getStructure().getShape().getRadius().getY()).doubleValue()
+                >= block2.getY().subtract(block2.getStructure().getShape().getRadius().getY()).doubleValue()
+                && block1.getY().subtract(block1.getStructure().getShape().getRadius().getY()).doubleValue()
+                <= block2.getY().add(block2.getStructure().getShape().getRadius().getY()).doubleValue()) {
             return true;
         }
         return false;
     }
 
-    /**
-     * Detect round collision
-     * @param regionInfo regionInfo
-     * @param wc1 Start point
-     * @param wc2 End point
-     * @param wc3 Obstacle center point
-     * @param radius1 radius of p1
-     * @param radius2 radius of p2
-     * @return whether they collide
-     */
-    @Deprecated
-    public static boolean detectCollision(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
-                                          WorldCoordinate wc3, BigDecimal radius1, BigDecimal radius2) {
-        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
-        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
-        return detectCollision(c1, c2, c3, radius1, radius2);
-    }
-
-    /**
-     * Detect round collision
-     * @param c1 Start point
-     * @param c2 End point
-     * @param c3 Obstacle center point
-     * @param radius1 radius of p1
-     * @param radius2 radius of p2
-     * @return whether they collide
-     */
-    @Deprecated
-    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal radius1,
-                                          BigDecimal radius2) {
-        double newDistance = radius1.doubleValue() + radius2.doubleValue();
-        if (Math.sqrt(Math.pow(c3.getX().subtract(c1.getX()).doubleValue(), 2)
-                + Math.pow(c3.getY().subtract(c1.getY()).doubleValue(), 2)) < newDistance) {
-            // Already overlapped
-            return false;
-        }
-        if (Math.sqrt(Math.pow(c3.getX().subtract(c2.getX()).doubleValue(), 2)
-                + Math.pow(c3.getY().subtract(c2.getY()).doubleValue(), 2)) < newDistance) {
-            // Too close
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Detect square collision
-     * @param regionInfo regionInfo
-     * @param wc1 Start point
-     * @param wc2 End point
-     * @param wc3 Obstacle center point
-     * @param radius1 radius of p1
-     * @param radius2 radius of p2
-     * @return whether they collide
-     */
-    @Deprecated
-    public static boolean detectCollisionSquare(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
-                                                WorldCoordinate wc3, BigDecimal radius1, BigDecimal radius2) {
-        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
-        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
-        return detectCollisionSquare(c1, c2, c3, radius1, radius2);
-    }
-
-    /**
-     * Detect square collision
-     * @param c1 Start point
-     * @param c2 End point
-     * @param c3 Obstacle center point
-     * @param radius1 radius of p1
-     * @param radius2 radius of p2
-     * @return whether they collide
-     */
-    @Deprecated
-    public static boolean detectCollisionSquare(Coordinate c1, Coordinate c2, Coordinate c3, BigDecimal radius1,
-                                                BigDecimal radius2) {
-        double newDistance = radius1.doubleValue() + radius2.doubleValue();
-        if (Math.abs(c3.getX().subtract(c1.getX()).doubleValue()) < newDistance
-                && Math.abs(c3.getY().subtract(c1.getY()).doubleValue()) < newDistance) {
-            // Already overlapped
-            return false;
-        }
-        if (Math.abs(c3.getX().subtract(c2.getX()).doubleValue()) < newDistance
-                && Math.abs(c3.getY().subtract(c2.getY()).doubleValue()) <= newDistance) {
-            // Too close
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean checkBlockTypeSolid(int blockType) {
+    public static int convertBlockType2Material(int blockType) {
+        int material = GamePalConstants.STRUCTURE_MATERIAL_HOLLOW;
         switch (blockType) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_DROP:
@@ -768,10 +625,15 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                return false;
+                material = GamePalConstants.STRUCTURE_MATERIAL_SOLID;
+                break;
+            case GamePalConstants.BLOCK_TYPE_PLAYER:
+                material = GamePalConstants.STRUCTURE_MATERIAL_FLESH;
+                break;
             default:
-                return true;
+                break;
         }
+        return material;
     }
 
     public static boolean checkBlockTypeInteractive(int blockType) {
@@ -792,7 +654,7 @@ public class BlockUtil {
     }
 
     @Deprecated
-    public static Queue<Block> createRankingQueueOld() {
+    public static Queue<Block> createRankingQueueByType() {
         return new PriorityQueue<>((o1, o2) -> {
             IntegerCoordinate level1 = BlockUtil.convertBlockType2Level(o1.getType());
             IntegerCoordinate level2 = BlockUtil.convertBlockType2Level(o2.getType());
@@ -809,10 +671,13 @@ public class BlockUtil {
 
     public static Queue<Block> createRankingQueue() {
         return new PriorityQueue<>((o1, o2) -> {
-            if (!Objects.equals(o1.getStructure().getLayer(), o2.getStructure().getLayer())) {
-                return o1.getStructure().getLayer() - o2.getStructure().getLayer();
+            if (!Objects.equals(o1.getStructure().getLayer() / 10, o2.getStructure().getLayer() / 10)) {
+                return o1.getStructure().getLayer() / 10 - o2.getStructure().getLayer() / 10;
             }
-            return o1.getY().compareTo(o2.getY());
+            if (!Objects.equals(o1.getY(), o2.getY())) {
+                return o1.getY().compareTo(o2.getY());
+            }
+            return o1.getStructure().getLayer() % 10 - o2.getStructure().getLayer() % 10;
         });
     }
 
