@@ -27,6 +27,7 @@ public class WorldBlock extends WorldCoordinate {
         this.type = type;
         this.id = id;
         this.code = code;
-        this.structure = new Structure(structure);
+        this.structure = new Structure(structure.getMaterial(), structure.getLayer(), structure.getShape(),
+                structure.getImageSize());
     }
 }

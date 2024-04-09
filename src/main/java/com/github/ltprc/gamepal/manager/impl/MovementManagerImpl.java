@@ -48,27 +48,24 @@ public class MovementManagerImpl implements MovementManager {
                     && BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
                             worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                    block, worldMovingBlock.getStructure().getShapes(), structure.getShapes())) {
+                    block, worldMovingBlock.getStructure().getShape(), structure.getShape())) {
                     teleportWc = ((Teleport) block).getTo();
                     break;
             }
             if (!BlockUtil.checkBlockTypeSolid(block.getType())) {
                 continue;
             }
-            if (structure.getShapes().get(0) == null) {
-                continue;
-            }
             if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX()
                             .add(worldMovingBlock.getSpeed().getX()),
                             worldMovingBlock.getCoordinate().getY()),
-                    block, worldMovingBlock.getStructure().getShapes(), structure.getShapes())) {
+                    block, worldMovingBlock.getStructure().getShape(), structure.getShape())) {
                 worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
             }
             if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX(),
                             worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                    block, worldMovingBlock.getStructure().getShapes(), structure.getShapes())) {
+                    block, worldMovingBlock.getStructure().getShape(), structure.getShape())) {
                 worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
             }
         }

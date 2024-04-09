@@ -55,8 +55,6 @@ public class GamePalConstants {
     public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 40;
     public static final int STRUCTURE_LAYER_TOP = 50;
     public static final int STRUCTURE_LAYER_TOP_DECORATION = 60;
-    public static final int STRUCTURE_UNDERSIDE_TYPE_SQUARE = 1;
-    public static final int STRUCTURE_UNDERSIDE_TYPE_ROUND = 2;
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;

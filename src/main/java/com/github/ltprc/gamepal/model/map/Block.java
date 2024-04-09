@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.model.map;
 
+import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class Block extends Coordinate {
         this.type = type;
         this.id = id;
         this.code = code;
-        this.structure = new Structure(structure);
+        this.structure = new Structure(structure.getMaterial(), structure.getLayer(), structure.getShape(),
+                structure.getImageSize());
     }
 }

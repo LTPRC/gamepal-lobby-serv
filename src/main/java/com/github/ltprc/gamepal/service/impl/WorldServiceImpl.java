@@ -11,8 +11,7 @@ import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.structure.Round;
-import com.github.ltprc.gamepal.model.map.structure.Square;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.npc.NpcBrain;
@@ -163,10 +162,11 @@ public class WorldServiceImpl implements WorldService {
                             }
                             Block block = new Block(blockType, null, String.valueOf(value % 10000),
                                     new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+                                            GamePalConstants.STRUCTURE_LAYER_BOTTOM,
+                                            new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE,
+                                                    new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D)),
+                                                    new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D)))),
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
-                            block.getStructure().getShapes().add(new Square(BigDecimal.ONE,
-                                    new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D))));
                             newScene.getBlocks().add(block);
                         }
                     }
@@ -179,11 +179,12 @@ public class WorldServiceImpl implements WorldService {
                         Integer type = blockRow.getInteger(0);
                         Block block = new Block(type, null, String.valueOf(blockRow.getInteger(1)),
                                 new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                        GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+                                        GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+                                        new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE,
+                                                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D)),
+                                                new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)))),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
                                                 BigDecimal.valueOf(blockRow.getInteger(3))));
-                        block.getStructure().getShapes().add(new Square(BigDecimal.ONE,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D))));
                         switch (type) {
                             case GamePalConstants.BLOCK_TYPE_DROP:
                                 block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
@@ -352,7 +353,7 @@ public class WorldServiceImpl implements WorldService {
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
                         && BlockUtil.detectLineSquareCollision(regionMap.get(eventBlock.getRegionNo()),
                         fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
-                        fromPlayerInfo.getStructure().getShapes(), blocker.getStructure().getShapes())
+                        fromPlayerInfo.getStructure().getShape(), blocker.getStructure().getShape())
                         && BlockUtil.compareAnglesInDegrees(
                         BlockUtil.calculateAngle(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo,
                                 blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D;

@@ -458,25 +458,13 @@ public class BlockUtil {
 
     public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldCoordinate wc1,
                                                     BigDecimal ballisticAngle, WorldCoordinate wc2,
-                                                    List<Shape> list1, List<Shape> list2) {
+                                                    Shape shape1, Shape shape2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        return detectLineSquareCollision(c1, ballisticAngle, c2, list1, list2);
-    }
-
-    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
-                                                    List<Shape> list1, List<Shape> list2) {
-        for (int i = 0; i < list1.size(); i++) {
-            for (int j = 0; j < list2.size(); j++) {
-                if (detectLineSquareCollision(c1, ballisticAngle, c2, list1.get(i), list2.get(j))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return detectLineSquareCollision(c1, ballisticAngle, c2, shape1, shape2);
     }
 
     public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
@@ -486,26 +474,26 @@ public class BlockUtil {
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND:
                 rst = detectLineSquareCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX()),
                                 c1.getY().add(shape1.getCenter().getY())), ballisticAngle, c2, shape2,
-                        ((Round) shape1).getRadius().doubleValue());
+                        shape1.getRadius().getX().doubleValue());
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectLineSquareCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(((Square) shape1).getSideLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c1.getY().add(shape1.getCenter().getY())
-                                                .add(((Square) shape1).getSideLength().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
                                 ballisticAngle, c2, shape2, 0D);
                     }
                 }
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectLineSquareCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(((Rectangle) shape1).getLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c1.getY().add(shape1.getCenter().getY())
-                                                .add(((Rectangle) shape1).getWidth().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape1.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
                                 ballisticAngle, c2, shape2, 0D);
                     }
                 }
@@ -524,28 +512,28 @@ public class BlockUtil {
                 rst = detectLineSquareCollision(c1, ballisticAngle,
                         new Coordinate(c2.getX().add(shape2.getCenter().getX()),
                                 c2.getY().add(shape2.getCenter().getY())),
-                        thresholdDistance + ((Round) shape2).getRadius().doubleValue());
+                        thresholdDistance + shape2.getRadius().getX().doubleValue());
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectLineSquareCollision(c1, ballisticAngle,
                                 new Coordinate(c2.getX().add(shape2.getCenter().getX())
-                                        .add(((Square) shape2).getSideLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c2.getY().add(shape2.getCenter().getY())
-                                                .add(((Square) shape2).getSideLength().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
                                 thresholdDistance);
                     }
                 }
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectLineSquareCollision(c1, ballisticAngle,
                                 new Coordinate(c2.getX().add(shape2.getCenter().getX())
-                                        .add(((Rectangle) shape2).getLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c2.getY().add(shape2.getCenter().getY())
-                                                .add(((Rectangle) shape2).getWidth().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape2.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
                                 thresholdDistance);
                     }
                 }
@@ -574,23 +562,11 @@ public class BlockUtil {
     }
 
     public static boolean detectCollision(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2,
-                                          WorldCoordinate wc3, List<Shape> list1, List<Shape> list2) {
+                                          WorldCoordinate wc3, Shape shape1, Shape shape2) {
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
         Coordinate c3 = convertWorldCoordinate2Coordinate(regionInfo, wc3);
-        return detectCollision(c1, c2, c3, list1, list2);
-    }
-
-    public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, List<Shape> list1,
-                                          List<Shape> list2) {
-        for (int i = 0; i < list1.size(); i++) {
-            for (int j = 0; j < list2.size(); j++) {
-                if (detectCollision(c1, c2, c3, list1.get(i), list2.get(j))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return detectCollision(c1, c2, c3, shape1, shape2);
     }
 
     public static boolean detectCollision(Coordinate c1, Coordinate c2, Coordinate c3, Shape shape1, Shape shape2) {
@@ -601,34 +577,34 @@ public class BlockUtil {
                                 c1.getY().add(shape1.getCenter().getY())),
                         new Coordinate(c2.getX().add(shape1.getCenter().getX()),
                                 c2.getY().add(shape1.getCenter().getY())),
-                        c3, shape2, ((Round) shape1).getRadius().doubleValue());
+                        c3, shape2, shape1.getRadius().getX().doubleValue());
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(((Square) shape1).getSideLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c1.getY().add(shape1.getCenter().getY())
-                                                .add(((Square) shape1).getSideLength().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
                                 new Coordinate(c2.getX().add(shape1.getCenter().getX())
-                                        .add(((Square) shape1).getSideLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c2.getY().add(shape1.getCenter().getY())
-                                                .add(((Square) shape1).getSideLength().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
                                 c3, shape2, 0D);
                     }
                 }
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(((Rectangle) shape1).getLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c1.getY().add(shape1.getCenter().getY())
-                                                .add(((Rectangle) shape1).getWidth().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape1.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
                                 new Coordinate(c2.getX().add(shape1.getCenter().getX())
-                                        .add(((Rectangle) shape1).getLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c2.getY().add(shape1.getCenter().getY())
-                                                .add(((Rectangle) shape1).getWidth().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape1.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
                                 c3, shape2, 0D);
                     }
                 }
@@ -647,28 +623,28 @@ public class BlockUtil {
                 rst = detectCollision(c1, c2,
                         new Coordinate(c3.getX().add(shape2.getCenter().getX()),
                                 c3.getY().add(shape2.getCenter().getY())),
-                        thresholdDistance + ((Round) shape2).getRadius().doubleValue());
+                        thresholdDistance + shape2.getRadius().getX().doubleValue());
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectCollision(c1, c2,
                                 new Coordinate(c3.getX().add(shape2.getCenter().getX())
-                                        .add(((Square) shape2).getSideLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c3.getY().add(shape2.getCenter().getY())
-                                                .add(((Square) shape2).getSideLength().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
                                 thresholdDistance);
                     }
                 }
                 break;
             case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (double i = -0.5; i <= 0.5; i++) {
-                    for (double j = -0.5; j <= 0.5; j++) {
+                for (int i = -1; i <= 1; i += 2) {
+                    for (int j = -1; j <= 1; j += 2) {
                         rst |= detectCollision(c1, c2,
                                 new Coordinate(c3.getX().add(shape2.getCenter().getX())
-                                        .add(((Rectangle) shape2).getLength().multiply(BigDecimal.valueOf(i))),
+                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
                                         c3.getY().add(shape2.getCenter().getY())
-                                                .add(((Rectangle) shape2).getWidth().multiply(BigDecimal.valueOf(j)))),
+                                                .add(shape2.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
                                 thresholdDistance);
                     }
                 }
@@ -858,21 +834,18 @@ public class BlockUtil {
 
     public static WorldBlock convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
                                                      WorldCoordinate worldCoordinate) {
-        WorldBlock block = new WorldBlock(convertEventCode2BlockType(eventCode), userCode,
-                String.valueOf(eventCode), new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE), worldCoordinate);
-        block.getStructure().getShapes().add(new Square(BigDecimal.ONE,new Coordinate(BigDecimal.ZERO,
-                BigDecimal.valueOf(-0.5D))));
+        WorldBlock block = new WorldBlock(convertEventCode2BlockType(eventCode), userCode, String.valueOf(eventCode),
+                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+                worldCoordinate);
         BlockUtil.fixWorldCoordinate(regionInfo, block);
         return block;
     }
 
     public static Block convertEvent2Block(Event event) {
         Block block = new Block(convertEventCode2BlockType(event.getCode()), String.valueOf(event.getFrame()),
-                String.valueOf(event.getCode()), new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                convertEventCode2Layer(event.getCode())), event);
-        block.getStructure().getShapes().add(new Square(BigDecimal.ONE,new Coordinate(BigDecimal.ZERO,
-                BigDecimal.valueOf(-0.5D))));
+                String.valueOf(event.getCode()),
+                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())),
+                event);
         return block;
     }
 

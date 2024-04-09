@@ -13,7 +13,6 @@ import com.github.ltprc.gamepal.model.item.Outfit;
 import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
-import com.github.ltprc.gamepal.model.map.structure.Square;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
@@ -37,7 +36,6 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -119,12 +117,12 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        JSONObject structureObj = req.getJSONObject("structure");
-        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
-                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
-                .collect(Collectors.toList());
+//        JSONObject structureObj = req.getJSONObject("structure");
+//        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
+//                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
+//                .collect(Collectors.toList());
         PlayerInfo playerInfo = JSON.parseObject(String.valueOf(req), PlayerInfo.class);
-        playerInfo.getStructure().setShapes(shapes);
+//        playerInfo.getStructure().setShapes(shapes);
         playerInfoMap.put(userCode, playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -219,11 +217,11 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != faceDirection) {
             playerInfo.setFaceDirection(faceDirection);
         }
-        JSONObject structureObj = req.getJSONObject("structure");
-        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
-                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
-                .collect(Collectors.toList());
-        playerInfo.getStructure().setShapes(shapes);
+//        JSONObject structureObj = req.getJSONObject("structure");
+//        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
+//                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
+//                .collect(Collectors.toList());
+//        playerInfo.getStructure().setShapes(shapes);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -894,9 +892,11 @@ public class PlayerServiceImpl implements PlayerService {
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         Drop drop = new Drop(itemNo, amount, new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
                 "3000", new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE), worldMovingBlock.getCoordinate())); // TODO characterize code
-        drop.getStructure().getShapes().add(new Square(BigDecimal.ONE, new Coordinate(BigDecimal.ZERO,
-                BigDecimal.valueOf(-0.5D))));
+                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+                new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)))),
+                worldMovingBlock.getCoordinate())); // TODO characterize code
         drop.getStructure().setImageSize(new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5)));
         scene.getBlocks().add(drop);
         WorldDrop worldDrop = new WorldDrop(drop.getItemNo(), drop.getAmount(), worldMovingBlock);
