@@ -222,18 +222,12 @@ public class WorldServiceImpl implements WorldService {
                 Scene scene = entry2.getValue();
                 scene.getBlocks().stream().forEach(block -> {
                     block.setId(UUID.randomUUID().toString());
-                    WorldBlock worldBlock =
-                            new WorldBlock(block.getType(), block.getId(), block.getCode(), block.getStructure(),
-                            new WorldCoordinate(region.getRegionNo(), scene.getSceneCoordinate(), block));
+                    WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(block, region.getRegionNo(),
+                            scene.getSceneCoordinate(), block);
                     switch (block.getType()) {
                         case GamePalConstants.BLOCK_TYPE_DROP:
-                            WorldDrop worldDrop = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(),
-                                    worldBlock);
-                            world.getBlockMap().put(block.getId(), worldDrop);
-                            break;
                         case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                            WorldTeleport worldTeleport = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
-                            world.getBlockMap().put(block.getId(), worldTeleport);
+                            world.getBlockMap().put(block.getId(), worldBlock);
                             break;
                         default:
                             if (BlockUtil.checkBlockTypeInteractive(block.getType())) {
@@ -350,8 +344,7 @@ public class WorldServiceImpl implements WorldService {
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
                         && BlockUtil.detectLineSquareCollision(regionMap.get(eventBlock.getRegionNo()),
-                        fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
-                        fromPlayerInfo.getStructure().getShape(), blocker.getStructure().getShape())
+                        fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker)
                         && BlockUtil.compareAnglesInDegrees(
                         BlockUtil.calculateAngle(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo,
                                 blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D;
@@ -506,14 +499,12 @@ public class WorldServiceImpl implements WorldService {
         List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>(playerInfoList);
         preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
             regionMap.get(eventBlock.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
-                    .filter(blocker -> GamePalConstants.STRUCTURE_MATERIAL_HOLLOW
-                            != BlockUtil.convertBlockType2Material(blocker.getType()))
+                    .filter(blocker ->
+                            GamePalConstants.STRUCTURE_MATERIAL_HOLLOW != blocker.getStructure().getMaterial())
                     .forEach(blocker -> {
-                        WorldCoordinate wc = BlockUtil.convertCoordinate2WorldCoordinate(
-                                regionMap.get(eventBlock.getRegionNo()), sceneCoordinate, blocker);
-                        WorldBlock wb = new WorldBlock(blocker.getType(), blocker.getId(), blocker.getCode(),
-                                blocker.getStructure(), wc);
-                        preSelectedWorldBlocks.add(wb);
+                        WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(blocker, eventBlock.getRegionNo(),
+                                sceneCoordinate, blocker);
+                        preSelectedWorldBlocks.add(worldBlock);
                     });
         });
         preSelectedWorldBlocks.stream()

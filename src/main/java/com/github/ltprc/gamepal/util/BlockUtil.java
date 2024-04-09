@@ -227,6 +227,22 @@ public class BlockUtil {
         }
         return newBlock;
     }
+    public static WorldBlock convertBlock2WorldBlock(Block block, int regionNo, IntegerCoordinate sceneCoordinate,
+                                                     Coordinate coordinate) {
+        WorldBlock worldBlock = new WorldBlock(block.getType(), block.getId(), block.getCode(),
+                block.getStructure(), new WorldCoordinate(regionNo, sceneCoordinate, coordinate));
+        switch (block.getType()) {
+            case GamePalConstants.BLOCK_TYPE_DROP:
+                worldBlock = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(), worldBlock);
+                break;
+            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                worldBlock = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
+                break;
+            default:
+                break;
+        }
+        return worldBlock;
+    }
 
     public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
         return new Event(worldEvent.getUserCode(), worldEvent.getCode(), worldEvent.getFrame(),
@@ -362,26 +378,6 @@ public class BlockUtil {
         return Math.abs(a2 - a1);
     }
 
-    public static BigDecimal calculateBallisticDistance(RegionInfo regionInfo, WorldCoordinate wc1,
-                                                        BigDecimal ballisticAngle, WorldCoordinate wc2) {
-        if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
-            return null;
-        }
-        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
-        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        return calculateBallisticDistance(c1, ballisticAngle, c2);
-    }
-
-    public static BigDecimal calculateBallisticDistance(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
-        if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
-                || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
-            return c1.getX().subtract(c2.getX()).abs();
-        }
-        double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
-        return BigDecimal.valueOf(Math.abs(slope * c2.getX().doubleValue() - c2.getY().doubleValue()
-                + c1.getY().doubleValue() - slope * c1.getX().doubleValue()) / Math.sqrt(slope * slope + 1));
-    }
-
     public static List<WorldCoordinate> collectEquidistantPoints(RegionInfo regionInfo, WorldCoordinate wc1,
                                                                  WorldCoordinate wc2, int amount) {
         List<WorldCoordinate> rst = new ArrayList<>();
@@ -456,109 +452,90 @@ public class BlockUtil {
         return wc;
     }
 
-    public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldCoordinate wc1,
-                                                    BigDecimal ballisticAngle, WorldCoordinate wc2,
-                                                    Shape shape1, Shape shape2) {
-        if (wc1.getRegionNo() != regionInfo.getRegionNo() || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+    public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldBlock worldBlock1,
+                                                    BigDecimal ballisticAngle, WorldBlock worldBlock2) {
+        if (worldBlock1.getRegionNo() != regionInfo.getRegionNo()
+                || worldBlock2.getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
-        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        return detectLineSquareCollision(c1, ballisticAngle, c2, shape1, shape2);
+        Block block1 = convertWorldBlock2Block(regionInfo, worldBlock1, true);
+        Block block2 = convertWorldBlock2Block(regionInfo, worldBlock2, true);
+        return detectLineSquareCollision(block1, ballisticAngle, block2);
     }
 
-    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
-                                                    Shape shape1, Shape shape2) {
-        boolean rst = false;
-        switch (shape1.getShapeType()) {
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND:
-                rst = detectLineSquareCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX()),
-                                c1.getY().add(shape1.getCenter().getY())), ballisticAngle, c2, shape2,
-                        shape1.getRadius().getX().doubleValue());
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectLineSquareCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c1.getY().add(shape1.getCenter().getY())
-                                                .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
-                                ballisticAngle, c2, shape2, 0D);
-                    }
-                }
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectLineSquareCollision(new Coordinate(c1.getX().add(shape1.getCenter().getX())
-                                        .add(shape1.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c1.getY().add(shape1.getCenter().getY())
-                                                .add(shape1.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
-                                ballisticAngle, c2, shape2, 0D);
-                    }
-                }
-                break;
-            default:
-                break;
+    public static boolean detectLineSquareCollision(Block oldBlock1, BigDecimal ballisticAngle, Block oldBlock2) {
+        Block block1 = new Block(oldBlock1.getType(), oldBlock1.getId(), oldBlock1.getCode(), oldBlock1.getStructure(),
+                new Coordinate(oldBlock1.getX().add(oldBlock1.getStructure().getShape().getCenter().getX()),
+                        oldBlock1.getY().add(oldBlock1.getStructure().getShape().getCenter().getY())));
+        Block block2 = new Block(oldBlock2.getType(), oldBlock2.getId(), oldBlock2.getCode(), oldBlock2.getStructure(),
+                new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
+                        oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
+            block1.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block1.getStructure().getShape().getRadius().setY(block1.getStructure().getShape().getRadius().getX());
         }
-        return rst;
-    }
-
-    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
-                                                    Shape shape2, double thresholdDistance) {
-        boolean rst = false;
-        switch (shape2.getShapeType()) {
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND:
-                rst = detectLineSquareCollision(c1, ballisticAngle,
-                        new Coordinate(c2.getX().add(shape2.getCenter().getX()),
-                                c2.getY().add(shape2.getCenter().getY())),
-                        thresholdDistance + shape2.getRadius().getX().doubleValue());
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectLineSquareCollision(c1, ballisticAngle,
-                                new Coordinate(c2.getX().add(shape2.getCenter().getX())
-                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c2.getY().add(shape2.getCenter().getY())
-                                                .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(j)))),
-                                thresholdDistance);
-                    }
-                }
-                break;
-            case GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE:
-                for (int i = -1; i <= 1; i += 2) {
-                    for (int j = -1; j <= 1; j += 2) {
-                        rst |= detectLineSquareCollision(c1, ballisticAngle,
-                                new Coordinate(c2.getX().add(shape2.getCenter().getX())
-                                        .add(shape2.getRadius().getX().multiply(BigDecimal.valueOf(i))),
-                                        c2.getY().add(shape2.getCenter().getY())
-                                                .add(shape2.getRadius().getY().multiply(BigDecimal.valueOf(j)))),
-                                thresholdDistance);
-                    }
-                }
-                break;
-            default:
-                break;
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
+            block2.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block2.getStructure().getShape().getRadius().setY(block2.getStructure().getShape().getRadius().getX());
         }
-        return rst;
-    }
-
-    public static boolean detectLineSquareCollision(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2,
-                                                    double thresholdDistance) {
         if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
                 || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
-            return c1.getX().subtract(c2.getX()).abs().doubleValue() < thresholdDistance;
+            return block1.getX().subtract(block2.getX()).abs().doubleValue()
+                    < block1.getStructure().getShape().getRadius().getX()
+                    .add(block2.getStructure().getShape().getRadius().getX()).doubleValue();
+        }
+        // Round vs. round
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
+                && GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+            if (calculateBallisticDistance(block1, ballisticAngle, block2)
+                    .compareTo(block1.getStructure().getShape().getRadius().getX()
+                            .add(block2.getStructure().getShape().getRadius().getX())) < 0) {
+                return true;
+            }
+            return false;
         }
         double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
-        double yLeft = slope * ((c2.getX().doubleValue() - 0.5D) - thresholdDistance - c1.getX().doubleValue())
-                + c1.getY().doubleValue();
-        double yRight = slope * ((c2.getX().doubleValue() + 0.5D) - thresholdDistance - c1.getX().doubleValue())
-                + c1.getY().doubleValue();
-        return !((yLeft - c2.getY().doubleValue() > thresholdDistance
-                && yRight - c2.getY().doubleValue() > thresholdDistance)
-                || (c2.getY().doubleValue() - yLeft > thresholdDistance
-                && c2.getY().doubleValue() - yRight > thresholdDistance));
+        BigDecimal xLeft = block2.getX().subtract(block2.getStructure().getShape().getRadius().getX());
+        BigDecimal xRight = block2.getX().add(block2.getStructure().getShape().getRadius().getX());
+        BigDecimal yLeft = xLeft.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
+        BigDecimal yRight = xRight.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
+        // Rectangle vs. rectangle
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
+                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
+            if (yLeft.subtract(block2.getY()).abs()
+                    .compareTo(block1.getStructure().getShape().getRadius().getY()
+                            .add(block2.getStructure().getShape().getRadius().getY())) < 0
+            || yRight.subtract(block2.getY()).abs()
+                    .compareTo(block1.getStructure().getShape().getRadius().getY()
+                            .add(block2.getStructure().getShape().getRadius().getY())) < 0) {
+                return true;
+            }
+            return false;
+        }
+        // Round vs. rectangle
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
+        }
+        // TODO make them specific
+        if (yLeft.subtract(block2.getY()).abs()
+                .compareTo(block1.getStructure().getShape().getRadius().getY()
+                        .add(block2.getStructure().getShape().getRadius().getY())) < 0
+                || yRight.subtract(block2.getY()).abs()
+                .compareTo(block1.getStructure().getShape().getRadius().getY()
+                        .add(block2.getStructure().getShape().getRadius().getY())) < 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public static BigDecimal calculateBallisticDistance(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
+        if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
+                || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
+            return c1.getX().subtract(c2.getX()).abs();
+        }
+        double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
+        return BigDecimal.valueOf(Math.abs(-slope * c2.getX().doubleValue() - c2.getY().doubleValue()
+                + c1.getY().doubleValue() + slope * c1.getX().doubleValue()) / Math.sqrt(slope * slope + 1));
     }
 
     public static boolean detectCollision(RegionInfo regionInfo, WorldBlock worldBlock1, WorldBlock worldBlock2) {
@@ -574,6 +551,14 @@ public class BlockUtil {
         Block block2 = new Block(oldBlock2.getType(), oldBlock2.getId(), oldBlock2.getCode(), oldBlock2.getStructure(),
                 new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
                         oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
+            block1.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block1.getStructure().getShape().getRadius().setY(block1.getStructure().getShape().getRadius().getX());
+        }
+        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
+            block2.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block2.getStructure().getShape().getRadius().setY(block2.getStructure().getShape().getRadius().getX());
+        }
         // Round vs. round
         if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
                 && GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
@@ -615,8 +600,8 @@ public class BlockUtil {
         return false;
     }
 
-    public static int convertBlockType2Material(int blockType) {
-        int material = GamePalConstants.STRUCTURE_MATERIAL_HOLLOW;
+    public static int convertBlockType2MaterialOld(int blockType) {
+        int material;
         switch (blockType) {
             case GamePalConstants.BLOCK_TYPE_GROUND:
             case GamePalConstants.BLOCK_TYPE_DROP:
@@ -625,12 +610,13 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
             case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
             case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                material = GamePalConstants.STRUCTURE_MATERIAL_SOLID;
+                material = GamePalConstants.STRUCTURE_MATERIAL_HOLLOW;
                 break;
             case GamePalConstants.BLOCK_TYPE_PLAYER:
                 material = GamePalConstants.STRUCTURE_MATERIAL_FLESH;
                 break;
             default:
+                material = GamePalConstants.STRUCTURE_MATERIAL_SOLID;
                 break;
         }
         return material;

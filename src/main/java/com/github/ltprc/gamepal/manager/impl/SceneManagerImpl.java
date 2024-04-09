@@ -223,7 +223,7 @@ public class SceneManagerImpl implements SceneManager {
         }
         // 灌木丛2
         for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, null, "f-5-4",
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-5-4",
                     new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));

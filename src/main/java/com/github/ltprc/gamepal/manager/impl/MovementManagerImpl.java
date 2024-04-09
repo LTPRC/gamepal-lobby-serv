@@ -53,8 +53,7 @@ public class MovementManagerImpl implements MovementManager {
                     teleportWc = ((Teleport) block).getTo();
                     break;
             }
-            if (GamePalConstants.STRUCTURE_MATERIAL_HOLLOW
-                    != BlockUtil.convertBlockType2Material(block.getType())) {
+            if (GamePalConstants.STRUCTURE_MATERIAL_HOLLOW == block.getStructure().getMaterial()) {
                 continue;
             }
             newMovingBlock = new Block(movingBlock);
