@@ -12,6 +12,9 @@ import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.item.Outfit;
 import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
+import com.github.ltprc.gamepal.model.map.structure.Square;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -34,6 +37,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -108,13 +112,19 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> updatePlayerInfo(String userCode, PlayerInfo playerInfo) {
+    public ResponseEntity<String> updatePlayerInfo(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        JSONObject structureObj = req.getJSONObject("structure");
+        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
+                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
+                .collect(Collectors.toList());
+        PlayerInfo playerInfo = JSON.parseObject(String.valueOf(req), PlayerInfo.class);
+        playerInfo.getStructure().setShapes(shapes);
         playerInfoMap.put(userCode, playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -209,6 +219,11 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != faceDirection) {
             playerInfo.setFaceDirection(faceDirection);
         }
+        JSONObject structureObj = req.getJSONObject("structure");
+        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
+                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
+                .collect(Collectors.toList());
+        playerInfo.getStructure().setShapes(shapes);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -685,62 +700,62 @@ public class PlayerServiceImpl implements PlayerService {
                 GamePalConstants.EVENT_MAX_DISTANCE_SHOOT);
         switch (playerInfo.getSkill()[skillNo][0]) {
             case GamePalConstants.SKILL_CODE_BLOCK:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_BLOCK,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_HEAL:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_HEAL,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_CHEER:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CHEER,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_CURSE:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CURSE,
                         playerInfo));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_HIT:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_HIT, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_KICK:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_KICK, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_SCRATCH:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_SCRATCH, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_CLEAVE:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_CLEAVE, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_MELEE_STAB:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_STAB, meleeWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_HIT:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_HIT, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_ARROW:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_ARROW, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_GUN:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootWc));
                 break;
@@ -750,18 +765,18 @@ public class PlayerServiceImpl implements PlayerService {
                             world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
                                     GamePalConstants.EVENT_MAX_ANGLE_SHOOT_SHOTGUN.doubleValue() * 2 * (random.nextDouble() - 0.5D))),
                             GamePalConstants.EVENT_MAX_DISTANCE_SHOOT_SHOTGUN);
-                    worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                    worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                             world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                             GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootShotgunWc));
                 }
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_MAGNUM:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_MAGNUM, shootWc));
                 break;
             case GamePalConstants.SKILL_CODE_SHOOT_ROCKET:
-                worldService.addEvent(userCode, BlockUtil.createEventWorldBlock(
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_ROCKET, shootWc));
                 break;
@@ -878,8 +893,11 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         Drop drop = new Drop(itemNo, amount, new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
-                "3000", new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)), worldMovingBlock.getCoordinate())); // TODO characterize it
+                "3000", new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
+                GamePalConstants.STRUCTURE_LAYER_MIDDLE), worldMovingBlock.getCoordinate())); // TODO characterize code
+        drop.getStructure().getShapes().add(new Square(BigDecimal.ONE, new Coordinate(BigDecimal.ZERO,
+                BigDecimal.valueOf(-0.5D))));
+        drop.getStructure().setImageSize(new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5)));
         scene.getBlocks().add(drop);
         WorldDrop worldDrop = new WorldDrop(drop.getItemNo(), drop.getAmount(), worldMovingBlock);
         worldDrop.setType(drop.getType());

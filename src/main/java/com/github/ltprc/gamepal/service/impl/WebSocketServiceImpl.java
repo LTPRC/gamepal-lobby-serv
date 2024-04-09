@@ -9,6 +9,7 @@ import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
@@ -95,7 +96,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfo")) {
-                playerService.updatePlayerInfo(userCode, functions.getObject("updatePlayerInfo", PlayerInfo.class));
+                playerService.updatePlayerInfo(userCode, functions.getJSONObject("updatePlayerInfo"));
             }
             if (functions.containsKey("updateplayerinfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));

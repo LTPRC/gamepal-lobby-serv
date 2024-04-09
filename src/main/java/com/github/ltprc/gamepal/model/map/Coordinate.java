@@ -14,7 +14,7 @@ public class Coordinate {
     private BigDecimal y;
 
     public Coordinate(Coordinate coordinate) {
-        this.x = coordinate.getX();
-        this.y = coordinate.getY();
+        x = coordinate.x;
+        y = coordinate.y;
     }
 }

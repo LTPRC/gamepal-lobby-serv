@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.model.map.world;
 
-import com.github.ltprc.gamepal.model.map.Structure;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +27,6 @@ public class WorldBlock extends WorldCoordinate {
         this.type = type;
         this.id = id;
         this.code = code;
-        this.structure = structure;
+        this.structure = new Structure(structure);
     }
 }

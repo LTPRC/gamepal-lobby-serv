@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
@@ -43,53 +44,32 @@ public class MovementManagerImpl implements MovementManager {
                 continue;
             }
             Structure structure = block.getStructure();
-            Coordinate squareCoordinate = block; // Not lifted anymore 24/04/07
             if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT
-                    && BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
+                    && BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
                             worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                    squareCoordinate, worldMovingBlock.getStructure().getRadius(), structure.getRadius())) {
+                    block, worldMovingBlock.getStructure().getShapes(), structure.getShapes())) {
                     teleportWc = ((Teleport) block).getTo();
                     break;
             }
             if (!BlockUtil.checkBlockTypeSolid(block.getType())) {
                 continue;
             }
-            switch (structure.getUndersideType()) {
-                case GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE:
-                    // Blocked by square
-                    if (BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
-                            new Coordinate(worldMovingBlock.getCoordinate().getX()
-                                    .add(worldMovingBlock.getSpeed().getX()),
-                                    worldMovingBlock.getCoordinate().getY()),
-                            squareCoordinate, worldMovingBlock.getStructure().getRadius(), structure.getRadius())) {
-                        worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
-                    }
-                    if (BlockUtil.detectCollisionSquare(worldMovingBlock.getCoordinate(),
-                            new Coordinate(worldMovingBlock.getCoordinate().getX(),
-                                    worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                            squareCoordinate, worldMovingBlock.getStructure().getRadius(), structure.getRadius())) {
-                        worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
-                    }
-                    break;
-                case GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND:
-                    // Blocked by round
-                    if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                            new Coordinate(worldMovingBlock.getCoordinate().getX()
-                                    .add(worldMovingBlock.getSpeed().getX()),
-                                    worldMovingBlock.getCoordinate().getY()),
-                            block, worldMovingBlock.getStructure().getRadius(), structure.getRadius())) {
-                        worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
-                    }
-                    if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
-                            new Coordinate(worldMovingBlock.getCoordinate().getX(),
-                                    worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
-                            block, worldMovingBlock.getStructure().getRadius(), structure.getRadius())) {
-                        worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
-                    }
-                    break;
-                default:
-                    break;
+            if (structure.getShapes().get(0) == null) {
+                continue;
+            }
+            if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
+                    new Coordinate(worldMovingBlock.getCoordinate().getX()
+                            .add(worldMovingBlock.getSpeed().getX()),
+                            worldMovingBlock.getCoordinate().getY()),
+                    block, worldMovingBlock.getStructure().getShapes(), structure.getShapes())) {
+                worldMovingBlock.getSpeed().setX(BigDecimal.ZERO);
+            }
+            if (BlockUtil.detectCollision(worldMovingBlock.getCoordinate(),
+                    new Coordinate(worldMovingBlock.getCoordinate().getX(),
+                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())),
+                    block, worldMovingBlock.getStructure().getShapes(), structure.getShapes())) {
+                worldMovingBlock.getSpeed().setY(BigDecimal.ZERO);
             }
         }
         // Settle worldMovingBlock position

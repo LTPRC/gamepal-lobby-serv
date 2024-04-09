@@ -11,6 +11,9 @@ import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.structure.Round;
+import com.github.ltprc.gamepal.model.map.structure.Square;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -138,6 +141,7 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new ArrayList<>());
                 newScene.setEvents(new ArrayList<>());
+                // Collect normal square blocks from map object
                 JSONArray map = scene.getJSONArray("map");
                 if (null != map && !map.isEmpty()) {
                     for (int i = 0; i < Math.min(height, map.size()); i++) {
@@ -158,25 +162,32 @@ public class WorldServiceImpl implements WorldService {
                                     break;
                             }
                             Block block = new Block(blockType, null, String.valueOf(value % 10000),
-                                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                                            BigDecimal.valueOf(0.5D), BigDecimal.ONE, BigDecimal.ONE),
+                                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                            GamePalConstants.STRUCTURE_LAYER_BOTTOM),
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
+                            block.getStructure().getShapes().add(new Square(BigDecimal.ONE,
+                                    new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D))));
                             newScene.getBlocks().add(block);
                         }
                     }
                 }
+                // Collect special blocks from blocks object
                 JSONArray blocks = scene.getJSONArray("blocks");
                 if (null != blocks && !blocks.isEmpty()) {
                     for (int i = 0; i < blocks.size(); i++) {
                         JSONArray blockRow = blocks.getJSONArray(i);
                         Integer type = blockRow.getInteger(0);
                         Block block = new Block(type, null, String.valueOf(blockRow.getInteger(1)),
-                                new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_SQUARE,
-                                        BigDecimal.valueOf(0.5D), BigDecimal.ONE, BigDecimal.ONE),
+                                new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
+                                        GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
                                                 BigDecimal.valueOf(blockRow.getInteger(3))));
+                        block.getStructure().getShapes().add(new Square(BigDecimal.ONE,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.5D))));
                         switch (type) {
                             case GamePalConstants.BLOCK_TYPE_DROP:
+                                block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
+                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
                                 Drop drop = new Drop(blockRow.getString(4), blockRow.getInteger(5), block);
                                 newScene.getBlocks().add(drop);
                                 break;
@@ -186,6 +197,7 @@ public class WorldServiceImpl implements WorldService {
                                                 blockRow.getInteger(6)),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
                                                 BigDecimal.valueOf(blockRow.getInteger(8))));
+                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
                                 Teleport teleport = new Teleport(to, block);
                                 newScene.getBlocks().add(teleport);
                                 break;
@@ -212,7 +224,7 @@ public class WorldServiceImpl implements WorldService {
                 scene.getBlocks().stream().forEach(block -> {
                     block.setId(UUID.randomUUID().toString());
                     WorldBlock worldBlock =
-                            new WorldBlock(block.getType(), block.getId(), block.getCode(),block.getStructure(),
+                            new WorldBlock(block.getType(), block.getId(), block.getCode(), block.getStructure(),
                             new WorldCoordinate(region.getRegionNo(), scene.getSceneCoordinate(), block));
                     switch (block.getType()) {
                         case GamePalConstants.BLOCK_TYPE_DROP:
@@ -340,7 +352,7 @@ public class WorldServiceImpl implements WorldService {
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
                         && BlockUtil.detectLineSquareCollision(regionMap.get(eventBlock.getRegionNo()),
                         fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker,
-                        structure.getRadius().doubleValue())
+                        fromPlayerInfo.getStructure().getShapes(), blocker.getStructure().getShapes())
                         && BlockUtil.compareAnglesInDegrees(
                         BlockUtil.calculateAngle(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo,
                                 blocker).doubleValue(), fromPlayerInfo.getFaceDirection().doubleValue()) < 135D;
@@ -433,7 +445,7 @@ public class WorldServiceImpl implements WorldService {
                         eventBlock);
                 world.getEventQueue().add(worldEvent);
                 if (Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
-                    addEvent(eventBlock.getId(), BlockUtil.createEventWorldBlock(
+                    addEvent(eventBlock.getId(), BlockUtil.convertEvent2WorldBlock(
                             world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock.getId(),
                             GamePalConstants.EVENT_CODE_EXPLODE, eventBlock));
                     // Add tail smoke 24/03/16

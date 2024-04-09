@@ -46,8 +46,20 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_HOLLOW_WALL = 18;
     public static final int BLOCK_TYPE_BLOCKED_CEILING = 19;
 
+    public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
+    public static final int STRUCTURE_MATERIAL_SOLID = 1;
+    public static final int STRUCTURE_MATERIAL_FLESH = 2;
+    public static final int STRUCTURE_LAYER_BOTTOM = 10;
+    public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 20;
+    public static final int STRUCTURE_LAYER_MIDDLE = 30;
+    public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 40;
+    public static final int STRUCTURE_LAYER_TOP = 50;
+    public static final int STRUCTURE_LAYER_TOP_DECORATION = 60;
     public static final int STRUCTURE_UNDERSIDE_TYPE_SQUARE = 1;
     public static final int STRUCTURE_UNDERSIDE_TYPE_ROUND = 2;
+    public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
+    public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
+    public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
     public static final BigDecimal PLAYER_VIEW_RADIUS = BigDecimal.valueOf(10);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
@@ -141,11 +153,7 @@ public class GamePalConstants {
     public static final int REGION_INDEX_GRASSLAND = 2;
     public static final int SCENE_SCAN_RADIUS = 1;
     public static final int SCENE_SCAN_MAX_RADIUS = 50;
-
     public static final long ONLINE_TIMEOUT_SECOND = 300;
-    public static final int LAYER_BOTTOM = 1;
-    public static final int LAYER_CENTER = 2;
-    public static final int LAYER_TOP = 3;
 
     public static final int GAME_STATUS_END = -1;
     public static final int GAME_STATUS_START = 0;

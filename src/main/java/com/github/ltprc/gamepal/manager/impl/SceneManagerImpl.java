@@ -4,6 +4,9 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.structure.Round;
+import com.github.ltprc.gamepal.model.map.structure.Square;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
@@ -12,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.*;
 
 
@@ -61,11 +63,12 @@ public class SceneManagerImpl implements SceneManager {
         scene.setBlocks(new ArrayList<>());
         for (int k = 0; k < region.getHeight(); k++) {
             for (int l = 0; l < region.getWidth(); l++) {
-                Block block = new Block();
-                block.setX(BigDecimal.valueOf(l));
-                block.setY(BigDecimal.valueOf(k));
-                block.setType(GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND);
-                block.setCode("1001");
+                Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND, null, "1001",
+                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
+                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+                        new Coordinate(BigDecimal.valueOf(l), BigDecimal.valueOf(k)));
+                block.getStructure().getShapes().add(new Square(BigDecimal.ONE, new Coordinate(BigDecimal.ZERO,
+                        BigDecimal.valueOf(-0.5D))));
                 scene.getBlocks().add(block);
             }
         }
@@ -89,140 +92,145 @@ public class SceneManagerImpl implements SceneManager {
         scene.setBlocks(new ArrayList<>());
         for (int k = 0; k < region.getHeight(); k++) {
             for (int l = 0; l < region.getWidth(); l++) {
-                Block block = new Block();
-                block.setX(BigDecimal.valueOf(l));
-                block.setY(BigDecimal.valueOf(k));
-                block.setType(GamePalConstants.BLOCK_TYPE_GROUND);
-                block.setCode("1010");
+                Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND, null, "1010",
+                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+                        new Coordinate(BigDecimal.valueOf(l), BigDecimal.valueOf(k)));
+                block.getStructure().getShapes().add(new Square(BigDecimal.ONE, new Coordinate(BigDecimal.ZERO,
+                        BigDecimal.valueOf(-0.5D))));
                 scene.getBlocks().add(block);
             }
         }
 
         // 松树
         for (int j = 0; j < random.nextInt(10); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-0-0-2-2",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.valueOf(2), BigDecimal.valueOf(2)),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-0-0",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D)));
+            block.getStructure().setImageSize(new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
             scene.getBlocks().add(block);
         }
         // 橡树
         for (int j = 0; j < random.nextInt(10); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-2-0-2-2",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.valueOf(2), BigDecimal.valueOf(2)),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-2-0",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D)));
+            block.getStructure().setImageSize(new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
             scene.getBlocks().add(block);
         }
         // 死树
         for (int j = 0; j < random.nextInt(2); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-4-0-2-2",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.valueOf(2), BigDecimal.valueOf(2)),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-4-0",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D)));
+            block.getStructure().setImageSize(new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
             scene.getBlocks().add(block);
         }
         // 细松树
         for (int j = 0; j < random.nextInt(2); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-0-2-1-2",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.ONE, BigDecimal.valueOf(2)),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-0-2",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D)));
+            block.getStructure().setImageSize(new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
             scene.getBlocks().add(block);
         }
         // 细橡树
         for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-1-2-1-2",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.ONE, BigDecimal.valueOf(2)),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-1-2",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D)));
+            block.getStructure().setImageSize(new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
             scene.getBlocks().add(block);
         }
         // 细死树
         for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-2-2-1-2",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.1D),
-                            BigDecimal.ONE, BigDecimal.valueOf(2)),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-2-2",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D)));
+            block.getStructure().setImageSize(new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
             scene.getBlocks().add(block);
         }
         // 大石头
         for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-0-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-0-4",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                    BigDecimal.valueOf(-0.25D))));
             scene.getBlocks().add(block);
         }
         // 树桩1
         for (int j = 0; j < random.nextInt(2); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-1-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-1-4",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                    BigDecimal.valueOf(-0.25D))));
             scene.getBlocks().add(block);
         }
         // 树桩2
         for (int j = 0; j < random.nextInt(2); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-2-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-2-4",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                    BigDecimal.valueOf(-0.25D))));
             scene.getBlocks().add(block);
         }
         // 空心树干
         for (int j = 0; j < random.nextInt(2); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-3-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-3-4",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                    BigDecimal.valueOf(-0.25D))));
             scene.getBlocks().add(block);
         }
         // 灌木丛1
         for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-4-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
+            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL, null, "f-4-4",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                    BigDecimal.valueOf(-0.25D))));
             scene.getBlocks().add(block);
         }
         // 灌木丛2
         for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL_DECORATION, null, "f-5-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
+            Block block = new Block(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, null, "f-5-4",
+                    new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
-            scene.getBlocks().add(block);
-        }
-        // 灌木丛2
-        for (int j = 0; j < random.nextInt(5); j++) {
-            Block block = new Block(GamePalConstants.BLOCK_TYPE_WALL_DECORATION, null, "f-5-4-1-1",
-                    new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                            BigDecimal.ONE, BigDecimal.ONE),
-                    new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
-                            BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+            block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                    BigDecimal.valueOf(-0.25D))));
             scene.getBlocks().add(block);
         }
         // 其他装饰
         for (int i = 0; i < 22; i++) {
             for (int j = 0; j < random.nextInt(3); j++) {
-                Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND_DECORATION, null, "f-" + (i % 8) + "-" + (i / 8 + 5) + "-1-1",
-                        new Structure(GamePalConstants.STRUCTURE_UNDERSIDE_TYPE_ROUND, BigDecimal.valueOf(0.5D),
-                                BigDecimal.ONE, BigDecimal.ONE),
+                Block block = new Block(GamePalConstants.BLOCK_TYPE_GROUND_DECORATION, null, "f-" + (i % 8) + "-" + (i / 8 + 5),
+                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID, GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION),
                         new Coordinate(BigDecimal.valueOf(random.nextDouble() * region.getWidth()),
                                 BigDecimal.valueOf(random.nextDouble() * region.getHeight())));
+                block.getStructure().getShapes().add(new Round(BigDecimal.valueOf(0.1D), new Coordinate(BigDecimal.ZERO,
+                        BigDecimal.valueOf(-0.5D))));
                 scene.getBlocks().add(block);
             }
         }
@@ -315,7 +323,7 @@ public class SceneManagerImpl implements SceneManager {
                             && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
                 })
                 .forEach(entry -> {
-                    Block block = BlockUtil.convertWorldBlock2Block(entry.getValue());
+                    Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                             entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
                     rankingQueue.add(block);
