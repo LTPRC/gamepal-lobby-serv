@@ -15,7 +15,10 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +29,8 @@ import java.util.UUID;
 
 @Component
 public class NpcManagerImpl implements NpcManager {
+
+    private static final Log logger = LogFactory.getLog(NpcManagerImpl.class);
 
     @Autowired
     private PlayerService playerService;
@@ -141,8 +146,13 @@ public class NpcManagerImpl implements NpcManager {
         WorldCoordinate wc = request.getObject("wc", WorldCoordinate.class);
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
-        double distance = BlockUtil.calculateDistance(
-                world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, wc).doubleValue();
+        BigDecimal distanceBigDecimal = BlockUtil.calculateDistance(
+                world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, wc);
+        if (null == distanceBigDecimal) {
+            logger.warn(ErrorUtil.ERROR_1034);
+            return rst;
+        }
+        double distance = distanceBigDecimal.doubleValue();
         double stopDistance = GamePalConstants.PLAYER_RADIUS.doubleValue() * 2;
         if (playerInfo.getRegionNo() != wc.getRegionNo() || distance <= stopDistance) {
             playerInfo.setFaceDirection(BigDecimal.ZERO);

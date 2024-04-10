@@ -502,14 +502,14 @@ public class BlockUtil {
         // Rectangle vs. rectangle
 //        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
 //                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
-//            if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-//                            .add(block2.getStructure().getShape().getRadius().getY())) > 0
-//            && yRight.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
-//                            .add(block2.getStructure().getShape().getRadius().getY())) > 0)
-//            || (yLeft.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
-//                    .add(block2.getStructure().getShape().getRadius().getY())) > 0
-//                    && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-//                    .add(block2.getStructure().getShape().getRadius().getY())) > 0)) {
+//        if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+//                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0
+//                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+//                .add(block2.getStructure().getShape().getRadius().getY())) < 0)
+//                || (yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+//                .add(block2.getStructure().getShape().getRadius().getY())) < 0
+//                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+//                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0)) {
 //                return true;
 //            }
 //            return false;
@@ -518,15 +518,15 @@ public class BlockUtil {
 //        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
 //            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
 //        }
-        // TODO make them specific
+        // TODO make round vs. rectangle specific
         if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY())) > 0
-                && yRight.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY())) > 0)
-                || (yLeft.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY())) > 0
+                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0
                 && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY())) > 0)) {
+                .add(block2.getStructure().getShape().getRadius().getY())) < 0)
+                || (yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+                .add(block2.getStructure().getShape().getRadius().getY())) < 0
+                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0)) {
             return true;
         }
         return false;
