@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -299,7 +300,7 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 // Generate blocks from scene events 24/02/16
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
-                    scene.getEvents().stream()
+                    scene.getEvents().stream().collect(Collectors.toList())
                             .forEach(event -> {
                                 Block newBlock = BlockUtil.convertEvent2Block(event);
                                 BlockUtil.adjustCoordinate(newBlock,

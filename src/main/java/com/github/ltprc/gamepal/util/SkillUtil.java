@@ -269,4 +269,9 @@ public class SkillUtil {
                 });
         playerInfo.setSkill(skills);
     }
+
+    public static boolean validateDamage(PlayerInfo playerInfo) {
+        return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0;
+    }
 }

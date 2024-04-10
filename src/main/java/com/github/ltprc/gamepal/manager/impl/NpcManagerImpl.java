@@ -15,6 +15,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -117,8 +118,7 @@ public class NpcManagerImpl implements NpcManager {
         world.getPlayerInfoMap().entrySet().stream()
                 .filter(entry -> !entry.getValue().getId().equals(npcUserCode))
                 .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
-                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .filter(entry -> entry.getValue().getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0)
+                .filter(entry -> SkillUtil.validateDamage(entry.getValue()))
                 .forEach(entry -> {
                     BigDecimal distance = BlockUtil.calculateDistance(world.getRegionMap().get(playerInfo.getRegionNo()),
                             playerInfo, entry.getValue());

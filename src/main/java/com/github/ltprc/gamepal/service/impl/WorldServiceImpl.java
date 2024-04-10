@@ -22,7 +22,6 @@ import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import com.github.ltprc.gamepal.util.lv.LasVegasGameUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,11 +301,10 @@ public class WorldServiceImpl implements WorldService {
     private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {
         GameWorld world = userService.getWorldByUserCode(eventBlock.getId());
         PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
-        boolean rst = eventBlock.getRegionNo() == blocker.getRegionNo()
+        return eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
-                || (GamePalConstants.PLAYER_STATUS_RUNNING == fromPlayerInfo.getPlayerStatus()
-                && 0 == fromPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD]));
-        return rst && checkEventConditionByEventCode(eventBlock, blocker);
+                || SkillUtil.validateDamage((PlayerInfo) blocker))
+                && checkEventConditionByEventCode(eventBlock, blocker);
     }
 
     private boolean checkEventConditionByEventCode(final WorldBlock eventBlock, final WorldBlock blocker) {
@@ -338,7 +336,6 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                Structure structure = blocker.getStructure();
                 BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
                 rst = !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
@@ -363,6 +360,7 @@ public class WorldServiceImpl implements WorldService {
         Random random = new Random();
         GameWorld world = userService.getWorldByUserCode(eventBlock.getId());
         Map<Integer, Region> regionMap = world.getRegionMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         WorldEvent worldEvent;
         switch (Integer.valueOf(eventBlock.getCode())) {
             case GamePalConstants.EVENT_CODE_BLOCK:
@@ -416,7 +414,8 @@ public class WorldServiceImpl implements WorldService {
                 activatedWorldBlockList.stream().forEach((WorldBlock activatedWorldBlock) -> {
                     BlockUtil.copyWorldCoordinate(activatedWorldBlock, eventBlock);
                     if (activatedWorldBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-                            && StringUtils.isNotBlank(activatedWorldBlock.getId())) {
+                            && playerInfoMap.containsKey(activatedWorldBlock.getId())
+                            && SkillUtil.validateDamage(playerInfoMap.get(activatedWorldBlock.getId()))) {
                         playerService.damageHp(activatedWorldBlock.getId(), eventBlock.getId(),
                                 -GamePalConstants.EVENT_DAMAGE_SHOOT, false);
                         WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
@@ -429,10 +428,10 @@ public class WorldServiceImpl implements WorldService {
                     }
                 });
                 // Shake the final position of event 24/04/05
-                WorldCoordinate shakedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
+                WorldCoordinate shakenWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                         regionMap.get(eventBlock.getRegionNo()), eventBlock,
                         BigDecimal.valueOf(random.nextDouble() * 360), BigDecimal.valueOf(random.nextDouble() / 2));
-                BlockUtil.copyWorldCoordinate(shakedWc, eventBlock);
+                BlockUtil.copyWorldCoordinate(shakenWc, eventBlock);
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()),
                         eventBlock);
                 world.getEventQueue().add(worldEvent);
@@ -642,10 +641,7 @@ public class WorldServiceImpl implements WorldService {
             // Run NPC tasks
             Map<String, NpcBrain> npcBrainMap = entry1.getValue().getNpcBrainMap();
             npcBrainMap.entrySet().stream()
-                    .filter(entry2 -> entry1.getValue().getPlayerInfoMap().get(entry2.getKey()).getPlayerStatus()
-                            == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .filter(entry2 -> entry1.getValue().getPlayerInfoMap().get(entry2.getKey())
-                            .getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0)
+                    .filter(entry2 -> SkillUtil.validateDamage(entry1.getValue().getPlayerInfoMap().get(entry2.getKey())))
                     .forEach(entry2 -> {
                         String npcUserCode = entry2.getKey();
                         JSONObject observeReq = new JSONObject();

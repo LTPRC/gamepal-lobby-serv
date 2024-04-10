@@ -500,34 +500,45 @@ public class BlockUtil {
         BigDecimal yLeft = xLeft.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
         BigDecimal yRight = xRight.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
         // Rectangle vs. rectangle
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
-                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
-            if (yLeft.subtract(block2.getY()).abs()
-                    .compareTo(block1.getStructure().getShape().getRadius().getY()
-                            .add(block2.getStructure().getShape().getRadius().getY())) < 0
-            || yRight.subtract(block2.getY()).abs()
-                    .compareTo(block1.getStructure().getShape().getRadius().getY()
-                            .add(block2.getStructure().getShape().getRadius().getY())) < 0) {
-                return true;
-            }
-            return false;
-        }
+//        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
+//                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
+//            if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+//                            .add(block2.getStructure().getShape().getRadius().getY())) > 0
+//            && yRight.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
+//                            .add(block2.getStructure().getShape().getRadius().getY())) > 0)
+//            || (yLeft.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
+//                    .add(block2.getStructure().getShape().getRadius().getY())) > 0
+//                    && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+//                    .add(block2.getStructure().getShape().getRadius().getY())) > 0)) {
+//                return true;
+//            }
+//            return false;
+//        }
         // Round vs. rectangle
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
-            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
-        }
+//        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+//            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
+//        }
         // TODO make them specific
-        if (yLeft.subtract(block2.getY()).abs()
-                .compareTo(block1.getStructure().getShape().getRadius().getY()
-                        .add(block2.getStructure().getShape().getRadius().getY())) < 0
-                || yRight.subtract(block2.getY()).abs()
-                .compareTo(block1.getStructure().getShape().getRadius().getY()
-                        .add(block2.getStructure().getShape().getRadius().getY())) < 0) {
+        if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+                .add(block2.getStructure().getShape().getRadius().getY())) > 0
+                && yRight.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
+                .add(block2.getStructure().getShape().getRadius().getY())) > 0)
+                || (yLeft.subtract(block2.getY()).negate().compareTo(block1.getStructure().getShape().getRadius().getY()
+                .add(block2.getStructure().getShape().getRadius().getY())) > 0
+                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
+                .add(block2.getStructure().getShape().getRadius().getY())) > 0)) {
             return true;
         }
         return false;
     }
 
+    /**
+     * No need to consider structure's center
+     * @param c1
+     * @param ballisticAngle
+     * @param c2
+     * @return
+     */
     public static BigDecimal calculateBallisticDistance(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
         if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
                 || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {

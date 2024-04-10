@@ -5,18 +5,16 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Random;
@@ -83,8 +81,7 @@ public class TimedEventTask {
 
             onlineMap.entrySet().stream()
                     .filter(entry2 -> playerInfoMap.containsKey(entry2.getKey())
-                            && playerInfoMap.get(entry2.getKey()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
-                            && (playerInfoMap.get(entry2.getKey()).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0))
+                            && SkillUtil.validateDamage(playerInfoMap.get(entry2.getKey())))
                     .forEach(entry2 -> {
                         // TODO Activate buff if necessary
 
