@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -137,7 +138,7 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new ArrayList<>());
-                newScene.setEvents(new ArrayList<>());
+                newScene.setEvents(new CopyOnWriteArrayList<>());
                 // Collect normal square blocks from map object
                 JSONArray map = scene.getJSONArray("map");
                 if (null != map && !map.isEmpty()) {
@@ -532,7 +533,7 @@ public class WorldServiceImpl implements WorldService {
         // Clear events from scene 24/02/16
         regionMap.entrySet().stream().forEach(region ->
             region.getValue().getScenes().entrySet().forEach(scene ->
-                scene.getValue().setEvents(new ArrayList<>())
+                scene.getValue().setEvents(new CopyOnWriteArrayList<>())
             )
         );
         Queue<WorldEvent> eventQueue = world.getEventQueue();

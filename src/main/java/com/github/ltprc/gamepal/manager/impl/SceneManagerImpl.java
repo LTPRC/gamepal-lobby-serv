@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 
@@ -74,7 +75,7 @@ public class SceneManagerImpl implements SceneManager {
         // Add extra blocks
 
         // Add events
-        scene.setEvents(new ArrayList<>());
+        scene.setEvents(new CopyOnWriteArrayList<>());
 
         region.getScenes().put(sceneCoordinate, scene);
     }
@@ -243,7 +244,7 @@ public class SceneManagerImpl implements SceneManager {
         }
 
         // Add events
-        scene.setEvents(new ArrayList<>());
+        scene.setEvents(new CopyOnWriteArrayList<>());
 
         region.getScenes().put(sceneCoordinate, scene);
     }
