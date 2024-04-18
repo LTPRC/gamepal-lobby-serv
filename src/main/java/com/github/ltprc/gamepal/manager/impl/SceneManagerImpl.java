@@ -56,9 +56,9 @@ public class SceneManagerImpl implements SceneManager {
         Random random = new Random();
         Grid grid = new Grid(region.getRadius() * 2 + 1);
         NoiseGenerator noiseGenerator = new NoiseGenerator();
-        noiseStage(grid, noiseGenerator, 3, 0.5f);
-        noiseStage(grid, noiseGenerator, 2, 0.3f);
-        noiseStage(grid, noiseGenerator, 1, 0.2f);
+        noiseStage(grid, noiseGenerator, 3, 0.1f);
+        noiseStage(grid, noiseGenerator, 2, 0.4f);
+        noiseStage(grid, noiseGenerator, 1, 0.5f);
 
         // Generate temp altitudeMap
         Map<IntegerCoordinate, Double> altitudeMap = new HashMap<>();
@@ -66,39 +66,49 @@ public class SceneManagerImpl implements SceneManager {
             for (int j = - region.getRadius(); j <= region.getRadius(); j++) {
                 IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, j);
                 float gridVal = grid.get(i + region.getRadius(), j + region.getRadius());
-                altitudeMap.put(sceneCoordinate, calculateIslandAltitude(region.getRadius(), sceneCoordinate) * gridVal);
+                altitudeMap.put(sceneCoordinate, calculateIslandAltitude(region.getRadius(), sceneCoordinate) + gridVal);
             }
         }
         // Generate and store terrainMap
         Map<IntegerCoordinate, Integer> terrainMap = region.getTerrainMap();
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius());
-            defineScene(region, altitudeMap, sceneCoordinate, Double.MIN_VALUE, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
             sceneCoordinate = new IntegerCoordinate(i, -region.getRadius());
-            defineScene(region, altitudeMap, sceneCoordinate, Double.MIN_VALUE, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
             sceneCoordinate = new IntegerCoordinate(region.getRadius(), i);
-            defineScene(region, altitudeMap, sceneCoordinate, Double.MIN_VALUE, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
             sceneCoordinate = new IntegerCoordinate(-region.getRadius(), i);
-            defineScene(region, altitudeMap, sceneCoordinate, Double.MIN_VALUE, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
+        }
+        for (int i = - region.getRadius() + 1; i < region.getRadius(); i++) {
+            IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius() - 1);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            sceneCoordinate = new IntegerCoordinate(i, - region.getRadius() + 1);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            sceneCoordinate = new IntegerCoordinate(region.getRadius() - 1, i);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            sceneCoordinate = new IntegerCoordinate(- region.getRadius() + 1, i);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
         }
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             for (int j = - region.getRadius(); j <= region.getRadius(); j++) {
                 IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, j);
                 int blockCode;
                 double d = random.nextDouble();
-                if (altitudeMap.get(sceneCoordinate) >= 0.75D) {
+                if (altitudeMap.get(sceneCoordinate) >= 0.65D) {
                     blockCode = BlockCodeConstants.BLOCK_CODE_SNOW;
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.75D, Double.MAX_VALUE, blockCode);
-                } else if (altitudeMap.get(sceneCoordinate) >= 0.5D) {
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.6D, null, blockCode);
+                } else if (altitudeMap.get(sceneCoordinate) >= 0.55D) {
                     blockCode = BlockCodeConstants.BLOCK_CODE_ROUGH;
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.5D, 0.75D, blockCode);
-                } else if (altitudeMap.get(sceneCoordinate) >= 0D) {
-                    if (d >= 0.5D) {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_GRASS;
-                    } else {
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.5D, 0.6D, blockCode);
+                } else if (altitudeMap.get(sceneCoordinate) >= 0.3D) {
+                    if (d >= 0.75D) {
                         blockCode = BlockCodeConstants.BLOCK_CODE_DIRT;
+                    } else {
+                        blockCode = BlockCodeConstants.BLOCK_CODE_GRASS;
                     }
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0D, 0.5D, blockCode);
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.3D, 0.5D, blockCode);
                 } else {
                     if (d >= 0.8D) {
                         blockCode = BlockCodeConstants.BLOCK_CODE_WATER;
@@ -111,7 +121,7 @@ public class SceneManagerImpl implements SceneManager {
                     } else {
                         blockCode = BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN;
                     }
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), Double.MIN_VALUE, 0D, blockCode);
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), null, 0.3D, blockCode);
                 }
             }
         }
@@ -128,12 +138,13 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private static double calculateIslandAltitude(final int radius, final IntegerCoordinate coordinate) {
-        double ratio = (coordinate.getX() + coordinate.getY()) / ((double) radius * 2);
+        double ratio = Math.max(Math.abs(coordinate.getX()) / (double) radius,
+                Math.abs(coordinate.getY()) / (double) radius);
         double rst;
-        if (ratio < 0.8D) {
-            rst = 1D;
-        } else if (ratio < 0.9D) {
-            rst = (ratio - 0.8D) * (-2D) / 0.1D + 1D;
+        if (ratio < 0.6D) {
+            rst = 0D;
+        } else if (ratio < 0.8D) {
+            rst = (ratio - 0.6D) * (-1D) / 0.2D;
         } else {
             rst = -1D;
         }
@@ -141,8 +152,8 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private static void defineScene(final Region region, Map<IntegerCoordinate, Double> altitudeMap,
-                                    final IntegerCoordinate sceneCoordinate, final double minAltitude,
-                                    final double maxAltitude, final int blockCode) {
+                                    final IntegerCoordinate sceneCoordinate, final Double minAltitude,
+                                    final Double maxAltitude, final int blockCode) {
         if (region.getTerrainMap().containsKey(sceneCoordinate)) {
             return;
         }
@@ -153,7 +164,10 @@ public class SceneManagerImpl implements SceneManager {
         if (!altitudeMap.containsKey(sceneCoordinate)) {
             return;
         }
-        if (altitudeMap.get(sceneCoordinate) < minAltitude || altitudeMap.get(sceneCoordinate) > maxAltitude) {
+        if (null != minAltitude && altitudeMap.get(sceneCoordinate) < minAltitude) {
+            return;
+        }
+        if (null != maxAltitude && altitudeMap.get(sceneCoordinate) > maxAltitude) {
             return;
         }
         region.getTerrainMap().put(sceneCoordinate, blockCode);
@@ -215,10 +229,10 @@ public class SceneManagerImpl implements SceneManager {
             return;
         }
         int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
-        if (Math.abs(sceneCoordinate.getX()) == region.getRadius()
-                || Math.abs(sceneCoordinate.getY()) == region.getRadius() ) {
-            regionIndex = BlockCodeConstants.BLOCK_CODE_NOTHING;
-        }
+//        if (Math.abs(sceneCoordinate.getX()) == region.getRadius()
+//                || Math.abs(sceneCoordinate.getY()) == region.getRadius() ) {
+//            regionIndex = BlockCodeConstants.BLOCK_CODE_NOTHING;
+//        }
         switch (regionIndex) {
             case BlockCodeConstants.BLOCK_CODE_GRASS:
                 fillSceneGrass(region, scene);

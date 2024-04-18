@@ -245,9 +245,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         String token = world.getTokenMap().get(userCode);
         rst.put("token", token);
 
-        // Return worldTIme
-        int worldTime = world.getWorldTime();
-        rst.put("worldTime", worldTime);
+        // Return worldInfo
+        JSONObject worldInfo = new JSONObject();
+        worldInfo.put("worldTime", world.getWorldTime());
+        worldInfo.put("windDirection", world.getWindDirection());
+        worldInfo.put("windSpeed", world.getWindSpeed());
+        rst.put("worldInfo", worldInfo);
 
         // Flush messages automatically
         Map<String, Queue<Message>> messageMap = world.getMessageMap();
