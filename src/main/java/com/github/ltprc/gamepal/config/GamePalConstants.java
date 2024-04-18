@@ -14,6 +14,12 @@ public class GamePalConstants {
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
     public static final int FRAME_PER_SECOND = 25;
+    public static final int MAX_WORLD_TIME = 86400;
+    public static final int UPDATED_WORLD_TIME_PER_SECOND = 60;
+    public static final int WORLD_TIME_SUNRISE_BEGIN = 18000;
+    public static final int WORLD_TIME_SUNRISE_END = 25200;
+    public static final int WORLD_TIME_SUNSET_BEGIN = 61200;
+    public static final int WORLD_TIME_SUNSET_END = 68400;
 
     public static final String COMMAND_PREFIX = "/";
     public static final int MESSAGE_TYPE_PRINTED = 1;
@@ -53,7 +59,8 @@ public class GamePalConstants {
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
-    public static final BigDecimal PLAYER_VIEW_RADIUS = BigDecimal.valueOf(10);
+    public static final BigDecimal PLAYER_VIEW_DAYTIME_RADIUS = BigDecimal.valueOf(10);
+    public static final BigDecimal PLAYER_VIEW_NIGHT_RADIUS = BigDecimal.valueOf(10);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 
     public static final int INTERACTION_USE = 0;
@@ -141,11 +148,9 @@ public class GamePalConstants {
 
     // Backend constants
 
-    public static final int REGION_INDEX_NOTHING = 1;
-    public static final int REGION_INDEX_GRASSLAND = 2;
+    public static final long ONLINE_TIMEOUT_SECOND = 300L;
     public static final int SCENE_SCAN_RADIUS = 1;
     public static final int SCENE_SCAN_MAX_RADIUS = 50;
-    public static final long ONLINE_TIMEOUT_SECOND = 300;
 
     public static final int GAME_STATUS_END = -1;
     public static final int GAME_STATUS_START = 0;
@@ -186,7 +191,7 @@ public class GamePalConstants {
     public static final BigDecimal EVENT_MAX_ANGLE_MELEE = BigDecimal.valueOf(120D);
     public static final BigDecimal EVENT_MAX_ANGLE_SHOOT = BigDecimal.valueOf(5D);
     public static final BigDecimal EVENT_MAX_ANGLE_SHOOT_SHOTGUN = BigDecimal.valueOf(10D);
-    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(5);
+    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(3);
     public static final int EVENT_DAMAGE_PER_FRAME_FIRE = 1;
     public static final int EVENT_DAMAGE_MELEE = 10;
     public static final int EVENT_DAMAGE_SHOOT = 200;

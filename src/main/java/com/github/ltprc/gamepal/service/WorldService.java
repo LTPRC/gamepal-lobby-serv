@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 public interface WorldService {
@@ -28,5 +29,7 @@ public interface WorldService {
 
     void expandScene(GameWorld world, WorldCoordinate worldCoordinate);
 
-    void updateNpcMovement();
+    void updateNpcMovement(GameWorld world);
+
+    void updateWorldTime(GameWorld world);
 }

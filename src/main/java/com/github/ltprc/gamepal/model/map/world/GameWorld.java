@@ -15,7 +15,7 @@ import java.util.Set;
 
 
 @Data
-public class GameWorld {
+public class GameWorld extends GameWorldInfo {
     private Map<Integer, Region> regionMap; // regionNo, region
     private Map<String, PlayerInfo> playerInfoMap;
     private Map<String, Map<String, Integer>> relationMap;

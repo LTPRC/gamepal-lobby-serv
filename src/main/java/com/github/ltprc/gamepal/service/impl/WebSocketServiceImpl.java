@@ -245,6 +245,10 @@ public class WebSocketServiceImpl implements WebSocketService {
         String token = world.getTokenMap().get(userCode);
         rst.put("token", token);
 
+        // Return worldTIme
+        int worldTime = world.getWorldTime();
+        rst.put("worldTime", worldTime);
+
         // Flush messages automatically
         Map<String, Queue<Message>> messageMap = world.getMessageMap();
         if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
@@ -283,7 +287,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         world.getTerminalMap().entrySet().stream()
                 .filter(entry -> userCode.equals(entry.getValue().getUserCode()))
                 .forEach(entry -> {
-                    entry.getValue().flushOutput().stream().forEach(output -> {
+                    entry.getValue().flushOutput().forEach(output -> {
                         JSONObject terminalOutput = new JSONObject();
                         terminalOutput.put("content", output);
                         terminalOutputs.add(terminalOutput);
@@ -302,9 +306,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("regionInfo", JSON.toJSON(new RegionInfo(region)));
 
         // Return SceneInfos
-        // sceneInfos is almost useless 24/02/22
         JSONArray sceneInfos = new JSONArray();
-        region.getScenes().entrySet().stream().forEach(entry -> {
+        region.getScenes().entrySet().forEach(entry -> {
             SceneInfo sceneInfo = new SceneInfo();
             sceneInfo.setName(entry.getValue().getName());
             sceneInfo.setSceneCoordinate(entry.getKey());

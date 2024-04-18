@@ -10,7 +10,7 @@ public interface SceneManager {
 
     Region generateRegion(final int regionNo);
 
-    void fillScene(final Region region, final IntegerCoordinate sceneCoordinate, int regionIndex);
+    void fillScene(final Region region, final IntegerCoordinate sceneCoordinate);
 
     Queue<Block> collectBlocksByUserCode(final String userCode, final int sceneScanRadius);
 

@@ -13,7 +13,7 @@
 
     <groupId>com.github.ltprc.gamepal</groupId>
     <artifactId>gamepal-lobby-serv</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>gamepal-lobby-serv</name>
     <description>gamepal-lobby-serv</description>
@@ -94,6 +94,13 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.8.11</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.github.czyzby/noise4j -->
+        <dependency>
+            <groupId>com.github.czyzby</groupId>
+            <artifactId>noise4j</artifactId>
+            <version>0.1.0</version>
         </dependency>
 
         <dependency>

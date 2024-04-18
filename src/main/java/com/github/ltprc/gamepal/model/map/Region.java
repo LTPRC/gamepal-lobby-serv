@@ -11,4 +11,5 @@ import java.util.Map;
 @AllArgsConstructor
 public class Region extends RegionInfo{
     private Map<IntegerCoordinate, Scene> scenes; // sceneCoordinate, scene
+    private Map<IntegerCoordinate, Integer> terrainMap;
 }

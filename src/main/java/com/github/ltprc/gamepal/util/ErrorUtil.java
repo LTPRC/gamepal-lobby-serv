@@ -39,4 +39,5 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1032 = new GamepalError("1032", "AI is not allowed to receive msg.");
     public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
     public static final GamepalError ERROR_1034 = new GamepalError("1034", "RegionNos are not identical.");
+    public static final GamepalError ERROR_1035 = new GamepalError("1035", "Invalid coordinate.");
 }

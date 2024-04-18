@@ -781,4 +781,27 @@ public class BlockUtil {
         }
         return event;
     }
+
+    public static BigDecimal calculateViewRadius(int worldTime) {
+        BigDecimal viewRadius = GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS;
+        if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
+                && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
+            viewRadius.add(GamePalConstants.PLAYER_VIEW_DAYTIME_RADIUS
+                    .subtract(GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS)
+                    .multiply(BigDecimal.valueOf(worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
+                    .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNRISE_END
+                            - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN), 2)));
+        } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
+                && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
+            viewRadius.add(GamePalConstants.PLAYER_VIEW_DAYTIME_RADIUS
+                    .subtract(GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS)
+                    .multiply(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
+                            .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END
+                                    - GamePalConstants.WORLD_TIME_SUNSET_BEGIN), 2)));
+        } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
+                && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
+            viewRadius = GamePalConstants.PLAYER_VIEW_DAYTIME_RADIUS;
+        }
+        return viewRadius;
+    }
 }

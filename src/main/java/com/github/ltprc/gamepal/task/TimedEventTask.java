@@ -128,7 +128,7 @@ public class TimedEventTask {
                     });
 
             // Other movements
-            worldService.updateNpcMovement();
+            worldService.updateNpcMovement(world);
         }
     }
 
@@ -150,6 +150,11 @@ public class TimedEventTask {
                         }
                     });
         }
+    }
+    @Scheduled(cron = "* * * * * ?")
+    public void executeBy1s() {
+        worldService.getWorldMap().entrySet().stream()
+                .forEach(entry -> worldService.updateWorldTime(entry.getValue()));
     }
 
 //    @Scheduled(cron = "*/5 * * * * ?")

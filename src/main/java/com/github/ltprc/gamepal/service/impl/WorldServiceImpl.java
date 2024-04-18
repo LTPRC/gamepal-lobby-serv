@@ -97,6 +97,8 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private void initiateWorld(GameWorld world) {
+        Random random = new Random();
+        world.setWorldTime(random.nextInt(GamePalConstants.MAX_WORLD_TIME));
         world.setRegionMap(new ConcurrentHashMap<>());
         world.setPlayerInfoMap(new ConcurrentHashMap<>());
         world.setRelationMap(new ConcurrentHashMap<>());
@@ -128,6 +130,9 @@ public class WorldServiceImpl implements WorldService {
             newRegion.setName(regionName);
             newRegion.setHeight(height);
             newRegion.setWidth(width);
+            newRegion.setRadius(GamePalConstants.SCENE_SCAN_MAX_RADIUS);
+            newRegion.setScenes(new HashMap<>());
+            newRegion.setTerrainMap(new HashMap<>());
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));
@@ -205,9 +210,6 @@ public class WorldServiceImpl implements WorldService {
                                 break;
                         }
                     }
-                }
-                if (null == newRegion.getScenes()) {
-                    newRegion.setScenes(new HashMap<>());
                 }
                 newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
             }
@@ -299,9 +301,7 @@ public class WorldServiceImpl implements WorldService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {
-        GameWorld world = userService.getWorldByUserCode(eventBlock.getId());
-        PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
+    private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {;
         return eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
                 || SkillUtil.validateDamage((PlayerInfo) blocker))
@@ -497,7 +497,7 @@ public class WorldServiceImpl implements WorldService {
         List<IntegerCoordinate> preSelectedSceneCoordinates = BlockUtil.preSelectSceneCoordinates(
                 regionMap.get(eventBlock.getRegionNo()), eventPlayerInfo, eventBlock);
         List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>(playerInfoList);
-        preSelectedSceneCoordinates.stream().forEach(sceneCoordinate -> {
+        preSelectedSceneCoordinates.stream().forEach(sceneCoordinate ->
             regionMap.get(eventBlock.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
                     .filter(blocker ->
                             GamePalConstants.STRUCTURE_MATERIAL_HOLLOW != blocker.getStructure().getMaterial())
@@ -505,8 +505,8 @@ public class WorldServiceImpl implements WorldService {
                         WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(blocker, eventBlock.getRegionNo(),
                                 sceneCoordinate, blocker);
                         preSelectedWorldBlocks.add(worldBlock);
-                    });
-        });
+                    })
+        );
         preSelectedWorldBlocks.stream()
                 .filter(wb -> checkEventCondition(eventBlock, wb))
                 .forEach(wb -> {
@@ -575,17 +575,17 @@ public class WorldServiceImpl implements WorldService {
             region.setScenes(new HashMap<>());
         }
         if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
-            sceneManager.fillScene(region, worldCoordinate.getSceneCoordinate(), GamePalConstants.REGION_INDEX_GRASSLAND);
+            sceneManager.fillScene(region, worldCoordinate.getSceneCoordinate());
         }
         if (depth > 0) {
             WorldCoordinate newWorldCoordinate = new WorldCoordinate();
             BlockUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
             for (int i = - 1; i <= 1; i++) {
                 for (int j = - 1; j <= 1; j++) {
-                    if (worldCoordinate.getSceneCoordinate().getX() + i >= -GamePalConstants.SCENE_SCAN_MAX_RADIUS
-                            && worldCoordinate.getSceneCoordinate().getX() + i <= GamePalConstants.SCENE_SCAN_MAX_RADIUS
-                            && worldCoordinate.getSceneCoordinate().getY() + j >= -GamePalConstants.SCENE_SCAN_MAX_RADIUS
-                            && worldCoordinate.getSceneCoordinate().getY() + j <= GamePalConstants.SCENE_SCAN_MAX_RADIUS) {
+                    if (worldCoordinate.getSceneCoordinate().getX() + i >= - region.getRadius()
+                            && worldCoordinate.getSceneCoordinate().getX() + i <= region.getRadius()
+                            && worldCoordinate.getSceneCoordinate().getY() + j >= - region.getRadius()
+                            && worldCoordinate.getSceneCoordinate().getY() + j <= region.getRadius()) {
                         newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
                                 worldCoordinate.getSceneCoordinate().getX() + i,
                                 worldCoordinate.getSceneCoordinate().getY() + j));
@@ -637,38 +637,42 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public void updateNpcMovement() {
-        worldMap.entrySet().stream().forEach(entry1 -> {
-            // Run NPC tasks
-            Map<String, NpcBrain> npcBrainMap = entry1.getValue().getNpcBrainMap();
-            npcBrainMap.entrySet().stream()
-                    .filter(entry2 -> SkillUtil.validateDamage(entry1.getValue().getPlayerInfoMap().get(entry2.getKey())))
-                    .forEach(entry2 -> {
-                        String npcUserCode = entry2.getKey();
-                        JSONObject observeReq = new JSONObject();
-                        observeReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_OBSERVE);
-                        observeReq.put("userCode", npcUserCode);
-                        JSONObject observeResp = npcManager.runNpcTask(observeReq);
-                        WorldCoordinate wc = observeResp.getObject("wc", WorldCoordinate.class);
-                        if (null != wc) {
-                            JSONObject moveReq = new JSONObject();
-                            moveReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_MOVE);
-                            moveReq.put("userCode", npcUserCode);
-                            moveReq.put("wc", wc);
-                            JSONObject moveResp = npcManager.runNpcTask(moveReq);
-                        } else {
-                            JSONObject idleReq = new JSONObject();
-                            idleReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_IDLE);
-                            idleReq.put("userCode", npcUserCode);
-                            JSONObject idleResp = npcManager.runNpcTask(idleReq);
-                        }
-                    });
-            // Settle NPC speed
-            Map<String, PlayerInfo> playerInfoMap = entry1.getValue().getPlayerInfoMap();
-            playerInfoMap.entrySet().stream()
-                    .filter(entry2 -> entry2.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_AI)
-                    .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
-        });
+    public void updateNpcMovement(GameWorld world) {
+        // Run NPC tasks
+        Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
+        npcBrainMap.entrySet().stream()
+                .filter(entry2 -> SkillUtil.validateDamage(world.getPlayerInfoMap().get(entry2.getKey())))
+                .forEach(entry2 -> {
+                    String npcUserCode = entry2.getKey();
+                    JSONObject observeReq = new JSONObject();
+                    observeReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_OBSERVE);
+                    observeReq.put("userCode", npcUserCode);
+                    JSONObject observeResp = npcManager.runNpcTask(observeReq);
+                    WorldCoordinate wc = observeResp.getObject("wc", WorldCoordinate.class);
+                    if (null != wc) {
+                        JSONObject moveReq = new JSONObject();
+                        moveReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_MOVE);
+                        moveReq.put("userCode", npcUserCode);
+                        moveReq.put("wc", wc);
+                        JSONObject moveResp = npcManager.runNpcTask(moveReq);
+                    } else {
+                        JSONObject idleReq = new JSONObject();
+                        idleReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_IDLE);
+                        idleReq.put("userCode", npcUserCode);
+                        JSONObject idleResp = npcManager.runNpcTask(idleReq);
+                    }
+                });
+        // Settle NPC speed
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        playerInfoMap.entrySet().stream()
+                .filter(entry2 -> entry2.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_AI)
+                .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
+    }
+
+    @Override
+    public void updateWorldTime(GameWorld world) {
+        world.setWorldTime((world.getWorldTime() + GamePalConstants.UPDATED_WORLD_TIME_PER_SECOND)
+                % GamePalConstants.MAX_WORLD_TIME);
     }
 }

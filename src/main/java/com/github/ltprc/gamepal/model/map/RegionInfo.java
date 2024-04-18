@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,11 +15,13 @@ public class RegionInfo {
     private String name;
     private int height;
     private int width;
+    private int radius;
 
     public RegionInfo(RegionInfo regionInfo) {
-        regionNo = regionInfo.getRegionNo();
-        name = regionInfo.getName();
-        height = regionInfo.getHeight();
-        width = regionInfo.getWidth();
+        regionNo = regionInfo.regionNo;
+        name = regionInfo.name;
+        height = regionInfo.height;
+        width = regionInfo.width;
+        radius = regionInfo.radius;
     }
 }
