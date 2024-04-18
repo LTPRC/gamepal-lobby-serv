@@ -135,6 +135,7 @@ public class WorldServiceImpl implements WorldService {
             newRegion.setRadius(GamePalConstants.SCENE_SCAN_MAX_RADIUS);
             newRegion.setScenes(new HashMap<>());
             newRegion.setTerrainMap(new HashMap<>());
+            newRegion.setAltitudeMap(new HashMap<>());
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));

@@ -12,4 +12,5 @@ import java.util.Map;
 public class Region extends RegionInfo{
     private Map<IntegerCoordinate, Scene> scenes; // sceneCoordinate, scene
     private Map<IntegerCoordinate, Integer> terrainMap;
+    private Map<IntegerCoordinate, Double> altitudeMap;
 }
