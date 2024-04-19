@@ -147,6 +147,12 @@ public class WorldServiceImpl implements WorldService {
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
                 newScene.setBlocks(new ArrayList<>());
                 newScene.setEvents(new CopyOnWriteArrayList<>());
+                newScene.setGird(new int[newRegion.getWidth() + 1][newRegion.getHeight() + 1]);
+                for (int i = 0; i <= newRegion.getWidth(); i++) {
+                    for (int j = 0; j <= newRegion.getHeight(); j++) {
+                        newScene.getGird()[i][j] = 1001;
+                    }
+                }
                 // Collect normal square blocks from map object
                 JSONArray map = scene.getJSONArray("map");
                 if (null != map && !map.isEmpty()) {

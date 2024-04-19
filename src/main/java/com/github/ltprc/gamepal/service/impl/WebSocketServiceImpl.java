@@ -310,16 +310,18 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Return SceneInfos
         JSONArray sceneInfos = new JSONArray();
-        region.getScenes().entrySet().forEach(entry -> {
-            SceneInfo sceneInfo = new SceneInfo();
-            sceneInfo.setName(entry.getValue().getName());
-            sceneInfo.setSceneCoordinate(entry.getKey());
+        region.getScenes().forEach((key, value) -> {
+            SceneInfo sceneInfo = new SceneInfo(value);
             sceneInfos.add(sceneInfo);
-            if (entry.getKey().equals(playerInfo.getSceneCoordinate())) {
+            if (key.equals(playerInfo.getSceneCoordinate())) {
                 rst.put("sceneInfo", JSON.toJSON(sceneInfo));
             }
         });
         rst.put("sceneInfos", sceneInfos);
+
+        // Collect grids
+        int[][] grids = sceneManager.collectGridsByUserCode(userCode, GamePalConstants.SCENE_SCAN_RADIUS);
+        rst.put("grids", grids);
 
         // Collect blocks
         Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, GamePalConstants.SCENE_SCAN_RADIUS);
