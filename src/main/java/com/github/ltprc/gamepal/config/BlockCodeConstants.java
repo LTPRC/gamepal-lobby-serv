@@ -5,6 +5,7 @@ public class BlockCodeConstants {
     private BlockCodeConstants() {}
 
     public static final char BLOCK_CODE_PREFIX_PLANTS = 'p';
+    public static final char BLOCK_CODE_PREFIX_ROCKS = 'r';
 
     public static final int BLOCK_CODE_NOTHING = 1001;
 
