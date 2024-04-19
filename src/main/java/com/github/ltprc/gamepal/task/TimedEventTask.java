@@ -119,9 +119,14 @@ public class TimedEventTask {
                         // Change skill remaining time
                         for (int i = 0; i < playerInfoMap.get(entry2.getKey()).getSkill().length; i++) {
                             if (playerInfoMap.get(entry2.getKey()).getSkill()[i][2] > 0) {
-                                playerInfoMap.get(entry2.getKey()).getSkill()[i][2] = playerInfoMap.get(entry2.getKey()).getSkill()[i][2] - 1;
+                                playerInfoMap.get(entry2.getKey()).getSkill()[i][2] =
+                                        playerInfoMap.get(entry2.getKey()).getSkill()[i][2] - 1;
                             }
                         }
+
+                        // Change view radius
+                        playerInfoMap.get(entry2.getKey())
+                                .setPlayerViewRadius(BlockUtil.calculateViewRadius(world.getWorldTime()));
 
                         // Update buff
                         playerService.updateBuff(entry2.getKey());

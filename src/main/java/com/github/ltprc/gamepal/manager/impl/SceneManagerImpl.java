@@ -406,13 +406,13 @@ public class SceneManagerImpl implements SceneManager {
                 roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
         roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
-                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
+                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
         // 大石头
         addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_WALL,
                 BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
                 roundShape, null);
         // 小石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_WALL,
+        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_GROUND_DECORATION,
                 BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
                 roundShape, null);
         // 树桩1
@@ -493,13 +493,13 @@ public class SceneManagerImpl implements SceneManager {
                 null, null);
         Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
-                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
+                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
         // 大石头
         addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_WALL,
                 BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
                 roundShape, null);
         // 小石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_WALL,
+        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_GROUND_DECORATION,
                 BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
                 roundShape, null);
         return scene;
@@ -509,13 +509,13 @@ public class SceneManagerImpl implements SceneManager {
         fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_LAVA);
         Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
-                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
+                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
         // 大石头
         addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_WALL,
                 BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
                 roundShape, null);
         // 小石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_WALL,
+        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_GROUND_DECORATION,
                 BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
                 roundShape, null);
         return scene;
@@ -595,7 +595,7 @@ public class SceneManagerImpl implements SceneManager {
                                         newSceneCoordinate), region.getHeight(), region.getWidth());
                         // Save communication cost 24/04/09
                         if (BlockUtil.calculateDistance(newBlock, playerInfo.getCoordinate())
-                                .compareTo(BlockUtil.calculateViewRadius(world.getWorldTime())) <= 0) {
+                                .compareTo(playerInfo.getPlayerViewRadius()) <= 0) {
                             rankingQueue.add(newBlock);
                         }
                     });

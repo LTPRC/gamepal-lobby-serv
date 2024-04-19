@@ -9,9 +9,7 @@ import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
@@ -19,7 +17,6 @@ import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.BlockUtil;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -82,7 +79,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         int webStage = jsonObject.getInteger("webStage");
 
-        // Usercode information
+        // UserCode information
         String userCode = jsonObject.getString("userCode");
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -98,8 +95,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updatePlayerInfo")) {
                 playerService.updatePlayerInfo(userCode, functions.getJSONObject("updatePlayerInfo"));
             }
-            if (functions.containsKey("updateplayerinfoCharacter")) {
-                playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updateplayerinfoCharacter"));
+            if (functions.containsKey("updatePlayerInfoCharacter")) {
+                playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
             if (functions.containsKey("updateMovingBlock")) {
                 playerService.updatePlayerMovement(userCode, functions.getJSONObject("updateMovingBlock"));
@@ -343,7 +340,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("functions", functionsResponse);
 
         // Latest timestamp
-        rst.put("timestamp", world.getOnlineMap().get(userCode));
+        rst.put("currentSecond", Instant.now().getEpochSecond() % 60);
+        rst.put("currentMillisecond", Instant.now().getNano() / 1000_000);
 
         transmit(rst, userCode, world);
     }

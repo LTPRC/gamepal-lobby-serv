@@ -51,6 +51,7 @@ public class PlayerInfoFactory {
         playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         SkillUtil.updateSkills(playerInfo);
+        playerInfo.setPlayerViewRadius(GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS);
         return playerInfo;
     }
 
