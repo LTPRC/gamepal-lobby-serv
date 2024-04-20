@@ -32,7 +32,7 @@ public class CheckOnlineTask {
             if (!onlineMap.isEmpty() && Instant.now().getEpochSecond() - onlineMap.entrySet().iterator().next().getValue()
                     > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
                 String userCode = onlineMap.entrySet().iterator().next().getKey();
-                userService.logoff(userCode, null, false);
+                userService.logoff(userCode, "", false);
             }
         }
     }

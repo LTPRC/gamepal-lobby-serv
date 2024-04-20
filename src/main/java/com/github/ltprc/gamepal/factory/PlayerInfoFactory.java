@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.factory;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.model.PerceptionInfo;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
@@ -27,7 +28,7 @@ public class PlayerInfoFactory {
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_RADIUS))));
         playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-        playerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_HUMAN);
+        playerInfo.setPlayerType(PlayerConstants.PLAYER_TYPE_HUMAN);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         playerInfo.setRegionNo(1);
         playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,7 +99,7 @@ public class MessageServiceImpl implements MessageService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
         }
         // AI cannot receive msg 24/03/23
-        if (world.getPlayerInfoMap().get(userCode).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN) {
+        if (world.getPlayerInfoMap().get(userCode).getPlayerType() != PlayerConstants.PLAYER_TYPE_HUMAN) {
             logger.warn(ErrorUtil.ERROR_1032 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1032));
         }

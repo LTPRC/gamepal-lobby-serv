@@ -132,7 +132,6 @@ public class UserServiceImpl implements UserService {
         String token = UUID.randomUUID().toString();
         world.getTokenMap().put(userCode, token);
         // Update online record
-        world.getOnlineMap().remove(userCode);
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         if (!world.getPlayerInfoMap().containsKey(userCode)) {
             PlayerInfo playerInfo = playerInfoFactory.createPlayerInfoInstance();

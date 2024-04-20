@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
@@ -11,7 +12,6 @@ import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.model.npc.NpcMoveTask;
 import com.github.ltprc.gamepal.model.npc.NpcObserveTask;
-import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
@@ -33,9 +33,6 @@ public class NpcManagerImpl implements NpcManager {
     private static final Log logger = LogFactory.getLog(NpcManagerImpl.class);
 
     @Autowired
-    private PlayerService playerService;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -46,7 +43,7 @@ public class NpcManagerImpl implements NpcManager {
         String userCode = UUID.randomUUID().toString();
         PlayerInfo npcPlayerInfo = playerInfoFactory.createPlayerInfoInstance();
         npcPlayerInfo.setId(userCode);
-        npcPlayerInfo.setPlayerType(GamePalConstants.PLAYER_TYPE_AI);
+        npcPlayerInfo.setPlayerType(PlayerConstants.PLAYER_TYPE_AI);
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         world.getPlayerInfoMap().put(userCode, npcPlayerInfo);
         userService.addUserIntoWorldMap(world, userCode);
@@ -76,6 +73,9 @@ public class NpcManagerImpl implements NpcManager {
 
     private NpcBrain generateNpcBrain() {
         NpcBrain npcBrain = new NpcBrain();
+        npcBrain.setStatus(PlayerConstants.NPC_BRAIN_STATUS_UNAWARE);
+        npcBrain.setAttackTeammate(false);
+        npcBrain.setAttackStranger(true);
         npcBrain.setObserveTaskQueue(new PriorityQueue<>());
         npcBrain.setMoveTaskQueue(new PriorityQueue<>());
         npcBrain.setAttackTaskQueue(new PriorityQueue<>());

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -674,7 +675,7 @@ public class WorldServiceImpl implements WorldService {
         // Settle NPC speed
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         playerInfoMap.entrySet().stream()
-                .filter(entry2 -> entry2.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_AI)
+                .filter(entry2 -> entry2.getValue().getPlayerType() == PlayerConstants.PLAYER_TYPE_AI)
                 .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
     }
