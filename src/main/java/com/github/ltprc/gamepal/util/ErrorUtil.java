@@ -40,4 +40,5 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
     public static final GamepalError ERROR_1034 = new GamepalError("1034", "RegionNos are not identical.");
     public static final GamepalError ERROR_1035 = new GamepalError("1035", "Invalid coordinate.");
+    public static final GamepalError ERROR_1036 = new GamepalError("1036", "Invalid JSON content.");
 }

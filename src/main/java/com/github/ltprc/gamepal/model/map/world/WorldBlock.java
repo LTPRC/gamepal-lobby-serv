@@ -12,6 +12,7 @@ public class WorldBlock extends WorldCoordinate {
     private Integer type;
     private String id;
     private String code;
+    private Integer frame;
     private Structure structure;
 
     public WorldBlock(WorldBlock worldBlock) {

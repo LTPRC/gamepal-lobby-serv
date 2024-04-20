@@ -896,7 +896,7 @@ public class PlayerServiceImpl implements PlayerService {
                 new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)))),
-                worldMovingBlock.getCoordinate())); // TODO characterize code
+                worldMovingBlock.getCoordinate())); // TODO characterize drop image
         drop.getStructure().setImageSize(new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5)));
         scene.getBlocks().add(drop);
         WorldDrop worldDrop = new WorldDrop(drop.getItemNo(), drop.getAmount(), worldMovingBlock);

@@ -122,6 +122,10 @@ public class WorldServiceImpl implements WorldService {
 
     private void loadScenes(GameWorld world) {
         JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/json/regions.json");
+        if (null == regions) {
+            logger.error(ErrorUtil.ERROR_1036);
+            return;
+        }
         for (Object obj : regions) {
             JSONObject region = JSON.parseObject(String.valueOf(obj));
             Region newRegion = new Region();
@@ -198,7 +202,7 @@ public class WorldServiceImpl implements WorldService {
                         switch (type) {
                             case GamePalConstants.BLOCK_TYPE_DROP:
                                 block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
-                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM);
+                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_MIDDLE);
                                 Drop drop = new Drop(blockRow.getString(4), blockRow.getInteger(5), block);
                                 newScene.getBlocks().add(drop);
                                 break;
@@ -208,7 +212,8 @@ public class WorldServiceImpl implements WorldService {
                                                 blockRow.getInteger(6)),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
                                                 BigDecimal.valueOf(blockRow.getInteger(8))));
-                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_GROUND_DECORATION);
+                                block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
+                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
                                 Teleport teleport = new Teleport(to, block);
                                 newScene.getBlocks().add(teleport);
                                 break;
@@ -225,11 +230,11 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private void registerInteractiveBlocks(GameWorld world) {
-        world.getRegionMap().entrySet().stream().forEach(entry1 -> {
+        world.getRegionMap().entrySet().forEach(entry1 -> {
             Region region = entry1.getValue();
-            region.getScenes().entrySet().stream().forEach(entry2 -> {
+            region.getScenes().entrySet().forEach(entry2 -> {
                 Scene scene = entry2.getValue();
-                scene.getBlocks().stream().forEach(block -> {
+                scene.getBlocks().forEach(block -> {
                     block.setId(UUID.randomUUID().toString());
                     WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(block, region.getRegionNo(),
                             scene.getSceneCoordinate(), block);
@@ -252,7 +257,11 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void loadItems() {
         JSONArray items = ContentUtil.jsonFile2JSONArray("src/main/resources/json/items.json");
-        items.stream().forEach(itemObj -> {
+        if (null == items) {
+            logger.error(ErrorUtil.ERROR_1036);
+            return;
+        }
+        items.forEach(itemObj -> {
             switch (((JSONObject) itemObj).getString("itemNo").charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
                     Tool tool = JSON.parseObject(String.valueOf(itemObj), Tool.class);
@@ -308,7 +317,7 @@ public class WorldServiceImpl implements WorldService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {;
+    private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {
         return eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
                 || SkillUtil.validateDamage((PlayerInfo) blocker))
@@ -504,7 +513,7 @@ public class WorldServiceImpl implements WorldService {
         List<IntegerCoordinate> preSelectedSceneCoordinates = BlockUtil.preSelectSceneCoordinates(
                 regionMap.get(eventBlock.getRegionNo()), eventPlayerInfo, eventBlock);
         List<WorldBlock> preSelectedWorldBlocks = new ArrayList<>(playerInfoList);
-        preSelectedSceneCoordinates.stream().forEach(sceneCoordinate ->
+        preSelectedSceneCoordinates.forEach(sceneCoordinate ->
             regionMap.get(eventBlock.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
                     .filter(blocker ->
                             GamePalConstants.STRUCTURE_MATERIAL_HOLLOW != blocker.getStructure().getMaterial())
@@ -523,7 +532,7 @@ public class WorldServiceImpl implements WorldService {
                     BigDecimal distanceNew =
                             BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()),
                                     eventPlayerInfo, wb);
-                    if (distanceOld.compareTo(distanceNew) > 0) {
+                    if (null != distanceOld && null != distanceNew && distanceOld.compareTo(distanceNew) > 0) {
                         if (wb.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
                                 || eventBlock.getType() != GamePalConstants.SKILL_CODE_SHOOT_MAGNUM) {
                             activatedWorldBlockList.clear();
@@ -567,7 +576,7 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void expandScene(GameWorld world, WorldCoordinate worldCoordinate) {
-        expandScene(world, worldCoordinate, 1);
+        expandScene(world, worldCoordinate, GamePalConstants.SCENE_SCAN_RADIUS);
     }
 
     private void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth) {

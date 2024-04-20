@@ -32,6 +32,7 @@ public class GamePalConstants {
     public static final int SCENE_DEFAULT_WIDTH = 10;
     public static final int SCENE_DEFAULT_HEIGHT = 10;
     public static final int BLOCK_TYPE_NORMAL = 0;
+    public static final int BLOCK_TYPE_EVENT = 1;
     public static final int BLOCK_TYPE_PLAYER = 2;
     public static final int BLOCK_TYPE_DROP = 3;
     public static final int BLOCK_TYPE_TELEPORT = 4;

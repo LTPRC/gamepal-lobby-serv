@@ -198,7 +198,6 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1035);
             return;
         }
-        scene.setGird(new int[region.getWidth() + 1][region.getHeight() + 1]);
         int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
         switch (regionIndex) {
             case BlockCodeConstants.BLOCK_CODE_DIRT:
@@ -234,11 +233,16 @@ public class SceneManagerImpl implements SceneManager {
                 break;
         }
         scene.setEvents(new CopyOnWriteArrayList<>());
-
         region.getScenes().put(sceneCoordinate, scene);
     }
 
     private Scene fillSceneTemplate(final Region region, final Scene scene, final int blockCode) {
+        scene.setGird(new int[region.getWidth() + 1][region.getHeight() + 1]);
+        for (int i = 0; i <= region.getWidth(); i++) {
+            for (int j = 0; j <= region.getHeight(); j++) {
+                scene.getGird()[i][j] = 1001;
+            }
+        }
         IntegerCoordinate sceneCoordinate = scene.getSceneCoordinate();
         Scene scene1;
         for (int l = 0; l <= region.getWidth(); l++) {
@@ -250,32 +254,50 @@ public class SceneManagerImpl implements SceneManager {
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() - 1));
         if (null != scene1) {
             scene.getGird()[0][0] = scene1.getGird()[region.getWidth()][region.getHeight()];
+        } else {
+            scene.getGird()[0][0] = region.getTerrainMap()
+                    .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() - 1), blockCode);
         }
         // Area 2,0
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() - 1));
         if (null != scene1) {
             scene.getGird()[region.getWidth()][0] = scene1.getGird()[0][region.getHeight()];
+        } else {
+            scene.getGird()[region.getWidth()][0] = region.getTerrainMap()
+                    .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() - 1), blockCode);
         }
         // Area 0,2
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() + 1));
         if (null != scene1) {
             scene.getGird()[0][region.getHeight()] = scene1.getGird()[region.getWidth()][0];
+        } else {
+            scene.getGird()[0][region.getHeight()] = region.getTerrainMap()
+                    .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() + 1), blockCode);
         }
         // Area 2,2
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() + 1));
         if (null != scene1) {
             scene.getGird()[region.getWidth()][region.getHeight()] = scene1.getGird()[0][0];
+        } else {
+            scene.getGird()[region.getWidth()][region.getHeight()] = region.getTerrainMap()
+                    .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() + 1), blockCode);
         }
         for (int i = 1; i < region.getWidth(); i++) {
             // Area 1,0
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() - 1));
             if (null != scene1) {
                 scene.getGird()[i][0] = scene1.getGird()[i][region.getHeight()];
+            } else {
+                scene.getGird()[i][0] = region.getTerrainMap()
+                        .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() + 1), blockCode);
             }
             // Area 1,2
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() + 1));
             if (null != scene1) {
                 scene.getGird()[i][region.getHeight()] = scene1.getGird()[i][0];
+            } else {
+                scene.getGird()[i][region.getHeight()] = region.getTerrainMap()
+                        .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() + 1), blockCode);
             }
         }
         for (int i = 1; i < region.getHeight(); i++) {
@@ -283,11 +305,17 @@ public class SceneManagerImpl implements SceneManager {
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY()));
             if (null != scene1) {
                 scene.getGird()[i][region.getHeight()] = scene1.getGird()[region.getHeight()][i];
+            } else {
+                scene.getGird()[i][region.getHeight()] = region.getTerrainMap()
+                        .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY()), blockCode);
             }
             // Area 2,1
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY()));
             if (null != scene1) {
                 scene.getGird()[region.getHeight()][i] = scene1.getGird()[0][i];
+            } else {
+                scene.getGird()[region.getHeight()][i] = region.getTerrainMap()
+                        .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY()), blockCode);
             }
         }
         // Pollute from 4 sides
