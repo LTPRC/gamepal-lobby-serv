@@ -59,8 +59,6 @@ public class GamePalConstants {
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
-    public static final BigDecimal PLAYER_VIEW_DAYTIME_RADIUS = BigDecimal.valueOf(10);
-    public static final BigDecimal PLAYER_VIEW_NIGHT_RADIUS = BigDecimal.valueOf(10);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 
     public static final int INTERACTION_USE = 0;
@@ -149,7 +147,7 @@ public class GamePalConstants {
     // Backend constants
 
     public static final long ONLINE_TIMEOUT_SECOND = 300L;
-    public static final int SCENE_SCAN_RADIUS = 1;
+    public static final int SCENE_SCAN_RADIUS = 2;
     public static final int SCENE_SCAN_MAX_RADIUS = 50;
 
     public static final int GAME_STATUS_END = -1;
@@ -222,4 +220,8 @@ public class GamePalConstants {
     public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
     public static final int STRUCTURE_LAYER_SKY = 50;
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
+
+    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(10);
+    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(5);
+    public static final BigDecimal DEFAULT_HEARING_RADIUS = BigDecimal.valueOf(10);
 }

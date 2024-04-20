@@ -1,11 +1,13 @@
 package com.github.ltprc.gamepal.factory;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.PerceptionInfo;
 import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.NameUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.stereotype.Component;
@@ -51,7 +53,8 @@ public class PlayerInfoFactory {
         playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         SkillUtil.updateSkills(playerInfo);
-        playerInfo.setPlayerViewRadius(GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS);
+        playerInfo.setPerceptionInfo(new PerceptionInfo());
+        BlockUtil.updateVisionRadius(playerInfo.getPerceptionInfo(), 0);
         return playerInfo;
     }
 

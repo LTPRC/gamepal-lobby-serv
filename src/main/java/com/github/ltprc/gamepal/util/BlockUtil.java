@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.PerceptionInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -782,26 +783,28 @@ public class BlockUtil {
         return event;
     }
 
-    public static BigDecimal calculateViewRadius(int worldTime) {
-        BigDecimal viewRadius = GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS;
+    public static void updateVisionRadius(PerceptionInfo perceptionInfo, int worldTime) {
+        BigDecimal visionRadius = GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS;
         if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
-            viewRadius.add(GamePalConstants.PLAYER_VIEW_DAYTIME_RADIUS
-                    .subtract(GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS)
+            visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS)
                     .multiply(BigDecimal.valueOf(worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
                     .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNRISE_END
                             - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN), 2)));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
-            viewRadius.add(GamePalConstants.PLAYER_VIEW_DAYTIME_RADIUS
-                    .subtract(GamePalConstants.PLAYER_VIEW_NIGHT_RADIUS)
+            visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS)
                     .multiply(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
                             .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END
                                     - GamePalConstants.WORLD_TIME_SUNSET_BEGIN), 2)));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
-            viewRadius = GamePalConstants.PLAYER_VIEW_DAYTIME_RADIUS;
+            visionRadius = GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS;
         }
-        return viewRadius;
+        perceptionInfo.setDistinctVisionRadius(visionRadius);
+        perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius().multiply(BigDecimal.valueOf(1.5)));
+        perceptionInfo.setHearingRadius(GamePalConstants.DEFAULT_HEARING_RADIUS);
     }
 }

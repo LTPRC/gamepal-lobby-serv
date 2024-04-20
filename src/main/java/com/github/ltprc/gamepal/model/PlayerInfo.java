@@ -58,5 +58,5 @@ public class PlayerInfo extends WorldMovingBlock {
     private int[] buff; // buff code, remaining frame
     private int[][] skill; // skillNo; skillCode, skillMode(0=semi-auto 1=auto), time, timeMax
     private String bossId;
-    private BigDecimal playerViewRadius;
+    private PerceptionInfo perceptionInfo;
 }

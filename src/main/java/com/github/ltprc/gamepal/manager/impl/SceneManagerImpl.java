@@ -311,7 +311,7 @@ public class SceneManagerImpl implements SceneManager {
                 leftWeight = Math.max(0, leftWeight - region.getWidth() / 2);
                 rightWeight = Math.max(0, rightWeight - region.getWidth() / 2);
                 downWeight = Math.max(0, downWeight - region.getHeight() / 2);
-                int val = random.nextInt(region.getWidth() + region.getHeight());
+                int val = random.nextInt(upWeight + leftWeight + rightWeight + downWeight + 1);
                 if (val < upWeight) {
                     scene.getGird()[l][k] = upCode;
                     continue;
@@ -593,9 +593,8 @@ public class SceneManagerImpl implements SceneManager {
                         BlockUtil.adjustCoordinate(newBlock,
                                 BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                                         newSceneCoordinate), region.getHeight(), region.getWidth());
-                        // Save communication cost 24/04/09
                         if (BlockUtil.calculateDistance(newBlock, playerInfo.getCoordinate())
-                                .compareTo(playerInfo.getPlayerViewRadius()) <= 0) {
+                                .compareTo(playerInfo.getPerceptionInfo().getDistinctVisionRadius()) <= 0) {
                             rankingQueue.add(newBlock);
                         }
                     });
@@ -652,8 +651,8 @@ public class SceneManagerImpl implements SceneManager {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
-        int[][] grids =
-                new int[region.getWidth() * sceneScanRadius * 3 + 1][region.getHeight() * sceneScanRadius * 3 + 1];
+        int[][] grids = new int[region.getWidth() * (sceneScanRadius * 2 + 1) + 1]
+                [region.getHeight() * (sceneScanRadius * 2 + 1) + 1];
         for (int i = sceneCoordinate.getY() - sceneScanRadius; i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
             for (int j = sceneCoordinate.getX() - sceneScanRadius; j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
                 final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);

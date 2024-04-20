@@ -125,8 +125,8 @@ public class TimedEventTask {
                         }
 
                         // Change view radius
-                        playerInfoMap.get(entry2.getKey())
-                                .setPlayerViewRadius(BlockUtil.calculateViewRadius(world.getWorldTime()));
+                        BlockUtil.updateVisionRadius(playerInfoMap.get(entry2.getKey()).getPerceptionInfo(),
+                                world.getWorldTime());
 
                         // Update buff
                         playerService.updateBuff(entry2.getKey());
