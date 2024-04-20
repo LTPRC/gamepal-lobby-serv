@@ -82,128 +82,6 @@ public class BlockUtil {
         }
     }
 
-    @Deprecated
-    public static IntegerCoordinate convertBlockType2Level(int type) {
-        IntegerCoordinate rst = new IntegerCoordinate(0, 0);
-        switch (type) {
-            case GamePalConstants.BLOCK_TYPE_GROUND:
-                rst = new IntegerCoordinate(0, 100);
-                break;
-            case GamePalConstants.BLOCK_TYPE_WALL:
-                rst = new IntegerCoordinate(1, 105);
-                break;
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-                rst = new IntegerCoordinate(1, 200);
-                break;
-            case GamePalConstants.BLOCK_TYPE_DROP:
-                rst = new IntegerCoordinate(1, 300);
-                break;
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                rst = new IntegerCoordinate(0, 200);
-                break;
-            case GamePalConstants.BLOCK_TYPE_BED:
-                rst = new IntegerCoordinate(1, 110);
-                break;
-            case GamePalConstants.BLOCK_TYPE_TOILET:
-                rst = new IntegerCoordinate(1, 111);
-                break;
-            case GamePalConstants.BLOCK_TYPE_DRESSER:
-                rst = new IntegerCoordinate(1, 112);
-                break;
-            case GamePalConstants.BLOCK_TYPE_WORKSHOP:
-                rst = new IntegerCoordinate(1, 113);
-                break;
-            case GamePalConstants.BLOCK_TYPE_GAME:
-                rst = new IntegerCoordinate(1, 114);
-                break;
-            case GamePalConstants.BLOCK_TYPE_STORAGE:
-                rst = new IntegerCoordinate(1, 115);
-                break;
-            case GamePalConstants.BLOCK_TYPE_COOKER:
-                rst = new IntegerCoordinate(1, 116);
-                break;
-            case GamePalConstants.BLOCK_TYPE_SINK:
-                rst = new IntegerCoordinate(1, 117);
-                break;
-            case GamePalConstants.BLOCK_TYPE_CEILING:
-                rst = new IntegerCoordinate(2, 100);
-                break;
-            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
-                rst = new IntegerCoordinate(0, 150);
-                break;
-            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
-                rst = new IntegerCoordinate(1, 150);
-                break;
-            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
-                rst = new IntegerCoordinate(2, 150);
-                break;
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
-                rst = new IntegerCoordinate(0, 105);
-                break;
-            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
-                rst = new IntegerCoordinate(1, 100);
-                break;
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
-                rst = new IntegerCoordinate(2, 105);
-                break;
-            default:
-        }
-        return rst;
-    }
-
-    /**
-     * X stands for bottom, center, top, and y stands for detailed height
-     * @param type
-     * @return
-     */
-    @Deprecated
-    public static IntegerCoordinate convertBlockType2LevelOld(int type) {
-        IntegerCoordinate rst = new IntegerCoordinate();
-        switch (type) {
-            case GamePalConstants.BLOCK_TYPE_GROUND:
-            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
-                rst.setX(GamePalConstants.STRUCTURE_LAYER_GROUND);
-                break;
-            case GamePalConstants.BLOCK_TYPE_CEILING:
-            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
-                rst.setX(GamePalConstants.STRUCTURE_LAYER_TOP);
-                break;
-            case GamePalConstants.BLOCK_TYPE_WALL:
-            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-            case GamePalConstants.BLOCK_TYPE_DROP:
-            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
-            default:
-                rst.setX(GamePalConstants.STRUCTURE_LAYER_MIDDLE);
-                break;
-        }
-        switch (type) {
-            case GamePalConstants.BLOCK_TYPE_GROUND:
-            case GamePalConstants.BLOCK_TYPE_WALL:
-            case GamePalConstants.BLOCK_TYPE_CEILING:
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_GROUND:
-            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
-            case GamePalConstants.BLOCK_TYPE_BLOCKED_CEILING:
-                rst.setY(0);
-                break;
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-            case GamePalConstants.BLOCK_TYPE_DROP:
-                rst.setY(20);
-                break;
-            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-            default:
-                rst.setY(10);
-                break;
-        }
-        return rst;
-    }
-
     /**
      * Ignore sceneCoordinate
      * @param regionInfo RegionInfo
@@ -612,28 +490,6 @@ public class BlockUtil {
         return false;
     }
 
-    public static int convertBlockType2MaterialOld(int blockType) {
-        int material;
-        switch (blockType) {
-            case GamePalConstants.BLOCK_TYPE_GROUND:
-            case GamePalConstants.BLOCK_TYPE_DROP:
-            case GamePalConstants.BLOCK_TYPE_GROUND_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_WALL_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_CEILING_DECORATION:
-            case GamePalConstants.BLOCK_TYPE_HOLLOW_WALL:
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                material = GamePalConstants.STRUCTURE_MATERIAL_HOLLOW;
-                break;
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-                material = GamePalConstants.STRUCTURE_MATERIAL_FLESH;
-                break;
-            default:
-                material = GamePalConstants.STRUCTURE_MATERIAL_SOLID;
-                break;
-        }
-        return material;
-    }
-
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
             case GamePalConstants.BLOCK_TYPE_PLAYER:
@@ -649,22 +505,6 @@ public class BlockUtil {
             default:
                 return false;
         }
-    }
-
-    @Deprecated
-    public static Queue<Block> createRankingQueueByType() {
-        return new PriorityQueue<>((o1, o2) -> {
-            IntegerCoordinate level1 = BlockUtil.convertBlockType2Level(o1.getType());
-            IntegerCoordinate level2 = BlockUtil.convertBlockType2Level(o2.getType());
-            if (!Objects.equals(level1.getX(), level2.getX())) {
-                return level1.getX() - level2.getX();
-            }
-            // Please use equals() instead of == 24/02/10
-            if (!o1.getY().equals(o2.getY())) {
-                return o1.getY().compareTo(o2.getY());
-            }
-            return level1.getY() - level2.getY();
-        });
     }
 
     public static Queue<Block> createRankingQueue() {
@@ -697,15 +537,15 @@ public class BlockUtil {
 
     public static WorldBlock convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
                                                      WorldCoordinate worldCoordinate) {
-        WorldBlock block = new WorldBlock(convertEventCode2BlockType(eventCode), userCode, String.valueOf(eventCode),
-                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+        WorldBlock block = new WorldBlock(GamePalConstants.BLOCK_TYPE_NORMAL, userCode, String.valueOf(eventCode),
+                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(eventCode)),
                 worldCoordinate);
         BlockUtil.fixWorldCoordinate(regionInfo, block);
         return block;
     }
 
     public static Block convertEvent2Block(Event event) {
-        Block block = new Block(convertEventCode2BlockType(event.getCode()), String.valueOf(event.getFrame()),
+        Block block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, String.valueOf(event.getFrame()),
                 String.valueOf(event.getCode()),
                 new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())),
                 event);
@@ -713,7 +553,7 @@ public class BlockUtil {
     }
 
     private static int convertEventCode2Layer(int eventCode) {
-        int blockType;
+        int layer;
         switch (eventCode) {
             case GamePalConstants.EVENT_CODE_EXPLODE:
             case GamePalConstants.EVENT_CODE_BLOCK:
@@ -724,34 +564,13 @@ public class BlockUtil {
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
-                blockType = GamePalConstants.STRUCTURE_LAYER_TOP_DECORATION;
+                layer = GamePalConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
             default:
-                blockType = GamePalConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
+                layer = GamePalConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
                 break;
         }
-        return blockType;
-    }
-
-    private static int convertEventCode2BlockType(int eventCode) {
-        int blockType;
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_BLEED:
-            case GamePalConstants.EVENT_CODE_UPGRADE:
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_SACRIFICE:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                blockType = GamePalConstants.BLOCK_TYPE_CEILING_DECORATION;
-                break;
-            default:
-                blockType = GamePalConstants.BLOCK_TYPE_WALL_DECORATION;
-                break;
-        }
-        return blockType;
+        return layer;
     }
 
     public static WorldEvent createWorldEvent(String userCode, int code, WorldCoordinate worldCoordinate) {

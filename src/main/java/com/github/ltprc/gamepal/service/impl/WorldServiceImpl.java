@@ -161,24 +161,21 @@ public class WorldServiceImpl implements WorldService {
                         JSONArray blockRow = map.getJSONArray(i);
                         for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                             Integer value = blockRow.getInteger(j);
-                            int blockType;
+                            int blockType = GamePalConstants.BLOCK_TYPE_NORMAL;
                             Structure structure;
                             switch (value / 10000) {
                                 case 2:
-                                    blockType = GamePalConstants.BLOCK_TYPE_WALL;
                                     structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
                                             GamePalConstants.STRUCTURE_LAYER_MIDDLE);
                                     break;
                                 case 3:
-                                    blockType = GamePalConstants.BLOCK_TYPE_CEILING;
                                     structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
                                             GamePalConstants.STRUCTURE_LAYER_TOP);
                                     break;
                                 case 1:
                                 default:
-                                    blockType = GamePalConstants.BLOCK_TYPE_GROUND;
                                     structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            GamePalConstants.STRUCTURE_LAYER_GROUND);
+                                            GamePalConstants.STRUCTURE_LAYER_BOTTOM);
                                     break;
                             }
                             Block block = new Block(blockType, null, String.valueOf(value % 10000), structure,

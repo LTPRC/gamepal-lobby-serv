@@ -31,8 +31,7 @@ public class GamePalConstants {
 
     public static final int SCENE_DEFAULT_WIDTH = 10;
     public static final int SCENE_DEFAULT_HEIGHT = 10;
-    public static final int BLOCK_TYPE_GROUND = 0;
-    public static final int BLOCK_TYPE_WALL = 1;
+    public static final int BLOCK_TYPE_NORMAL = 0;
     public static final int BLOCK_TYPE_PLAYER = 2;
     public static final int BLOCK_TYPE_DROP = 3;
     public static final int BLOCK_TYPE_TELEPORT = 4;
@@ -44,13 +43,6 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_STORAGE = 10;
     public static final int BLOCK_TYPE_COOKER = 11;
     public static final int BLOCK_TYPE_SINK = 12;
-    public static final int BLOCK_TYPE_CEILING = 13;
-    public static final int BLOCK_TYPE_GROUND_DECORATION = 14;
-    public static final int BLOCK_TYPE_WALL_DECORATION = 15;
-    public static final int BLOCK_TYPE_CEILING_DECORATION = 16;
-    public static final int BLOCK_TYPE_BLOCKED_GROUND = 17;
-    public static final int BLOCK_TYPE_HOLLOW_WALL = 18;
-    public static final int BLOCK_TYPE_BLOCKED_CEILING = 19;
 
     public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
     public static final int STRUCTURE_MATERIAL_SOLID = 1;
