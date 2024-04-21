@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.PlayerConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -123,7 +124,7 @@ public class WorldServiceImpl implements WorldService {
     private void loadScenes(GameWorld world) {
         JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/json/regions.json");
         if (null == regions) {
-            logger.error(ErrorUtil.ERROR_1036);
+            logger.error(ErrorUtil.ERROR_1032);
             return;
         }
         for (Object obj : regions) {
@@ -258,7 +259,7 @@ public class WorldServiceImpl implements WorldService {
     public void loadItems() {
         JSONArray items = ContentUtil.jsonFile2JSONArray("src/main/resources/json/items.json");
         if (null == items) {
-            logger.error(ErrorUtil.ERROR_1036);
+            logger.error(ErrorUtil.ERROR_1032);
             return;
         }
         items.forEach(itemObj -> {
@@ -309,8 +310,7 @@ public class WorldServiceImpl implements WorldService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        List<WorldBlock> playerInfoList = world.getPlayerInfoMap().entrySet().stream()
-                .map(Map.Entry::getValue)
+        List<WorldBlock> playerInfoList = world.getPlayerInfoMap().values().stream()
                 .filter(playerInfo -> checkEventCondition(eventBlock, playerInfo))
                 .collect(Collectors.toList());
         activateEvent(eventBlock, playerInfoList);
@@ -534,7 +534,7 @@ public class WorldServiceImpl implements WorldService {
                                     eventPlayerInfo, wb);
                     if (null != distanceOld && null != distanceNew && distanceOld.compareTo(distanceNew) > 0) {
                         if (wb.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
-                                || eventBlock.getType() != GamePalConstants.SKILL_CODE_SHOOT_MAGNUM) {
+                                || eventBlock.getType() != SkillConstants.SKILL_CODE_SHOOT_MAGNUM) {
                             activatedWorldBlockList.clear();
                         }
                         activatedWorldBlockList.add(new WorldBlock(wb));

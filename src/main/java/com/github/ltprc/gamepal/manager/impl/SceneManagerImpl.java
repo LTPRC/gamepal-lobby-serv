@@ -58,8 +58,8 @@ public class SceneManagerImpl implements SceneManager {
         Grid grid = new Grid(region.getRadius() * 2 + 1);
         NoiseGenerator noiseGenerator = new NoiseGenerator();
         noiseStage(grid, noiseGenerator, 3, 0.1f);
-        noiseStage(grid, noiseGenerator, 2, 0.4f);
-        noiseStage(grid, noiseGenerator, 1, 0.5f);
+        noiseStage(grid, noiseGenerator, 2, 0.3f);
+        noiseStage(grid, noiseGenerator, 1, 0.6f);
 
         // Set temp altitudeMap
         Map<IntegerCoordinate, Double> altitudeMap = region.getAltitudeMap();
@@ -103,17 +103,20 @@ public class SceneManagerImpl implements SceneManager {
                 double d = random.nextDouble();
                 if (altitudeMap.get(sceneCoordinate) >= 0.65D) {
                     blockCode = BlockCodeConstants.BLOCK_CODE_SNOW;
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.65D, null, blockCode);
-                } else if (altitudeMap.get(sceneCoordinate) >= 0.55D) {
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
+                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
+                } else if (altitudeMap.get(sceneCoordinate) >= 0.6D) {
                     blockCode = BlockCodeConstants.BLOCK_CODE_ROUGH;
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.55D, 0.65D, blockCode);
-                } else if (altitudeMap.get(sceneCoordinate) >= 0.3D) {
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
+                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
+                } else if (altitudeMap.get(sceneCoordinate) >= 0.4D) {
                     if (d >= 0.75D) {
                         blockCode = BlockCodeConstants.BLOCK_CODE_DIRT;
                     } else {
                         blockCode = BlockCodeConstants.BLOCK_CODE_GRASS;
                     }
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), 0.3D, 0.55D, blockCode);
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
+                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else {
                     if (d >= 0.8D) {
                         blockCode = BlockCodeConstants.BLOCK_CODE_WATER;
@@ -126,7 +129,8 @@ public class SceneManagerImpl implements SceneManager {
                     } else {
                         blockCode = BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN;
                     }
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), null, 0.3D, blockCode);
+                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
+                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 }
             }
         }
@@ -195,7 +199,7 @@ public class SceneManagerImpl implements SceneManager {
         scene.setBlocks(new ArrayList<>());
         if (Math.abs(sceneCoordinate.getX()) > region.getRadius()
                 || Math.abs(sceneCoordinate.getY()) > region.getRadius() ) {
-            logger.error(ErrorUtil.ERROR_1035);
+            logger.error(ErrorUtil.ERROR_1031);
             return;
         }
         int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
@@ -577,6 +581,26 @@ public class SceneManagerImpl implements SceneManager {
                             BigDecimal.valueOf(random.nextDouble() * regionInfo.getHeight())));
             scene.getBlocks().add(block);
         }
+    }
+
+    private void addSceneObjects(RegionInfo regionInfo, Scene scene) {
+        Random random = new Random();
+        // Plants
+        for (int j = 0; j < random.nextInt(10); j++) {
+            Coordinate coordinate = new Coordinate(BigDecimal.valueOf(random.nextDouble() * regionInfo.getWidth()),
+                    BigDecimal.valueOf(random.nextDouble() * regionInfo.getHeight()));
+            int upleftBlockCode = scene.getGird()[(int) Math.floor(coordinate.getX().doubleValue())]
+                    [(int) Math.floor(coordinate.getY().doubleValue())];
+            int uprightBlockCode = scene.getGird()[(int) Math.ceil(coordinate.getX().doubleValue())]
+                    [(int) Math.floor(coordinate.getY().doubleValue())];
+            int downleftBlockCode = scene.getGird()[(int) Math.floor(coordinate.getX().doubleValue())]
+                    [(int) Math.ceil(coordinate.getY().doubleValue())];
+            int downrightBlockCode = scene.getGird()[(int) Math.ceil(coordinate.getX().doubleValue())]
+                    [(int) Math.ceil(coordinate.getY().doubleValue())];
+            int[] weights = new int[20];
+            
+        }
+
     }
 
     @Override

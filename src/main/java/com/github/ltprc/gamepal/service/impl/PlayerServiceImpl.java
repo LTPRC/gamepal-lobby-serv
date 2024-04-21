@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
@@ -198,8 +199,8 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        PlayerMovement playerMovement = JSON.toJavaObject(req, PlayerMovement.class);
-        playerInfo.setPlayerStatus(playerMovement.getPlayerStatus());
+        PlayerInfo playerMovement = JSON.toJavaObject(req, PlayerInfo.class);
+        playerInfo.setPlayerStatus(req.getInteger("playerStatus"));
         playerInfo.setRegionNo(playerMovement.getRegionNo());
         IntegerCoordinate sceneCoordinate = playerMovement.getSceneCoordinate();
         if (null != sceneCoordinate) {
@@ -600,7 +601,7 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfoMap.get(userCode).setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
             for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
-                playerInfoMap.get(userCode).getSkill()[i][2] = playerInfoMap.get(userCode).getSkill()[i][3];
+                playerInfoMap.get(userCode).getSkill()[i].setFrame(playerInfoMap.get(userCode).getSkill()[i].getFrameMax());
             }
             WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
                     playerInfoMap.get(userCode));
@@ -651,28 +652,28 @@ public class PlayerServiceImpl implements PlayerService {
         }
         if (isDown) {
             // Skill button is pushed down
-            if (playerInfoMap.get(userCode).getSkill()[skillNo][2] == 0) {
-                if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO) {
+            if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == 0) {
+                if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
                     // It must be -1, otherwise it will be triggered automatically 24/03/05
-                    playerInfoMap.get(userCode).getSkill()[skillNo][2] = -1;
-                } else if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_AUTO) {
-                    playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
+                    playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(-1);
+                } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
+                    playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
                     generateEventBySkill(userCode, skillNo);
                 } else {
-                    logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo][1]);
+                    logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode());
                 }
             }
         } else {
             // Skill button is released
-            if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_SEMI_AUTO) {
-                if (playerInfoMap.get(userCode).getSkill()[skillNo][2] == -1) {
-                    playerInfoMap.get(userCode).getSkill()[skillNo][2] = playerInfoMap.get(userCode).getSkill()[skillNo][3];
+            if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
+                if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == -1) {
+                    playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
                     generateEventBySkill(userCode, skillNo);
                 }
-            } else if (playerInfoMap.get(userCode).getSkill()[skillNo][1] == GamePalConstants.SKILL_MODE_AUTO) {
+            } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
                 // Nothing
             } else {
-                logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo][1]);
+                logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode());
             }
 
         }
@@ -696,68 +697,68 @@ public class PlayerServiceImpl implements PlayerService {
                 playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
                         GamePalConstants.EVENT_MAX_ANGLE_SHOOT.doubleValue() * 2 * (random.nextDouble() - 0.5D))),
                 GamePalConstants.EVENT_MAX_DISTANCE_SHOOT);
-        switch (playerInfo.getSkill()[skillNo][0]) {
-            case GamePalConstants.SKILL_CODE_BLOCK:
+        switch (playerInfo.getSkill()[skillNo].getSkillCode()) {
+            case SkillConstants.SKILL_CODE_BLOCK:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_BLOCK,
                         playerInfo));
                 break;
-            case GamePalConstants.SKILL_CODE_HEAL:
+            case SkillConstants.SKILL_CODE_HEAL:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_HEAL,
                         playerInfo));
                 break;
-            case GamePalConstants.SKILL_CODE_CHEER:
+            case SkillConstants.SKILL_CODE_CHEER:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CHEER,
                         playerInfo));
                 break;
-            case GamePalConstants.SKILL_CODE_CURSE:
+            case SkillConstants.SKILL_CODE_CURSE:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CURSE,
                         playerInfo));
                 break;
-            case GamePalConstants.SKILL_CODE_MELEE_HIT:
+            case SkillConstants.SKILL_CODE_MELEE_HIT:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_HIT, meleeWc));
                 break;
-            case GamePalConstants.SKILL_CODE_MELEE_KICK:
+            case SkillConstants.SKILL_CODE_MELEE_KICK:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_KICK, meleeWc));
                 break;
-            case GamePalConstants.SKILL_CODE_MELEE_SCRATCH:
+            case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_SCRATCH, meleeWc));
                 break;
-            case GamePalConstants.SKILL_CODE_MELEE_CLEAVE:
+            case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_CLEAVE, meleeWc));
                 break;
-            case GamePalConstants.SKILL_CODE_MELEE_STAB:
+            case SkillConstants.SKILL_CODE_MELEE_STAB:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_MELEE_STAB, meleeWc));
                 break;
-            case GamePalConstants.SKILL_CODE_SHOOT_HIT:
+            case SkillConstants.SKILL_CODE_SHOOT_HIT:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_HIT, shootWc));
                 break;
-            case GamePalConstants.SKILL_CODE_SHOOT_ARROW:
+            case SkillConstants.SKILL_CODE_SHOOT_ARROW:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_ARROW, shootWc));
                 break;
-            case GamePalConstants.SKILL_CODE_SHOOT_GUN:
+            case SkillConstants.SKILL_CODE_SHOOT_GUN:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootWc));
                 break;
-            case GamePalConstants.SKILL_CODE_SHOOT_SHOTGUN:
+            case SkillConstants.SKILL_CODE_SHOOT_SHOTGUN:
                 for (int i = 0; i < 10; i++) {
                     WorldCoordinate shootShotgunWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                             world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
@@ -768,12 +769,12 @@ public class PlayerServiceImpl implements PlayerService {
                             GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootShotgunWc));
                 }
                 break;
-            case GamePalConstants.SKILL_CODE_SHOOT_MAGNUM:
+            case SkillConstants.SKILL_CODE_SHOOT_MAGNUM:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_MAGNUM, shootWc));
                 break;
-            case GamePalConstants.SKILL_CODE_SHOOT_ROCKET:
+            case SkillConstants.SKILL_CODE_SHOOT_ROCKET:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_ROCKET, shootWc));

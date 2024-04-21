@@ -73,7 +73,7 @@ public class NpcManagerImpl implements NpcManager {
 
     private NpcBrain generateNpcBrain() {
         NpcBrain npcBrain = new NpcBrain();
-        npcBrain.setStatus(PlayerConstants.NPC_BRAIN_STATUS_UNAWARE);
+        npcBrain.setStatus(PlayerConstants.NPC_BRAIN_STATUS_FOLLOWING);
         npcBrain.setAttackTeammate(false);
         npcBrain.setAttackStranger(true);
         npcBrain.setObserveTaskQueue(new PriorityQueue<>());

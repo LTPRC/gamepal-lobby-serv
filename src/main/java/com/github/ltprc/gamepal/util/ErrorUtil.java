@@ -35,10 +35,8 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1028 = new GamepalError("1028", "Invalid skillNo.");
     public static final GamepalError ERROR_1029 = new GamepalError("1029", "Invalid skillMode.");
     public static final GamepalError ERROR_1030 = new GamepalError("1030", "Invalid drop id.");
-    public static final GamepalError ERROR_1031 = new GamepalError("1031", "Player is not running or alive.");
-    public static final GamepalError ERROR_1032 = new GamepalError("1032", "AI is not allowed to receive msg.");
+    public static final GamepalError ERROR_1031 = new GamepalError("1035", "Invalid coordinate.");
+    public static final GamepalError ERROR_1032 = new GamepalError("1036", "Invalid JSON content.");
     public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
     public static final GamepalError ERROR_1034 = new GamepalError("1034", "RegionNos are not identical.");
-    public static final GamepalError ERROR_1035 = new GamepalError("1035", "Invalid coordinate.");
-    public static final GamepalError ERROR_1036 = new GamepalError("1036", "Invalid JSON content.");
 }

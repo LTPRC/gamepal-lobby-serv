@@ -14,4 +14,6 @@ public class PlayerConstants {
     public static final int NPC_BRAIN_STATUS_SUSPICIOUS = 1;
     public static final int NPC_BRAIN_STATUS_ALERT = 2;
     public static final int NPC_BRAIN_STATUS_SEARCHING = 3;
+    public static final int NPC_BRAIN_STATUS_FOLLOWING = 4;
+    public static final int NPC_BRAIN_STATUS_WANDERING = 5;
 }

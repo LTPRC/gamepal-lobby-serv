@@ -56,7 +56,7 @@ public class PlayerInfo extends WorldMovingBlock {
     private BigDecimal capacityMax;
     private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
     private int[] buff; // buff code, remaining frame
-    private int[][] skill; // skillNo; skillCode, skillMode(0=semi-auto 1=auto), time, timeMax
+    private Skill[] skill;
     private String bossId;
     private PerceptionInfo perceptionInfo;
 }

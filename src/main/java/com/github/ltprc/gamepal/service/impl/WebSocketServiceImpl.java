@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
@@ -98,15 +99,15 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
-            if (functions.containsKey("updateMovingBlock")) {
-                playerService.updatePlayerMovement(userCode, functions.getJSONObject("updateMovingBlock"));
+            if (functions.containsKey("updatePlayerMovement")) {
+                playerService.updatePlayerMovement(userCode, functions.getJSONObject("updatePlayerMovement"));
             }
             // Detect and expand scenes after updating player's location
             PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
             worldService.expandScene(world, playerInfo);
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
-                useItems.stream().forEach(useItem -> {
+                useItems.forEach(useItem -> {
                     String itemNo = ((JSONObject) useItem).getString("itemNo");
                     int itemAmount = ((JSONObject) useItem).getInteger("itemAmount");
                     playerService.useItem(userCode, itemNo, itemAmount);
@@ -114,7 +115,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("getItems")) {
                 JSONArray getItems = functions.getJSONArray("getItems");
-                getItems.stream().forEach(getItem -> {
+                getItems.forEach(getItem -> {
                     String itemNo = ((JSONObject) getItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getItem).getInteger("itemAmount");
                     playerService.getItem(userCode, itemNo, itemAmount);
@@ -122,7 +123,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("getPreservedItems")) {
                 JSONArray getPreservedItems = functions.getJSONArray("getPreservedItems");
-                getPreservedItems.stream().forEach(getPreservedItem -> {
+                getPreservedItems.forEach(getPreservedItem -> {
                     String itemNo = ((JSONObject) getPreservedItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getPreservedItem).getInteger("itemAmount");
                     playerService.getPreservedItem(userCode, itemNo, itemAmount);
@@ -151,7 +152,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 }
             }
             JSONArray drops = functions.getJSONArray("addDrops");
-            drops.stream().forEach(obj -> {
+            drops.forEach(obj -> {
                 String itemNo = ((JSONObject) obj).getString("itemNo");
                 int itemAmount = ((JSONObject) obj).getInteger("itemAmount");
                 playerService.addDrop(userCode, itemNo, itemAmount);
@@ -184,7 +185,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("interactBlocks")) {
                 JSONArray interactBlocks = functions.getJSONArray("interactBlocks");
-                interactBlocks.stream().forEach(interactBlock -> {
+                interactBlocks.forEach(interactBlock -> {
                     int interactionCode = ((JSONObject) interactBlock).getInteger("interactionCode");
                     String id = ((JSONObject) interactBlock).getString("id");
                     playerService.interactBlocks(userCode, interactionCode, id);
@@ -204,7 +205,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("useSkills")) {
                 JSONArray useSkills = functions.getJSONArray("useSkills");
-                for (int i = 0; i < GamePalConstants.SKILL_LENGTH; i++) {
+                for (int i = 0; i < SkillConstants.SKILL_LENGTH; i++) {
                     playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
                 }
             }

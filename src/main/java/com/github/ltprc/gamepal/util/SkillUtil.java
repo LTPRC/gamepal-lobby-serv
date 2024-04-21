@@ -1,9 +1,13 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.Skill;
 import com.github.ltprc.gamepal.model.item.Tool;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 @Component
 public class SkillUtil {
@@ -23,7 +27,7 @@ public class SkillUtil {
             case "t113":
             case "t114":
             case "t115":
-                toolType = GamePalConstants.SKILL_CODE_MELEE_HIT;
+                toolType = SkillConstants.SKILL_CODE_MELEE_HIT;
                 break;
             case "t010":
             case "t014":
@@ -33,25 +37,25 @@ public class SkillUtil {
             case "t117":
             case "t204":
             case "t227":
-                toolType = GamePalConstants.SKILL_CODE_MELEE_CLEAVE;
+                toolType = SkillConstants.SKILL_CODE_MELEE_CLEAVE;
                 break;
             case "t004":
             case "t111":
-                toolType = GamePalConstants.SKILL_CODE_MELEE_SCRATCH;
+                toolType = SkillConstants.SKILL_CODE_MELEE_SCRATCH;
                 break;
             case "t001":
             case "t020":
             case "t101":
             case "t103":
             case "t109":
-                toolType = GamePalConstants.SKILL_CODE_MELEE_STAB;
+                toolType = SkillConstants.SKILL_CODE_MELEE_STAB;
                 break;
             case "t007":
-                toolType = GamePalConstants.SKILL_CODE_SHOOT_HIT;
+                toolType = SkillConstants.SKILL_CODE_SHOOT_HIT;
                 break;
             case "t108":
             case "t203":
-                toolType = GamePalConstants.SKILL_CODE_SHOOT_ARROW;
+                toolType = SkillConstants.SKILL_CODE_SHOOT_ARROW;
                 break;
             case "t000":
             case "t003":
@@ -80,14 +84,14 @@ public class SkillUtil {
             case "t228":
             case "t229":
             case "t230":
-                toolType = GamePalConstants.SKILL_CODE_SHOOT_GUN;
+                toolType = SkillConstants.SKILL_CODE_SHOOT_GUN;
                 break;
             case "t106":
             case "t201":
             case "t215":
             case "t220":
             case "t231":
-                toolType = GamePalConstants.SKILL_CODE_SHOOT_SHOTGUN;
+                toolType = SkillConstants.SKILL_CODE_SHOOT_SHOTGUN;
                 break;
             case "t002":
             case "t202":
@@ -96,11 +100,11 @@ public class SkillUtil {
             case "t212":
             case "t219":
             case "t222":
-                toolType = GamePalConstants.SKILL_CODE_SHOOT_MAGNUM;
+                toolType = SkillConstants.SKILL_CODE_SHOOT_MAGNUM;
                 break;
             case "t221":
             case "t226":
-                toolType = GamePalConstants.SKILL_CODE_SHOOT_ROCKET;
+                toolType = SkillConstants.SKILL_CODE_SHOOT_ROCKET;
                 break;
             case "t008":
             case "t009":
@@ -109,7 +113,7 @@ public class SkillUtil {
             case "t218":
                 // TODO
             default:
-                toolType = GamePalConstants.SKILL_CODE_MELEE_HIT;
+                toolType = SkillConstants.SKILL_CODE_MELEE_HIT;
                 break;
         }
         switch (tool.getItemNo()) {
@@ -138,10 +142,10 @@ public class SkillUtil {
             case "t229":
             case "t230":
             case "t231":
-                skillMode = GamePalConstants.SKILL_MODE_AUTO;
+                skillMode = SkillConstants.SKILL_MODE_AUTO;
                 break;
             default:
-                skillMode = GamePalConstants.SKILL_MODE_SEMI_AUTO;
+                skillMode = SkillConstants.SKILL_MODE_SEMI_AUTO;
                 break;
         }
         switch (tool.getItemNo()) {
@@ -242,7 +246,7 @@ public class SkillUtil {
             case "t009":
             case "t011":
             default:
-                skillTime = GamePalConstants.SKILL_DEFAULT_TIME;
+                skillTime = SkillConstants.SKILL_DEFAULT_FRAME;
                 break;
         }
         tool.setItemType(toolType);
@@ -251,22 +255,25 @@ public class SkillUtil {
     }
 
     public static void updateSkills(PlayerInfo playerInfo) {
-        int[][] skills = new int[4][4];
-        skills[0] = new int[]{GamePalConstants.SKILL_CODE_MELEE_HIT, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        skills[1] = new int[]{GamePalConstants.SKILL_CODE_MELEE_KICK, GamePalConstants.SKILL_MODE_SEMI_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME * 2};
-        skills[2] = new int[]{GamePalConstants.SKILL_CODE_CURSE, GamePalConstants.SKILL_MODE_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        skills[3] = new int[]{GamePalConstants.SKILL_CODE_CHEER, GamePalConstants.SKILL_MODE_AUTO, 0,
-                GamePalConstants.SKILL_DEFAULT_TIME};
-        playerInfo.getTools().stream()
-                .forEach((String toolStr) -> {
-                    Tool tool = new Tool();
-                    tool.setItemNo(toolStr);
-                    defineToolProps(tool);
-                    skills[0] = new int[]{tool.getItemType(), tool.getItemMode(), 0, tool.getItemTime()};
-                });
+        Skill[] skills = new Skill[4];
+        skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+        skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
+                GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+        skills[2] = new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO);
+        skills[3] = new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO);
+        playerInfo.getTools().forEach((String toolStr) -> {
+            Tool tool = new Tool();
+            tool.setItemNo(toolStr);
+            defineToolProps(tool);
+            skills[0] = new Skill(tool.getItemType(), tool.getItemMode(), 0,
+                    tool.getItemTime(), SkillConstants.SKILL_TYPE_ATTACK,
+                    GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+        });
         playerInfo.setSkill(skills);
     }
 
