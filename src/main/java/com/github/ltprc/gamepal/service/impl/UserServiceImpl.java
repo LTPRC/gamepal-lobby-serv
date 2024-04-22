@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -138,8 +139,6 @@ public class UserServiceImpl implements UserService {
             playerInfo.setId(userCode);
             playerInfo.setCode("");
             world.getPlayerInfoMap().put(userCode, playerInfo);
-            String npcUserCode = npcManager.createNpc(world);
-            npcManager.putNpc(userCode, npcUserCode);
         }
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));

@@ -44,6 +44,8 @@ public interface PlayerService {
 
     ResponseEntity<String> setMember(String userCode, String nextUserCode);
 
+    String findTopBossId(final String userCode);
+
     ResponseEntity<String> useTools(String userCode, String itemNo);
 
     ResponseEntity<String> useOutfits(String userCode, String itemNo);

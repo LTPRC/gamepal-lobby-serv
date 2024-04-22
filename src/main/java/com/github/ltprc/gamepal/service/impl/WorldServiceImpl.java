@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -15,7 +14,6 @@ import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
-import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -58,9 +56,6 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private NpcManager npcManager;
-
-    @Autowired
-    private MovementManager movementManager;
 
     @Override
     public Map<String, GameWorld> getWorldMap() {
@@ -650,40 +645,6 @@ public class WorldServiceImpl implements WorldService {
             }
         }
         return newEvent;
-    }
-
-    @Override
-    public void updateNpcMovement(GameWorld world) {
-        // Run NPC tasks
-        Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
-        npcBrainMap.entrySet().stream()
-                .filter(entry2 -> SkillUtil.validateDamage(world.getPlayerInfoMap().get(entry2.getKey())))
-                .forEach(entry2 -> {
-                    String npcUserCode = entry2.getKey();
-                    JSONObject observeReq = new JSONObject();
-                    observeReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_OBSERVE);
-                    observeReq.put("userCode", npcUserCode);
-                    JSONObject observeResp = npcManager.runNpcTask(observeReq);
-                    WorldCoordinate wc = observeResp.getObject("wc", WorldCoordinate.class);
-                    if (null != wc) {
-                        JSONObject moveReq = new JSONObject();
-                        moveReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_MOVE);
-                        moveReq.put("userCode", npcUserCode);
-                        moveReq.put("wc", wc);
-                        JSONObject moveResp = npcManager.runNpcTask(moveReq);
-                    } else {
-                        JSONObject idleReq = new JSONObject();
-                        idleReq.put("npcTaskType", GamePalConstants.NPC_TASK_TYPE_IDLE);
-                        idleReq.put("userCode", npcUserCode);
-                        JSONObject idleResp = npcManager.runNpcTask(idleReq);
-                    }
-                });
-        // Settle NPC speed
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        playerInfoMap.entrySet().stream()
-                .filter(entry2 -> entry2.getValue().getPlayerType() == PlayerConstants.PLAYER_TYPE_AI)
-                .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
     }
 
     @Override

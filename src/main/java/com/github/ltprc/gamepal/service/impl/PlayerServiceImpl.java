@@ -1,10 +1,13 @@
 package com.github.ltprc.gamepal.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
@@ -16,6 +19,7 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
+import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
@@ -63,6 +67,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private SceneManager sceneManager;
+
+    @Autowired
+    private NpcManager npcManager;
 
     @Override
     public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
@@ -118,12 +125,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-//        JSONObject structureObj = req.getJSONObject("structure");
-//        List<Shape> shapes = structureObj.getJSONArray("shapes").stream()
-//                .map(shapeObj -> JSON.parseObject(String.valueOf(shapeObj), Shape.class))
-//                .collect(Collectors.toList());
         PlayerInfo playerInfo = JSON.parseObject(String.valueOf(req), PlayerInfo.class);
-//        playerInfo.getStructure().setShapes(shapes);
         playerInfoMap.put(userCode, playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -140,6 +142,10 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Integer playerStatus = req.getInteger("playerStatus");
+        if (null != playerStatus) {
+            playerInfo.setPlayerStatus(playerStatus);
+        }
         String firstName = req.getString("firstName");
         if (StringUtils.isNotBlank(firstName)) {
             playerInfo.setFirstName(firstName);
@@ -180,6 +186,13 @@ public class PlayerServiceImpl implements PlayerService {
         if (StringUtils.isNotBlank(eyes)) {
             playerInfo.setEyes(eyes);
         }
+        JSONArray faceCoefs = req.getJSONArray("faceCoefs");
+        if (null != faceCoefs) {
+            playerInfo.setFaceCoefs(new int[GamePalConstants.FACE_COEFS_LENGTH]);
+            for (int i = 0; i < GamePalConstants.FACE_COEFS_LENGTH; i++) {
+                playerInfo.getFaceCoefs()[i] = (int) faceCoefs.get(i);
+            }
+        }
         String avatar = req.getString("avatar");
         if (StringUtils.isNotBlank(avatar)) {
             playerInfo.setAvatar(avatar);
@@ -200,7 +213,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         PlayerInfo playerMovement = JSON.toJavaObject(req, PlayerInfo.class);
-        playerInfo.setPlayerStatus(req.getInteger("playerStatus"));
+        Integer playerStatus = req.getInteger("playerStatus");
+        if (null != playerStatus) {
+            playerInfo.setPlayerStatus(playerStatus);
+        }
         playerInfo.setRegionNo(playerMovement.getRegionNo());
         IntegerCoordinate sceneCoordinate = playerMovement.getSceneCoordinate();
         if (null != sceneCoordinate) {
@@ -603,6 +619,7 @@ public class PlayerServiceImpl implements PlayerService {
             for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
                 playerInfoMap.get(userCode).getSkill()[i].setFrame(playerInfoMap.get(userCode).getSkill()[i].getFrameMax());
             }
+            npcManager.resetNpcBrainQueues(userCode);
             WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
                     playerInfoMap.get(userCode));
             world.getEventQueue().add(worldEvent);
@@ -782,6 +799,22 @@ public class PlayerServiceImpl implements PlayerService {
             default:
                 break;
         }
+    }
+
+    @Override
+    public String findTopBossId(final String userCode) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.error(ErrorUtil.ERROR_1016);
+        }
+        if (!world.getPlayerInfoMap().containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+        }
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        while (StringUtils.isNotBlank(playerInfo.getBossId()) && !playerInfo.getBossId().equals(playerInfo.getId())) {
+            playerInfo = world.getPlayerInfoMap().get(playerInfo.getBossId());
+        }
+        return playerInfo.getId();
     }
 
     @Override

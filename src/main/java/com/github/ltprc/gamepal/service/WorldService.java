@@ -29,7 +29,5 @@ public interface WorldService {
 
     void expandScene(GameWorld world, WorldCoordinate worldCoordinate);
 
-    void updateNpcMovement(GameWorld world);
-
     void updateWorldTime(GameWorld world);
 }

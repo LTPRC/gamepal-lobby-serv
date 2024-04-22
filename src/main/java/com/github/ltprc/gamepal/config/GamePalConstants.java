@@ -146,13 +146,6 @@ public class GamePalConstants {
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
 
-    public static final int NPC_TASK_TYPE_IDLE = 0;
-    public static final int NPC_TASK_TYPE_OBSERVE = 1;
-    public static final int NPC_TASK_TYPE_MOVE = 2;
-    public static final int NPC_TASK_TYPE_ATTACK = 3;
-    public static final BigDecimal NPC_MAX_OBSERVE_RANGE = BigDecimal.valueOf(5);
-    public static final BigDecimal NPC_MAX_CHASE_DISTANCE = BigDecimal.valueOf(1);
-
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal EVENT_MAX_DISTANCE_MELEE = BigDecimal.ONE;
     public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT = BigDecimal.valueOf(10);

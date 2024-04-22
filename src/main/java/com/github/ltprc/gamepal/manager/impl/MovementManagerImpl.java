@@ -4,12 +4,11 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.map.*;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +26,9 @@ public class MovementManagerImpl implements MovementManager {
 
     @Autowired
     private SceneManager sceneManager;
+
+    @Autowired
+    private WorldService worldService;
 
     @Override
     public void settleSpeed(String userCode, WorldMovingBlock worldMovingBlock) {
@@ -74,6 +76,7 @@ public class MovementManagerImpl implements MovementManager {
             worldMovingBlock.getCoordinate().setY(worldMovingBlock.getCoordinate().getY()
                     .add(worldMovingBlock.getSpeed().getY()));
         } else {
+            worldService.expandScene(world, teleportWc);
             BlockUtil.copyWorldCoordinate(teleportWc, worldMovingBlock);
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
             region = world.getRegionMap().get(teleportWc.getRegionNo());

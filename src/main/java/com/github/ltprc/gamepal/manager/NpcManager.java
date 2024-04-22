@@ -10,5 +10,11 @@ public interface NpcManager {
 
     void putNpc(String userCode, String npcUserCode);
 
+    JSONObject changeNpcBehavior(JSONObject request);
+
     JSONObject runNpcTask(JSONObject request);
+
+    void updateNpcBrains(GameWorld world);
+
+    void resetNpcBrainQueues(String npcUserCode);
 }

@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.task;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -39,7 +40,6 @@ public class TimedEventTask {
 
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
-        Random random = new Random();
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
 
@@ -133,7 +133,7 @@ public class TimedEventTask {
                     });
 
             // Other movements
-            worldService.updateNpcMovement(world);
+            npcManager.updateNpcBrains(world);
         }
     }
 
@@ -146,24 +146,27 @@ public class TimedEventTask {
         long timestamp = Instant.now().getEpochSecond();
         for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry1.getValue();
-            world.getOnlineMap().entrySet().forEach(entry2 -> {
-                PlayerInfo playerInfo = world.getPlayerInfoMap().get(entry2.getKey());
+            world.getOnlineMap().forEach((key, value) -> {
+                PlayerInfo playerInfo = world.getPlayerInfoMap().get(key);
                 if (playerInfo.getPlayerType() == PlayerConstants.PLAYER_TYPE_HUMAN
-                        && timestamp - entry2.getValue() > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
-                    userService.logoff(entry2.getKey(), "", false);
+                        && timestamp - value > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
+                    userService.logoff(key, "", false);
                 }
             });
         }
     }
     @Scheduled(cron = "* * * * * ?")
     public void executeBy1s() {
-        worldService.getWorldMap().entrySet().forEach(entry -> worldService.updateWorldTime(entry.getValue()));
+        worldService.getWorldMap().forEach((key, value) -> worldService.updateWorldTime(value));
     }
 
-//    @Scheduled(cron = "*/5 * * * * ?")
+    @Scheduled(cron = "*/5 * * * * ?")
     public void executeBy5s() {
         for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry1.getValue();
+            if (!world.getNpcBrainMap().isEmpty()) {
+                continue;
+            }
             Map<String, Long> onlineMap = world.getOnlineMap();
             onlineMap.entrySet().stream()
                     .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType()
@@ -174,6 +177,12 @@ public class TimedEventTask {
                         String userCode = entry2.getKey();
                         String npcUserCode = npcManager.createNpc(world);
                         npcManager.putNpc(userCode, npcUserCode);
+                        JSONObject behaviorRequest = new JSONObject();
+                        behaviorRequest.put("userCode", npcUserCode);
+                        behaviorRequest.put("npcBehaviorType", PlayerConstants.NPC_BEHAVIOR_FOLLOW);
+                        behaviorRequest.put("targetUserCode", userCode);
+                        npcManager.changeNpcBehavior(behaviorRequest);
+                        world.getPlayerInfoMap().get(npcUserCode).setBossId(userCode);
                     });
         }
     }

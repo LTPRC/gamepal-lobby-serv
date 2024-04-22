@@ -593,18 +593,18 @@ public class BlockUtil {
         BigDecimal visionRadius = GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS;
         if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
-            visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
+            visionRadius = visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
                     .subtract(GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS)
-                    .multiply(BigDecimal.valueOf(worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
+                    .multiply(BigDecimal.valueOf(worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN))
                     .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNRISE_END
-                            - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN), RoundingMode.CEILING)));
+                            - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN), RoundingMode.CEILING));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
-            visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
+            visionRadius = visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
                     .subtract(GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS)
-                    .multiply(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
-                            .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END
-                                    - GamePalConstants.WORLD_TIME_SUNSET_BEGIN), RoundingMode.CEILING)));
+                    .multiply(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END - worldTime))
+                    .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END
+                            - GamePalConstants.WORLD_TIME_SUNSET_BEGIN), RoundingMode.CEILING));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
             visionRadius = GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS;
