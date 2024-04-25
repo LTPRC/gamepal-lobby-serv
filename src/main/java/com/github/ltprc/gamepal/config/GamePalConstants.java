@@ -118,7 +118,7 @@ public class GamePalConstants {
     public static final int BUFF_CODE_BLIND = 9;
     public static final int BUFF_CODE_LENGTH = 10;
 
-    public static final int FACE_COEFS_LENGTH = 9;
+    public static final int FACE_COEFS_LENGTH = 10;
 
     // Backend constants
 
