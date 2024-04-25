@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -19,7 +18,6 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
-import com.github.ltprc.gamepal.model.npc.NpcBrain;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
@@ -309,9 +307,6 @@ public class PlayerServiceImpl implements PlayerService {
             default:
                 break;
         }
-        if (!world.getFlagMap().containsKey(userCode)) {
-            world.getFlagMap().put(userCode, new HashSet<>());
-        }
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
@@ -353,9 +348,6 @@ public class PlayerServiceImpl implements PlayerService {
         } else if (itemAmount > 0) {
             generateNotificationMessage(userCode,
                     "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
-        }
-        if (!world.getFlagMap().containsKey(userCode)) {
-            world.getFlagMap().put(userCode, new HashSet<>());
         }
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
@@ -586,17 +578,8 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case GamePalConstants.INTERACTION_DECOMPOSE:
                 break;
-            case GamePalConstants.INTERACTION_TALK:
-                break;
-            case GamePalConstants.INTERACTION_ATTACK:
-                break;
-            case GamePalConstants.INTERACTION_FLIRT:
-                break;
             case GamePalConstants.INTERACTION_SET:
                 generateNotificationMessage(userCode, "你捯饬了起来。");
-                break;
-            case GamePalConstants.INTERACTION_YIELD:
-                // setMember()
                 break;
             default:
                 break;
@@ -824,35 +807,52 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> setMember(String userCode, String nextUserCode) {
+    public ResponseEntity<String> setMember(String userCode, String userCode1, String userCode2) {
         JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
+        GameWorld world = userService.getWorldByUserCode(userCode1);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         if (!world.getPlayerInfoMap().containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        if (StringUtils.isBlank(nextUserCode)) {
-            generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
-            world.getPlayerInfoMap().get(userCode).setBossId(null);
-            return ResponseEntity.ok().body(rst.toString());
-        }
-        if (!world.getPlayerInfoMap().containsKey(nextUserCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        String nextUserCodeBossId = nextUserCode;
-        while (StringUtils.isNotBlank(nextUserCodeBossId)) {
-            if (nextUserCodeBossId.equals(userCode)) {
-                generateNotificationMessage(userCode, world.getPlayerInfoMap().get(nextUserCode).getNickname()
-                        + "是你的下级，你不可以为其效忠。");
-                return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
+        if (userCode.equals(userCode1)) {
+            if (StringUtils.isBlank(userCode2)) {
+                generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
+                world.getPlayerInfoMap().get(userCode).setBossId(null);
+                return ResponseEntity.ok().body(rst.toString());
             }
-            nextUserCodeBossId = world.getPlayerInfoMap().get(nextUserCodeBossId).getBossId();
+            if (!world.getPlayerInfoMap().containsKey(userCode2)) {
+                return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+            }
+            String nextUserCodeBossId = userCode2;
+            while (StringUtils.isNotBlank(nextUserCodeBossId)) {
+                if (nextUserCodeBossId.equals(userCode)) {
+                    generateNotificationMessage(userCode, world.getPlayerInfoMap().get(userCode2).getNickname()
+                            + "是你的下级，你不可以为其效忠。");
+                    return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
+                }
+                nextUserCodeBossId = world.getPlayerInfoMap().get(nextUserCodeBossId).getBossId();
+            }
+            generateNotificationMessage(userCode, "你向" + world.getPlayerInfoMap().get(userCode2).getNickname()
+                    + "屈从了，自此为其效忠。");
+            world.getPlayerInfoMap().get(userCode).setBossId(userCode2);
+        } else {
+            PlayerInfo playerInfo1 = world.getPlayerInfoMap().get(userCode1);
+            if (!playerInfo1.getBossId().equals(userCode)) {
+                generateNotificationMessage(userCode, "你无法驱逐" + playerInfo1.getNickname()
+                        + "，这不是你的直属下级。");
+                return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
+            } else if (StringUtils.isNotBlank(userCode2)) {
+                generateNotificationMessage(userCode, "你无法指派你的直属下级" + playerInfo1.getNickname()
+                        + "向他人效忠。");
+                return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
+            } else {
+                playerInfo1.setBossId("");
+                generateNotificationMessage(userCode, "你驱逐了" + playerInfo1.getNickname()
+                        + "，对你的效忠就此终止。");
+            }
         }
-        generateNotificationMessage(userCode, "你向" + world.getPlayerInfoMap().get(nextUserCode).getNickname()
-                + "屈从了，自此为其效忠。");
-        world.getPlayerInfoMap().get(userCode).setBossId(nextUserCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 

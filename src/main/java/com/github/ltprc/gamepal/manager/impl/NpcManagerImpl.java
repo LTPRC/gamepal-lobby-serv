@@ -243,7 +243,7 @@ public class NpcManagerImpl implements NpcManager {
     private boolean checkAttackCondition(final String fromUserCode, final String toUserCode) {
         GameWorld world = userService.getWorldByUserCode(fromUserCode);
         if (null == world) {
-            logger.warn(ErrorUtil.ERROR_1019);
+            logger.warn(ErrorUtil.ERROR_1016);
             return false;
         }
         if (world != userService.getWorldByUserCode(toUserCode)) {

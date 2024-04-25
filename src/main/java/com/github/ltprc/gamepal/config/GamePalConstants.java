@@ -63,7 +63,8 @@ public class GamePalConstants {
     public static final int INTERACTION_ATTACK = 6;
     public static final int INTERACTION_FLIRT = 7;
     public static final int INTERACTION_SET = 8;
-    public static final int INTERACTION_YIELD = 9;
+    public static final int INTERACTION_SUCCUMB = 9;
+    public static final int INTERACTION_EXPEL = 10;
 
     public static final char ITEM_CHARACTER_TOOL = 't';
     public static final char ITEM_CHARACTER_OUTFIT = 'a';
@@ -73,6 +74,7 @@ public class GamePalConstants {
     public static final char ITEM_CHARACTER_NOTE = 'n';
     public static final char ITEM_CHARACTER_RECORDING = 'r';
 
+    public static final String FLAG_LOGOFF = "logoff";
     public static final String FLAG_UPDATE_ITEMS = "updateItems";
     public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";
 

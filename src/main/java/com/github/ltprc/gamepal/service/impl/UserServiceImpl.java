@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -140,6 +141,8 @@ public class UserServiceImpl implements UserService {
             playerInfo.setCode("");
             world.getPlayerInfoMap().put(userCode, playerInfo);
         }
+        // Clear flags including previous logoff flag 24/04/25
+        world.getFlagMap().put(userCode, new HashSet<>());
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));
         return ResponseEntity.ok().body(rst.toString());
@@ -165,15 +168,14 @@ public class UserServiceImpl implements UserService {
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1018));
         }
-        if (!needToken || token.equals(world.getTokenMap().get(userCode))) {
-            world.getTokenMap().remove(userCode);
-            world.getOnlineMap().remove(userCode);
-            world.getSessionMap().remove(userCode);
-            webSocketService.onClose(userCode);
-        } else {
+        if (needToken && !token.equals(world.getTokenMap().get(userCode))) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));
         }
+        world.getTokenMap().remove(userCode);
+        world.getOnlineMap().remove(userCode);
+        world.getSessionMap().remove(userCode);
         userWorldMap.remove(userCode);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_LOGOFF);
         return ResponseEntity.ok().body(rst.toString());
     }
 

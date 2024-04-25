@@ -42,7 +42,7 @@ public interface PlayerService {
 
     ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown);
 
-    ResponseEntity<String> setMember(String userCode, String nextUserCode);
+    ResponseEntity<String> setMember(String userCode, String userCode1, String userCode2);
 
     String findTopBossId(final String userCode);
 

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -61,6 +62,10 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Override
     public void onOpen(Session session, String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.info(ErrorUtil.ERROR_1019);
+            return;
+        }
         world.getSessionMap().put(userCode, session);
         logger.info("建立连接成功");
         communicate(userCode, GamePalConstants.WEB_STAGE_START, null);
@@ -213,7 +218,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 JSONObject setMember = functions.getJSONObject("setMember");
                 String userCode1 = setMember.getString("userCode");
                 String userCode2 = setMember.getString("nextUserCode");
-                playerService.setMember(userCode1, userCode2);
+                playerService.setMember(userCode, userCode1, userCode2);
             }
         }
         // Reply automatically
@@ -259,14 +264,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         // Return flags
-        if (!world.getFlagMap().containsKey(userCode)) {
-            world.getFlagMap().put(userCode, new HashSet<>());
-        }
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
 
         JSONArray flags = new JSONArray();
-        world.getFlagMap().get(userCode).stream().forEach(flags::add);
+        flags.addAll(world.getFlagMap().get(userCode));
         rst.put("flags", flags);
         world.getFlagMap().get(userCode).clear();
 
@@ -358,7 +360,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             session.getBasicRemote().sendText(content);
         } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-            userService.logoff(userCode, "", false);
+//            userService.logoff(userCode, "", false);
         }
     }
 }

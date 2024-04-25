@@ -23,7 +23,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1016 = new GamepalError("1016", "Invalid worldCode.");
     public static final GamepalError ERROR_1017 = new GamepalError("1017", "Different worlds detected.");
     public static final GamepalError ERROR_1018 = new GamepalError("1018", "Already offline.");
-    public static final GamepalError ERROR_1019 = new GamepalError("1019", "Already removed.");
+    public static final GamepalError ERROR_1019 = new GamepalError("1019", "Expired world.");
     public static final GamepalError ERROR_1020 = new GamepalError("1020", "Invalid item information.");
     public static final GamepalError ERROR_1021 = new GamepalError("1021", "Unable to locate terminal.");
     public static final GamepalError ERROR_1022 = new GamepalError("1022", "Unable to locate created game.");

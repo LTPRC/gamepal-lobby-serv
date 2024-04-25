@@ -77,7 +77,7 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public ResponseEntity<String> removeWorld(String worldCode) {
         JSONObject rst = ContentUtil.generateRst();
-        GameWorld world =worldMap.get(worldCode);
+        GameWorld world = worldMap.get(worldCode);
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1019));
         }
