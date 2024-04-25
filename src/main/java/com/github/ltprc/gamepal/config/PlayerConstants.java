@@ -33,5 +33,12 @@ public class PlayerConstants {
     public static final int STANCE_STAND_GROUND = 3;
     public static final int STANCE_NO_ATTACK = 4;
     public static final BigDecimal NPC_ARRIVE_DISTANCE = BigDecimal.valueOf(0.1);
-    public static final BigDecimal NPC_CHASE_DISTANCE = BigDecimal.ONE;
+    public static final BigDecimal NPC_FOLLOW_STOP_DISTANCE = BigDecimal.ONE;
+
+    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(10);
+    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(5);
+    public static final BigDecimal DEFAULT_DISTINCT_VISION_ANGLE = BigDecimal.valueOf(60);
+    public static final BigDecimal DEFAULT_INDISTINCT_VISION_ANGLE = BigDecimal.valueOf(180);
+    public static final BigDecimal DEFAULT_DISTINCT_HEARING_RADIUS = BigDecimal.valueOf(1);
+    public static final BigDecimal DEFAULT_INDISTINCT_HEARING_RADIUS = BigDecimal.valueOf(10);
 }

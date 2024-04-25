@@ -1,8 +1,8 @@
 package com.github.ltprc.gamepal.model.game;
 
-import cn.hutool.core.collection.ConcurrentHashSet;
 import lombok.Data;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +17,6 @@ public class Game {
     private int PlayerNumber; // Current player's No
     private int minPlayerNum;
     private int maxPlayerNum;
-    private Set<String> standbySet = new ConcurrentHashSet<>();
+    private Set<String> standbySet = new HashSet<>();
     private Map<Integer, Player> playerMap = new ConcurrentHashMap<>();
 }

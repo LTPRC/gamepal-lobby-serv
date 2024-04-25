@@ -151,13 +151,8 @@ public class NpcManagerImpl implements NpcManager {
                             .filter(playerInfo -> !npcUserCode.equals(playerInfo.getId()))
                             .filter(SkillUtil::validateDamage)
                             .filter(playerInfo -> checkAttackCondition(npcUserCode, playerInfo.getId()))
-                            .filter(playerInfo -> {
-                                BigDecimal distance = BlockUtil.calculateDistance(
-                                        world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
-                                        playerInfo);
-                                return null != distance && distance.compareTo(
-                                        npcPlayerInfo.getPerceptionInfo().getDistinctVisionRadius()) <= 0;
-                            })
+                            .filter(playerInfo -> BlockUtil.checkPerceptionCondition(
+                                    world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo, playerInfo))
                             .min((playerInfo1, playerInfo2) -> {
                                 BigDecimal distance1 = BlockUtil.calculateDistance
                                         (world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
@@ -233,7 +228,7 @@ public class NpcManagerImpl implements NpcManager {
                         moveReq.put("userCode", npcUserCode);
                         moveReq.put("wc", npcBrain.getGreenQueue().peek());
                         moveReq.put("stopDistance", npcBrain.getBehavior() == PlayerConstants.NPC_BEHAVIOR_FOLLOW
-                                ? PlayerConstants.NPC_CHASE_DISTANCE : PlayerConstants.NPC_ARRIVE_DISTANCE);
+                                ? PlayerConstants.NPC_FOLLOW_STOP_DISTANCE : PlayerConstants.NPC_ARRIVE_DISTANCE);
                         JSONObject moveResp = runNpcMoveTask(moveReq);
                     }
                 });
@@ -245,7 +240,7 @@ public class NpcManagerImpl implements NpcManager {
                 .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
     }
 
-    private boolean checkAttackCondition(String fromUserCode, String toUserCode) {
+    private boolean checkAttackCondition(final String fromUserCode, final String toUserCode) {
         GameWorld world = userService.getWorldByUserCode(fromUserCode);
         if (null == world) {
             logger.warn(ErrorUtil.ERROR_1019);
@@ -270,28 +265,6 @@ public class NpcManagerImpl implements NpcManager {
         return true;
     }
 
-    private List<PlayerInfo> findEnemies(PlayerInfo npcPlayerInfo) {
-        List<PlayerInfo> rst = new ArrayList<>();
-        GameWorld world = userService.getWorldByUserCode(npcPlayerInfo.getId());
-        Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
-        if (npcBrainMap.get(npcPlayerInfo.getId()).getStance() == PlayerConstants.STANCE_NO_ATTACK) {
-            return rst;
-        }
-        world.getOnlineMap().entrySet().stream()
-                .filter(entry2 -> SkillUtil.validateDamage(world.getPlayerInfoMap().get(entry2.getKey())))
-                .filter(entry2 -> !npcPlayerInfo.getId().equals(entry2.getKey()))
-                .forEach(entry2 -> {
-                    BigDecimal distance = BlockUtil.calculateDistance(
-                            world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
-                            world.getPlayerInfoMap().get(entry2.getKey()));
-                    if (null != distance && distance.compareTo(npcPlayerInfo.getPerceptionInfo()
-                            .getDistinctVisionRadius()) <= 0) {
-                        rst.add(world.getPlayerInfoMap().get(entry2.getKey()));
-                    }
-                });
-        return rst;
-    }
-
     @Override
     public void resetNpcBrainQueues(String npcUserCode) {
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
@@ -302,94 +275,6 @@ public class NpcManagerImpl implements NpcManager {
             npcBrain.getYellowQueue().clear();
             npcBrain.getGreenQueue().clear();
         }
-    }
-
-    public void updateNpcMovementOld(GameWorld world) {
-        // Run NPC tasks
-        Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
-        npcBrainMap.entrySet().stream()
-                .filter(entry2 -> SkillUtil.validateDamage(world.getPlayerInfoMap().get(entry2.getKey())))
-                .forEach(entry2 -> {
-                    String npcUserCode = entry2.getKey();
-                    JSONObject observeReq = new JSONObject();
-                    observeReq.put("npcTaskType", PlayerConstants.NPC_TASK_TYPE_OBSERVE);
-                    observeReq.put("userCode", npcUserCode);
-                    JSONObject observeResp = runNpcTask(observeReq);
-                    WorldCoordinate wc = observeResp.getObject("wc", WorldCoordinate.class);
-                    if (null != wc) {
-                        JSONObject moveReq = new JSONObject();
-                        moveReq.put("npcTaskType", PlayerConstants.NPC_TASK_TYPE_MOVE);
-                        moveReq.put("userCode", npcUserCode);
-                        moveReq.put("wc", wc);
-                        moveReq.put("stopDistance", PlayerConstants.NPC_CHASE_DISTANCE);
-                        JSONObject moveResp = runNpcTask(moveReq);
-                    } else {
-                        JSONObject idleReq = new JSONObject();
-                        idleReq.put("npcTaskType", PlayerConstants.NPC_TASK_TYPE_IDLE);
-                        idleReq.put("userCode", npcUserCode);
-                        JSONObject idleResp = runNpcTask(idleReq);
-                    }
-                });
-        // Settle NPC speed
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        playerInfoMap.entrySet().stream()
-                .filter(entry2 -> entry2.getValue().getPlayerType() != PlayerConstants.PLAYER_TYPE_HUMAN)
-                .filter(entry2 -> entry2.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
-    }
-
-    @Override
-    public JSONObject runNpcTask(JSONObject request) {
-        JSONObject rst = ContentUtil.generateRst();
-        switch (request.getInteger("npcTaskType")) {
-            case PlayerConstants.NPC_TASK_TYPE_IDLE:
-                rst = runNpcIdleTask(request);
-                break;
-            case PlayerConstants.NPC_TASK_TYPE_OBSERVE:
-                rst = runNpcObserveTask(request);
-                break;
-            case PlayerConstants.NPC_TASK_TYPE_MOVE:
-                rst = runNpcMoveTask(request);
-                break;
-            case PlayerConstants.NPC_TASK_TYPE_ATTACK:
-                break;
-            default:
-                break;
-        }
-        return rst;
-    }
-
-    private JSONObject runNpcIdleTask(JSONObject request) {
-        JSONObject rst = ContentUtil.generateRst();
-        String npcUserCode = request.getString("userCode");
-        GameWorld world = userService.getWorldByUserCode(npcUserCode);
-        PlayerInfo npcPlayerInfo = world.getPlayerInfoMap().get(npcUserCode);
-        npcPlayerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        return rst;
-    }
-
-    private JSONObject runNpcObserveTask(JSONObject request) {
-        JSONObject rst = ContentUtil.generateRst();
-        String npcUserCode = request.getString("userCode");
-        GameWorld world = userService.getWorldByUserCode(npcUserCode);
-        PlayerInfo npcPlayerInfo = world.getPlayerInfoMap().get(npcUserCode);
-        world.getPlayerInfoMap().entrySet().stream()
-                .filter(entry -> !entry.getValue().getId().equals(npcUserCode))
-                .filter(entry -> entry.getValue().getRegionNo() == npcPlayerInfo.getRegionNo())
-                .filter(entry -> SkillUtil.validateDamage(entry.getValue()))
-                .forEach(entry -> {
-                    BigDecimal distance = BlockUtil.calculateDistance(world.getRegionMap().get(npcPlayerInfo.getRegionNo()),
-                            npcPlayerInfo, entry.getValue());
-                    if (distance.compareTo(npcPlayerInfo.getPerceptionInfo().getDistinctVisionRadius()) < 0
-                            && distance.compareTo(PlayerConstants.NPC_CHASE_DISTANCE) > 0) {
-                        WorldCoordinate wc = new WorldCoordinate();
-                        wc.setRegionNo(entry.getValue().getRegionNo());
-                        wc.setSceneCoordinate(entry.getValue().getSceneCoordinate());
-                        wc.setCoordinate(entry.getValue().getCoordinate());
-                        rst.put("wc", wc);
-                    }
-                });
-        return rst;
     }
 
     private JSONObject runNpcMoveTask(JSONObject request) {

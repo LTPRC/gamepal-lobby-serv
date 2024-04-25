@@ -165,7 +165,7 @@ public class GamePalConstants {
     public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
     public static final String GENDER_MALE = "1";
     public static final String GENDER_FEMALE = "2";
-    public static final int AVATARS_LENGTH = 10;
+    public static final int AVATARS_LENGTH = 110;
     public static final int SKIN_COLOR_C = 1;
     public static final int SKIN_COLOR_M = 2;
     public static final int SKIN_COLOR_A = 3;
@@ -184,8 +184,4 @@ public class GamePalConstants {
     public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
     public static final int STRUCTURE_LAYER_SKY = 50;
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
-
-    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(10);
-    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(5);
-    public static final BigDecimal DEFAULT_HEARING_RADIUS = BigDecimal.valueOf(10);
 }

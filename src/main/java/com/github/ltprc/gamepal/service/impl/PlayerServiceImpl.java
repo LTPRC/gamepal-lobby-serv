@@ -91,12 +91,18 @@ public class PlayerServiceImpl implements PlayerService {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        relationMap.computeIfAbsent(userCode, k -> relationMap.put(k, new ConcurrentHashMap<>()));
-        relationMap.computeIfAbsent(nextUserCode, k -> relationMap.put(k, new ConcurrentHashMap<>()));
-        relationMap.get(userCode).computeIfAbsent(nextUserCode, k ->
-                relationMap.get(userCode).put(k, RELATION_INIT));
-        relationMap.get(nextUserCode).computeIfAbsent(userCode, k ->
-                relationMap.get(nextUserCode).put(k, RELATION_INIT));
+        if (!relationMap.containsKey(userCode)) {
+            relationMap.put(userCode, new ConcurrentHashMap<>());
+        }
+        if (!relationMap.containsKey(nextUserCode)) {
+            relationMap.put(nextUserCode, new ConcurrentHashMap<>());
+        }
+        if (!relationMap.get(userCode).containsKey(nextUserCode)) {
+            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
+        }
+        if (!relationMap.get(nextUserCode).containsKey(userCode)) {
+            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
+        }
         if (!isAbsolute) {
             newRelation += relationMap.get(userCode).get(nextUserCode);
         }
@@ -190,7 +196,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != faceCoefs) {
             playerInfo.setFaceCoefs(new int[GamePalConstants.FACE_COEFS_LENGTH]);
             for (int i = 0; i < GamePalConstants.FACE_COEFS_LENGTH; i++) {
-                playerInfo.getFaceCoefs()[i] = (int) faceCoefs.get(i);
+                playerInfo.getFaceCoefs()[i] = faceCoefs.getInteger(i);
             }
         }
         String avatar = req.getString("avatar");

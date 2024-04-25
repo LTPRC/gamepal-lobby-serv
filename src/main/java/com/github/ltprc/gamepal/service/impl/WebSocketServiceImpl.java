@@ -235,7 +235,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             logger.warn(ErrorUtil.ERROR_1016 + "userCode: " + userCode);
-            logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
             return;
         }
 
@@ -359,6 +358,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             session.getBasicRemote().sendText(content);
         } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
+            userService.logoff(userCode, "", false);
         }
     }
 }

@@ -648,8 +648,7 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public void updateWorldTime(GameWorld world) {
-        world.setWorldTime((world.getWorldTime() + GamePalConstants.UPDATED_WORLD_TIME_PER_SECOND)
-                % GamePalConstants.MAX_WORLD_TIME);
+    public void updateWorldTime(GameWorld world, int increment) {
+        world.setWorldTime((world.getWorldTime() + increment) % GamePalConstants.MAX_WORLD_TIME);
     }
 }

@@ -8,5 +8,8 @@ import java.math.BigDecimal;
 public class PerceptionInfo {
     private BigDecimal distinctVisionRadius;
     private BigDecimal indistinctVisionRadius;
-    private BigDecimal hearingRadius;
+    private BigDecimal distinctVisionAngle;
+    private BigDecimal indistinctVisionAngle;
+    private BigDecimal distinctHearingRadius;
+    private BigDecimal indistinctHearingRadius;
 }

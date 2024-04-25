@@ -644,8 +644,8 @@ public class SceneManagerImpl implements SceneManager {
                         BlockUtil.adjustCoordinate(newBlock,
                                 BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                                         newSceneCoordinate), region.getHeight(), region.getWidth());
-                        if (BlockUtil.calculateDistance(newBlock, playerInfo.getCoordinate())
-                                .compareTo(playerInfo.getPerceptionInfo().getDistinctVisionRadius()) <= 0) {
+                        if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
+                                playerInfo.getFaceDirection(), playerInfo.getCoordinate(), newBlock)) {
                             rankingQueue.add(newBlock);
                         }
                     });
@@ -657,7 +657,10 @@ public class SceneManagerImpl implements SceneManager {
                         BlockUtil.adjustCoordinate(newBlock,
                                 BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                                         newSceneCoordinate), region.getHeight(), region.getWidth());
-                        rankingQueue.add(newBlock);
+                        if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
+                                playerInfo.getFaceDirection(), playerInfo.getCoordinate(), newBlock)) {
+                            rankingQueue.add(newBlock);
+                        }
                     });
                 }
             }
@@ -690,7 +693,10 @@ public class SceneManagerImpl implements SceneManager {
                     Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
                             entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
-                    rankingQueue.add(block);
+                    if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
+                            playerInfo.getFaceDirection(), playerInfo.getCoordinate(), block)) {
+                        rankingQueue.add(block);
+                    }
                 });
         return rankingQueue;
     }

@@ -19,9 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Random;
-
-import static com.github.ltprc.gamepal.config.GamePalConstants.FRAME_PER_SECOND;
 
 @Component
 public class TimedEventTask {
@@ -72,9 +69,9 @@ public class TimedEventTask {
                                             GamePalConstants.EVENT_CODE_SACRIFICE, playerInfo);
                                     userService.getWorldByUserCode(playerInfo.getId()).getEventQueue().add(worldEvent);
                                     world.getEventQueue().add(new WorldEvent());
-                                } else if (playerInfo.getBuff()[i] % FRAME_PER_SECOND == 0) {
+                                } else if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
                                     playerService.generateNotificationMessage(userCode, "距离复活还有"
-                                            + playerInfo.getBuff()[i] / FRAME_PER_SECOND + "秒。");
+                                            + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
                                 }
                             }
                         }
@@ -104,7 +101,7 @@ public class TimedEventTask {
                         if (Math.abs(speed.getX().doubleValue()) > 0 || Math.abs(speed.getY().doubleValue()) > 0) {
                             randomNumber *= 10;
                         }
-                        if (randomNumber < 40D / 70000D) {
+                        if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                             playerService.changeHunger(entry2.getKey(), -1, false);
                         }
 
@@ -113,7 +110,7 @@ public class TimedEventTask {
                         if (Math.abs(speed.getX().doubleValue()) > 0 || Math.abs(speed.getY().doubleValue()) > 0) {
                             randomNumber *= 10;
                         }
-                        if (randomNumber < 40D / 30000D) {
+                        if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                             playerService.changeThirst(entry2.getKey(), -1, false);
                         }
 
@@ -125,7 +122,7 @@ public class TimedEventTask {
                         }
 
                         // Change view radius
-                        BlockUtil.updateVisionRadius(playerInfoMap.get(entry2.getKey()).getPerceptionInfo(),
+                        BlockUtil.updatePerceptionInfo(playerInfoMap.get(entry2.getKey()).getPerceptionInfo(),
                                 world.getWorldTime());
 
                         // Update buff
@@ -135,6 +132,13 @@ public class TimedEventTask {
             // Other movements
             npcManager.updateNpcBrains(world);
         }
+    }
+
+    @Scheduled(fixedRate = 100)
+    public void executeBy1s() {
+        // Update worldTime
+        worldService.getWorldMap().forEach((key, value) -> worldService.updateWorldTime(value,
+                GamePalConstants.UPDATED_WORLD_TIME_PER_SECOND / 10));
     }
 
     /**
@@ -154,10 +158,6 @@ public class TimedEventTask {
                 }
             });
         }
-    }
-    @Scheduled(cron = "* * * * * ?")
-    public void executeBy1s() {
-        worldService.getWorldMap().forEach((key, value) -> worldService.updateWorldTime(value));
     }
 
     @Scheduled(cron = "*/5 * * * * ?")

@@ -1,7 +1,9 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.PlayerConstants;
 import com.github.ltprc.gamepal.model.PerceptionInfo;
+import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -212,31 +214,21 @@ public class BlockUtil {
      * @return in degrees
      */
     public static BigDecimal calculateAngle(final Coordinate c1, final Coordinate c2) {
-        if (c1.getX().equals(c2.getX())) {
-            switch (c1.getY().compareTo(c2.getY())) {
-                case 1:
-                    return BigDecimal.valueOf(90D);
-                case -1:
-                    return BigDecimal.valueOf(270D);
-                default:
-                    return BigDecimal.ZERO;
+        double deltaX = c2.getX().subtract(c1.getX()).doubleValue();
+        double deltaY = c2.getY().subtract(c1.getY()).doubleValue();
+        double rst = Math.acos(deltaX / Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))) / Math.PI * 180;;
+        if (deltaY > 0) {
+            rst = 360 - rst;
+        } else if (deltaY == 0) {
+            if (deltaX > 0) {
+                rst = 0;
+            } else if (deltaX < 0) {
+                rst = 180;
+            } else {
+                rst = 270;
             }
         }
-        if (c1.getY().equals(c2.getY())) {
-            if (c1.getX().compareTo(c2.getX()) == 1) {
-                return BigDecimal.valueOf(180D);
-            }
-            return BigDecimal.ZERO;
-        }
-        BigDecimal rst = BigDecimal.valueOf(Math.atan(c2.getY().subtract(c1.getY())
-                .divide(c1.getX().subtract(c2.getX()), 2, RoundingMode.HALF_UP).doubleValue()) / Math.PI * 180);
-        if (c1.getX().compareTo(c2.getX()) > 0) {
-            rst = rst.add(BigDecimal.valueOf(180D));
-        }
-        if (c1.getX().compareTo(c2.getX()) < 0 && c1.getY().compareTo(c2.getY()) < 0) {
-            rst = rst.add(BigDecimal.valueOf(360D));
-        }
-        return rst;
+        return BigDecimal.valueOf(rst);
     }
 
     public static double compareAnglesInDegrees(double a1, double a2) {
@@ -589,28 +581,57 @@ public class BlockUtil {
         return event;
     }
 
-    public static void updateVisionRadius(PerceptionInfo perceptionInfo, int worldTime) {
-        BigDecimal visionRadius = GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS;
+    public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {
+        BigDecimal visionRadius = PlayerConstants.DEFAULT_NIGHT_VISION_RADIUS;
         if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
-            visionRadius = visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
-                    .subtract(GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS)
-                    .multiply(BigDecimal.valueOf(worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN))
-                    .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNRISE_END
-                            - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN), RoundingMode.CEILING));
+            visionRadius = visionRadius.add(BigDecimal.valueOf(PlayerConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(PlayerConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
+                    * (worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
+                    / (GamePalConstants.WORLD_TIME_SUNRISE_END - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
-            visionRadius = visionRadius.add(GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS
-                    .subtract(GamePalConstants.DEFAULT_NIGHT_VISION_RADIUS)
-                    .multiply(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END - worldTime))
-                    .divide(BigDecimal.valueOf(GamePalConstants.WORLD_TIME_SUNSET_END
-                            - GamePalConstants.WORLD_TIME_SUNSET_BEGIN), RoundingMode.CEILING));
+            visionRadius = visionRadius.add(BigDecimal.valueOf(PlayerConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(PlayerConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
+                    * (GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
+                    / (GamePalConstants.WORLD_TIME_SUNSET_END - GamePalConstants.WORLD_TIME_SUNSET_BEGIN)));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
-            visionRadius = GamePalConstants.DEFAULT_DAYTIME_VISION_RADIUS;
+            visionRadius = PlayerConstants.DEFAULT_DAYTIME_VISION_RADIUS;
         }
         perceptionInfo.setDistinctVisionRadius(visionRadius);
-        perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius().multiply(BigDecimal.valueOf(1.5)));
-        perceptionInfo.setHearingRadius(GamePalConstants.DEFAULT_HEARING_RADIUS);
+        perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius()
+                .multiply(BigDecimal.valueOf(1.2)));
+        perceptionInfo.setDistinctVisionAngle(PlayerConstants.DEFAULT_DISTINCT_VISION_ANGLE);
+        perceptionInfo.setIndistinctVisionAngle(PlayerConstants.DEFAULT_INDISTINCT_VISION_ANGLE);
+        perceptionInfo.setDistinctHearingRadius(PlayerConstants.DEFAULT_DISTINCT_HEARING_RADIUS);
+        perceptionInfo.setIndistinctHearingRadius(PlayerConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
+    }
+
+    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final PlayerInfo playerInfo1,
+                                                   final WorldBlock worldBlock2) {
+        if (playerInfo1.getRegionNo() != regionInfo.getRegionNo()
+                || worldBlock2.getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        Block block1 = convertWorldBlock2Block(regionInfo, playerInfo1, true);
+        Block block2 = convertWorldBlock2Block(regionInfo, worldBlock2, true);
+        return checkPerceptionCondition(playerInfo1.getPerceptionInfo(), playerInfo1.getFaceDirection(), block1, block2);
+    }
+
+    public static boolean checkPerceptionCondition(final PerceptionInfo perceptionInfo, final BigDecimal faceDirection,
+                                                   final Coordinate coordinate1, final Block block2) {
+        BigDecimal distance = BlockUtil.calculateDistance(coordinate1, block2);
+        BigDecimal angle = BlockUtil.calculateAngle(coordinate1, block2);
+        if (distance.compareTo(perceptionInfo.getDistinctHearingRadius()) <= 0) {
+            return true;
+        }
+        if (block2.getType() == GamePalConstants.BLOCK_TYPE_PLAYER) {
+            return distance.compareTo(perceptionInfo.getDistinctVisionRadius()) <= 0
+                    && angle.subtract(faceDirection).abs().doubleValue() % 360D
+                    < perceptionInfo.getDistinctVisionAngle().doubleValue() / 2;
+        } else {
+            return distance.compareTo(perceptionInfo.getIndistinctVisionRadius()) <= 0;
+        }
     }
 }

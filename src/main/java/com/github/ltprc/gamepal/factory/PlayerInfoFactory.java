@@ -55,7 +55,7 @@ public class PlayerInfoFactory {
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         SkillUtil.updateSkills(playerInfo);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
-        BlockUtil.updateVisionRadius(playerInfo.getPerceptionInfo(), 0);
+        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), 0);
         return playerInfo;
     }
 
