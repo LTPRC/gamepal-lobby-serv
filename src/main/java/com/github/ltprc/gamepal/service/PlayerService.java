@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.model.PlayerInfo;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -25,6 +24,8 @@ public interface PlayerService {
     ResponseEntity<String> getItem(String userCode, String itemNo, int itemAmount);
 
     ResponseEntity<String> getPreservedItem(String userCode, String itemNo, int itemAmount);
+
+    ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount);
 
     ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute);
 

@@ -9,6 +9,7 @@ import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.item.Recipe;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldDrop;
@@ -134,6 +135,14 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.getPreservedItem(userCode, itemNo, itemAmount);
                 });
             }
+            if (functions.containsKey("useRecipes")) {
+                JSONArray useRecipes = functions.getJSONArray("useRecipes");
+                useRecipes.forEach(useRecipe -> {
+                    String recipeNo = ((JSONObject) useRecipe).getString("recipeNo");
+                    int recipeAmount = ((JSONObject) useRecipe).getInteger("recipeAmount");
+                    playerService.useRecipe(userCode, recipeNo, recipeAmount);
+                });
+            }
             // Check incoming messages
             JSONArray messages = functions.getJSONArray("addMessages");
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
@@ -233,6 +242,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             JSONObject itemsObj = new JSONObject();
             itemsObj.putAll(worldService.getItemMap());
             rst.put("items", itemsObj);
+            JSONObject recipesObj = new JSONObject();
+            recipesObj.putAll(worldService.getRecipeMap());
+            rst.put("recipes", recipesObj);
         }
 
         // UserCode information
@@ -264,8 +276,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         // Return flags
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
+//        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
+//        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
 
         JSONArray flags = new JSONArray();
         flags.addAll(world.getFlagMap().get(userCode));
@@ -360,7 +372,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             session.getBasicRemote().sendText(content);
         } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-//            userService.logoff(userCode, "", false);
+            userService.logoff(userCode, "", false);
         }
     }
 }

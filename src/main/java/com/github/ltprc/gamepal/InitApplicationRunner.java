@@ -21,6 +21,8 @@ public class InitApplicationRunner implements ApplicationRunner {
         String defaultWorldName = "DEFAULT";
         worldService.loadItems();
         logger.info("Item config is loaded.");
+        worldService.loadRecipes();
+        logger.info("Recipe config is loaded.");
         worldService.addWorld(defaultWorldName);
         logger.info("World " + defaultWorldName + " is added.");
     }

@@ -73,10 +73,14 @@ public class GamePalConstants {
     public static final char ITEM_CHARACTER_JUNK = 'j';
     public static final char ITEM_CHARACTER_NOTE = 'n';
     public static final char ITEM_CHARACTER_RECORDING = 'r';
+    public static final char RECIPE_CHARACTER_WORKSHOP = 'w';
+    public static final char RECIPE_CHARACTER_COOKER = 'c';
+    public static final char RECIPE_CHARACTER_SINK = 's';
 
     public static final String FLAG_LOGOFF = "logoff";
     public static final String FLAG_UPDATE_ITEMS = "updateItems";
     public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";
+    public static final String FLAG_UPDATE_RECIPES = "updateRecipes";
 
     public static final int TERMINAL_TYPE_GAME = 1;
     public static final int GAME_TYPE_LAS_VEGAS = 1;

@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.service;
 
 import com.github.ltprc.gamepal.model.item.Item;
+import com.github.ltprc.gamepal.model.item.Recipe;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldBlock;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
@@ -19,7 +20,11 @@ public interface WorldService {
 
     Map<String, Item> getItemMap();
 
+    Map<String, Recipe> getRecipeMap();
+
     void loadItems();
+
+    void loadRecipes();
 
     void initiateGame(GameWorld world);
 

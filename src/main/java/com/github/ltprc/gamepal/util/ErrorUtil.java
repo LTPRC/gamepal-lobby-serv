@@ -27,8 +27,8 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1020 = new GamepalError("1020", "Invalid item information.");
     public static final GamepalError ERROR_1021 = new GamepalError("1021", "Unable to locate terminal.");
     public static final GamepalError ERROR_1022 = new GamepalError("1022", "Unable to locate created game.");
-    public static final GamepalError ERROR_1023 = new GamepalError("1023", "Invalid game type.");
-    public static final GamepalError ERROR_1024 = new GamepalError("1024", "Terminal type is not supported.");
+    public static final GamepalError ERROR_1023 = new GamepalError("1023", "Invalid recipe information.");
+    public static final GamepalError ERROR_1024 = new GamepalError("1024", "Player does not fit the condition.");
     public static final GamepalError ERROR_1025 = new GamepalError("1025", "Game type is not supported.");
     public static final GamepalError ERROR_1026 = new GamepalError("1026", "Game status is not supported.");
     public static final GamepalError ERROR_1027 = new GamepalError("1027", "Invalid regionNo.");
@@ -38,5 +38,4 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1031 = new GamepalError("1035", "Invalid coordinate.");
     public static final GamepalError ERROR_1032 = new GamepalError("1036", "Invalid JSON content.");
     public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
-    public static final GamepalError ERROR_1034 = new GamepalError("1034", "RegionNos are not identical.");
 }

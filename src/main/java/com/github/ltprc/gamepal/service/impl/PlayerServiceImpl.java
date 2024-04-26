@@ -10,10 +10,7 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.item.Consumable;
-import com.github.ltprc.gamepal.model.item.Junk;
-import com.github.ltprc.gamepal.model.item.Outfit;
-import com.github.ltprc.gamepal.model.item.Tool;
+import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
@@ -279,9 +276,11 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (!StringUtils.isNotBlank(itemNo) || !playerInfo.getItems().containsKey(itemNo)
-                || playerInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
+        if (!StringUtils.isNotBlank(itemNo) || !playerInfo.getItems().containsKey(itemNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
+        }
+        if (playerInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         switch (itemNo.charAt(0)) {
             case GamePalConstants.ITEM_CHARACTER_TOOL:
@@ -297,7 +296,7 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case GamePalConstants.ITEM_CHARACTER_JUNK:
                 getItem(userCode, itemNo, -1);
-                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet().stream()
+                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet()
                         .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue()));
                 break;
             case GamePalConstants.ITEM_CHARACTER_NOTE:
@@ -376,6 +375,32 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    public ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Map<String, Recipe> recipeMap = worldService.getRecipeMap();
+        if (!StringUtils.isNotBlank(recipeNo) || !recipeMap.containsKey(recipeNo)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1023));
+        }
+        Recipe recipe = recipeMap.get(recipeNo);
+        if (recipe.getCost().entrySet().stream()
+                .anyMatch(entry -> playerInfo.getItems().get(entry.getKey()) < entry.getValue() * recipeAmount)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
+        }
+        recipe.getCost().entrySet()
+                .forEach(entry -> getItem(userCode, entry.getKey(), - entry.getValue() * recipeAmount));
+        recipe.getValue().entrySet()
+                .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue() * recipeAmount));
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_RECIPES);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
     public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute) {
         return changeHp(userCode, value, isAbsolute);
     }
@@ -448,7 +473,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         for (int i = 0; i < itemAmount; i++) {
-            ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet().stream()
+            ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet()
                     .forEach((Map.Entry<String, Integer> entry) -> {
                         switch (entry.getKey()) {
                             case "hp":
@@ -539,10 +564,10 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.INTERACTION_USE:
                 switch (block.getType()) {
                     case GamePalConstants.BLOCK_TYPE_TOILET:
-                        generateNotificationMessage(userCode, "你方便了一下。");
+                        generateNotificationMessage(userCode, "你正在使用马桶。");
                         break;
                     case GamePalConstants.BLOCK_TYPE_WORKSHOP:
-                        generateNotificationMessage(userCode, "你对于如何使用一无所知。");
+                        generateNotificationMessage(userCode, "你正在使用工作台。");
                         break;
                     case GamePalConstants.BLOCK_TYPE_GAME:
                         generateNotificationMessage(userCode, "你开启了桌游。");
@@ -557,10 +582,10 @@ public class PlayerServiceImpl implements PlayerService {
                         stateMachineService.gameTerminalInput((GameTerminal) world.getTerminalMap().get(id), "1");
                         break;
                     case GamePalConstants.BLOCK_TYPE_COOKER:
-                        generateNotificationMessage(userCode, "你对于如何烹饪一无所知。");
+                        generateNotificationMessage(userCode, "你正在使用灶台。");
                         break;
                     case GamePalConstants.BLOCK_TYPE_SINK:
-                        generateNotificationMessage(userCode, "你清洗了一下双手。");
+                        generateNotificationMessage(userCode, "你正在使用饮水台。");
                         break;
                     default:
                         break;
