@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Block extends Coordinate {
-    private Integer type;
+    private int type;
     private String id;
     private String code;
     private Structure structure;

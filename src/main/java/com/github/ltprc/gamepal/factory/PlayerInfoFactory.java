@@ -1,9 +1,9 @@
 package com.github.ltprc.gamepal.factory;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.PlayerConstants;
-import com.github.ltprc.gamepal.model.PerceptionInfo;
-import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -28,7 +28,7 @@ public class PlayerInfoFactory {
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_RADIUS))));
         playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-        playerInfo.setPlayerType(PlayerConstants.PLAYER_TYPE_HUMAN);
+        playerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_HUMAN);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         playerInfo.setRegionNo(1);
         playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
@@ -62,7 +62,7 @@ public class PlayerInfoFactory {
     public void randomlyPersonalizePlayerInfo(PlayerInfo playerInfo) {
         Random random = new Random();
         String origin = NameUtil.generateOrigin();
-        String gender = NameUtil.generateGender();
+        int gender = NameUtil.generateGender();
         String[] names = NameUtil.generateNames(origin, gender);
         playerInfo.setAvatar(String.valueOf(random.nextInt(GamePalConstants.AVATARS_LENGTH)));
         playerInfo.setGender(gender);
@@ -70,11 +70,11 @@ public class PlayerInfoFactory {
         playerInfo.setLastName(names[1]);
         playerInfo.setNickname(names[2]);
         playerInfo.setNameColor("#990000");
-        playerInfo.setCreature("1");
+        playerInfo.setCreatureType(CreatureConstants.CREATURE_TYPE_HUMAN);
         playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
         playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
-        playerInfo.setHairColor(String.valueOf(random.nextInt(3) + 1));
-        playerInfo.setEyes(String.valueOf(random.nextInt(GamePalConstants.EYES_LENGTH) + 1));
+        playerInfo.setHairColor(random.nextInt(3) + 1);
+        playerInfo.setEyes(random.nextInt(GamePalConstants.EYES_LENGTH) + 1);
         playerInfo.setFaceCoefs(Arrays.stream(new int[GamePalConstants.FACE_COEFS_LENGTH])
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }

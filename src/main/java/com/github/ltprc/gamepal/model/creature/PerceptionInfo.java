@@ -1,4 +1,4 @@
-package com.github.ltprc.gamepal.model;
+package com.github.ltprc.gamepal.model.creature;
 
 import lombok.Data;
 

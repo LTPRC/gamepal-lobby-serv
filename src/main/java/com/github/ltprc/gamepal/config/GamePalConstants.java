@@ -170,8 +170,6 @@ public class GamePalConstants {
     public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
     public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
     public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
-    public static final String GENDER_MALE = "1";
-    public static final String GENDER_FEMALE = "2";
     public static final int AVATARS_LENGTH = 110;
     public static final int SKIN_COLOR_C = 1;
     public static final int SKIN_COLOR_M = 2;

@@ -1,6 +1,5 @@
-package com.github.ltprc.gamepal.model.npc;
+package com.github.ltprc.gamepal.model.creature;
 
-import com.github.ltprc.gamepal.model.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import lombok.Data;
 

@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import org.apache.commons.lang3.StringUtils;
 
@@ -88,17 +89,16 @@ public class NameUtil {
             "Ananya" };
 
     public static String[] generateNames() {
-        return generateNames("", "");
+        return generateNames("", 0);
     }
 
-    public static String[] generateNames(String origin, String gender) {
+    public static String[] generateNames(String origin, int gender) {
         if (StringUtils.isNotBlank(origin) || (!GamePalConstants.ORIGIN_CHINESE.equals(origin)
                 && !GamePalConstants.ORIGIN_JAPANESE.equals(origin)
                 && !GamePalConstants.ORIGIN_INTERNATIONAL.equals(origin))) {
             origin = generateOrigin();
         }
-        if (StringUtils.isNotBlank(gender) || (!GamePalConstants.GENDER_MALE.equals(gender)
-                && !GamePalConstants.GENDER_FEMALE.equals(gender))) {
+        if (gender != CreatureConstants.GENDER_MALE && gender != CreatureConstants.GENDER_FEMALE) {
             gender = generateGender();
         }
         switch (origin) {
@@ -126,18 +126,18 @@ public class NameUtil {
         return origin;
     }
 
-    public static String generateGender() {
-        String gender;
+    public static int generateGender() {
+        int gender;
         double r = Math.random();
         if (r < 0.5D) {
-            gender = GamePalConstants.GENDER_MALE;
+            gender = CreatureConstants.GENDER_MALE;
         } else {
-            gender = GamePalConstants.GENDER_FEMALE;
+            gender = CreatureConstants.GENDER_FEMALE;
         }
         return gender;
     }
 
-    public static String[] generateChineseNames(String gender) {
+    public static String[] generateChineseNames(int gender) {
         String lastName = generateChineseLastname();
         String firstName = generateChineseFirstname(gender);
         double r = Math.random();
@@ -164,17 +164,17 @@ public class NameUtil {
         return chineseLastnames[random.nextInt(100)];
     }
 
-    public static String generateChineseFirstname(String gender) {
+    public static String generateChineseFirstname(int gender) {
         Random random = new Random();
         int num = random.nextInt(100);
-        if (GamePalConstants.GENDER_FEMALE.equals(gender)) {
+        if (gender == CreatureConstants.GENDER_FEMALE) {
             return chineseFemaleFirstnames[num];
         } else {
             return chineseMaleFirstnames[num];
         }
     }
 
-    public static String[] generateJapaneseNames(String gender) {
+    public static String[] generateJapaneseNames(int gender) {
         String lastName = generateJapaneseLastname();
         String firstName = generateJapaneseFirstname(gender);
         return new String[] { firstName, lastName, lastName + firstName };
@@ -186,17 +186,17 @@ public class NameUtil {
         return japaneseLastnames[num];
     }
 
-    public static String generateJapaneseFirstname(String gender) {
+    public static String generateJapaneseFirstname(int gender) {
         Random random = new Random();
         int num = random.nextInt(100);
-        if (GamePalConstants.GENDER_FEMALE.equals(gender)) {
+        if (gender == CreatureConstants.GENDER_FEMALE) {
             return japaneseFemaleFirstnames[num];
         } else {
             return japaneseMaleFirstnames[num];
         }
     }
 
-    public static String[] generateInternationalNames(String gender) {
+    public static String[] generateInternationalNames(int gender) {
         String lastName = generateInternationalLastname();
         String firstName = generateInternationalFirstname(gender);
         return new String[] { firstName, lastName, firstName + "·" + lastName };
@@ -208,17 +208,17 @@ public class NameUtil {
         return internationalLastnames[num];
     }
 
-    public static String generateInternationalFirstname(String gender) {
+    public static String generateInternationalFirstname(int gender) {
         Random random = new Random();
         int num = random.nextInt(100);
-        if (GamePalConstants.GENDER_FEMALE.equals(gender)) {
+        if (gender == CreatureConstants.GENDER_FEMALE) {
             return internationalFemaleFirstnames[num];
         } else {
             return internationalMaleFirstnames[num];
         }
     }
 
-    public static String generateSkinColorByOrigin(String origin) {
+    public static int generateSkinColorByOrigin(String origin) {
         double r = Math.random();
         int rst;
         switch (origin) {
@@ -263,23 +263,23 @@ public class NameUtil {
                 }
                 break;
         }
-        return String.valueOf(rst);
+        return rst;
     }
 
-    public static String generateHairStyleByGender(String gender) {
+    public static int generateHairStyleByGender(int gender) {
         Random random = new Random();
         int rst;
         switch (gender) {
-            case GamePalConstants.GENDER_MALE:
+            case CreatureConstants.GENDER_MALE:
                 rst = random.nextInt(6) + 1;
                 break;
-            case GamePalConstants.GENDER_FEMALE:
+            case CreatureConstants.GENDER_FEMALE:
                 rst = random.nextInt(6) + 7;
                 break;
             default:
                 rst = random.nextInt(12) + 1;
                 break;
         }
-        return String.valueOf(rst);
+        return rst;
     }
 }

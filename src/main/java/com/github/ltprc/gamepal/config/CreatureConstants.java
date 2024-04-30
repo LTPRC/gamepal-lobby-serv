@@ -2,9 +2,14 @@ package com.github.ltprc.gamepal.config;
 
 import java.math.BigDecimal;
 
-public class PlayerConstants {
+public class CreatureConstants {
 
-    private PlayerConstants() {}
+    private CreatureConstants() {}
+
+    public static final int CREATURE_TYPE_HUMAN = 1;
+    public static final int CREATURE_TYPE_ANIMAL = 2;
+    public static final int GENDER_MALE = 1;
+    public static final int GENDER_FEMALE = 2;
 
     // Backend constants
 

@@ -9,7 +9,7 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -111,28 +111,28 @@ public class PlayerServiceImpl implements PlayerService {
         if (StringUtils.isNotBlank(nameColor)) {
             playerInfo.setNameColor(nameColor);
         }
-        String creature = req.getString("creature");
-        if (StringUtils.isNotBlank(creature)) {
-            playerInfo.setCreature(creature);
+        Integer creature = req.getInteger("creature");
+        if (null != creature) {
+            playerInfo.setCreatureType(creature);
         }
-        String gender = req.getString("gender");
-        if (StringUtils.isNotBlank(gender)) {
+        Integer gender = req.getInteger("gender");
+        if (null != gender) {
             playerInfo.setGender(gender);
         }
-        String skinColor = req.getString("skinColor");
-        if (StringUtils.isNotBlank(skinColor)) {
+        Integer skinColor = req.getInteger("skinColor");
+        if (null != skinColor) {
             playerInfo.setSkinColor(skinColor);
         }
-        String hairstyle = req.getString("hairstyle");
-        if (StringUtils.isNotBlank(hairstyle)) {
+        Integer hairstyle = req.getInteger("hairstyle");
+        if (null != hairstyle) {
             playerInfo.setHairstyle(hairstyle);
         }
-        String hairColor = req.getString("hairColor");
-        if (StringUtils.isNotBlank(hairColor)) {
+        Integer hairColor = req.getInteger("hairColor");
+        if (null != hairColor) {
             playerInfo.setHairColor(hairColor);
         }
-        String eyes = req.getString("eyes");
-        if (StringUtils.isNotBlank(eyes)) {
+        Integer eyes = req.getInteger("eyes");
+        if (null != eyes) {
             playerInfo.setEyes(eyes);
         }
         JSONArray faceCoefs = req.getJSONArray("faceCoefs");

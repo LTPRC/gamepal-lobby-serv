@@ -1,10 +1,10 @@
 package com.github.ltprc.gamepal.model.map.world;
 
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.map.Region;
-import com.github.ltprc.gamepal.model.npc.NpcBrain;
+import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;
 

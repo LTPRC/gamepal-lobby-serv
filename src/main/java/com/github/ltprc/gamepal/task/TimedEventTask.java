@@ -2,9 +2,9 @@ package com.github.ltprc.gamepal.task;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.PlayerConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
-import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldEvent;
@@ -152,7 +152,7 @@ public class TimedEventTask {
             GameWorld world = entry1.getValue();
             world.getOnlineMap().forEach((key, value) -> {
                 PlayerInfo playerInfo = world.getPlayerInfoMap().get(key);
-                if (playerInfo.getPlayerType() == PlayerConstants.PLAYER_TYPE_HUMAN
+                if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN
                         && timestamp - value > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
                     userService.logoff(key, "", false);
                 }
@@ -170,7 +170,7 @@ public class TimedEventTask {
             Map<String, Long> onlineMap = world.getOnlineMap();
             onlineMap.entrySet().stream()
                     .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType()
-                            == PlayerConstants.PLAYER_TYPE_HUMAN)
+                            == CreatureConstants.PLAYER_TYPE_HUMAN)
                     .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerStatus()
                             == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(entry2 -> {
@@ -179,7 +179,7 @@ public class TimedEventTask {
                         npcManager.putNpc(userCode, npcUserCode);
                         JSONObject behaviorRequest = new JSONObject();
                         behaviorRequest.put("userCode", npcUserCode);
-                        behaviorRequest.put("npcBehaviorType", PlayerConstants.NPC_BEHAVIOR_FOLLOW);
+                        behaviorRequest.put("npcBehaviorType", CreatureConstants.NPC_BEHAVIOR_FOLLOW);
                         behaviorRequest.put("targetUserCode", userCode);
                         npcManager.changeNpcBehavior(behaviorRequest);
                         world.getPlayerInfoMap().get(npcUserCode).setBossId(userCode);

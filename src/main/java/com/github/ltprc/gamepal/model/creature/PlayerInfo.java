@@ -1,6 +1,6 @@
-package com.github.ltprc.gamepal.model;
+package com.github.ltprc.gamepal.model.creature;
 
-import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
+import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 @Data
 @NoArgsConstructor
-public class PlayerInfo extends WorldMovingBlock {
+public class PlayerInfo extends CreatureInfo {
 
     // Basic properties
     private int playerType; // 0-human 1-AI
@@ -24,17 +24,12 @@ public class PlayerInfo extends WorldMovingBlock {
     private String lastName;
     private String nickname;
     private String nameColor;
-    private String creature;
-    private String gender;
-    private String skinColor;
-    private String hairstyle;
-    private String hairColor;
-    private String eyes;
+    private int hairstyle;
+    private int hairColor;
+    private int eyes;
     private int[] faceCoefs;
 
     // Dynamic properties
-    private Set<String> tools = new ConcurrentSkipListSet<>();
-    private Set<String> outfits = new ConcurrentSkipListSet<>();
     private int hpMax;
     private int hp;
     private int vpMax;
@@ -47,12 +42,11 @@ public class PlayerInfo extends WorldMovingBlock {
     private int exp;
     private int expMax;
     private int money;
+    private Set<String> tools = new ConcurrentSkipListSet<>();
+    private Set<String> outfits = new ConcurrentSkipListSet<>();
     private Map<String, Integer> items = new ConcurrentHashMap<>(); // itemId, amount
     private BigDecimal capacity;
     private BigDecimal capacityMax;
     private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
-    private int[] buff; // buff code, remaining frame
-    private Skill[] skill;
     private String bossId;
-    private PerceptionInfo perceptionInfo;
 }

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.PlayerConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,7 +99,7 @@ public class MessageServiceImpl implements MessageService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
         }
         // Human-only
-        if (world.getPlayerInfoMap().get(userCode).getPlayerType() == PlayerConstants.PLAYER_TYPE_HUMAN) {
+        if (world.getPlayerInfoMap().get(userCode).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             if (!messageMap.containsKey(userCode)) {
                 messageMap.put(userCode, new LinkedBlockingDeque<>());

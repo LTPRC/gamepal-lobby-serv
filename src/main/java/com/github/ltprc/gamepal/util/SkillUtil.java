@@ -2,8 +2,8 @@ package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
-import com.github.ltprc.gamepal.model.PlayerInfo;
-import com.github.ltprc.gamepal.model.Skill;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Tool;
 import org.springframework.stereotype.Component;
 

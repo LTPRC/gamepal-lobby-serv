@@ -1,9 +1,9 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.PlayerConstants;
-import com.github.ltprc.gamepal.model.PerceptionInfo;
-import com.github.ltprc.gamepal.model.PlayerInfo;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -582,30 +582,30 @@ public class BlockUtil {
     }
 
     public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {
-        BigDecimal visionRadius = PlayerConstants.DEFAULT_NIGHT_VISION_RADIUS;
+        BigDecimal visionRadius = CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS;
         if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
-            visionRadius = visionRadius.add(BigDecimal.valueOf(PlayerConstants.DEFAULT_DAYTIME_VISION_RADIUS
-                    .subtract(PlayerConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
+            visionRadius = visionRadius.add(BigDecimal.valueOf(CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
                     * (worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
                     / (GamePalConstants.WORLD_TIME_SUNRISE_END - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
-            visionRadius = visionRadius.add(BigDecimal.valueOf(PlayerConstants.DEFAULT_DAYTIME_VISION_RADIUS
-                    .subtract(PlayerConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
+            visionRadius = visionRadius.add(BigDecimal.valueOf(CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
                     * (GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
                     / (GamePalConstants.WORLD_TIME_SUNSET_END - GamePalConstants.WORLD_TIME_SUNSET_BEGIN)));
         } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
                 && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
-            visionRadius = PlayerConstants.DEFAULT_DAYTIME_VISION_RADIUS;
+            visionRadius = CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS;
         }
         perceptionInfo.setDistinctVisionRadius(visionRadius);
         perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius()
                 .multiply(BigDecimal.valueOf(1.2)));
-        perceptionInfo.setDistinctVisionAngle(PlayerConstants.DEFAULT_DISTINCT_VISION_ANGLE);
-        perceptionInfo.setIndistinctVisionAngle(PlayerConstants.DEFAULT_INDISTINCT_VISION_ANGLE);
-        perceptionInfo.setDistinctHearingRadius(PlayerConstants.DEFAULT_DISTINCT_HEARING_RADIUS);
-        perceptionInfo.setIndistinctHearingRadius(PlayerConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
+        perceptionInfo.setDistinctVisionAngle(CreatureConstants.DEFAULT_DISTINCT_VISION_ANGLE);
+        perceptionInfo.setIndistinctVisionAngle(CreatureConstants.DEFAULT_INDISTINCT_VISION_ANGLE);
+        perceptionInfo.setDistinctHearingRadius(CreatureConstants.DEFAULT_DISTINCT_HEARING_RADIUS);
+        perceptionInfo.setIndistinctHearingRadius(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
     }
 
     public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final PlayerInfo playerInfo1,
