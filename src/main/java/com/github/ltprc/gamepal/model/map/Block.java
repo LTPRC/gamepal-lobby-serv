@@ -1,6 +1,5 @@
 package com.github.ltprc.gamepal.model.map;
 
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -820,9 +820,11 @@ public class PlayerServiceImpl implements PlayerService {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             logger.error(ErrorUtil.ERROR_1016);
+            return userCode;
         }
         if (!world.getPlayerInfoMap().containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007);
+            return userCode;
         }
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         while (StringUtils.isNotBlank(playerInfo.getBossId()) && !playerInfo.getBossId().equals(playerInfo.getId())) {
