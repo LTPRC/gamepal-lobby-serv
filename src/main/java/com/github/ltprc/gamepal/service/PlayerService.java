@@ -7,8 +7,6 @@ import java.util.Map;
 
 public interface PlayerService {
 
-    ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute);
-
     ResponseEntity<String> updatePlayerInfo(String userCode, JSONObject req);
 
     ResponseEntity<String> updatePlayerInfoCharacter(String userCode, JSONObject req);
@@ -16,6 +14,8 @@ public interface PlayerService {
     ResponseEntity<String> updatePlayerMovement(String userCode, JSONObject req);
 
     ResponseEntity<String> generateNotificationMessage(String userCode, String content);
+
+    ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute);
 
     Map<String, Integer> getRelationMapByUserCode(String userCode);
 

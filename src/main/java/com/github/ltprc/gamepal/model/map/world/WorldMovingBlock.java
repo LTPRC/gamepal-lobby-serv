@@ -10,16 +10,22 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class WorldMovingBlock extends WorldBlock {
     private Coordinate speed;
+    private BigDecimal maxSpeed; // block per frame
+    private BigDecimal acceleration; // block per frame square
     private BigDecimal faceDirection; // from 0 to 360
 
-    public WorldMovingBlock(Coordinate speed, BigDecimal faceDirection) {
+    public WorldMovingBlock(Coordinate speed, BigDecimal maxSpeed, BigDecimal acceleration, BigDecimal faceDirection) {
         this.speed = new Coordinate(speed);
+        this.maxSpeed = maxSpeed;
+        this.acceleration = acceleration;
         this.faceDirection = faceDirection;
     }
 
     public WorldMovingBlock(WorldMovingBlock worldMovingBlock) {
         super(worldMovingBlock);
         speed = worldMovingBlock.speed;
+        maxSpeed = worldMovingBlock.maxSpeed;
+        acceleration = worldMovingBlock.acceleration;
         faceDirection = worldMovingBlock.faceDirection;
     }
 }

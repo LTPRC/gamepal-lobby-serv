@@ -67,58 +67,6 @@ public class PlayerServiceImpl implements PlayerService {
     private NpcManager npcManager;
 
     @Override
-    public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
-        JSONObject rst = ContentUtil.generateRst();
-        if (userService.getWorldByUserCode(userCode) != userService.getWorldByUserCode(nextUserCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1017));
-        }
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        if (!playerInfoMap.containsKey(nextUserCode)) {
-            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        if (!relationMap.containsKey(userCode)) {
-            relationMap.put(userCode, new ConcurrentHashMap<>());
-        }
-        if (!relationMap.containsKey(nextUserCode)) {
-            relationMap.put(nextUserCode, new ConcurrentHashMap<>());
-        }
-        if (!relationMap.get(userCode).containsKey(nextUserCode)) {
-            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
-        }
-        if (!relationMap.get(nextUserCode).containsKey(userCode)) {
-            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
-        }
-        if (!isAbsolute) {
-            newRelation += relationMap.get(userCode).get(nextUserCode);
-        }
-        newRelation = Math.min(RELATION_MAX, Math.max(RELATION_MIN, newRelation));
-        if (newRelation != relationMap.get(userCode).get(nextUserCode)) {
-            generateNotificationMessage(userCode, "你将对" + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
-                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
-                    + "为" + newRelation);
-            generateNotificationMessage(nextUserCode, playerInfoMap.get(userCode).getNickname() + "将对你的关系"
-                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
-                    + "为" + newRelation);
-            relationMap.get(userCode).put(nextUserCode, newRelation);
-            relationMap.get(nextUserCode).put(userCode, newRelation);
-        }
-        rst.put("userCode", userCode);
-        rst.put("nextUserCode", nextUserCode);
-        rst.put("relation", newRelation);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
     public ResponseEntity<String> updatePlayerInfo(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -265,6 +213,58 @@ public class PlayerServiceImpl implements PlayerService {
             relationMap.put(userCode, new ConcurrentHashMap<>());
         }
         return relationMap.get(userCode);
+    }
+
+    @Override
+    public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
+        JSONObject rst = ContentUtil.generateRst();
+        if (userService.getWorldByUserCode(userCode) != userService.getWorldByUserCode(nextUserCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1017));
+        }
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (!playerInfoMap.containsKey(nextUserCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (!relationMap.containsKey(userCode)) {
+            relationMap.put(userCode, new ConcurrentHashMap<>());
+        }
+        if (!relationMap.containsKey(nextUserCode)) {
+            relationMap.put(nextUserCode, new ConcurrentHashMap<>());
+        }
+        if (!relationMap.get(userCode).containsKey(nextUserCode)) {
+            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
+        }
+        if (!relationMap.get(nextUserCode).containsKey(userCode)) {
+            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
+        }
+        if (!isAbsolute) {
+            newRelation += relationMap.get(userCode).get(nextUserCode);
+        }
+        newRelation = Math.min(RELATION_MAX, Math.max(RELATION_MIN, newRelation));
+        if (newRelation != relationMap.get(userCode).get(nextUserCode)) {
+            generateNotificationMessage(userCode, "你将对" + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
+                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
+                    + "为" + newRelation);
+            generateNotificationMessage(nextUserCode, playerInfoMap.get(userCode).getNickname() + "将对你的关系"
+                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
+                    + "为" + newRelation);
+            relationMap.get(userCode).put(nextUserCode, newRelation);
+            relationMap.get(nextUserCode).put(userCode, newRelation);
+        }
+        rst.put("userCode", userCode);
+        rst.put("nextUserCode", nextUserCode);
+        rst.put("relation", newRelation);
+        return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override

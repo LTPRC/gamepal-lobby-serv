@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.model;
 
 import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,11 +12,11 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class PlayerInfo extends WorldMovingBlock {
 
     // Basic properties
     private int playerType; // 0-human 1-AI
+    private int playerStatus;
 
     // Character properties
     private String avatar;
@@ -34,9 +33,6 @@ public class PlayerInfo extends WorldMovingBlock {
     private int[] faceCoefs;
 
     // Dynamic properties
-    private int playerStatus;
-    private BigDecimal maxSpeed; // block per frame
-    private BigDecimal acceleration; // block per frame square
     private Set<String> tools = new ConcurrentSkipListSet<>();
     private Set<String> outfits = new ConcurrentSkipListSet<>();
     private int hpMax;
