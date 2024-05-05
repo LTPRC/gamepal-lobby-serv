@@ -10,6 +10,26 @@ public class CreatureConstants {
     public static final int CREATURE_TYPE_ANIMAL = 2;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
+    public static final int SKIN_COLOR_C = 1;
+    public static final int SKIN_COLOR_M = 2;
+    public static final int SKIN_COLOR_A = 3;
+    public static final int SKIN_COLOR_L = 4;
+    public static final int SKIN_COLOR_B = 5;
+    public static final int SKIN_COLOR_PAOFU = 1;
+    public static final int SKIN_COLOR_FROG = 2;
+    public static final int SKIN_COLOR_MONKEY = 3;
+    public static final int SKIN_COLOR_RACOON = 4;
+    public static final int SKIN_COLOR_CHICKEN = 5;
+    public static final int SKIN_COLOR_BUFFALO = 6;
+    public static final int SKIN_COLOR_FOX = 7;
+    public static final int SKIN_COLOR_POLAR_BEAR = 8;
+    public static final int SKIN_COLOR_SHEEP = 8;
+    public static final int SKIN_COLOR_TIGER = 9;
+    public static final int SKIN_COLOR_CAT = 10;
+    public static final int SKIN_COLOR_DOG = 11;
+    public static final int SKIN_COLOR_WOLF = 8;
+    public static final int SKIN_COLOR_BOAR = 12;
+    public static final int SKIN_COLOR_HORSE = 13;
 
     // Backend constants
 

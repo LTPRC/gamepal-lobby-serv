@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
-import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
+import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -35,7 +35,7 @@ public class NpcManagerImpl implements NpcManager {
     private UserService userService;
 
     @Autowired
-    private PlayerInfoFactory playerInfoFactory;
+    private CreatureFactory creatureFactory;
 
     @Autowired
     private MovementManager movementManager;
@@ -46,7 +46,7 @@ public class NpcManagerImpl implements NpcManager {
     @Override
     public String createNpc(GameWorld world) {
         String userCode = UUID.randomUUID().toString();
-        PlayerInfo npcPlayerInfo = playerInfoFactory.createPlayerInfoInstance();
+        PlayerInfo npcPlayerInfo = creatureFactory.createPlayerInfoInstance();
         npcPlayerInfo.setId(userCode);
         npcPlayerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_AI);
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);

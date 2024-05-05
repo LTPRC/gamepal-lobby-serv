@@ -1,6 +1,5 @@
 package com.github.ltprc.gamepal.model.creature;
 
-import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,14 +29,6 @@ public class PlayerInfo extends CreatureInfo {
     private int[] faceCoefs;
 
     // Dynamic properties
-    private int hpMax;
-    private int hp;
-    private int vpMax;
-    private int vp;
-    private int hunger;
-    private int hungerMax;
-    private int thirst;
-    private int thirstMax;
     private int level;
     private int exp;
     private int expMax;

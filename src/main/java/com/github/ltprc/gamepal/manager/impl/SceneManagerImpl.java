@@ -4,6 +4,7 @@ import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockCodeConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -1058,6 +1059,70 @@ public class SceneManagerImpl implements SceneManager {
         if (null != block) {
             scene.getBlocks().add(block);
         }
+    }
+
+    private void addSceneAnimal(RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x, BigDecimal y) {
+        Random random = new Random();
+        Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
+                y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
+        Map<Integer, Integer> weightMap = new LinkedHashMap<>();
+        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 1000);
+        switch (blockCode) {
+            case BlockCodeConstants.BLOCK_CODE_DIRT:
+                weightMap.put(CreatureConstants.SKIN_COLOR_DOG, 10);
+                break;
+            case BlockCodeConstants.BLOCK_CODE_GRASS:
+                weightMap.put(CreatureConstants.SKIN_COLOR_MONKEY, 2);
+                weightMap.put(CreatureConstants.SKIN_COLOR_CHICKEN, 20);
+                weightMap.put(CreatureConstants.SKIN_COLOR_BUFFALO, 10);
+                weightMap.put(CreatureConstants.SKIN_COLOR_SHEEP, 20);
+                weightMap.put(CreatureConstants.SKIN_COLOR_CAT, 5);
+                weightMap.put(CreatureConstants.SKIN_COLOR_HORSE, 10);
+                break;
+            case BlockCodeConstants.BLOCK_CODE_SNOW:
+                weightMap.put(CreatureConstants.SKIN_COLOR_POLAR_BEAR, 10);
+                break;
+            case BlockCodeConstants.BLOCK_CODE_SWAMP:
+                weightMap.put(CreatureConstants.SKIN_COLOR_FROG, 50);
+                break;
+            case BlockCodeConstants.BLOCK_CODE_ROUGH:
+                weightMap.put(CreatureConstants.SKIN_COLOR_FOX, 10);
+                weightMap.put(CreatureConstants.SKIN_COLOR_WOLF, 10);
+                weightMap.put(CreatureConstants.SKIN_COLOR_TIGER, 10);
+                weightMap.put(CreatureConstants.SKIN_COLOR_BOAR, 10);
+                break;
+            case BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN:
+                weightMap.put(CreatureConstants.SKIN_COLOR_RACOON, 5);
+                break;
+            case BlockCodeConstants.BLOCK_CODE_SAND:
+            case BlockCodeConstants.BLOCK_CODE_LAVA:
+            case BlockCodeConstants.BLOCK_CODE_WATER:
+            case BlockCodeConstants.BLOCK_CODE_NOTHING:
+            default:
+                break;
+        }
+        int randomInt = random.nextInt(weightMap.values().stream().mapToInt(Integer::intValue).sum());
+        List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
+        for (int i = 0; i < weightList.size(); i++) {
+            if (randomInt < weightList.get(i).getValue()) {
+                addSceneAnimalBySkinColor(regionInfo, scene, weightList.get(i).getKey(), coordinate);
+                break;
+            }
+            randomInt -= weightList.get(i).getValue();
+        }
+    }
+
+    private void addSceneAnimalBySkinColor(RegionInfo regionInfo, Scene scene, int skinColor, Coordinate coordinate) {
+        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
+        Block block = new Block(GamePalConstants.BLOCK_TYPE_ANIMAL, null, "",
+                new Structure(GamePalConstants.STRUCTURE_MATERIAL_FLESH,
+                        GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+                        roundShape,
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE)),
+                coordinate);
+        scene.getBlocks().add(block);
     }
 
     @Override

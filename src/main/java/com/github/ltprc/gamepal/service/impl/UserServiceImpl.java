@@ -8,7 +8,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
+import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     private UserInfoRepository userInfoRepository;
 
     @Autowired
-    private PlayerInfoFactory playerInfoFactory;
+    private CreatureFactory creatureFactory;
 
     @Autowired
     private NpcManager npcManager;
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
         // Update online record
         world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
         if (!world.getPlayerInfoMap().containsKey(userCode)) {
-            PlayerInfo playerInfo = playerInfoFactory.createPlayerInfoInstance();
+            PlayerInfo playerInfo = creatureFactory.createPlayerInfoInstance();
             playerInfo.setId(userCode);
             playerInfo.setCode("");
             world.getPlayerInfoMap().put(userCode, playerInfo);

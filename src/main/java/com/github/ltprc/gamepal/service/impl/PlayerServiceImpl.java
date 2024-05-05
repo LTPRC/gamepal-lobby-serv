@@ -111,9 +111,9 @@ public class PlayerServiceImpl implements PlayerService {
         if (StringUtils.isNotBlank(nameColor)) {
             playerInfo.setNameColor(nameColor);
         }
-        Integer creature = req.getInteger("creature");
-        if (null != creature) {
-            playerInfo.setCreatureType(creature);
+        Integer creatureType = req.getInteger("creatureType");
+        if (null != creatureType) {
+            playerInfo.setCreatureType(creatureType);
         }
         Integer gender = req.getInteger("gender");
         if (null != gender) {
@@ -905,7 +905,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getTools().add(itemNo);
         }
-        SkillUtil.updateSkills(playerInfo);
+        SkillUtil.updateHumanSkills(playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -931,7 +931,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getOutfits().add(itemNo);
         }
-        SkillUtil.updateSkills(playerInfo);
+        SkillUtil.updateHumanSkills(playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 

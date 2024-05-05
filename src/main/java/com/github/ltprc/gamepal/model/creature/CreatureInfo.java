@@ -13,4 +13,12 @@ public class CreatureInfo extends WorldMovingBlock {
     private int[] buff; // buff code, remaining frame
     private Skill[] skill;
     private PerceptionInfo perceptionInfo;
+    private int hpMax;
+    private int hp;
+    private int vpMax;
+    private int vp;
+    private int hunger;
+    private int hungerMax;
+    private int thirst;
+    private int thirstMax;
 }

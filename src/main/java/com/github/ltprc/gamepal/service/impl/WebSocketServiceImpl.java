@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
-import com.github.ltprc.gamepal.factory.PlayerInfoFactory;
+import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
@@ -50,7 +50,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     private StateMachineService stateMachineService;
 
     @Autowired
-    private PlayerInfoFactory playerInfoFactory;
+    private CreatureFactory creatureFactory;
 
     @Autowired
     private SceneManager sceneManager;
@@ -346,7 +346,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (null != functions) {
             if (functions.containsKey("createPlayerInfoInstance")
                     && Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
-                functionsResponse.put("createPlayerInfoInstance", playerInfoFactory.createPlayerInfoInstance());
+                functionsResponse.put("createPlayerInfoInstance", creatureFactory.createPlayerInfoInstance());
             }
         }
         rst.put("functions", functionsResponse);

@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Tool;
@@ -254,7 +255,7 @@ public class SkillUtil {
         tool.setItemTime(skillTime);
     }
 
-    public static void updateSkills(PlayerInfo playerInfo) {
+    public static void updateHumanSkills(PlayerInfo playerInfo) {
         Skill[] skills = new Skill[4];
         skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
@@ -275,6 +276,21 @@ public class SkillUtil {
                     GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
         });
         playerInfo.setSkill(skills);
+    }
+
+    public static void updateAnimalSkills(CreatureInfo creatureInfo) {
+        Skill[] skills = new Skill[4];
+        skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+        skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
+                GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+        skills[2] = new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO);
+        skills[3] = new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO);
+        creatureInfo.setSkill(skills);
     }
 
     public static boolean validateDamage(PlayerInfo playerInfo) {
