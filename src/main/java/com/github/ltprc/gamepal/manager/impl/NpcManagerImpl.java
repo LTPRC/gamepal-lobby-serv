@@ -18,6 +18,7 @@ import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,7 +256,7 @@ public class NpcManagerImpl implements NpcManager {
             return false;
         }
         if (world.getNpcBrainMap().get(fromUserCode).isPeaceWithSameCreature()
-                && world.getPlayerInfoMap().get(toUserCode).getCreatureType()
+                && world.getPlayerInfoMap().get(fromUserCode).getCreatureType()
                 == world.getPlayerInfoMap().get(toUserCode).getCreatureType()) {
             return false;
         } else if (world.getNpcBrainMap().get(fromUserCode).isPeaceWithTeammate()

@@ -40,4 +40,5 @@ public class PlayerInfo extends CreatureInfo {
     private BigDecimal capacityMax;
     private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
     private String bossId;
+    private String topBossId;
 }

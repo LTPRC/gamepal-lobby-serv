@@ -954,7 +954,7 @@ public class PlayerServiceImpl implements PlayerService {
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
-            sceneManager.fillScene(region, worldMovingBlock.getSceneCoordinate());
+            worldService.expandScene(world, worldMovingBlock);
         }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         Drop drop = new Drop(itemNo, amount, new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),

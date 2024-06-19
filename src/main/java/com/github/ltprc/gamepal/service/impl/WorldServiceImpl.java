@@ -606,7 +606,7 @@ public class WorldServiceImpl implements WorldService {
             region.setScenes(new HashMap<>());
         }
         if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
-            sceneManager.fillScene(region, worldCoordinate.getSceneCoordinate());
+            sceneManager.fillScene(world, region, worldCoordinate.getSceneCoordinate());
         }
         if (depth > 0) {
             WorldCoordinate newWorldCoordinate = new WorldCoordinate();

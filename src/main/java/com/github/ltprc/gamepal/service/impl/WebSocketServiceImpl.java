@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -237,12 +238,14 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Static information
         if (webStage == GamePalConstants.WEB_STAGE_START) {
+            JSONObject staticDataObj = new JSONObject();
             JSONObject itemsObj = new JSONObject();
             itemsObj.putAll(worldService.getItemMap());
-            rst.put("items", itemsObj);
+            staticDataObj.put("items", itemsObj);
             JSONObject recipesObj = new JSONObject();
             recipesObj.putAll(worldService.getRecipeMap());
-            rst.put("recipes", recipesObj);
+            staticDataObj.put("recipes", recipesObj);
+            rst.put("staticData", staticDataObj);
         }
 
         // UserCode information
@@ -291,6 +294,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         // All playerInfos are provided, but only blocks of running players or player himself will be collected 24/03/16
         rst.put("playerInfos", playerInfoMap);
+        Map<String, CreatureInfo> animalMap = world.getAnimalMap();
+        rst.put("animals", animalMap);
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
@@ -370,7 +375,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             session.getBasicRemote().sendText(content);
         } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-            userService.logoff(userCode, "", false);
+            // Browser refresh comes here 24/05/29
+//            userService.logoff(userCode, "", false);
         }
     }
 }

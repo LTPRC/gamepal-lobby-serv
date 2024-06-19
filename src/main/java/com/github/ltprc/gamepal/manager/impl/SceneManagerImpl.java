@@ -6,7 +6,9 @@ import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockCodeConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -33,6 +35,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CreatureFactory creatureFactory;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -191,7 +196,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public void fillScene(final Region region, final IntegerCoordinate sceneCoordinate) {
+    public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
         Scene scene = new Scene();
         scene.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
         scene.setName("Auto Scene (" + scene.getSceneCoordinate().getX() + "," + scene.getSceneCoordinate().getY()
@@ -206,6 +211,9 @@ public class SceneManagerImpl implements SceneManager {
         fillSceneTemplate(region, scene, regionIndex);
         if (regionIndex == BlockCodeConstants.BLOCK_CODE_NOTHING) {
             scene.getBlocks().forEach(block -> block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_SOLID));
+        } else {
+            // Add animals 24/06/19
+            addSceneAnimals(world, region, scene);
         }
         scene.setEvents(new CopyOnWriteArrayList<>());
         region.getScenes().put(sceneCoordinate, scene);
@@ -809,7 +817,7 @@ public class SceneManagerImpl implements SceneManager {
         }
         int randomInt = random.nextInt(weightMap.values().stream().mapToInt(Integer::intValue).sum());
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
-        for (int i = 0; i < weightList.size(); i++) {
+        for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()) {
                 addSceneObjectByCode(regionInfo, scene, weightList.get(i).getKey(), coordinate);
                 break;
@@ -1061,12 +1069,43 @@ public class SceneManagerImpl implements SceneManager {
         }
     }
 
-    private void addSceneAnimal(RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x, BigDecimal y) {
+    private void addSceneAnimals(GameWorld world, RegionInfo regionInfo, Scene scene) {
         Random random = new Random();
-        Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
-                y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
+        for (int i = 0; i < regionInfo.getWidth(); i++) {
+            for (int j = 0; j < regionInfo.getHeight(); j++) {
+                switch (random.nextInt(4)) {
+                    case 0:
+                        int upleftBlockCode = scene.getGird()[i][j];
+                        addSceneAnimal(world, regionInfo, scene, upleftBlockCode, BigDecimal.valueOf(i),
+                                BigDecimal.valueOf(j));
+                        break;
+                    case 1:
+                        int uprightBlockCode = scene.getGird()[i + 1][j];
+                        addSceneAnimal(world, regionInfo, scene, uprightBlockCode, BigDecimal.valueOf(i + 0.5D),
+                                BigDecimal.valueOf(j));
+                        break;
+                    case 2:
+                        int downleftBlockCode = scene.getGird()[i][j + 1];
+                        addSceneAnimal(world, regionInfo, scene, downleftBlockCode, BigDecimal.valueOf(i),
+                                BigDecimal.valueOf(j + 0.5D));
+                        break;
+                    case 3:
+                        int downrightBlockCode = scene.getGird()[i + 1][j + 1];
+                        addSceneAnimal(world, regionInfo, scene, downrightBlockCode, BigDecimal.valueOf(i + 0.5D),
+                                BigDecimal.valueOf(j + 0.5D));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    private void addSceneAnimal(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
+                                BigDecimal y) {
+        Random random = new Random();
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 1000);
+        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 10000);
         switch (blockCode) {
             case BlockCodeConstants.BLOCK_CODE_DIRT:
                 weightMap.put(CreatureConstants.SKIN_COLOR_DOG, 10);
@@ -1103,32 +1142,30 @@ public class SceneManagerImpl implements SceneManager {
         }
         int randomInt = random.nextInt(weightMap.values().stream().mapToInt(Integer::intValue).sum());
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
-        for (int i = 0; i < weightList.size(); i++) {
-            if (randomInt < weightList.get(i).getValue()) {
-                addSceneAnimalBySkinColor(regionInfo, scene, weightList.get(i).getKey(), coordinate);
+        for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
+            if (randomInt < weightList.get(i).getValue() && BlockCodeConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
+                CreatureInfo animalInfo = creatureFactory.createAnimalInfoInstance();
+                int skinColor = weightList.get(i).getKey();
+                animalInfo.setSkinColor(skinColor);
+                animalInfo.setRegionNo(regionInfo.getRegionNo());
+                animalInfo.setSceneCoordinate(scene.getSceneCoordinate());
+                Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
+                        y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
+                animalInfo.setCoordinate(coordinate);
+                String id = UUID.randomUUID().toString();
+                animalInfo.setId(id);
+                world.getAnimalMap().put(id, animalInfo);
                 break;
             }
             randomInt -= weightList.get(i).getValue();
         }
     }
 
-    private void addSceneAnimalBySkinColor(RegionInfo regionInfo, Scene scene, int skinColor, Coordinate coordinate) {
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
-        Block block = new Block(GamePalConstants.BLOCK_TYPE_ANIMAL, null, "",
-                new Structure(GamePalConstants.STRUCTURE_MATERIAL_FLESH,
-                        GamePalConstants.STRUCTURE_LAYER_MIDDLE,
-                        roundShape,
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE)),
-                coordinate);
-        scene.getBlocks().add(block);
-    }
-
     @Override
     public Queue<Block> collectBlocksByUserCode(String userCode, final int sceneScanRadius) {
         Queue<Block> rankingQueue = collectBlocksFromScenes(userCode, sceneScanRadius);
         rankingQueue.addAll(collectBlocksFromPlayerInfoMap(userCode, sceneScanRadius));
+        rankingQueue.addAll(collectBlocksFromAnimalMap(userCode, sceneScanRadius));
         return rankingQueue;
     }
 
@@ -1204,6 +1241,37 @@ public class SceneManagerImpl implements SceneManager {
                 // playerInfos contains running players or NPC 24/03/25
                 .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                // Detected
+                .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
+                .filter(entry -> {
+                    IntegerCoordinate integerCoordinate
+                            = BlockUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
+                    return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
+                            && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
+                })
+                .forEach(entry -> {
+                    Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
+                    BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                            entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
+                    if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
+                            playerInfo.getFaceDirection(), playerInfo.getCoordinate(), block)) {
+                        rankingQueue.add(block);
+                    }
+                });
+        return rankingQueue;
+    }
+
+    @Override
+    public Queue<Block> collectBlocksFromAnimalMap(String userCode, final int sceneScanRadius) {
+        Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
+        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        // Collect detected animals
+        Map<String, CreatureInfo> animalMap = world.getAnimalMap();
+        animalMap.entrySet().stream()
                 // Detected
                 .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
                 .filter(entry -> {
