@@ -1145,7 +1145,7 @@ public class SceneManagerImpl implements SceneManager {
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue() && BlockCodeConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
-                CreatureInfo animalInfo = creatureFactory.createAnimalInfoInstance();
+                PlayerInfo animalInfo = creatureFactory.createAnimalInfoInstance();
                 int skinColor = weightList.get(i).getKey();
                 animalInfo.setSkinColor(skinColor);
                 animalInfo.setRegionNo(regionInfo.getRegionNo());
@@ -1155,7 +1155,7 @@ public class SceneManagerImpl implements SceneManager {
                 animalInfo.setCoordinate(coordinate);
                 String id = UUID.randomUUID().toString();
                 animalInfo.setId(id);
-                world.getAnimalMap().put(id, animalInfo);
+                world.getPlayerInfoMap().put(id, animalInfo);
                 break;
             }
             randomInt -= weightList.get(i).getValue();
@@ -1262,8 +1262,7 @@ public class SceneManagerImpl implements SceneManager {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect detected animals
-        Map<String, CreatureInfo> animalMap = world.getAnimalMap();
-        animalMap.entrySet().stream()
+        playerInfoMap.entrySet().stream()
                 .filter(entry -> isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
                 .forEach(entry -> {
                     Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);

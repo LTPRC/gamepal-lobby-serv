@@ -294,8 +294,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         // All playerInfos are provided, but only blocks of running players or player himself will be collected 24/03/16
         rst.put("playerInfos", playerInfoMap);
-        Map<String, CreatureInfo> animalMap = world.getAnimalMap();
-        rst.put("animals", animalMap);
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));

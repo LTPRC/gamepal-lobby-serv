@@ -80,8 +80,8 @@ public class CreatureFactory {
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }
 
-    public CreatureInfo createAnimalInfoInstance() {
-        CreatureInfo animalInfo = new CreatureInfo();
+    public PlayerInfo createAnimalInfoInstance() {
+        PlayerInfo animalInfo = new PlayerInfo();
         animalInfo.setStructure(new Structure(GamePalConstants.STRUCTURE_MATERIAL_FLESH,
                 GamePalConstants.STRUCTURE_LAYER_MIDDLE,
                 new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,

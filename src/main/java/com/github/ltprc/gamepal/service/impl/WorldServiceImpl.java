@@ -106,7 +106,6 @@ public class WorldServiceImpl implements WorldService {
         world.setWindSpeed(BigDecimal.valueOf(random.nextDouble()));
         world.setRegionMap(new ConcurrentHashMap<>());
         world.setPlayerInfoMap(new ConcurrentHashMap<>());
-        world.setAnimalMap(new ConcurrentHashMap<>());
         world.setRelationMap(new ConcurrentHashMap<>());
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
