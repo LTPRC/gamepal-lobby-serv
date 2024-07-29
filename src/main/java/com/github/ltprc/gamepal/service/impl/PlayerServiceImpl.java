@@ -633,6 +633,7 @@ public class PlayerServiceImpl implements PlayerService {
             for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
                 playerInfoMap.get(userCode).getSkill()[i].setFrame(playerInfoMap.get(userCode).getSkill()[i].getFrameMax());
             }
+            world.getOnlineMap().remove(userCode);
             npcManager.resetNpcBrainQueues(userCode);
             WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
                     playerInfoMap.get(userCode));

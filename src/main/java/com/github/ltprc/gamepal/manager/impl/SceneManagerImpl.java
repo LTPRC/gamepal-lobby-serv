@@ -14,6 +14,7 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -1234,21 +1235,13 @@ public class SceneManagerImpl implements SceneManager {
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect detected playerInfos
         playerInfoMap.entrySet().stream()
                 // playerInfos contains running players or NPC 24/03/25
                 .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                // Detected
-                .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
-                .filter(entry -> {
-                    IntegerCoordinate integerCoordinate
-                            = BlockUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
-                    return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
-                            && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
-                })
+                .filter(entry -> isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
                 .forEach(entry -> {
                     Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
@@ -1267,19 +1260,11 @@ public class SceneManagerImpl implements SceneManager {
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect detected animals
         Map<String, CreatureInfo> animalMap = world.getAnimalMap();
         animalMap.entrySet().stream()
-                // Detected
-                .filter(entry -> entry.getValue().getRegionNo() == playerInfo.getRegionNo())
-                .filter(entry -> {
-                    IntegerCoordinate integerCoordinate
-                            = BlockUtil.getCoordinateRelation(sceneCoordinate, entry.getValue().getSceneCoordinate());
-                    return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
-                            && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
-                })
+                .filter(entry -> isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
                 .forEach(entry -> {
                     Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
@@ -1290,6 +1275,17 @@ public class SceneManagerImpl implements SceneManager {
                     }
                 });
         return rankingQueue;
+    }
+
+    private static boolean isBlockDetected(final PlayerInfo playerInfo, final WorldCoordinate worldCoordinate,
+                                           final int sceneScanRadius) {
+        if (worldCoordinate.getRegionNo() != playerInfo.getRegionNo()) {
+            return false;
+        }
+        IntegerCoordinate integerCoordinate = BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
+                worldCoordinate.getSceneCoordinate());
+        return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
+                && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
     }
 
     @Override
