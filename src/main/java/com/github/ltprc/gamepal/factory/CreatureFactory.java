@@ -9,6 +9,7 @@ import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.NameUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -29,7 +30,6 @@ public class CreatureFactory {
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_RADIUS))));
         playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
-        playerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_HUMAN);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         playerInfo.setRegionNo(1);
         playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
@@ -87,7 +87,7 @@ public class CreatureFactory {
                 new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_RADIUS))));
-        animalInfo.setType(GamePalConstants.BLOCK_TYPE_ANIMAL);
+        animalInfo.setType(13);
         animalInfo.setRegionNo(1);
         animalInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
         animalInfo.setCoordinate(new Coordinate(new BigDecimal(5), new BigDecimal(5)));
@@ -120,5 +120,49 @@ public class CreatureFactory {
     private int generateAnimalSkinColor() {
         Random random = new Random();
         return random.nextInt(14) + 1;
+    }
+
+    public PlayerInfo createCreatureInstance(final int playerType) {
+        PlayerInfo playerInfo = new PlayerInfo();
+        playerInfo.setStructure(new Structure(GamePalConstants.STRUCTURE_MATERIAL_FLESH,
+                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+                new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                        new Coordinate(GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_RADIUS))));
+        playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
+        playerInfo.setPlayerType(playerType);
+        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
+        playerInfo.setRegionNo(1);
+        playerInfo.setSceneCoordinate(new IntegerCoordinate(0, 0));
+        playerInfo.setCoordinate(new Coordinate(new BigDecimal(5), new BigDecimal(5)));
+        playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        playerInfo.setFaceDirection(BigDecimal.ZERO);
+        playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
+        playerInfo.setAcceleration(BigDecimal.valueOf(0.01));
+        playerInfo.setHpMax(1000);
+        playerInfo.setHp(playerInfo.getHpMax() / 2);
+        playerInfo.setVpMax(1000);
+        playerInfo.setVp(playerInfo.getVpMax() / 2);
+        playerInfo.setHungerMax(1000);
+        playerInfo.setHunger(playerInfo.getHungerMax() / 2);
+        playerInfo.setThirstMax(1000);
+        playerInfo.setThirst(playerInfo.getThirstMax() / 2);
+        playerInfo.setLevel(1);
+        playerInfo.setExp(0);
+        playerInfo.setExpMax(100);
+        playerInfo.setMoney(1);
+        playerInfo.setCapacity(new BigDecimal(0));
+        playerInfo.setCapacityMax(new BigDecimal(500));
+        playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
+        playerInfo.setPerceptionInfo(new PerceptionInfo());
+        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), 0);
+        if (CreatureConstants.PLAYER_TYPE_ANIMAL != playerType) {
+            SkillUtil.updateHumanSkills(playerInfo);
+            randomlyPersonalizePlayerInfo(playerInfo);
+        } else {
+            SkillUtil.updateAnimalSkills(playerInfo);
+            randomlyPersonalizeAnimalInfo(playerInfo);
+        }
+        return playerInfo;
     }
 }

@@ -2,13 +2,19 @@ package com.github.ltprc.gamepal.manager;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 
 public interface NpcManager {
 
     String createNpc(GameWorld world);
 
+    PlayerInfo createCreature(GameWorld world, final int playerType, String userCode);
+
     void putNpc(String userCode, String npcUserCode);
+
+    void putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate);
 
     JSONObject changeNpcBehavior(JSONObject request);
 

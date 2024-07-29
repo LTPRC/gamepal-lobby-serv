@@ -34,7 +34,7 @@ public class CreatureConstants {
     // Backend constants
 
     public static final int PLAYER_TYPE_HUMAN = 0;
-    public static final int PLAYER_TYPE_AI = 1;
+    public static final int PLAYER_TYPE_NPC = 1;
     public static final int PLAYER_TYPE_ANIMAL = 3;
 
     public static final int NPC_BRAIN_STATUS_UNAWARE = 0;

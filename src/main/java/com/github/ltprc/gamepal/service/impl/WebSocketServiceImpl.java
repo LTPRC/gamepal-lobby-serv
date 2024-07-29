@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
@@ -349,7 +350,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (null != functions) {
             if (functions.containsKey("createPlayerInfoInstance")
                     && Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
-                functionsResponse.put("createPlayerInfoInstance", creatureFactory.createPlayerInfoInstance());
+                functionsResponse.put("createPlayerInfoInstance",
+                        creatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN));
             }
         }
         rst.put("functions", functionsResponse);

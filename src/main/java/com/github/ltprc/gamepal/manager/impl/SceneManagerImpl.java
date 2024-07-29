@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
@@ -7,8 +8,8 @@ import com.github.ltprc.gamepal.config.BlockCodeConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
+import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
-import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -39,6 +40,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private CreatureFactory creatureFactory;
+
+    @Autowired
+    private NpcManager npcManager;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -1144,18 +1148,17 @@ public class SceneManagerImpl implements SceneManager {
         int randomInt = random.nextInt(weightMap.values().stream().mapToInt(Integer::intValue).sum());
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
-            if (randomInt < weightList.get(i).getValue() && BlockCodeConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
-                PlayerInfo animalInfo = creatureFactory.createAnimalInfoInstance();
+            if (randomInt < weightList.get(i).getValue()
+                    && BlockCodeConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
+                String animalUserCode = UUID.randomUUID().toString();
+                PlayerInfo animalInfo =
+                        npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_ANIMAL, animalUserCode);
                 int skinColor = weightList.get(i).getKey();
                 animalInfo.setSkinColor(skinColor);
-                animalInfo.setRegionNo(regionInfo.getRegionNo());
-                animalInfo.setSceneCoordinate(scene.getSceneCoordinate());
-                Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
-                        y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
-                animalInfo.setCoordinate(coordinate);
-                String id = UUID.randomUUID().toString();
-                animalInfo.setId(id);
-                world.getPlayerInfoMap().put(id, animalInfo);
+                WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(),
+                        scene.getSceneCoordinate(), new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
+                        y.add(BigDecimal.valueOf(random.nextDouble() / 2))));
+                npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 break;
             }
             randomInt -= weightList.get(i).getValue();

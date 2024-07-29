@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -17,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class TimedEventTask {
@@ -175,8 +178,16 @@ public class TimedEventTask {
                             == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(entry2 -> {
                         String userCode = entry2.getKey();
-                        String npcUserCode = npcManager.createNpc(world);
-                        npcManager.putNpc(userCode, npcUserCode);
+                        String npcUserCode = UUID.randomUUID().toString();
+                        PlayerInfo playerInfo =
+                                npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC, npcUserCode);
+                        WorldCoordinate worldCoordinate = new WorldCoordinate();
+                        BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(entry2.getKey()), worldCoordinate);
+                        worldCoordinate.getCoordinate().setX(worldCoordinate.getCoordinate().getX()
+                                .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        worldCoordinate.getCoordinate().setY(worldCoordinate.getCoordinate().getY()
+                                .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+                        npcManager.putCreature(world, npcUserCode, worldCoordinate);
                         JSONObject behaviorRequest = new JSONObject();
                         behaviorRequest.put("userCode", npcUserCode);
                         behaviorRequest.put("npcBehaviorType", CreatureConstants.NPC_BEHAVIOR_FOLLOW);

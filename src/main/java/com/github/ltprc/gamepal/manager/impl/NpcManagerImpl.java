@@ -18,7 +18,6 @@ import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ public class NpcManagerImpl implements NpcManager {
         String userCode = UUID.randomUUID().toString();
         PlayerInfo npcPlayerInfo = creatureFactory.createPlayerInfoInstance();
         npcPlayerInfo.setId(userCode);
-        npcPlayerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_AI);
+        npcPlayerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_NPC);
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         world.getPlayerInfoMap().put(userCode, npcPlayerInfo);
         userService.addUserIntoWorldMap(world, userCode);
@@ -59,22 +58,45 @@ public class NpcManagerImpl implements NpcManager {
     }
 
     @Override
+    public PlayerInfo createCreature(GameWorld world, final int playerType, String userCode) {
+        PlayerInfo playerInfo = creatureFactory.createCreatureInstance(playerType);
+        playerInfo.setId(userCode);
+        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerType) {
+            NpcBrain npcBrain = generateNpcBrain();
+            world.getNpcBrainMap().put(userCode, npcBrain);
+        }
+        world.getPlayerInfoMap().put(userCode, playerInfo);
+        world.getFlagMap().put(userCode, new HashSet<>());
+        userService.addUserIntoWorldMap(world, userCode);
+        return playerInfo;
+    }
+
+    @Override
     public void putNpc(String userCode, String npcUserCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         PlayerInfo npcPlayerInfo = playerInfoMap.get(npcUserCode);
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-        BlockUtil.copyWorldCoordinate(playerInfoMap.get(userCode), playerInfoMap.get(npcUserCode));
-        npcPlayerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
-        npcPlayerInfo.setRegionNo(playerInfo.getRegionNo());
-        npcPlayerInfo.setSceneCoordinate(playerInfo.getSceneCoordinate());
-        npcPlayerInfo.getCoordinate().setX(playerInfo.getCoordinate().getX()
+        BlockUtil.copyWorldCoordinate(playerInfo, npcPlayerInfo);
+        npcPlayerInfo.getCoordinate().setX(npcPlayerInfo.getCoordinate().getX()
                 .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-        npcPlayerInfo.getCoordinate().setY(playerInfo.getCoordinate().getY()
+        npcPlayerInfo.getCoordinate().setY(npcPlayerInfo.getCoordinate().getY()
                 .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+        npcPlayerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(playerInfo.getRegionNo()), npcPlayerInfo);
         world.getOnlineMap().put(npcUserCode, -1L);
+    }
+
+    @Override
+    public void putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate) {
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo creatureInfo = playerInfoMap.get(userCode);
+        creatureInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+        creatureInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
+        BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
+        BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
+        world.getOnlineMap().put(userCode, -1L);
     }
 
     private NpcBrain generateNpcBrain() {

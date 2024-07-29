@@ -44,7 +44,6 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_STORAGE = 10;
     public static final int BLOCK_TYPE_COOKER = 11;
     public static final int BLOCK_TYPE_SINK = 12;
-    public static final int BLOCK_TYPE_ANIMAL = 13;
 
     public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
     public static final int STRUCTURE_MATERIAL_SOLID = 1;
