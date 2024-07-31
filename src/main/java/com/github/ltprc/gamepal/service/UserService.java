@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface UserService {
     ResponseEntity<String> registerAccount(HttpServletRequest request);
 
@@ -15,6 +17,8 @@ public interface UserService {
     ResponseEntity<String> logoff(HttpServletRequest request);
 
     ResponseEntity<String> logoff(String userCode, String token, boolean needToken);
+
+    ResponseEntity<String> getWorldNames(HttpServletRequest request);
 
     GameWorld getWorldByUserCode(String userCode);
 

@@ -37,6 +37,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * Do not put too many dynamic game logics into this class.
+ */
 @Transactional
 @Service
 public class WorldServiceImpl implements WorldService {

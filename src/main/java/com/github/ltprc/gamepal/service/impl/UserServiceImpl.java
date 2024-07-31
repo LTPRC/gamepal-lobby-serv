@@ -1,9 +1,7 @@
 package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,11 +10,8 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -123,13 +118,13 @@ public class UserServiceImpl implements UserService {
         }
         String username = req.getString("username");
         String password = req.getString("password");
-        String worldCode = req.getString("worldCode");
+        int worldIndex = req.getInteger("worldIndex");
         List<UserInfo> userInfoList = userInfoRepository.queryUserInfoByUsernameAndPassword(username, password);
         if (userInfoList.isEmpty()) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1005));
         }
         String userCode = userInfoList.get(0).getUserCode();
-        GameWorld world = worldService.getWorldMap().get(worldCode);
+        GameWorld world = (GameWorld) worldService.getWorldMap().values().toArray()[worldIndex];
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
@@ -172,6 +167,13 @@ public class UserServiceImpl implements UserService {
         world.getSessionMap().remove(userCode);
         userWorldMap.remove(userCode);
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_LOGOFF);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> getWorldNames(HttpServletRequest request) {
+        JSONObject rst = ContentUtil.generateRst();
+        rst.put("worldNames", JSON.toJSON(worldService.getWorldMap().keySet()));
         return ResponseEntity.ok().body(rst.toString());
     }
 
