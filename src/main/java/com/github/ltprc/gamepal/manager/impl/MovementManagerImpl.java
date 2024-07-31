@@ -10,6 +10,9 @@ import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +23,8 @@ import java.util.Queue;
 
 @Component
 public class MovementManagerImpl implements MovementManager {
+
+    private static final Log logger = LogFactory.getLog(MovementManagerImpl.class);
 
     @Autowired
     private UserService userService;
@@ -33,6 +38,10 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void settleSpeed(String userCode, WorldMovingBlock worldMovingBlock) {
         GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.warn(ErrorUtil.ERROR_1016);
+            return;
+        }
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(userCode, 1);
         WorldCoordinate teleportWc = null;

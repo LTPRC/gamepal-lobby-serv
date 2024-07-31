@@ -19,6 +19,7 @@ import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1244,7 +1245,7 @@ public class SceneManagerImpl implements SceneManager {
                 // playerInfos contains running players or NPC 24/03/25
                 .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
                 .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .filter(entry -> isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
+                .filter(entry -> SkillUtil.isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
                 .forEach(entry -> {
                     Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
@@ -1266,7 +1267,7 @@ public class SceneManagerImpl implements SceneManager {
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect detected animals
         playerInfoMap.entrySet().stream()
-                .filter(entry -> isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
+                .filter(entry -> SkillUtil.isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
                 .forEach(entry -> {
                     Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
@@ -1277,17 +1278,6 @@ public class SceneManagerImpl implements SceneManager {
                     }
                 });
         return rankingQueue;
-    }
-
-    private static boolean isBlockDetected(final PlayerInfo playerInfo, final WorldCoordinate worldCoordinate,
-                                           final int sceneScanRadius) {
-        if (worldCoordinate.getRegionNo() != playerInfo.getRegionNo()) {
-            return false;
-        }
-        IntegerCoordinate integerCoordinate = BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                worldCoordinate.getSceneCoordinate());
-        return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
-                && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
     }
 
     @Override

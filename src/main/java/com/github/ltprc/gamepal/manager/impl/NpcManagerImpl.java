@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
@@ -21,6 +22,7 @@ import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -66,8 +68,6 @@ public class NpcManagerImpl implements NpcManager {
             world.getNpcBrainMap().put(userCode, npcBrain);
         }
         world.getPlayerInfoMap().put(userCode, playerInfo);
-        world.getFlagMap().put(userCode, new HashSet<>());
-        userService.addUserIntoWorldMap(world, userCode);
         return playerInfo;
     }
 
@@ -97,6 +97,8 @@ public class NpcManagerImpl implements NpcManager {
         BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
         world.getOnlineMap().put(userCode, -1L);
+        world.getFlagMap().putIfAbsent(userCode, new HashSet<>());
+        userService.addUserIntoWorldMap(world, userCode);
     }
 
     private NpcBrain generateNpcBrain() {
@@ -116,6 +118,10 @@ public class NpcManagerImpl implements NpcManager {
         JSONObject rst = ContentUtil.generateRst();
         String npcUserCode = request.getString("userCode");
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
+        if (null == world) {
+            logger.warn(ErrorUtil.ERROR_1016);
+            return rst;
+        }
         PlayerInfo npcPlayerInfo = world.getPlayerInfoMap().get(npcUserCode);
         Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
         NpcBrain npcBrain = npcBrainMap.get(npcUserCode);
@@ -147,6 +153,12 @@ public class NpcManagerImpl implements NpcManager {
     public void updateNpcBrains(GameWorld world) {
         Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
         npcBrainMap.entrySet().stream()
+                // Filtered NPCs not detected by human players 24/08/01
+                .filter(entry2 -> world.getPlayerInfoMap().entrySet().stream()
+                        .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == entry3.getValue().getPlayerType())
+                        .anyMatch(entry3 -> SkillUtil.isBlockDetected(entry3.getValue(),
+                                world.getPlayerInfoMap().get(entry3.getKey()),
+                                GamePalConstants.SCENE_SCAN_RADIUS)))
                 .filter(entry2 -> SkillUtil.validateDamage(world.getPlayerInfoMap().get(entry2.getKey())))
                 .forEach(entry2 -> {
                     String npcUserCode = entry2.getKey();
