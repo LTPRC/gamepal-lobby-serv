@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.PrivateInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
@@ -67,28 +68,29 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public ResponseEntity<String> addWorld(String worldCode) {
+    public ResponseEntity<String> addWorld(String worldId) {
         JSONObject rst = ContentUtil.generateRst();
-        if (worldMap.containsKey(worldCode)) {
+        if (worldMap.containsKey(worldId)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1015));
         }
         GameWorld world = new GameWorld();
         initiateWorld(world);
-        worldMap.put(worldCode, world);
+        world.setId(worldId);
+        worldMap.put(worldId, world);
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
-    public ResponseEntity<String> removeWorld(String worldCode) {
+    public ResponseEntity<String> removeWorld(String worldId) {
         JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = worldMap.get(worldCode);
+        GameWorld world = worldMap.get(worldId);
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1019));
         }
         world.getOnlineMap().entrySet().forEach(entry ->
             userService.logoff(entry.getKey(), "", false)
         );
-        worldMap.remove(worldCode);
+        worldMap.remove(worldId);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -104,11 +106,13 @@ public class WorldServiceImpl implements WorldService {
 
     private void initiateWorld(GameWorld world) {
         Random random = new Random();
+        world.setName("默认世界");
         world.setWorldTime(random.nextInt(GamePalConstants.MAX_WORLD_TIME));
         world.setWindDirection(BigDecimal.valueOf(random.nextDouble() * 360));
         world.setWindSpeed(BigDecimal.valueOf(random.nextDouble()));
         world.setRegionMap(new ConcurrentHashMap<>());
         world.setPlayerInfoMap(new ConcurrentHashMap<>());
+        world.setPrivateInfoMap(new ConcurrentHashMap<>());
         world.setRelationMap(new ConcurrentHashMap<>());
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
@@ -235,28 +239,24 @@ public class WorldServiceImpl implements WorldService {
     }
 
     private void registerInteractiveBlocks(GameWorld world) {
-        world.getRegionMap().entrySet().forEach(entry1 -> {
-            Region region = entry1.getValue();
-            region.getScenes().entrySet().forEach(entry2 -> {
-                Scene scene = entry2.getValue();
-                scene.getBlocks().forEach(block -> {
-                    block.setId(UUID.randomUUID().toString());
-                    WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(block, region.getRegionNo(),
-                            scene.getSceneCoordinate(), block);
-                    switch (block.getType()) {
-                        case GamePalConstants.BLOCK_TYPE_DROP:
-                        case GamePalConstants.BLOCK_TYPE_TELEPORT:
-                            world.getBlockMap().put(block.getId(), worldBlock);
-                            break;
-                        default:
-                            if (BlockUtil.checkBlockTypeInteractive(block.getType())) {
-                                world.getBlockMap().put(block.getId(), worldBlock);
-                            }
-                            break;
-                    }
-                });
-            });
-        });
+        world.getRegionMap().values().forEach(region ->
+                region.getScenes().values().forEach(scene ->
+                        scene.getBlocks().forEach(block -> {
+            String id = UUID.randomUUID().toString();
+            block.setId(id);
+            WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(block, region.getRegionNo(),
+                    scene.getSceneCoordinate(), block);
+            if (GamePalConstants.BLOCK_TYPE_CONTAINER == block.getType()) {
+                PrivateInfo privateInfo = new PrivateInfo();
+                privateInfo.setId(id);
+                world.getPrivateInfoMap().put(id, privateInfo);
+            }
+            if (GamePalConstants.BLOCK_TYPE_DROP == block.getType()
+                    || GamePalConstants.BLOCK_TYPE_TELEPORT == block.getType()
+                    || BlockUtil.checkBlockTypeInteractive(block.getType())) {
+                world.getBlockMap().put(id, worldBlock);
+            }
+        })));
     }
 
     @Override

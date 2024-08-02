@@ -617,7 +617,7 @@ public class SceneManagerImpl implements SceneManager {
         Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
                 y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 1000);
+        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 2000);
         switch (blockCode) {
             case BlockCodeConstants.BLOCK_CODE_DIRT:
                 weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 10);

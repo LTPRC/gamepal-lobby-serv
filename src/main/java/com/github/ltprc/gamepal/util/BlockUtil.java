@@ -480,6 +480,7 @@ public class BlockUtil {
             case GamePalConstants.BLOCK_TYPE_STORAGE:
             case GamePalConstants.BLOCK_TYPE_COOKER:
             case GamePalConstants.BLOCK_TYPE_SINK:
+            case GamePalConstants.BLOCK_TYPE_CONTAINER:
                 return true;
             default:
                 return false;

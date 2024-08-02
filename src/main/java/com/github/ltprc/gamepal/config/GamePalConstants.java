@@ -44,6 +44,7 @@ public class GamePalConstants {
     public static final int BLOCK_TYPE_STORAGE = 10;
     public static final int BLOCK_TYPE_COOKER = 11;
     public static final int BLOCK_TYPE_SINK = 12;
+    public static final int BLOCK_TYPE_CONTAINER = 13;
 
     public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
     public static final int STRUCTURE_MATERIAL_SOLID = 1;
@@ -188,4 +189,6 @@ public class GamePalConstants {
     public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
     public static final int STRUCTURE_LAYER_SKY = 50;
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
+
+    public static final int CAPACITY_MAX = 50;
 }

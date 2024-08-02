@@ -35,10 +35,10 @@ public class PlayerInfo extends CreatureInfo {
     private int money;
     private Set<String> tools = new ConcurrentSkipListSet<>();
     private Set<String> outfits = new ConcurrentSkipListSet<>();
-    private Map<String, Integer> items = new ConcurrentHashMap<>(); // itemId, amount
-    private BigDecimal capacity;
-    private BigDecimal capacityMax;
-    private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
+//    private Map<String, Integer> items = new ConcurrentHashMap<>(); // itemId, amount
+//    private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
+//    private BigDecimal capacity;
+//    private BigDecimal capacityMax;
     private String bossId;
     private String topBossId;
 }

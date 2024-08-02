@@ -9,7 +9,6 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
-import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -295,6 +294,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         // All playerInfos are provided, but only blocks of running players or player himself will be collected 24/03/16
         rst.put("playerInfos", playerInfoMap);
+        rst.put("privateInfo", world.getPrivateInfoMap().get(userCode));
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));

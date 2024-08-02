@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameWorldInfo {
-
+    private String id;
+    private String name;
     private int worldTime;
     private BigDecimal windDirection;
     private BigDecimal windSpeed;

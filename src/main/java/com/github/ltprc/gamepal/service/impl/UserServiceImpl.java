@@ -6,6 +6,7 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
@@ -15,6 +16,7 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private NpcManager npcManager;
 
-    private Map<String, GameWorld> userWorldMap = new LinkedHashMap<>(); // userCode, world
+    private Map<String, String> userWorldMap = new LinkedHashMap<>(); // userCode, worldId
 
     @Override
     public ResponseEntity<String> registerAccount(HttpServletRequest request) {
@@ -118,13 +120,16 @@ public class UserServiceImpl implements UserService {
         }
         String username = req.getString("username");
         String password = req.getString("password");
-        int worldIndex = req.getInteger("worldIndex");
+        String worldId = req.getString("worldId");
+        if (StringUtils.isBlank(worldId)) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
         List<UserInfo> userInfoList = userInfoRepository.queryUserInfoByUsernameAndPassword(username, password);
         if (userInfoList.isEmpty()) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1005));
         }
         String userCode = userInfoList.get(0).getUserCode();
-        GameWorld world = (GameWorld) worldService.getWorldMap().values().toArray()[worldIndex];
+        GameWorld world = worldService.getWorldMap().get(worldId);
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
@@ -162,10 +167,10 @@ public class UserServiceImpl implements UserService {
         if (needToken && !token.equals(world.getTokenMap().get(userCode))) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));
         }
-        world.getTokenMap().remove(userCode);
-        world.getOnlineMap().remove(userCode);
-        world.getSessionMap().remove(userCode);
-        userWorldMap.remove(userCode);
+//        world.getTokenMap().remove(userCode);
+//        world.getOnlineMap().remove(userCode);
+//        world.getSessionMap().remove(userCode);
+//        userWorldMap.remove(userCode);
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_LOGOFF);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -173,17 +178,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<String> getWorldNames(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
-        rst.put("worldNames", JSON.toJSON(worldService.getWorldMap().keySet()));
+        JSONArray worldNames = new JSONArray();
+        worldService.getWorldMap().values().stream().map(world -> {
+            JSONObject worldName = new JSONObject();
+            worldName.put("id", world.getId());
+            worldName.put("name", world.getName());
+            return worldName;
+        }).forEach(worldNames::add);
+        rst.put("worldNames", worldNames);
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
     public GameWorld getWorldByUserCode(String userCode) {
-        return userWorldMap.get(userCode);
+        return worldService.getWorldMap().get(userWorldMap.get(userCode));
     }
 
     @Override
-    public void addUserIntoWorldMap(GameWorld world, String userCode) {
-        userWorldMap.put(userCode, world);
+    public void addUserIntoWorldMap(String userCode, String worldId) {
+        userWorldMap.put(userCode, worldId);
     }
 }

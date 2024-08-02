@@ -10,6 +10,7 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.PrivateInfo;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -65,6 +66,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private NpcManager npcManager;
+    private WorldBlock block;
 
     @Override
     public ResponseEntity<String> updatePlayerInfo(String userCode, JSONObject req) {
@@ -276,10 +278,12 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (!StringUtils.isNotBlank(itemNo) || !playerInfo.getItems().containsKey(itemNo)) {
+        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
+        PrivateInfo privateInfo = privateInfoMap.get(userCode);
+        if (!StringUtils.isNotBlank(itemNo) || !privateInfo.getItems().containsKey(itemNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
         }
-        if (playerInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
+        if (privateInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         switch (itemNo.charAt(0)) {
@@ -320,9 +324,11 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int oldItemAmount = playerInfo.getItems().getOrDefault(itemNo, 0);
-        playerInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (playerInfo.getItems().get(itemNo) == 0) {
+        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
+        PrivateInfo privateInfo = privateInfoMap.get(userCode);
+        int oldItemAmount = privateInfo.getItems().getOrDefault(itemNo, 0);
+        privateInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+        if (privateInfo.getItems().get(itemNo) == 0) {
             switch (itemNo.charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
                     if (playerInfo.getTools().contains(itemNo)) {
@@ -338,8 +344,8 @@ public class PlayerServiceImpl implements PlayerService {
                     break;
             }
         }
-        BigDecimal capacity = playerInfo.getCapacity();
-        playerInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
+        BigDecimal capacity = privateInfo.getCapacity();
+        privateInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
                 .multiply(BigDecimal.valueOf(itemAmount))));
         if (itemAmount < 0) {
             generateNotificationMessage(userCode,
@@ -360,10 +366,12 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int oldItemAmount = playerInfo.getPreservedItems().getOrDefault(itemNo, 0);
-        playerInfo.getPreservedItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+//        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
+        PrivateInfo privateInfo = privateInfoMap.get(userCode);
+        int oldItemAmount = privateInfo.getPreservedItems().getOrDefault(itemNo, 0);
+        privateInfo.getPreservedItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (itemAmount < 0) {
             generateNotificationMessage(userCode,
                     "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
@@ -383,13 +391,15 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
+        PrivateInfo privateInfo = privateInfoMap.get(userCode);
         Map<String, Recipe> recipeMap = worldService.getRecipeMap();
         if (!StringUtils.isNotBlank(recipeNo) || !recipeMap.containsKey(recipeNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1023));
         }
         Recipe recipe = recipeMap.get(recipeNo);
         if (recipe.getCost().entrySet().stream()
-                .anyMatch(entry -> playerInfo.getItems().get(entry.getKey()) < entry.getValue() * recipeAmount)) {
+                .anyMatch(entry -> privateInfo.getItems().get(entry.getKey()) < entry.getValue() * recipeAmount)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         recipe.getCost().entrySet()
@@ -559,7 +569,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        WorldBlock block = world.getBlockMap().getOrDefault(id, null);
+        WorldBlock block = world.getBlockMap().get(id);
+        if (null == block) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
+        }
         switch (interactionCode) {
             case GamePalConstants.INTERACTION_USE:
                 switch (block.getType()) {

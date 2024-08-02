@@ -9,6 +9,7 @@ import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.PrivateInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
@@ -53,7 +54,7 @@ public class NpcManagerImpl implements NpcManager {
         npcPlayerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_NPC);
         npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         world.getPlayerInfoMap().put(userCode, npcPlayerInfo);
-        userService.addUserIntoWorldMap(world, userCode);
+        userService.addUserIntoWorldMap(userCode, world.getId());
         NpcBrain npcBrain = generateNpcBrain();
         world.getNpcBrainMap().put(userCode, npcBrain);
         return userCode;
@@ -68,6 +69,11 @@ public class NpcManagerImpl implements NpcManager {
             world.getNpcBrainMap().put(userCode, npcBrain);
         }
         world.getPlayerInfoMap().put(userCode, playerInfo);
+        PrivateInfo privateInfo = new PrivateInfo();
+        privateInfo.setId(userCode);
+        privateInfo.setCapacity(BigDecimal.ZERO);
+        privateInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+        world.getPrivateInfoMap().put(userCode, privateInfo);
         return playerInfo;
     }
 
@@ -98,7 +104,7 @@ public class NpcManagerImpl implements NpcManager {
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
         world.getOnlineMap().put(userCode, -1L);
         world.getFlagMap().putIfAbsent(userCode, new HashSet<>());
-        userService.addUserIntoWorldMap(world, userCode);
+        userService.addUserIntoWorldMap(userCode, world.getId());
     }
 
     private NpcBrain generateNpcBrain() {

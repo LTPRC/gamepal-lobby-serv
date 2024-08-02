@@ -50,8 +50,8 @@ public class CreatureFactory {
         playerInfo.setExp(0);
         playerInfo.setExpMax(100);
         playerInfo.setMoney(1);
-        playerInfo.setCapacity(new BigDecimal(0));
-        playerInfo.setCapacityMax(new BigDecimal(500));
+//        playerInfo.setCapacity(new BigDecimal(0));
+//        playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         SkillUtil.updateHumanSkills(playerInfo);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
@@ -151,8 +151,8 @@ public class CreatureFactory {
         playerInfo.setExp(0);
         playerInfo.setExpMax(100);
         playerInfo.setMoney(1);
-        playerInfo.setCapacity(new BigDecimal(0));
-        playerInfo.setCapacityMax(new BigDecimal(500));
+//        playerInfo.setCapacity(new BigDecimal(0));
+//        playerInfo.setCapacityMax(new BigDecimal(500));
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), 0);

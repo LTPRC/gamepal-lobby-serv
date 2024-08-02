@@ -14,9 +14,9 @@ public interface WorldService {
 
     Map<String, GameWorld> getWorldMap();
 
-    ResponseEntity<String> addWorld(String worldCode);
+    ResponseEntity<String> addWorld(String worldId);
 
-    ResponseEntity<String> removeWorld(String worldCode);
+    ResponseEntity<String> removeWorld(String worldId);
 
     Map<String, Item> getItemMap();
 
