@@ -212,7 +212,7 @@ public class NpcManagerImpl implements NpcManager {
                         npcBrain.getRedQueue().add(red.get());
                     } else if (!npcBrain.getRedQueue().isEmpty()) {
                         PlayerInfo oldPlayerInfo = npcBrain.getRedQueue().poll();
-                        if (npcBrain.getRedQueue().isEmpty()) {
+                        if (npcBrain.getRedQueue().isEmpty() && SkillUtil.validateDamage(oldPlayerInfo)) {
                             npcBrain.getYellowQueue().push(new WorldCoordinate(oldPlayerInfo));
                         }
                     }
