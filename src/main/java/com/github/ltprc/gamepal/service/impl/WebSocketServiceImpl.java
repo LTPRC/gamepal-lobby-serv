@@ -134,6 +134,14 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.getPreservedItem(userCode, itemNo, itemAmount);
                 });
             }
+            if (functions.containsKey("getInteractedItems")) {
+                JSONArray getInteractedItems = functions.getJSONArray("getInteractedItems");
+                getInteractedItems.forEach(getInteractedItem -> {
+                    String itemNo = ((JSONObject) getInteractedItem).getString("itemNo");
+                    int itemAmount = ((JSONObject) getInteractedItem).getInteger("itemAmount");
+                    playerService.getInteractedItem(userCode, itemNo, itemAmount);
+                });
+            }
             if (functions.containsKey("useRecipes")) {
                 JSONArray useRecipes = functions.getJSONArray("useRecipes");
                 useRecipes.forEach(useRecipe -> {
@@ -196,13 +204,13 @@ public class WebSocketServiceImpl implements WebSocketService {
                     logger.warn(setRelationRst);
                 }
             }
+            playerService.updateInteractionInfo(userCode,
+                    functions.getObject("updateInteractionInfo", InteractionInfo.class));
             if (functions.containsKey("interactBlocks")) {
                 JSONArray interactBlocks = functions.getJSONArray("interactBlocks");
-                interactBlocks.forEach(interactBlock -> {
-                    int interactionCode = ((JSONObject) interactBlock).getInteger("interactionCode");
-                    String id = ((JSONObject) interactBlock).getString("id");
-                    playerService.interactBlocks(userCode, interactionCode, id);
-                });
+                interactBlocks.forEach(interactBlock ->
+                    playerService.interactBlocks(userCode, ((JSONObject) interactBlock).getInteger("interactionCode"))
+                );
             }
             if (functions.containsKey("terminalInputs")) {
                 JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
@@ -278,7 +286,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Return flags
 //        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-//        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
+//        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
 
         JSONArray flags = new JSONArray();
         flags.addAll(world.getFlagMap().get(userCode));
@@ -294,7 +302,14 @@ public class WebSocketServiceImpl implements WebSocketService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         // All playerInfos are provided, but only blocks of running players or player himself will be collected 24/03/16
         rst.put("playerInfos", playerInfoMap);
-        rst.put("privateInfo", world.getPrivateInfoMap().get(userCode));
+        rst.put("bagInfo", world.getBagInfoMap().get(userCode));
+        if (world.getInteractionInfoMap().containsKey(userCode)) {
+            if (GamePalConstants.BLOCK_TYPE_STORAGE == world.getInteractionInfoMap().get(userCode).getType()) {
+                rst.put("interactedBagInfo", world.getPreservedBagInfoMap().get(userCode));
+            } else if (world.getBagInfoMap().containsKey(world.getInteractionInfoMap().get(userCode).getId())) {
+                rst.put("interactedBagInfo", world.getBagInfoMap().get(world.getInteractionInfoMap().get(userCode).getId()));
+            }
+        }
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));

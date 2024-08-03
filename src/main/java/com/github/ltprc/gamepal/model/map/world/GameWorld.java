@@ -2,8 +2,9 @@ package com.github.ltprc.gamepal.model.map.world;
 
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.creature.PrivateInfo;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.game.Game;
+import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.terminal.Terminal;
@@ -19,7 +20,9 @@ import java.util.Set;
 public class GameWorld extends GameWorldInfo {
     private Map<Integer, Region> regionMap; // regionNo, region
     private Map<String, PlayerInfo> playerInfoMap;
-    private Map<String, PrivateInfo> privateInfoMap;
+    private Map<String, BagInfo> bagInfoMap;
+    private Map<String, BagInfo> preservedBagInfoMap;
+    private Map<String, InteractionInfo> interactionInfoMap;
     private Map<String, Map<String, Integer>> relationMap;
     private Map<String, Session> sessionMap; // userCode, session
     private Map<String, String> tokenMap; // userCode, token

@@ -1,6 +1,5 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
@@ -9,7 +8,7 @@ import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.creature.PrivateInfo;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
@@ -23,7 +22,6 @@ import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -69,11 +67,16 @@ public class NpcManagerImpl implements NpcManager {
             world.getNpcBrainMap().put(userCode, npcBrain);
         }
         world.getPlayerInfoMap().put(userCode, playerInfo);
-        PrivateInfo privateInfo = new PrivateInfo();
-        privateInfo.setId(userCode);
-        privateInfo.setCapacity(BigDecimal.ZERO);
-        privateInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
-        world.getPrivateInfoMap().put(userCode, privateInfo);
+        BagInfo bagInfo = new BagInfo();
+        bagInfo.setId(userCode);
+        bagInfo.setCapacity(BigDecimal.ZERO);
+        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+        world.getBagInfoMap().put(userCode, bagInfo);
+        bagInfo = new BagInfo();
+        bagInfo.setId(userCode);
+        bagInfo.setCapacity(BigDecimal.ZERO);
+        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+        world.getPreservedBagInfoMap().put(userCode, bagInfo);
         return playerInfo;
     }
 

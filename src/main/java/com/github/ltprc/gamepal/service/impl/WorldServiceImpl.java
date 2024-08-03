@@ -8,7 +8,7 @@ import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.creature.PrivateInfo;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
@@ -112,7 +112,9 @@ public class WorldServiceImpl implements WorldService {
         world.setWindSpeed(BigDecimal.valueOf(random.nextDouble()));
         world.setRegionMap(new ConcurrentHashMap<>());
         world.setPlayerInfoMap(new ConcurrentHashMap<>());
-        world.setPrivateInfoMap(new ConcurrentHashMap<>());
+        world.setBagInfoMap(new ConcurrentHashMap<>());
+        world.setPreservedBagInfoMap(new ConcurrentHashMap<>());
+        world.setInteractionInfoMap(new ConcurrentHashMap<>());
         world.setRelationMap(new ConcurrentHashMap<>());
         world.setSessionMap(new ConcurrentHashMap<>()); // userCode, session
         world.setTokenMap(new ConcurrentHashMap<>()); // userCode, token
@@ -247,9 +249,9 @@ public class WorldServiceImpl implements WorldService {
             WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(block, region.getRegionNo(),
                     scene.getSceneCoordinate(), block);
             if (GamePalConstants.BLOCK_TYPE_CONTAINER == block.getType()) {
-                PrivateInfo privateInfo = new PrivateInfo();
-                privateInfo.setId(id);
-                world.getPrivateInfoMap().put(id, privateInfo);
+                BagInfo bagInfo = new BagInfo();
+                bagInfo.setId(id);
+                world.getBagInfoMap().put(id, bagInfo);
             }
             if (GamePalConstants.BLOCK_TYPE_DROP == block.getType()
                     || GamePalConstants.BLOCK_TYPE_TELEPORT == block.getType()

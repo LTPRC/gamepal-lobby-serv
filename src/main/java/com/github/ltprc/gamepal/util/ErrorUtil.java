@@ -17,7 +17,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1010 = new GamepalError("1010", "Communicating failed.");
     public static final GamepalError ERROR_1011 = new GamepalError("1011", "Contact does not exist.");
     public static final GamepalError ERROR_1012 = new GamepalError("1012", "Invalid block code.");
-    public static final GamepalError ERROR_1013 = new GamepalError("1013", "Duplicated block code.");
+    public static final GamepalError ERROR_1013 = new GamepalError("1013", "Invalid block type.");
     public static final GamepalError ERROR_1014 = new GamepalError("1014", "Game status is invalid.");
     public static final GamepalError ERROR_1015 = new GamepalError("1015", "World with this worldCode has been created.");
     public static final GamepalError ERROR_1016 = new GamepalError("1016", "Invalid worldCode.");
@@ -38,4 +38,6 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1031 = new GamepalError("1035", "Invalid coordinate.");
     public static final GamepalError ERROR_1032 = new GamepalError("1036", "Invalid JSON content.");
     public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
+    public static final GamepalError ERROR_1034 = new GamepalError("1034", "Invalid interactionInfo.");
+    public static final GamepalError ERROR_1035 = new GamepalError("1035", "Item amount is not enough.");
 }

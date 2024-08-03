@@ -9,10 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 @NoArgsConstructor
-public class PrivateInfo {
+public class BagInfo {
     private String id;
     private BigDecimal capacity;
     private BigDecimal capacityMax;
     private Map<String, Integer> items = new ConcurrentHashMap<>(); // itemId, amount
-    private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
 }

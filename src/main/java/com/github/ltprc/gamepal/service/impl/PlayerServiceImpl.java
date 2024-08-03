@@ -10,7 +10,7 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.creature.PrivateInfo;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -66,7 +66,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private NpcManager npcManager;
-    private WorldBlock block;
 
     @Override
     public ResponseEntity<String> updatePlayerInfo(String userCode, JSONObject req) {
@@ -276,14 +275,12 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
-        PrivateInfo privateInfo = privateInfoMap.get(userCode);
-        if (!StringUtils.isNotBlank(itemNo) || !privateInfo.getItems().containsKey(itemNo)) {
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        if (!StringUtils.isNotBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
         }
-        if (privateInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
+        if (bagInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         switch (itemNo.charAt(0)) {
@@ -311,74 +308,142 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
         }
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
     public ResponseEntity<String> getItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
+        if (itemAmount == 0) {
+            return ResponseEntity.ok().body(rst.toString());
+        }
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
-        PrivateInfo privateInfo = privateInfoMap.get(userCode);
-        int oldItemAmount = privateInfo.getItems().getOrDefault(itemNo, 0);
-        privateInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (privateInfo.getItems().get(itemNo) == 0) {
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
+        if (oldItemAmount + itemAmount < 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
+        }
+        bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+        if (bagInfo.getItems().get(itemNo) == 0) {
             switch (itemNo.charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
-                    if (playerInfo.getTools().contains(itemNo)) {
-                        playerInfo.getTools().remove(itemNo);
-                    }
+                    playerInfo.getTools().remove(itemNo);
                     break;
                 case GamePalConstants.ITEM_CHARACTER_OUTFIT:
-                    if (playerInfo.getOutfits().contains(itemNo)) {
-                        playerInfo.getOutfits().remove(itemNo);
-                    }
+                    playerInfo.getOutfits().remove(itemNo);
                     break;
                 default:
                     break;
             }
         }
-        BigDecimal capacity = privateInfo.getCapacity();
-        privateInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
+        BigDecimal capacity = bagInfo.getCapacity();
+        bagInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
                 .multiply(BigDecimal.valueOf(itemAmount))));
         if (itemAmount < 0) {
             generateNotificationMessage(userCode,
                     "失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
-        } else if (itemAmount > 0) {
+        } else {
             generateNotificationMessage(userCode,
                     "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
         world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_PRESERVED_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
     public ResponseEntity<String> getPreservedItem(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
+        if (itemAmount == 0) {
+            return ResponseEntity.ok().body(rst.toString());
+        }
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-//        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
-        PrivateInfo privateInfo = privateInfoMap.get(userCode);
-        int oldItemAmount = privateInfo.getPreservedItems().getOrDefault(itemNo, 0);
-        privateInfo.getPreservedItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+        Map<String, BagInfo> preservedBagInfoMap = world.getPreservedBagInfoMap();
+        BagInfo preservedBagInfo = preservedBagInfoMap.get(userCode);
+        int oldItemAmount = preservedBagInfo.getItems().getOrDefault(itemNo, 0);
+        if (oldItemAmount + itemAmount < 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
+        }
+        preservedBagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (itemAmount < 0) {
             generateNotificationMessage(userCode,
-                    "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
-        } else if (itemAmount > 0) {
+                    "失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
+        } {
             generateNotificationMessage(userCode,
-                    "存入 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
+                    "储存 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> getInteractedItem(String userCode, String itemNo, int itemAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        if (itemAmount == 0) {
+            return ResponseEntity.ok().body(rst.toString());
+        }
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
+        if (oldItemAmount + itemAmount < 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
+        }
+        InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
+        if (null == interactionInfo) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
+        }
+        String id = interactionInfo.getId();
+        WorldBlock block = world.getBlockMap().get(id);
+        if (null == block) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
+        }
+        BagInfo interactedBagInfo;
+        int oldInteractedItemAmount;
+        switch (block.getType()) {
+            case GamePalConstants.BLOCK_TYPE_STORAGE:
+                Map<String, BagInfo> preservedBagInfoMap = world.getPreservedBagInfoMap();
+                interactedBagInfo = preservedBagInfoMap.get(userCode);
+                oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
+                break;
+            case GamePalConstants.BLOCK_TYPE_CONTAINER:
+                interactedBagInfo = bagInfoMap.get(id);
+                oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
+                break;
+            default:
+                return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1013));
+        }
+        if (oldInteractedItemAmount - itemAmount < 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
+        }
+        interactedBagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldInteractedItemAmount - itemAmount, Integer.MAX_VALUE)));
+        bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
+        BigDecimal capacity = bagInfo.getCapacity();
+        bagInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
+                .multiply(BigDecimal.valueOf(itemAmount))));
+        if (itemAmount < 0) {
+            generateNotificationMessage(userCode,
+                    "存入 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
+        } else {
+            generateNotificationMessage(userCode,
+                    "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
+        }
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -389,17 +454,15 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Map<String, PrivateInfo> privateInfoMap = world.getPrivateInfoMap();
-        PrivateInfo privateInfo = privateInfoMap.get(userCode);
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
         Map<String, Recipe> recipeMap = worldService.getRecipeMap();
         if (!StringUtils.isNotBlank(recipeNo) || !recipeMap.containsKey(recipeNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1023));
         }
         Recipe recipe = recipeMap.get(recipeNo);
         if (recipe.getCost().entrySet().stream()
-                .anyMatch(entry -> privateInfo.getItems().get(entry.getKey()) < entry.getValue() * recipeAmount)) {
+                .anyMatch(entry -> bagInfo.getItems().get(entry.getKey()) < entry.getValue() * recipeAmount)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         recipe.getCost().entrySet()
@@ -557,11 +620,10 @@ public class PlayerServiceImpl implements PlayerService {
      * Not all cases need to be implemented
      * @param userCode
      * @param interactionCode
-     * @param id
      * @return
      */
     @Override
-    public ResponseEntity<String> interactBlocks(String userCode, int interactionCode, String id) {
+    public ResponseEntity<String> interactBlocks(String userCode, int interactionCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -569,10 +631,17 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
+        if (null == interactionInfo) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
+        }
+        String id = interactionInfo.getId();
         WorldBlock block = world.getBlockMap().get(id);
         if (null == block) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
         }
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
+        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
         switch (interactionCode) {
             case GamePalConstants.INTERACTION_USE:
                 switch (block.getType()) {
@@ -605,6 +674,16 @@ public class PlayerServiceImpl implements PlayerService {
                 }
                 break;
             case GamePalConstants.INTERACTION_EXCHANGE:
+                switch (block.getType()) {
+                    case GamePalConstants.BLOCK_TYPE_STORAGE:
+                        generateNotificationMessage(userCode, "你正在交换个人物品。");
+                        break;
+                    case GamePalConstants.BLOCK_TYPE_CONTAINER:
+                        generateNotificationMessage(userCode, "你正在使用容器。");
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case GamePalConstants.INTERACTION_SLEEP:
                 playerInfo.setVp(playerInfo.getVpMax());
@@ -986,6 +1065,19 @@ public class PlayerServiceImpl implements PlayerService {
         worldDrop.setCode(drop.getCode());
         world.getBlockMap().put(drop.getId(), worldDrop);
         getItem(userCode, itemNo, -1 * amount);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> updateInteractionInfo(String userCode, InteractionInfo interactionInfo) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        if (null != interactionInfo) {
+            world.getInteractionInfoMap().put(userCode, interactionInfo);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 }

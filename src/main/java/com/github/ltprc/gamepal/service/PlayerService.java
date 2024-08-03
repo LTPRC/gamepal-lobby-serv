@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -25,6 +26,8 @@ public interface PlayerService {
 
     ResponseEntity<String> getPreservedItem(String userCode, String itemNo, int itemAmount);
 
+    ResponseEntity<String> getInteractedItem(String userCode, String itemNo, int itemAmount);
+
     ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount);
 
     ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute);
@@ -37,7 +40,7 @@ public interface PlayerService {
 
     ResponseEntity<String> changeThirst(String userCode, int value, boolean isAbsolute);
 
-    ResponseEntity<String> interactBlocks(String userCode, int interactionCode, String id);
+    ResponseEntity<String> interactBlocks(String userCode, int interactionCode);
 
     ResponseEntity<String> updateBuff(String userCode);
 
@@ -52,4 +55,6 @@ public interface PlayerService {
     ResponseEntity<String> useOutfits(String userCode, String itemNo);
 
     ResponseEntity<String> addDrop(String userCode, String itemNo, int amount);
+
+    ResponseEntity<String> updateInteractionInfo(String userCode, InteractionInfo interactionInfo);
 }

@@ -80,7 +80,7 @@ public class GamePalConstants {
 
     public static final String FLAG_LOGOFF = "logoff";
     public static final String FLAG_UPDATE_ITEMS = "updateItems";
-    public static final String FLAG_UPDATE_PRESERVED_ITEMS = "updatePreservedItems";
+    public static final String FLAG_UPDATE_INTERACTED_ITEMS = "updateInteractedItems";
     public static final String FLAG_UPDATE_RECIPES = "updateRecipes";
 
     public static final int TERMINAL_TYPE_GAME = 1;
