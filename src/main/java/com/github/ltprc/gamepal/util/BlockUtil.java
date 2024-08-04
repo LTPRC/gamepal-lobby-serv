@@ -546,6 +546,9 @@ public class BlockUtil {
             case GamePalConstants.EVENT_CODE_CURSE:
                 layer = GamePalConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
+            case GamePalConstants.EVENT_CODE_FOOTSTEP:
+                layer = GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
+                break;
             default:
                 layer = GamePalConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
                 break;

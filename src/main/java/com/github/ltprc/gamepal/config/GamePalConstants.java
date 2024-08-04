@@ -111,6 +111,7 @@ public class GamePalConstants {
     public static final int EVENT_CODE_SHOOT_MAGNUM = 124;
     public static final int EVENT_CODE_SHOOT_ROCKET = 121;
     public static final int EVENT_CODE_SPARK = 125;
+    public static final int EVENT_CODE_FOOTSTEP = 126;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;

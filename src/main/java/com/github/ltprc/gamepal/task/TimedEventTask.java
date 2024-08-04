@@ -78,9 +78,10 @@ public class TimedEventTask {
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
                             newVp = 5;
                         }
-                        Coordinate speed = playerInfoMap.get(userCode).getSpeed();
-                        BigDecimal maxSpeed = playerInfoMap.get(userCode).getMaxSpeed();
-                        newVp -= playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0 ? 100 : 20 * Math.ceil(Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
+                        Coordinate speed = playerInfo.getSpeed();
+                        BigDecimal maxSpeed = playerInfo.getMaxSpeed();
+                        newVp -= playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
+                                ? 100 : Math.ceil(20 * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
                                 + Math.pow(speed.getX().doubleValue(), 2)) / maxSpeed.doubleValue());
                         playerService.changeVp(userCode, newVp, false);
 
@@ -103,21 +104,21 @@ public class TimedEventTask {
                         }
 
                         // Change view radius
-                        BlockUtil.updatePerceptionInfo(playerInfoMap.get(userCode).getPerceptionInfo(),
+                        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(),
                                 world.getWorldTime());
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
-                            playerInfoMap.get(userCode).getPerceptionInfo().setDistinctVisionRadius(
-                                    playerInfoMap.get(userCode).getPerceptionInfo().getDistinctVisionAngle()
+                            playerInfo.getPerceptionInfo().setDistinctVisionRadius(
+                                    playerInfo.getPerceptionInfo().getDistinctVisionAngle()
                                             .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
-                            playerInfoMap.get(userCode).getPerceptionInfo().setIndistinctVisionRadius(
-                                    playerInfoMap.get(userCode).getPerceptionInfo().getIndistinctVisionAngle()
+                            playerInfo.getPerceptionInfo().setIndistinctVisionRadius(
+                                    playerInfo.getPerceptionInfo().getIndistinctVisionAngle()
                                             .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
                         }
 
                         // Change skill remaining time
-                        for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
-                            if (playerInfoMap.get(userCode).getSkill()[i].getFrame() > 0) {
-                                playerInfoMap.get(userCode).getSkill()[i].setFrame(playerInfoMap.get(userCode).getSkill()[i].getFrame() - 1);
+                        for (int i = 0; i < playerInfo.getSkill().length; i++) {
+                            if (playerInfo.getSkill()[i].getFrame() > 0) {
+                                playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrame() - 1);
                             }
                         }
                     });
@@ -134,10 +135,32 @@ public class TimedEventTask {
     }
 
     @Scheduled(fixedRate = 100)
-    public void executeBy1s() {
+    public void executeBy100ms() {
         // Update worldTime
         worldService.getWorldMap().forEach((key, value) -> worldService.updateWorldTime(value,
                 GamePalConstants.UPDATED_WORLD_TIME_PER_SECOND / 10));
+    }
+
+    @Scheduled(cron = "* * * * * ?")
+    public void executeBy1s() {
+        for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
+            GameWorld world = entry.getValue();
+            Map<String, Long> onlineMap = world.getOnlineMap();
+            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+            onlineMap.keySet().stream()
+                    .filter(userCode -> SkillUtil.validateActiveness(playerInfoMap.get(userCode)))
+                    .forEach(userCode -> {
+                        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+
+                        // Add footstep
+                        if (!playerInfo.getSpeed().getX().equals(BigDecimal.ZERO)
+                                || !playerInfo.getSpeed().getY().equals(BigDecimal.ZERO)) {
+                            WorldEvent worldEvent =BlockUtil.createWorldEvent(userCode,
+                                    GamePalConstants.EVENT_CODE_FOOTSTEP, playerInfo);
+                            world.getEventQueue().add(worldEvent);
+                        }
+                    });
+        }
     }
 
     /**
