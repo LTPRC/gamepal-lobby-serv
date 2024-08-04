@@ -226,9 +226,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                 }
             }
             if (functions.containsKey("useSkills")) {
-                JSONArray useSkills = functions.getJSONArray("useSkills");
-                for (int i = 0; i < SkillConstants.SKILL_LENGTH; i++) {
-                    playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_STUNNED] == 0) {
+                    JSONArray useSkills = functions.getJSONArray("useSkills");
+                    for (int i = 0; i < SkillConstants.SKILL_LENGTH; i++) {
+                        playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
+                    }
                 }
             }
             if (functions.containsKey("setMember")) {

@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -53,31 +54,34 @@ public class TimedEventTask {
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
-            // Buff updating
             onlineMap.keySet().stream()
                     .filter(playerInfoMap::containsKey)
                     .filter(userCode -> playerInfoMap.get(userCode).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(userCode -> {
                         buffManager.updateBuffTime(world, userCode);
-                        buffManager.activateBuff(world, userCode);
                         buffManager.changeBuff(world, userCode);
                     });
 
-            // Non-buff updating
             onlineMap.keySet().stream()
                     .filter(userCode -> SkillUtil.validateActiveness(playerInfoMap.get(userCode)))
                     .forEach(userCode -> {
+                        PlayerInfo playerInfo = playerInfoMap.get(userCode);
                         double randomNumber;
 
                         // Change hp
-//                        playerService.changeHp(entry2.getKey(), -10, false);
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] != 0) {
+                            playerService.changeHp(userCode, -1, false);
+                        }
 
                         // Change vp
-                        int newVp = 1;
-                        Coordinate speed = playerInfoMap.get(userCode).getSpeed();
-                        if (Math.abs(speed.getX().doubleValue()) > 0 || Math.abs(speed.getY().doubleValue()) > 0) {
-                            newVp = -1;
+                        int newVp = 10;
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
+                            newVp = 5;
                         }
+                        Coordinate speed = playerInfoMap.get(userCode).getSpeed();
+                        BigDecimal maxSpeed = playerInfoMap.get(userCode).getMaxSpeed();
+                        newVp -= playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0 ? 100 : 20 * Math.ceil(Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
+                                + Math.pow(speed.getX().doubleValue(), 2)) / maxSpeed.doubleValue());
                         playerService.changeVp(userCode, newVp, false);
 
                         // Change hunger
@@ -98,20 +102,34 @@ public class TimedEventTask {
                             playerService.changeThirst(userCode, -1, false);
                         }
 
+                        // Change view radius
+                        BlockUtil.updatePerceptionInfo(playerInfoMap.get(userCode).getPerceptionInfo(),
+                                world.getWorldTime());
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
+                            playerInfoMap.get(userCode).getPerceptionInfo().setDistinctVisionRadius(
+                                    playerInfoMap.get(userCode).getPerceptionInfo().getDistinctVisionAngle()
+                                            .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
+                            playerInfoMap.get(userCode).getPerceptionInfo().setIndistinctVisionRadius(
+                                    playerInfoMap.get(userCode).getPerceptionInfo().getIndistinctVisionAngle()
+                                            .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
+                        }
+
                         // Change skill remaining time
                         for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
                             if (playerInfoMap.get(userCode).getSkill()[i].getFrame() > 0) {
                                 playerInfoMap.get(userCode).getSkill()[i].setFrame(playerInfoMap.get(userCode).getSkill()[i].getFrame() - 1);
                             }
                         }
-
-                        // Change view radius
-                        BlockUtil.updatePerceptionInfo(playerInfoMap.get(userCode).getPerceptionInfo(),
-                                world.getWorldTime());
                     });
 
-            // Other movements
+            // NPC movements
             npcManager.updateNpcBrains(world);
+
+            // Buff changing
+            onlineMap.keySet().stream()
+                    .filter(playerInfoMap::containsKey)
+                    .filter(userCode -> playerInfoMap.get(userCode).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .forEach(userCode -> buffManager.changeBuff(world, userCode));
         }
     }
 
@@ -159,6 +177,7 @@ public class TimedEventTask {
                         String npcUserCode = UUID.randomUUID().toString();
                         PlayerInfo playerInfo =
                                 npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC, npcUserCode);
+                        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
                         WorldCoordinate worldCoordinate = new WorldCoordinate();
                         BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(entry2.getKey()), worldCoordinate);
                         worldCoordinate.getCoordinate().setX(worldCoordinate.getCoordinate().getX()

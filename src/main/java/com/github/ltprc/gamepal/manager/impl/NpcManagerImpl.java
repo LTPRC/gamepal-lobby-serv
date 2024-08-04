@@ -67,6 +67,7 @@ public class NpcManagerImpl implements NpcManager {
             world.getNpcBrainMap().put(userCode, npcBrain);
         }
         world.getPlayerInfoMap().put(userCode, playerInfo);
+        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         BagInfo bagInfo = new BagInfo();
         bagInfo.setId(userCode);
         bagInfo.setCapacity(BigDecimal.ZERO);
@@ -101,7 +102,6 @@ public class NpcManagerImpl implements NpcManager {
     public void putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate) {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo creatureInfo = playerInfoMap.get(userCode);
-        creatureInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
         creatureInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);

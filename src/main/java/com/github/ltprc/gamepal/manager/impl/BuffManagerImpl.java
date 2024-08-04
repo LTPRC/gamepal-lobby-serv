@@ -11,7 +11,6 @@ import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -47,12 +46,6 @@ public class BuffManagerImpl implements BuffManager {
         }
     }
 
-    @Override
-    public void activateBuff(GameWorld world, String userCode) {
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-
-    }
-
     /**
      * After activating buff
      * @param world
@@ -63,6 +56,7 @@ public class BuffManagerImpl implements BuffManager {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
 
+        // TODO revise
         if (playerInfo.getHp() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
             playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
             playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
@@ -91,7 +85,6 @@ public class BuffManagerImpl implements BuffManager {
             WorldEvent worldEvent = BlockUtil.createWorldEvent(playerInfo.getId(),
                     GamePalConstants.EVENT_CODE_SACRIFICE, playerInfo);
             world.getEventQueue().add(worldEvent);
-//            world.getEventQueue().add(new WorldEvent());
         }
 
         if (playerInfoMap.get(userCode).getHunger() < playerInfoMap.get(userCode).getHungerMax() / 10

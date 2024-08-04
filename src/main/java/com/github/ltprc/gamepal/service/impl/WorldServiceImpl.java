@@ -411,7 +411,7 @@ public class WorldServiceImpl implements WorldService {
                 world.getEventQueue().add(worldEvent);
                 break;
             case GamePalConstants.EVENT_CODE_FIRE:
-                playerInfoList.stream().forEach(playerInfo ->
+                playerInfoList.forEach(playerInfo ->
                     playerService.damageHp(playerInfo.getId(), eventBlock.getId(),
                             -GamePalConstants.EVENT_DAMAGE_PER_FRAME_FIRE, false));
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
@@ -422,12 +422,9 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
-                playerInfoList.stream().forEach(playerInfo -> {
+                playerInfoList.forEach(playerInfo -> {
                     int damageValue = -GamePalConstants.EVENT_DAMAGE_MELEE;
-                    if (userService.getWorldByUserCode(playerInfo.getId()).getEventQueue().stream()
-                            .anyMatch(event -> GamePalConstants.EVENT_CODE_BLOCK == event.getCode()
-                                    && playerInfo.getId().equals(event.getUserCode()))) {
-                        // This player is blocking 24/03/15
+                    if (((PlayerInfo) playerInfo).getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != 0) {
                         damageValue /= 2;
                     }
                     playerService.damageHp(playerInfo.getId(), eventBlock.getId(), damageValue, false);
@@ -447,7 +444,7 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
                 List<WorldBlock> activatedWorldBlockList = calculateBallisticWorldBlocks(eventBlock, playerInfoList);
-                activatedWorldBlockList.stream().forEach((WorldBlock activatedWorldBlock) -> {
+                activatedWorldBlockList.forEach((WorldBlock activatedWorldBlock) -> {
                     BlockUtil.copyWorldCoordinate(activatedWorldBlock, eventBlock);
                     if (activatedWorldBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
                             && playerInfoMap.containsKey(activatedWorldBlock.getId())

@@ -489,7 +489,9 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldHp = playerInfo.getHp();
         int newHp = isAbsolute ? value : oldHp + value;
-        playerInfoMap.get(userCode).setHp(Math.max(0, Math.min(newHp, playerInfo.getHpMax())));
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] == 0) {
+            playerInfoMap.get(userCode).setHp(Math.max(0, Math.min(newHp, playerInfo.getHpMax())));
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -765,6 +767,9 @@ public class PlayerServiceImpl implements PlayerService {
                 GamePalConstants.EVENT_MAX_DISTANCE_SHOOT);
         switch (playerInfo.getSkill()[skillNo].getSkillCode()) {
             case SkillConstants.SKILL_CODE_BLOCK:
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != -1) {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] = GamePalConstants.BUFF_DEFAULT_FRAME_BLOCKED;
+                }
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_BLOCK,
                         playerInfo));
@@ -1021,5 +1026,15 @@ public class PlayerServiceImpl implements PlayerService {
             world.getInteractionInfoMap().put(userCode, interactionInfo);
         }
         return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> killPlayer(String userCode) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<String> revivePlayer(String userCode) {
+        return null;
     }
 }

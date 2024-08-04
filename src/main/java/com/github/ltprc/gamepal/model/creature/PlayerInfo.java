@@ -4,9 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 @Data
@@ -35,10 +33,6 @@ public class PlayerInfo extends CreatureInfo {
     private int money;
     private Set<String> tools = new ConcurrentSkipListSet<>();
     private Set<String> outfits = new ConcurrentSkipListSet<>();
-//    private Map<String, Integer> items = new ConcurrentHashMap<>(); // itemId, amount
-//    private Map<String, Integer> preservedItems = new ConcurrentHashMap<>(); // itemId, amount
-//    private BigDecimal capacity;
-//    private BigDecimal capacityMax;
     private String bossId;
     private String topBossId;
 }

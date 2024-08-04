@@ -55,4 +55,8 @@ public interface PlayerService {
     ResponseEntity<String> addDrop(String userCode, String itemNo, int amount);
 
     ResponseEntity<String> updateInteractionInfo(String userCode, InteractionInfo interactionInfo);
+
+    ResponseEntity<String> killPlayer(String userCode);
+
+    ResponseEntity<String> revivePlayer(String userCode);
 }

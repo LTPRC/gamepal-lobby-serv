@@ -1154,6 +1154,7 @@ public class SceneManagerImpl implements SceneManager {
                 String animalUserCode = UUID.randomUUID().toString();
                 PlayerInfo animalInfo =
                         npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_ANIMAL, animalUserCode);
+                animalInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
                 int skinColor = weightList.get(i).getKey();
                 animalInfo.setSkinColor(skinColor);
                 WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(),

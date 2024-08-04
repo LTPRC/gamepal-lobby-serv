@@ -6,7 +6,5 @@ public interface BuffManager {
 
     void updateBuffTime(GameWorld world, String userCode);
 
-    void activateBuff(GameWorld world, String userCode);
-
     void changeBuff(GameWorld world, String userCode);
 }
