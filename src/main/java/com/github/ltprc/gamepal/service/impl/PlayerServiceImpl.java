@@ -704,64 +704,6 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    public ResponseEntity<String> updateBuff(String userCode) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-
-        // Check death 24/02/23
-        if (0 == playerInfoMap.get(userCode).getHp()
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-            playerInfoMap.get(userCode).setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-            changeVp(userCode, 0, true);
-            changeHunger(userCode, 0, true);
-            changeThirst(userCode, 0, true);
-            // Wipe all other buff and skill remaining time
-            playerInfoMap.get(userCode).setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
-            for (int i = 0; i < playerInfoMap.get(userCode).getSkill().length; i++) {
-                playerInfoMap.get(userCode).getSkill()[i].setFrame(playerInfoMap.get(userCode).getSkill()[i].getFrameMax());
-            }
-            world.getOnlineMap().remove(userCode);
-            npcManager.resetNpcBrainQueues(userCode);
-            WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
-                    playerInfoMap.get(userCode));
-            world.getEventQueue().add(worldEvent);
-        } else if (0 < playerInfoMap.get(userCode).getHp()
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
-        }
-
-        if (playerInfoMap.get(userCode).getHunger() < playerInfoMap.get(userCode).getHungerMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = -1;
-        } else if (playerInfoMap.get(userCode).getHunger() >= playerInfoMap.get(userCode).getHungerMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = 0;
-        }
-
-        if (playerInfoMap.get(userCode).getThirst() < playerInfoMap.get(userCode).getThirstMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = -1;
-        } else if (playerInfoMap.get(userCode).getThirst() >= playerInfoMap.get(userCode).getThirstMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = 0;
-        }
-
-        if (playerInfoMap.get(userCode).getVp() < playerInfoMap.get(userCode).getVpMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = -1;
-        } else if (playerInfoMap.get(userCode).getVp() >= playerInfoMap.get(userCode).getVpMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
-        }
-
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
     @Override
     public ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown) {
         JSONObject rst = ContentUtil.generateRst();

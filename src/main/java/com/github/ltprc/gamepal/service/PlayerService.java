@@ -42,8 +42,6 @@ public interface PlayerService {
 
     ResponseEntity<String> interactBlocks(String userCode, int interactionCode);
 
-    ResponseEntity<String> updateBuff(String userCode);
-
     ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown);
 
     ResponseEntity<String> setMember(String userCode, String userCode1, String userCode2);

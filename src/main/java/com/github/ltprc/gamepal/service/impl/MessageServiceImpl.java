@@ -108,10 +108,4 @@ public class MessageServiceImpl implements MessageService {
         }
         return ResponseEntity.ok().body(rst.toString());
     }
-
-    @Override
-    public ResponseEntity<String> useCommand(String userCode, String commandContent) {
-        JSONObject rst = ContentUtil.generateRst();
-        return ResponseEntity.ok().body(rst.toString());
-    }
 }

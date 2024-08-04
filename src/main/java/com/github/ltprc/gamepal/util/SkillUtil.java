@@ -295,7 +295,7 @@ public class SkillUtil {
         creatureInfo.setSkill(skills);
     }
 
-    public static boolean validateDamage(final PlayerInfo playerInfo) {
+    public static boolean validateActiveness(final PlayerInfo playerInfo) {
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0;
     }

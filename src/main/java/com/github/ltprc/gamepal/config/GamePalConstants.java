@@ -121,7 +121,14 @@ public class GamePalConstants {
     public static final int BUFF_CODE_THIRSTY = 7;
     public static final int BUFF_CODE_FATIGUED = 8;
     public static final int BUFF_CODE_BLIND = 9;
-    public static final int BUFF_CODE_LENGTH = 10;
+    public static final int BUFF_CODE_INVINCIBLE = 10;
+    public static final int BUFF_CODE_REVIVED = 11;
+    public static final int BUFF_CODE_REALISTIC = 12;
+    public static final int BUFF_CODE_ANTI_TROPHY = 13;
+    public static final int BUFF_CODE_BLOCKED = 14;
+    public static final int BUFF_CODE_HAPPY = 15;
+    public static final int BUFF_CODE_SAD = 16;
+    public static final int BUFF_CODE_LENGTH = 17;
 
     public static final int FACE_COEFS_LENGTH = 10;
 

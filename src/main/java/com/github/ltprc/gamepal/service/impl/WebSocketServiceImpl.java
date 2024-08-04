@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
+import com.github.ltprc.gamepal.manager.CommandManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
@@ -57,7 +58,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     private SceneManager sceneManager;
 
     @Autowired
-    private MessageService messageService;
+    private CommandManager commandManager;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -159,7 +160,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                     // Command detected
                     String commandContent = StringUtils.trim(msg.getContent().substring(1));
                     if (StringUtils.isNotBlank(commandContent)) {
-                        messageService.useCommand(userCode, commandContent);
+                        commandManager.useCommand(userCode, commandContent);
                     }
                 } else if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
                     messageMap.entrySet().stream()

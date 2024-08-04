@@ -168,7 +168,7 @@ public class NpcManagerImpl implements NpcManager {
                         .anyMatch(entry3 -> SkillUtil.isBlockDetected(entry3.getValue(),
                                 world.getPlayerInfoMap().get(entry3.getKey()),
                                 GamePalConstants.SCENE_SCAN_RADIUS)))
-                .filter(entry2 -> SkillUtil.validateDamage(world.getPlayerInfoMap().get(entry2.getKey())))
+                .filter(entry2 -> SkillUtil.validateActiveness(world.getPlayerInfoMap().get(entry2.getKey())))
                 .forEach(entry2 -> {
                     String npcUserCode = entry2.getKey();
                     PlayerInfo npcPlayerInfo = world.getPlayerInfoMap().get(npcUserCode);
@@ -193,7 +193,7 @@ public class NpcManagerImpl implements NpcManager {
                     }
                     Optional<PlayerInfo> red = world.getPlayerInfoMap().values().stream()
                             .filter(playerInfo -> !npcUserCode.equals(playerInfo.getId()))
-                            .filter(SkillUtil::validateDamage)
+                            .filter(SkillUtil::validateActiveness)
                             .filter(playerInfo -> checkAttackCondition(npcUserCode, playerInfo.getId()))
                             .filter(playerInfo -> BlockUtil.checkPerceptionCondition(
                                     world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo, playerInfo))
@@ -212,7 +212,7 @@ public class NpcManagerImpl implements NpcManager {
                         npcBrain.getRedQueue().add(red.get());
                     } else if (!npcBrain.getRedQueue().isEmpty()) {
                         PlayerInfo oldPlayerInfo = npcBrain.getRedQueue().poll();
-                        if (npcBrain.getRedQueue().isEmpty() && SkillUtil.validateDamage(oldPlayerInfo)) {
+                        if (npcBrain.getRedQueue().isEmpty() && SkillUtil.validateActiveness(oldPlayerInfo)) {
                             npcBrain.getYellowQueue().push(new WorldCoordinate(oldPlayerInfo));
                         }
                     }
@@ -280,7 +280,7 @@ public class NpcManagerImpl implements NpcManager {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         playerInfoMap.entrySet().stream()
                 .filter(entry2 -> entry2.getValue().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
-                .filter(entry2 -> SkillUtil.validateDamage(entry2.getValue()))
+                .filter(entry2 -> SkillUtil.validateActiveness(entry2.getValue()))
                 .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
     }
 

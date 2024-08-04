@@ -339,7 +339,7 @@ public class WorldServiceImpl implements WorldService {
     private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {
         return eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
-                || SkillUtil.validateDamage((PlayerInfo) blocker))
+                || SkillUtil.validateActiveness((PlayerInfo) blocker))
                 && checkEventConditionByEventCode(eventBlock, blocker);
     }
 
@@ -451,7 +451,7 @@ public class WorldServiceImpl implements WorldService {
                     BlockUtil.copyWorldCoordinate(activatedWorldBlock, eventBlock);
                     if (activatedWorldBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
                             && playerInfoMap.containsKey(activatedWorldBlock.getId())
-                            && SkillUtil.validateDamage(playerInfoMap.get(activatedWorldBlock.getId()))) {
+                            && SkillUtil.validateActiveness(playerInfoMap.get(activatedWorldBlock.getId()))) {
                         playerService.damageHp(activatedWorldBlock.getId(), eventBlock.getId(),
                                 -GamePalConstants.EVENT_DAMAGE_SHOOT, false);
                         WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(

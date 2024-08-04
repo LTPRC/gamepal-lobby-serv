@@ -10,6 +10,4 @@ public interface MessageService {
     ResponseEntity<String> sendMessage(HttpServletRequest request);
 
     ResponseEntity<String> sendMessage(String userCode, Message message);
-
-    ResponseEntity<String> useCommand(String userCode, String commandContent);
 }
