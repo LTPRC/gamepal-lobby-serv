@@ -1,6 +1,5 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
@@ -1171,7 +1170,6 @@ public class SceneManagerImpl implements SceneManager {
     public Queue<Block> collectBlocksByUserCode(String userCode, final int sceneScanRadius) {
         Queue<Block> rankingQueue = collectBlocksFromScenes(userCode, sceneScanRadius);
         rankingQueue.addAll(collectBlocksFromPlayerInfoMap(userCode, sceneScanRadius));
-        rankingQueue.addAll(collectBlocksFromAnimalMap(userCode, sceneScanRadius));
         return rankingQueue;
     }
 
@@ -1242,37 +1240,14 @@ public class SceneManagerImpl implements SceneManager {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
         // Collect detected playerInfos
-        playerInfoMap.entrySet().stream()
+        playerInfoMap.values().stream()
                 // playerInfos contains running players or NPC 24/03/25
-                .filter(entry -> world.getOnlineMap().containsKey(entry.getKey()))
-                .filter(entry -> entry.getValue().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .filter(entry -> SkillUtil.isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
-                .forEach(entry -> {
-                    Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
+                .filter(SkillUtil::validateActiveness)
+                .filter(playerInfo1 -> SkillUtil.isBlockDetected(playerInfo, playerInfo1, sceneScanRadius))
+                .forEach(playerInfo1 -> {
+                    Block block = BlockUtil.convertWorldBlock2Block(region, playerInfo1, false);
                     BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                            entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
-                    if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
-                            playerInfo.getFaceDirection(), playerInfo.getCoordinate(), block)) {
-                        rankingQueue.add(block);
-                    }
-                });
-        return rankingQueue;
-    }
-
-    @Override
-    public Queue<Block> collectBlocksFromAnimalMap(String userCode, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
-        // Collect detected animals
-        playerInfoMap.entrySet().stream()
-                .filter(entry -> SkillUtil.isBlockDetected(playerInfo, entry.getValue(), sceneScanRadius))
-                .forEach(entry -> {
-                    Block block = BlockUtil.convertWorldBlock2Block(region, entry.getValue(), false);
-                    BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                            entry.getValue().getSceneCoordinate()), region.getHeight(), region.getWidth());
+                            playerInfo1.getSceneCoordinate()), region.getHeight(), region.getWidth());
                     if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
                             playerInfo.getFaceDirection(), playerInfo.getCoordinate(), block)) {
                         rankingQueue.add(block);

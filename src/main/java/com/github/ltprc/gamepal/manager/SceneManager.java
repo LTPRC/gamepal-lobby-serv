@@ -19,7 +19,5 @@ public interface SceneManager {
 
     Queue<Block> collectBlocksFromPlayerInfoMap(final String userCode, final int sceneScanRadius);
 
-    Queue<Block> collectBlocksFromAnimalMap(final String userCode, final int sceneScanRadius);
-
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
 }

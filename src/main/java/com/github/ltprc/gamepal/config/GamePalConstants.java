@@ -1,5 +1,9 @@
 package com.github.ltprc.gamepal.config;
 
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+
 import java.math.BigDecimal;
 
 public class GamePalConstants {
@@ -158,6 +162,7 @@ public class GamePalConstants {
     public static final int OUTFIT_INDEX_CLOTHES = 1;
 
     public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.ONE;
+    public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.25D);
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_BLOCKED = 1 * FRAME_PER_SECOND;
@@ -200,4 +205,6 @@ public class GamePalConstants {
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 
     public static final int CAPACITY_MAX = 50;
+    public static final WorldCoordinate DEFAULT_BIRTHPLACE = new WorldCoordinate(1,
+            new IntegerCoordinate(0, 0), new Coordinate(new BigDecimal(5), new BigDecimal(5)));
 }

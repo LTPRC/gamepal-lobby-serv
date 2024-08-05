@@ -5,6 +5,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
+import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -44,19 +45,8 @@ public class NpcManagerImpl implements NpcManager {
     @Autowired
     private PlayerService playerService;
 
-    @Override
-    public String createNpc(GameWorld world) {
-        String userCode = UUID.randomUUID().toString();
-        PlayerInfo npcPlayerInfo = creatureFactory.createPlayerInfoInstance();
-        npcPlayerInfo.setId(userCode);
-        npcPlayerInfo.setPlayerType(CreatureConstants.PLAYER_TYPE_NPC);
-        npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-        world.getPlayerInfoMap().put(userCode, npcPlayerInfo);
-        userService.addUserIntoWorldMap(userCode, world.getId());
-        NpcBrain npcBrain = generateNpcBrain();
-        world.getNpcBrainMap().put(userCode, npcBrain);
-        return userCode;
-    }
+    @Autowired
+    private BuffManager buffManager;
 
     @Override
     public PlayerInfo createCreature(GameWorld world, final int playerType, String userCode) {
@@ -67,6 +57,7 @@ public class NpcManagerImpl implements NpcManager {
             world.getNpcBrainMap().put(userCode, npcBrain);
         }
         world.getPlayerInfoMap().put(userCode, playerInfo);
+        buffManager.initializeBuff(playerInfo);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         BagInfo bagInfo = new BagInfo();
         bagInfo.setId(userCode);
@@ -79,23 +70,6 @@ public class NpcManagerImpl implements NpcManager {
         bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
         world.getPreservedBagInfoMap().put(userCode, bagInfo);
         return playerInfo;
-    }
-
-    @Override
-    public void putNpc(String userCode, String npcUserCode) {
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        PlayerInfo npcPlayerInfo = playerInfoMap.get(npcUserCode);
-        npcPlayerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-        BlockUtil.copyWorldCoordinate(playerInfo, npcPlayerInfo);
-        npcPlayerInfo.getCoordinate().setX(npcPlayerInfo.getCoordinate().getX()
-                .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-        npcPlayerInfo.getCoordinate().setY(npcPlayerInfo.getCoordinate().getY()
-                .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-        npcPlayerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
-        BlockUtil.fixWorldCoordinate(world.getRegionMap().get(playerInfo.getRegionNo()), npcPlayerInfo);
-        world.getOnlineMap().put(npcUserCode, -1L);
     }
 
     @Override

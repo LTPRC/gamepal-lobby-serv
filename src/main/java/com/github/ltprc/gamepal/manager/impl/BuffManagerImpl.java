@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Map;
 
 
@@ -38,6 +39,7 @@ public class BuffManagerImpl implements BuffManager {
             if (i == GamePalConstants.BUFF_CODE_DEAD) {
                 if (playerInfo.getBuff()[i] == 0) {
                     playerService.generateNotificationMessage(userCode, "复活成功。");
+                    playerService.revivePlayer(userCode);
                 } else if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
                     playerService.generateNotificationMessage(userCode, "距离复活还有"
                             + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
@@ -56,35 +58,8 @@ public class BuffManagerImpl implements BuffManager {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
 
-        // TODO revise
         if (playerInfo.getHp() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
-            playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-            playerService.changeVp(userCode, 0, true);
-            playerService.changeHunger(userCode, 0, true);
-            playerService.changeThirst(userCode, 0, true);
-            // Wipe all other buff and skill remaining time
-            playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
-            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
-            for (int i = 0; i < playerInfo.getSkill().length; i++) {
-                playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrameMax());
-            }
-            if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
-                world.getOnlineMap().remove(userCode);
-                npcManager.resetNpcBrainQueues(userCode);
-            }
-            WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
-                    playerInfo);
-            world.getEventQueue().add(worldEvent);
-        } else if (playerInfo.getHp() > 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] != 0) {
-            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
-            playerService.changeHp(userCode, playerInfo.getHpMax(), true);
-            playerService.changeVp(userCode, playerInfo.getVpMax(), true);
-            playerService.changeHunger(userCode, playerInfo.getHungerMax(), true);
-            playerService.changeThirst(userCode, playerInfo.getThirstMax(), true);
-            WorldEvent worldEvent = BlockUtil.createWorldEvent(playerInfo.getId(),
-                    GamePalConstants.EVENT_CODE_SACRIFICE, playerInfo);
-            world.getEventQueue().add(worldEvent);
+            playerService.killPlayer(userCode);
         }
 
         if (playerInfoMap.get(userCode).getHunger() < playerInfoMap.get(userCode).getHungerMax() / 10
@@ -109,6 +84,49 @@ public class BuffManagerImpl implements BuffManager {
         } else if (playerInfoMap.get(userCode).getVp() >= playerInfoMap.get(userCode).getVpMax() / 10
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0){
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
+        }
+    }
+
+    @Override
+    public void resetBuff(PlayerInfo playerInfo) {
+        validateBuffArray(playerInfo);
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_STUNNED] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] = 0;
+    }
+
+    @Override
+    public void initializeBuff(PlayerInfo playerInfo) {
+        validateBuffArray(playerInfo);
+        resetBuff(playerInfo);
+        if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REVIVED] = -1;
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_ANTI_TROPHY] = -1;
+        } else if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_NPC) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
+        } else {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
+        }
+    }
+
+    private void validateBuffArray(PlayerInfo playerInfo) {
+        if (null == playerInfo.getBuff()) {
+            playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
+        }
+        if (playerInfo.getBuff().length < GamePalConstants.BUFF_CODE_LENGTH) {
+            int[] newBuff = new int[GamePalConstants.BUFF_CODE_LENGTH];
+            for (int i = 0; i < playerInfo.getBuff().length; i++) {
+                newBuff[i] = playerInfo.getBuff()[i];
+            }
+            playerInfo.setBuff(newBuff);
         }
     }
 }

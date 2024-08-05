@@ -8,11 +8,7 @@ import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 
 public interface NpcManager {
 
-    String createNpc(GameWorld world);
-
     PlayerInfo createCreature(GameWorld world, final int playerType, String userCode);
-
-    void putNpc(String userCode, String npcUserCode);
 
     void putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate);
 

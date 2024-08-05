@@ -76,13 +76,14 @@ public class TimedEventTask {
                         // Change vp
                         int newVp = 10;
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
-                            newVp = 5;
+                            newVp -= 5;
                         }
                         Coordinate speed = playerInfo.getSpeed();
                         BigDecimal maxSpeed = playerInfo.getMaxSpeed();
-                        newVp -= playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
-                                ? 100 : Math.ceil(20 * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
-                                + Math.pow(speed.getX().doubleValue(), 2)) / maxSpeed.doubleValue());
+                        int vpFracturedFactor = playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
+                                ? 150 : 15;
+                        newVp -= Math.floor(vpFracturedFactor * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
+                                + Math.pow(speed.getY().doubleValue(), 2)) / maxSpeed.doubleValue());
                         playerService.changeVp(userCode, newVp, false);
 
                         // Change hunger
@@ -121,6 +122,9 @@ public class TimedEventTask {
                                 playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrame() - 1);
                             }
                         }
+
+                        // Check level-up
+                        playerService.checkLevelUp(userCode);
                     });
 
             // NPC movements

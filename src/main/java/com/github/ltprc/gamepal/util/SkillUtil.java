@@ -310,4 +310,12 @@ public class SkillUtil {
         return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
                 && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
     }
+
+    public static void updateExpMax(PlayerInfo playerInfo) {
+        if (playerInfo.getLevel() <= 0 || playerInfo.getLevel() >= 100) {
+            playerInfo.setExpMax(0);
+        } else {
+            playerInfo.setExpMax(playerInfo.getLevel() * playerInfo.getLevel() + playerInfo.getLevel() + 10);
+        }
+    }
 }

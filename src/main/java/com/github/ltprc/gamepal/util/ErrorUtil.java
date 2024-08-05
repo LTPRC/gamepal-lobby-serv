@@ -40,4 +40,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1033 = new GamepalError("1033", "Set membership failed.");
     public static final GamepalError ERROR_1034 = new GamepalError("1034", "Invalid interactionInfo.");
     public static final GamepalError ERROR_1035 = new GamepalError("1035", "Item amount is not enough.");
+    public static final GamepalError ERROR_1036 = new GamepalError("1036", "Unable to kill invincible player.");
+    public static final GamepalError ERROR_1037 = new GamepalError("1037", "Invalid creatureType.");
+    public static final GamepalError ERROR_1038 = new GamepalError("1038", "Invalid animal skinColor.");
 }
