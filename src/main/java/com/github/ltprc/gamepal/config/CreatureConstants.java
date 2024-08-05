@@ -23,13 +23,13 @@ public class CreatureConstants {
     public static final int SKIN_COLOR_BUFFALO = 6;
     public static final int SKIN_COLOR_FOX = 7;
     public static final int SKIN_COLOR_POLAR_BEAR = 8;
-    public static final int SKIN_COLOR_SHEEP = 8;
-    public static final int SKIN_COLOR_TIGER = 9;
-    public static final int SKIN_COLOR_CAT = 10;
-    public static final int SKIN_COLOR_DOG = 11;
-    public static final int SKIN_COLOR_WOLF = 8;
-    public static final int SKIN_COLOR_BOAR = 12;
-    public static final int SKIN_COLOR_HORSE = 13;
+    public static final int SKIN_COLOR_SHEEP = 9;
+    public static final int SKIN_COLOR_TIGER = 10;
+    public static final int SKIN_COLOR_CAT = 11;
+    public static final int SKIN_COLOR_DOG = 12;
+    public static final int SKIN_COLOR_WOLF = 13;
+    public static final int SKIN_COLOR_BOAR = 14;
+    public static final int SKIN_COLOR_HORSE = 15;
 
     // Backend constants
 

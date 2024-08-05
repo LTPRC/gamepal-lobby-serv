@@ -1163,6 +1163,125 @@ public class PlayerServiceImpl implements PlayerService {
             case CreatureConstants.CREATURE_TYPE_HUMAN:
                 break;
             case CreatureConstants.CREATURE_TYPE_ANIMAL:
+                switch (playerInfo.getSkinColor()) {
+                    case CreatureConstants.SKIN_COLOR_PAOFU:
+                    case CreatureConstants.SKIN_COLOR_CAT:
+                        getItem(id, "c038", random.nextInt(2));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_FROG:
+                        break;
+                    case CreatureConstants.SKIN_COLOR_MONKEY:
+                        break;
+                    case CreatureConstants.SKIN_COLOR_RACOON:
+                        break;
+                    case CreatureConstants.SKIN_COLOR_CHICKEN:
+                        if (random.nextDouble() < 0.25D) {
+                            getItem(id, "c040", random.nextInt(1));
+                        }
+                        getItem(id, "c031", random.nextInt(2));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_BUFFALO:
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "j037", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.4D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "m_leather", random.nextInt(3));
+                        }
+                        getItem(id, "c032", random.nextInt(4));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_FOX:
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_leather", random.nextInt(2));
+                        }
+                        getItem(id, "c037", random.nextInt(2));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "j191", random.nextInt(4));
+                        }
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_leather", random.nextInt(2));
+                        }
+                        break;
+                    case CreatureConstants.SKIN_COLOR_SHEEP:
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        getItem(id, "c034", random.nextInt(2));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_TIGER:
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "j191", random.nextInt(4));
+                        }
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "m_leather", random.nextInt(3));
+                        }
+                        break;
+                    case CreatureConstants.SKIN_COLOR_DOG:
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "j063", 1);
+                        }
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "j193", 1);
+                        }
+                        if (random.nextDouble() < 0.25D) {
+                            getItem(id, "j191", random.nextInt(4));
+                        }
+                        if (random.nextDouble() < 0.2D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_leather", random.nextInt(2));
+                        }
+                        getItem(id, "c037", random.nextInt(2));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_WOLF:
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "j191", random.nextInt(4));
+                        }
+                        if (random.nextDouble() < 0.2D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.2D) {
+                            getItem(id, "m_leather", random.nextInt(2));
+                        }
+                        getItem(id, "c037", random.nextInt(3));
+                        break;
+                    case CreatureConstants.SKIN_COLOR_BOAR:
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "j191", random.nextInt(4));
+                        }
+                        if (random.nextDouble() < 0.4D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.5D) {
+                            getItem(id, "m_leather", random.nextInt(3));
+                        }
+                        break;
+                    case CreatureConstants.SKIN_COLOR_HORSE:
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_bone", random.nextInt(2));
+                        }
+                        if (random.nextDouble() < 0.1D) {
+                            getItem(id, "m_leather", random.nextInt(2));
+                        }
+                        getItem(id, "c036", random.nextInt(2));
+                        break;
+                    default:
+                        return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1038));
+                }
                 break;
             default:
                 return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1037));
