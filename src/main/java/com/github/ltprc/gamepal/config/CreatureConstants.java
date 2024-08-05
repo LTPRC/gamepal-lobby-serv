@@ -35,7 +35,7 @@ public class CreatureConstants {
 
     public static final int PLAYER_TYPE_HUMAN = 0;
     public static final int PLAYER_TYPE_NPC = 1;
-    public static final int PLAYER_TYPE_ANIMAL = 3;
+    public static final int PLAYER_TYPE_ANIMAL = 2;
 
     public static final int NPC_BRAIN_STATUS_UNAWARE = 0;
     public static final int NPC_BRAIN_STATUS_SUSPICIOUS = 1;
@@ -59,6 +59,9 @@ public class CreatureConstants {
     public static final int STANCE_NO_ATTACK = 4;
     public static final BigDecimal NPC_ARRIVE_DISTANCE = BigDecimal.valueOf(0.1);
     public static final BigDecimal NPC_FOLLOW_STOP_DISTANCE = BigDecimal.ONE;
+    public static final int NPC_ROLE_INDIVIDUAL = 1;
+    public static final int NPC_ROLE_PEER = 2;
+    public static final int NPC_ROLE_MINION = 3;
 
     public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(10);
     public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(5);

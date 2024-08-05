@@ -22,10 +22,9 @@ import java.util.Random;
 @Component
 public class CreatureFactory {
 
-    public void randomlyPersonalizePlayerInfo(PlayerInfo playerInfo) {
+    public static void randomlyPersonalizePlayerInfo(PlayerInfo playerInfo, int gender) {
         Random random = new Random();
         String origin = NameUtil.generateOrigin();
-        int gender = NameUtil.generateGender();
         String[] names = NameUtil.generateNames(origin, gender);
         playerInfo.setAvatar(String.valueOf(random.nextInt(GamePalConstants.AVATARS_LENGTH)));
         playerInfo.setGender(gender);
@@ -42,19 +41,18 @@ public class CreatureFactory {
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }
 
-    public void randomlyPersonalizeAnimalInfo(CreatureInfo animalInfo) {
-        int gender = NameUtil.generateGender();
+    public static void randomlyPersonalizeAnimalInfo(CreatureInfo animalInfo, int gender) {
         animalInfo.setGender(gender);
         animalInfo.setCreatureType(CreatureConstants.CREATURE_TYPE_ANIMAL);
         animalInfo.setSkinColor(generateAnimalSkinColor());
     }
 
-    private int generateAnimalSkinColor() {
+    private static int generateAnimalSkinColor() {
         Random random = new Random();
         return random.nextInt(14) + 1;
     }
 
-    public PlayerInfo createCreatureInstance(final int playerType) {
+    public static PlayerInfo createCreatureInstance(final int playerType) {
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setStructure(new Structure(GamePalConstants.STRUCTURE_MATERIAL_FLESH,
                 GamePalConstants.STRUCTURE_LAYER_MIDDLE,
@@ -86,10 +84,10 @@ public class CreatureFactory {
         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), 0);
         if (CreatureConstants.PLAYER_TYPE_ANIMAL != playerType) {
             SkillUtil.updateHumanSkills(playerInfo);
-            randomlyPersonalizePlayerInfo(playerInfo);
+            randomlyPersonalizePlayerInfo(playerInfo, NameUtil.generateGender());
         } else {
             SkillUtil.updateAnimalSkills(playerInfo);
-            randomlyPersonalizeAnimalInfo(playerInfo);
+            randomlyPersonalizeAnimalInfo(playerInfo, NameUtil.generateGender());
         }
         return playerInfo;
     }

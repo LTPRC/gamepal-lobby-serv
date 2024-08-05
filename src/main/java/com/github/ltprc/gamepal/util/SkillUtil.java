@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.model.creature.CreatureInfo;
@@ -17,7 +18,7 @@ public class SkillUtil {
 
     private SkillUtil() {}
 
-    public static void defineToolProps(Tool tool) {
+    public static Skill defineToolProps(Tool tool) {
         int toolType;
         int skillMode;
         int skillTime;
@@ -255,6 +256,28 @@ public class SkillUtil {
         tool.setItemType(toolType);
         tool.setItemMode(skillMode);
         tool.setItemTime(skillTime);
+        BigDecimal range;
+        switch (skillMode) {
+            case SkillConstants.SKILL_CODE_SHOOT_HIT:
+            case SkillConstants.SKILL_CODE_SHOOT_ARROW:
+            case SkillConstants.SKILL_CODE_SHOOT_GUN:
+            case SkillConstants.SKILL_CODE_SHOOT_MAGNUM:
+            case SkillConstants.SKILL_CODE_SHOOT_ROCKET:
+                range = GamePalConstants.EVENT_MAX_DISTANCE_SHOOT;
+                break;
+            case SkillConstants.SKILL_CODE_SHOOT_SHOTGUN:
+                range = GamePalConstants.EVENT_MAX_DISTANCE_SHOOT_SHOTGUN;
+                break;
+            case SkillConstants.SKILL_CODE_MELEE_HIT:
+            case SkillConstants.SKILL_CODE_MELEE_KICK:
+            case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
+            case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
+            case SkillConstants.SKILL_CODE_MELEE_STAB:
+            default:
+                range = GamePalConstants.EVENT_MAX_DISTANCE_MELEE;
+                break;
+        }
+        return new Skill(toolType, skillMode, 0, skillTime, SkillConstants.SKILL_TYPE_ATTACK, range);
     }
 
     public static void updateHumanSkills(PlayerInfo playerInfo) {
@@ -272,26 +295,63 @@ public class SkillUtil {
         playerInfo.getTools().forEach((String toolStr) -> {
             Tool tool = new Tool();
             tool.setItemNo(toolStr);
-            defineToolProps(tool);
-            skills[0] = new Skill(tool.getItemType(), tool.getItemMode(), 0,
-                    tool.getItemTime(), SkillConstants.SKILL_TYPE_ATTACK,
-                    GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+            skills[0] = defineToolProps(tool);
         });
         playerInfo.setSkill(skills);
     }
 
     public static void updateAnimalSkills(CreatureInfo creatureInfo) {
         Skill[] skills = new Skill[4];
-        skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        switch (creatureInfo.getSkinColor()) {
+            case CreatureConstants.SKIN_COLOR_PAOFU:
+            case CreatureConstants.SKIN_COLOR_CAT:
+            case CreatureConstants.SKIN_COLOR_TIGER:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        10, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_FROG:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        20, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_MONKEY:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        15, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_RACOON:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        20, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_CHICKEN:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_STAB, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        25, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_BUFFALO:
+            case CreatureConstants.SKIN_COLOR_SHEEP:
+            case CreatureConstants.SKIN_COLOR_HORSE:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        30, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_FOX:
+            case CreatureConstants.SKIN_COLOR_DOG:
+            case CreatureConstants.SKIN_COLOR_WOLF:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        15, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+            case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
+            case CreatureConstants.SKIN_COLOR_BOAR:
+                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        15, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
+                break;
+        }
+        skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
                 GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
-        skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
+        skills[2] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
                 GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
-        skills[2] = new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO);
-        skills[3] = new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO);
+        skills[3] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
         creatureInfo.setSkill(skills);
     }
 

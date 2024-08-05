@@ -908,6 +908,7 @@ public class PlayerServiceImpl implements PlayerService {
             if (StringUtils.isBlank(userCode2)) {
                 generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
                 world.getPlayerInfoMap().get(userCode).setBossId(null);
+                world.getPlayerInfoMap().get(userCode).setTopBossId(findTopBossId(userCode));
                 return ResponseEntity.ok().body(rst.toString());
             }
             if (!world.getPlayerInfoMap().containsKey(userCode2)) {
@@ -925,6 +926,7 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode, "你向" + world.getPlayerInfoMap().get(userCode2).getNickname()
                     + "屈从了，自此为其效忠。");
             world.getPlayerInfoMap().get(userCode).setBossId(userCode2);
+            world.getPlayerInfoMap().get(userCode).setTopBossId(findTopBossId(userCode));
         } else {
             PlayerInfo playerInfo1 = world.getPlayerInfoMap().get(userCode1);
             if (!playerInfo1.getBossId().equals(userCode)) {
@@ -937,6 +939,7 @@ public class PlayerServiceImpl implements PlayerService {
                 return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
             } else {
                 playerInfo1.setBossId("");
+                playerInfo1.setTopBossId(findTopBossId(userCode1));
                 generateNotificationMessage(userCode, "你驱逐了" + playerInfo1.getNickname()
                         + "，对你的效忠就此终止。");
             }
@@ -1069,7 +1072,9 @@ public class PlayerServiceImpl implements PlayerService {
         changeThirst(userCode, 0, true);
         // Reset all skill remaining time
         for (int i = 0; i < playerInfo.getSkill().length; i++) {
-            playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrameMax());
+            if (null != playerInfo.getSkill()[i]) {
+                playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrameMax());
+            }
         }
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
             world.getOnlineMap().remove(userCode);

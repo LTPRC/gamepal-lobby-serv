@@ -118,7 +118,7 @@ public class TimedEventTask {
 
                         // Change skill remaining time
                         for (int i = 0; i < playerInfo.getSkill().length; i++) {
-                            if (playerInfo.getSkill()[i].getFrame() > 0) {
+                            if (null != playerInfo.getSkill()[i] && playerInfo.getSkill()[i].getFrame() > 0) {
                                 playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrame() - 1);
                             }
                         }
@@ -183,42 +183,6 @@ public class TimedEventTask {
                     userService.logoff(key, "", false);
                 }
             });
-        }
-    }
-
-    @Scheduled(cron = "*/5 * * * * ?")
-    public void executeBy5s() {
-        for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
-            GameWorld world = entry1.getValue();
-            if (!world.getNpcBrainMap().isEmpty()) {
-                continue;
-            }
-            Map<String, Long> onlineMap = world.getOnlineMap();
-            onlineMap.entrySet().stream()
-                    .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType()
-                            == CreatureConstants.PLAYER_TYPE_HUMAN)
-                    .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerStatus()
-                            == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(entry2 -> {
-                        String userCode = entry2.getKey();
-                        String npcUserCode = UUID.randomUUID().toString();
-                        PlayerInfo playerInfo =
-                                npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC, npcUserCode);
-                        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-                        WorldCoordinate worldCoordinate = new WorldCoordinate();
-                        BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(entry2.getKey()), worldCoordinate);
-                        worldCoordinate.getCoordinate().setX(worldCoordinate.getCoordinate().getX()
-                                .add(BigDecimal.valueOf(1 * Math.cos(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-                        worldCoordinate.getCoordinate().setY(worldCoordinate.getCoordinate().getY()
-                                .subtract(BigDecimal.valueOf(1 * Math.sin(playerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
-                        npcManager.putCreature(world, npcUserCode, worldCoordinate);
-                        JSONObject behaviorRequest = new JSONObject();
-                        behaviorRequest.put("userCode", npcUserCode);
-                        behaviorRequest.put("npcBehaviorType", CreatureConstants.NPC_BEHAVIOR_FOLLOW);
-                        behaviorRequest.put("targetUserCode", userCode);
-                        npcManager.changeNpcBehavior(behaviorRequest);
-                        world.getPlayerInfoMap().get(npcUserCode).setBossId(userCode);
-                    });
         }
     }
 }
