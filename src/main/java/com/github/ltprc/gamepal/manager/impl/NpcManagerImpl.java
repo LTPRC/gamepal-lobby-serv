@@ -56,7 +56,32 @@ public class NpcManagerImpl implements NpcManager {
         PlayerInfo playerInfo = creatureFactory.createCreatureInstance(playerType);
         playerInfo.setId(userCode);
         playerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
-        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerType) {
+        world.getPlayerInfoMap().put(userCode, playerInfo);
+        buffManager.initializeBuff(playerInfo);
+        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
+        BagInfo bagInfo = new BagInfo();
+        bagInfo.setId(userCode);
+        bagInfo.setCapacity(BigDecimal.ZERO);
+        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+        world.getBagInfoMap().put(userCode, bagInfo);
+        bagInfo = new BagInfo();
+        bagInfo.setId(userCode);
+        bagInfo.setCapacity(BigDecimal.ZERO);
+        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+        world.getPreservedBagInfoMap().put(userCode, bagInfo);
+        return playerInfo;
+    }
+
+    @Override
+    public PlayerInfo putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate) {
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo creatureInfo = playerInfoMap.get(userCode);
+        BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
+        BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
+        world.getOnlineMap().put(userCode, -1L);
+        world.getFlagMap().putIfAbsent(userCode, new HashSet<>());
+        userService.addUserIntoWorldMap(userCode, world.getId());
+        if (CreatureConstants.PLAYER_TYPE_HUMAN != creatureInfo.getPlayerType()) {
             NpcBrain npcBrain = generateNpcBrain();
             world.getNpcBrainMap().put(userCode, npcBrain);
             JSONObject behaviorRequest = new JSONObject();
@@ -64,11 +89,11 @@ public class NpcManagerImpl implements NpcManager {
             behaviorRequest.put("targetUserCode", userCode);
             behaviorRequest.put("behavior", CreatureConstants.NPC_BEHAVIOR_IDLE);
             behaviorRequest.put("peaceWithTeammate", true);
-            if (CreatureConstants.CREATURE_TYPE_HUMAN == playerInfo.getCreatureType()) {
+            if (CreatureConstants.CREATURE_TYPE_HUMAN == creatureInfo.getCreatureType()) {
                 behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
                 behaviorRequest.put("peaceWithSameCreature", false);
             } else {
-                switch (playerInfo.getSkinColor()) {
+                switch (creatureInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_PAOFU:
                     case CreatureConstants.SKIN_COLOR_MONKEY:
                     case CreatureConstants.SKIN_COLOR_FOX:
@@ -97,31 +122,6 @@ public class NpcManagerImpl implements NpcManager {
             }
             changeNpcBehavior(behaviorRequest);
         }
-        world.getPlayerInfoMap().put(userCode, playerInfo);
-        buffManager.initializeBuff(playerInfo);
-        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-        BagInfo bagInfo = new BagInfo();
-        bagInfo.setId(userCode);
-        bagInfo.setCapacity(BigDecimal.ZERO);
-        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
-        world.getBagInfoMap().put(userCode, bagInfo);
-        bagInfo = new BagInfo();
-        bagInfo.setId(userCode);
-        bagInfo.setCapacity(BigDecimal.ZERO);
-        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
-        world.getPreservedBagInfoMap().put(userCode, bagInfo);
-        return playerInfo;
-    }
-
-    @Override
-    public PlayerInfo putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate) {
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo creatureInfo = playerInfoMap.get(userCode);
-        BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
-        BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
-        world.getOnlineMap().put(userCode, -1L);
-        world.getFlagMap().putIfAbsent(userCode, new HashSet<>());
-        userService.addUserIntoWorldMap(userCode, world.getId());
         return creatureInfo;
     }
 
@@ -297,8 +297,12 @@ public class NpcManagerImpl implements NpcManager {
                                 JSONObject moveReq = new JSONObject();
                                 moveReq.put("userCode", npcUserCode);
                                 moveReq.put("wc", npcBrain.getRedQueue().peek());
-                                moveReq.put("stopDistance", npcPlayerInfo.getSkill()[0].getRange()
-                                        .divide(BigDecimal.valueOf(2)));
+                                BigDecimal stopDistance = Arrays.stream(npcPlayerInfo.getSkill())
+                                        .map(Skill::getRange)
+                                        .max(BigDecimal::compareTo)
+                                        .get()
+                                        .divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
+                                moveReq.put("stopDistance", stopDistance);
                                 JSONObject moveResp = runNpcMoveTask(moveReq);
                                 BigDecimal distance = BlockUtil.calculateDistance(
                                         world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
@@ -311,22 +315,15 @@ public class NpcManagerImpl implements NpcManager {
                                 }
                                 break;
                             case CreatureConstants.STANCE_STAND_GROUND:
-                                moveReq = new JSONObject();
-                                moveReq.put("userCode", npcUserCode);
-                                moveReq.put("wc", npcBrain.getRedQueue().peek());
-                                BigDecimal stopDistance = Arrays.stream(npcPlayerInfo.getSkill())
-                                        .map(Skill::getRange)
-                                        .max(BigDecimal::compareTo)
-                                        .get()
-                                        .divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
-                                moveReq.put("stopDistance", stopDistance);
-                                moveResp = runNpcMoveTask(moveReq);
-                                npcPlayerInfo.setSpeed(new Coordinate());
+                                npcPlayerInfo.setFaceDirection(BlockUtil.calculateAngle(
+                                        world.getRegionMap().get(npcPlayerInfo.getRegionNo()),
+                                        npcPlayerInfo, npcBrain.getRedQueue().peek()));
                                 distance = BlockUtil.calculateDistance(
                                     world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
                                     npcBrain.getRedQueue().peek());
                                 for (int i = 0; i < npcPlayerInfo.getSkill().length; i++) {
-                                    if (distance.compareTo(npcPlayerInfo.getSkill()[i].getRange()) <= 0) {
+                                    if (null != distance
+                                            && distance.compareTo(npcPlayerInfo.getSkill()[i].getRange()) <= 0) {
                                         playerService.useSkill(npcPlayerInfo.getId(), i, true);
                                         playerService.useSkill(npcPlayerInfo.getId(), i, false);
                                     }
