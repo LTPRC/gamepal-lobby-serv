@@ -303,8 +303,8 @@ public class NpcManagerImpl implements NpcManager {
                         prepare2Attack(world, npcUserCode, red.get().getId());
                     }
                     // Move & Destroy
-                    if (!npcBrain.getRedQueue().isEmpty() && null != npcPlayerInfo.getSkill()[0]
-                            && npcPlayerInfo.getSkill()[0].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK) {
+                    if (!npcBrain.getRedQueue().isEmpty()
+                            && SkillUtil.checkSkillTypeAttack(world.getPlayerInfoMap().get(npcUserCode))) {
                         switch (npcBrain.getStance()) {
                             case CreatureConstants.STANCE_DEFENSIVE:
                                 npcBrain.getYellowQueue().push(new WorldCoordinate(npcPlayerInfo));
@@ -322,8 +322,12 @@ public class NpcManagerImpl implements NpcManager {
                                 BigDecimal distance = BlockUtil.calculateDistance(
                                         world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
                                         npcBrain.getRedQueue().peek());
+                                if (null == distance) {
+                                    break;
+                                }
                                 for (int i = 0; i < npcPlayerInfo.getSkill().length; i++) {
-                                    if (distance.compareTo(npcPlayerInfo.getSkill()[i].getRange()) <= 0) {
+                                    if (npcPlayerInfo.getSkill()[i].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK
+                                            && distance.compareTo(npcPlayerInfo.getSkill()[i].getRange()) <= 0) {
                                         playerService.useSkill(npcPlayerInfo.getId(), i, true);
                                         playerService.useSkill(npcPlayerInfo.getId(), i, false);
                                     }
@@ -336,8 +340,11 @@ public class NpcManagerImpl implements NpcManager {
                                 distance = BlockUtil.calculateDistance(
                                     world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo,
                                     npcBrain.getRedQueue().peek());
+                                if (null == distance) {
+                                    break;
+                                }
                                 for (int i = 0; i < npcPlayerInfo.getSkill().length; i++) {
-                                    if (null != distance
+                                    if (npcPlayerInfo.getSkill()[i].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK
                                             && distance.compareTo(npcPlayerInfo.getSkill()[i].getRange()) <= 0) {
                                         playerService.useSkill(npcPlayerInfo.getId(), i, true);
                                         playerService.useSkill(npcPlayerInfo.getId(), i, false);
@@ -383,9 +390,7 @@ public class NpcManagerImpl implements NpcManager {
         if (world.getNpcBrainMap().get(fromUserCode).getStance() == CreatureConstants.STANCE_NO_ATTACK) {
             return false;
         }
-        if (null != world.getPlayerInfoMap().get(fromUserCode).getSkill()[0]
-                && world.getPlayerInfoMap().get(fromUserCode).getSkill()[0].getSkillType()
-                != SkillConstants.SKILL_TYPE_ATTACK) {
+        if (!SkillUtil.checkSkillTypeAttack(world.getPlayerInfoMap().get(fromUserCode))) {
             return false;
         }
         if (world.getNpcBrainMap().get(fromUserCode).getExemption()[CreatureConstants.NPC_EXEMPTION_INNOCENT]) {

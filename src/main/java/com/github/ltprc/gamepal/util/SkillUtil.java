@@ -12,6 +12,7 @@ import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 @Component
 public class SkillUtil {
@@ -377,5 +378,10 @@ public class SkillUtil {
         } else {
             playerInfo.setExpMax(playerInfo.getLevel() * playerInfo.getLevel() + playerInfo.getLevel() + 10);
         }
+    }
+
+    public static boolean checkSkillTypeAttack(final PlayerInfo playerInfo) {
+        return Arrays.stream(playerInfo.getSkill())
+                .anyMatch(skill -> skill.getSkillType() == SkillConstants.SKILL_TYPE_ATTACK);
     }
 }
