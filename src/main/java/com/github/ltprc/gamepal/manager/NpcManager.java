@@ -25,7 +25,7 @@ public interface NpcManager {
 
     void updateNpcBrains(GameWorld world);
 
-    void prepare2Attack(GameWorld world, final String userCode, final String npcUserCode);
+    boolean prepare2Attack(GameWorld world, final String userCode, final String npcUserCode);
 
     void resetNpcBrainQueues(String npcUserCode);
 }

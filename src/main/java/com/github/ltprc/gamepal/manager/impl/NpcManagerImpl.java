@@ -58,6 +58,7 @@ public class NpcManagerImpl implements NpcManager {
         playerInfo.setCreatureType(creatureType);
         playerInfo.setId(userCode);
         playerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
+        playerInfo.setTopBossId(userCode);
         world.getPlayerInfoMap().put(userCode, playerInfo);
         buffManager.initializeBuff(playerInfo);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
@@ -94,7 +95,7 @@ public class NpcManagerImpl implements NpcManager {
             if (CreatureConstants.CREATURE_TYPE_HUMAN == creatureInfo.getCreatureType()) {
                 behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
                 exemptionJsonArray.add(false);
-                exemptionJsonArray.add(false);
+                exemptionJsonArray.add(true);
                 exemptionJsonArray.add(true);
                 exemptionJsonArray.add(false);
             } else {
@@ -124,7 +125,7 @@ public class NpcManagerImpl implements NpcManager {
                         break;
                 }
                 exemptionJsonArray.add(false);
-                exemptionJsonArray.add(false);
+                exemptionJsonArray.add(true);
                 exemptionJsonArray.add(true);
                 exemptionJsonArray.add(true);
             }
@@ -136,7 +137,7 @@ public class NpcManagerImpl implements NpcManager {
 
     private NpcBrain generateNpcBrain() {
         NpcBrain npcBrain = new NpcBrain();
-        npcBrain.setExemption(new boolean[]{false, true, false});
+        npcBrain.setExemption(new boolean[]{false, true, true, false}); // Default for all NPC including human and animals
         npcBrain.setBehavior(CreatureConstants.NPC_BEHAVIOR_IDLE);
         npcBrain.setStance(CreatureConstants.STANCE_AGGRESSIVE);
         npcBrain.setGreenQueue(new LinkedList<>());
@@ -225,8 +226,12 @@ public class NpcManagerImpl implements NpcManager {
                         CreatureConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
                         CreatureConstants.NPC_BEHAVIOR_MOVE, CreatureConstants.STANCE_DEFENSIVE,
                         new boolean[]{false, false, true, false});
-                playerService.setMember(npcPlayerInfo.getId(), npcPlayerInfo.getId(),
-                        world.getPlayerInfoMap().get(userCode).getBossId());
+                if (StringUtils.isBlank(world.getPlayerInfoMap().get(userCode).getBossId())) {
+                    playerService.setMember(npcPlayerInfo.getId(), npcPlayerInfo.getId(), userCode);
+                } else {
+                    playerService.setMember(npcPlayerInfo.getId(), npcPlayerInfo.getId(),
+                            world.getPlayerInfoMap().get(userCode).getBossId());
+                }
                 break;
             case CreatureConstants.NPC_ROLE_MINION:
                 npcPlayerInfo = putSpecificCreature(world, userCode, worldCoordinate, BigDecimal.ONE,
@@ -282,7 +287,6 @@ public class NpcManagerImpl implements NpcManager {
                     Optional<PlayerInfo> red = world.getPlayerInfoMap().values().stream()
                             .filter(playerInfo -> !npcUserCode.equals(playerInfo.getId()))
                             .filter(SkillUtil::validateActiveness)
-                            .filter(playerInfo -> checkAttackCondition(npcUserCode, playerInfo.getId()))
                             .filter(playerInfo -> BlockUtil.checkPerceptionCondition(
                                     world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo, playerInfo))
                             .min((playerInfo1, playerInfo2) -> {
@@ -384,7 +388,7 @@ public class NpcManagerImpl implements NpcManager {
                 != SkillConstants.SKILL_TYPE_ATTACK) {
             return false;
         }
-        if (world.getNpcBrainMap().get(fromUserCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
+        if (world.getNpcBrainMap().get(fromUserCode).getExemption()[CreatureConstants.NPC_EXEMPTION_INNOCENT]) {
             return false;
         } else if (world.getNpcBrainMap().get(fromUserCode).getExemption()[CreatureConstants.NPC_EXEMPTION_TEAMMATE]
                 && StringUtils.equals(world.getPlayerInfoMap().get(fromUserCode).getTopBossId(),
@@ -399,15 +403,19 @@ public class NpcManagerImpl implements NpcManager {
     }
 
     @Override
-    public void prepare2Attack(GameWorld world, final String fromUserCode, final String toUserCode) {
+    public boolean prepare2Attack(GameWorld world, final String fromUserCode, final String toUserCode) {
         PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(fromUserCode);
         NpcBrain npcBrain = world.getNpcBrainMap().get(fromUserCode);
         if (fromPlayerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN || null == npcBrain) {
             logger.warn(ErrorUtil.ERROR_1039);
-            return;
+            return false;
+        }
+        if (!checkAttackCondition(fromUserCode, toUserCode)) {
+            return false;
         }
         PlayerInfo toPlayerInfo = world.getPlayerInfoMap().get(toUserCode);
         npcBrain.getRedQueue().add(toPlayerInfo);
+        return true;
     }
 
     @Override

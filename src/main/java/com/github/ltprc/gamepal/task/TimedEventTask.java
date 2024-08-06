@@ -82,8 +82,14 @@ public class TimedEventTask {
                         BigDecimal maxSpeed = playerInfo.getMaxSpeed();
                         int vpFracturedFactor = playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
                                 ? 150 : 15;
-                        newVp -= Math.floor(vpFracturedFactor * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
-                                + Math.pow(speed.getY().doubleValue(), 2)) / maxSpeed.doubleValue());
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
+                                || playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+                            newVp -= speed.getX().equals(BigDecimal.ZERO) && speed.getY().equals(BigDecimal.ZERO)
+                                    ? 0 : vpFracturedFactor;
+                        } else {
+                            newVp -= Math.floor(vpFracturedFactor * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
+                                    + Math.pow(speed.getY().doubleValue(), 2)) / maxSpeed.doubleValue());
+                        }
                         playerService.changeVp(userCode, newVp, false);
 
                         // Change hunger

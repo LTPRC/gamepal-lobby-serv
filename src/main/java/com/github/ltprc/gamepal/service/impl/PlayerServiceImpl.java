@@ -502,7 +502,7 @@ public class PlayerServiceImpl implements PlayerService {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
-        && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ATTACKER]) {
+        && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
             npcManager.prepare2Attack(world, userCode, fromUserCode);
         }
         return changeHp(userCode, value, isAbsolute);

@@ -62,7 +62,7 @@ public class CreatureConstants {
     public static final int NPC_ROLE_PEER = 2;
     public static final int NPC_ROLE_MINION = 3;
     public static final int NPC_EXEMPTION_ALL = 0;
-    public static final int NPC_EXEMPTION_ATTACKER = 1;
+    public static final int NPC_EXEMPTION_INNOCENT = 1;
     public static final int NPC_EXEMPTION_TEAMMATE = 2;
     public static final int NPC_EXEMPTION_SAME_CREATURE = 3;
     public static final int NPC_EXEMPTION_LENGTH = 4;

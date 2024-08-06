@@ -562,11 +562,12 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void updateEvents(GameWorld world) {
         Map<Integer, Region> regionMap = world.getRegionMap();
-        // Clear events from scene 24/02/16
-        regionMap.entrySet().stream().forEach(region ->
-            region.getValue().getScenes().entrySet().forEach(scene ->
-                scene.getValue().setEvents(new CopyOnWriteArrayList<>())
-            )
+        // Clear events from scene 24/08/07
+        regionMap.values().stream()
+                .filter(region -> null != region.getScenes())
+                .filter(region -> !region.getScenes().isEmpty())
+                .forEach(region -> region.getScenes().values()
+                        .forEach(scene -> scene.setEvents(new CopyOnWriteArrayList<>()))
         );
         Queue<WorldEvent> eventQueue = world.getEventQueue();
         WorldEvent tailEvent = new WorldEvent();
