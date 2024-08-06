@@ -43,4 +43,5 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1036 = new GamepalError("1036", "Unable to kill invincible player.");
     public static final GamepalError ERROR_1037 = new GamepalError("1037", "Invalid creatureType.");
     public static final GamepalError ERROR_1038 = new GamepalError("1038", "Invalid animal skinColor.");
+    public static final GamepalError ERROR_1039 = new GamepalError("1039", "Invalid playerType.");
 }

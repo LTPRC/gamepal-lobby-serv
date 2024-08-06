@@ -32,7 +32,6 @@ public class CreatureFactory {
         playerInfo.setLastName(names[1]);
         playerInfo.setNickname(names[2]);
         playerInfo.setNameColor("#990000");
-        playerInfo.setCreatureType(CreatureConstants.CREATURE_TYPE_HUMAN);
         playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
         playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
         playerInfo.setHairColor(random.nextInt(3) + 1);
@@ -43,7 +42,6 @@ public class CreatureFactory {
 
     public static void randomlyPersonalizeAnimalInfo(CreatureInfo animalInfo, int gender) {
         animalInfo.setGender(gender);
-        animalInfo.setCreatureType(CreatureConstants.CREATURE_TYPE_ANIMAL);
         animalInfo.setSkinColor(generateAnimalSkinColor());
     }
 
@@ -82,7 +80,7 @@ public class CreatureFactory {
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), 0);
-        if (CreatureConstants.PLAYER_TYPE_ANIMAL != playerType) {
+        if (CreatureConstants.CREATURE_TYPE_ANIMAL != playerInfo.getCreatureType()) {
             SkillUtil.updateHumanSkills(playerInfo);
             randomlyPersonalizePlayerInfo(playerInfo, NameUtil.generateGender());
         } else {

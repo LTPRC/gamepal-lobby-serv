@@ -495,6 +495,16 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
+        && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ATTACKER]) {
+            npcManager.prepare2Attack(world, userCode, fromUserCode);
+        }
         return changeHp(userCode, value, isAbsolute);
     }
 

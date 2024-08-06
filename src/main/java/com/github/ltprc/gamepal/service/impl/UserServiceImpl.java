@@ -134,7 +134,8 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         PlayerInfo playerInfo = world.getPlayerInfoMap().getOrDefault(userCode,
-                npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_HUMAN, userCode));
+                npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_HUMAN,
+                        CreatureConstants.CREATURE_TYPE_HUMAN, userCode));
         npcManager.putCreature(world, userCode, playerInfo);
         // Update online token
         String token = UUID.randomUUID().toString();

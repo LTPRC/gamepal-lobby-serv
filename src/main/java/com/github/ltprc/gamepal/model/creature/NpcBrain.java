@@ -11,8 +11,7 @@ public class NpcBrain {
 
     private int behavior;
     private int stance;
-    private boolean peaceWithTeammate;
-    private boolean peaceWithSameCreature;
+    private boolean[] exemption;
     private Queue<WorldCoordinate> greenQueue;
     private Deque<WorldCoordinate> yellowQueue;
     private Queue<PlayerInfo> redQueue;
