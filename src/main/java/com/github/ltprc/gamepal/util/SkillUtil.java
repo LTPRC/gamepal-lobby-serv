@@ -258,7 +258,7 @@ public class SkillUtil {
         tool.setItemMode(skillMode);
         tool.setItemTime(skillTime);
         BigDecimal range;
-        switch (skillMode) {
+        switch (toolType) {
             case SkillConstants.SKILL_CODE_SHOOT_HIT:
             case SkillConstants.SKILL_CODE_SHOOT_ARROW:
             case SkillConstants.SKILL_CODE_SHOOT_GUN:

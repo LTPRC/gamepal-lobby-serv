@@ -567,7 +567,7 @@ public class WorldServiceImpl implements WorldService {
                 .filter(region -> null != region.getScenes())
                 .filter(region -> !region.getScenes().isEmpty())
                 .forEach(region -> region.getScenes().values()
-                        .forEach(scene -> scene.setEvents(new CopyOnWriteArrayList<>()))
+                        .forEach(scene -> scene.getEvents().clear())
         );
         Queue<WorldEvent> eventQueue = world.getEventQueue();
         WorldEvent tailEvent = new WorldEvent();

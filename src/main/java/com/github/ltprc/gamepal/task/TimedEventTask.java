@@ -111,8 +111,7 @@ public class TimedEventTask {
                         }
 
                         // Change view radius
-                        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(),
-                                world.getWorldTime());
+                        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
                             playerInfo.getPerceptionInfo().setDistinctVisionRadius(
                                     playerInfo.getPerceptionInfo().getDistinctVisionAngle()
