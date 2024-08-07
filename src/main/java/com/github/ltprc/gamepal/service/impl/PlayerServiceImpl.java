@@ -811,11 +811,19 @@ public class PlayerServiceImpl implements PlayerService {
                         playerInfo));
                 break;
             case SkillConstants.SKILL_CODE_CHEER:
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] != -1) {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] = GamePalConstants.BUFF_DEFAULT_FRAME_HAPPY;
+                    changeVp(userCode, playerInfo.getVpMax(), true);
+                }
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CHEER,
                         playerInfo));
                 break;
             case SkillConstants.SKILL_CODE_CURSE:
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] != -1) {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] = GamePalConstants.BUFF_DEFAULT_FRAME_SAD;
+                    changeVp(userCode, 0, true);
+                }
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
                         world.getRegionMap().get(playerInfo.getRegionNo()), userCode, GamePalConstants.EVENT_CODE_CURSE,
                         playerInfo));

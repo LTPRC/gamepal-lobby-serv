@@ -90,6 +90,11 @@ public class TimedEventTask {
                             newVp -= Math.floor(vpFracturedFactor * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
                                     + Math.pow(speed.getY().doubleValue(), 2)) / maxSpeed.doubleValue());
                         }
+                        if (newVp < 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
+                            newVp *= 2;
+                        } else if (newVp > 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
+                            newVp /= 2;
+                        }
                         playerService.changeVp(userCode, newVp, false);
 
                         // Change hunger

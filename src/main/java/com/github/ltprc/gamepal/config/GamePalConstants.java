@@ -166,6 +166,8 @@ public class GamePalConstants {
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_BLOCKED = 1 * FRAME_PER_SECOND;
+    public static final int BUFF_DEFAULT_FRAME_HAPPY = 10 * FRAME_PER_SECOND;
+    public static final int BUFF_DEFAULT_FRAME_SAD = 10 * FRAME_PER_SECOND;
 
     public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal EVENT_MAX_DISTANCE_MELEE = BigDecimal.ONE;
