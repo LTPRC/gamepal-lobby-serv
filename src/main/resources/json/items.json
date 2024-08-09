@@ -143,6 +143,7 @@
   {"itemNo": "c060", "name": "洋葱圈", "weight": 0.1, "description": "", "effects": {"hunger": 30, "thirst": -5}},
   {"itemNo": "c061", "name": "面包", "weight": 0.2, "description": "", "effects": {"hunger": 30}},
   {"itemNo": "c062", "name": "大饼", "weight": 0.5, "description": "", "effects": {"hunger": 40}},
+  {"itemNo": "c063", "name": "维生素片", "weight": 0.1, "description": ""},
 
   {"itemNo": "m_wood", "name": "木材", "weight": 0.0, "description": ""},
   {"itemNo": "m_steel", "name": "钢铁", "weight": 0.0, "description": ""},

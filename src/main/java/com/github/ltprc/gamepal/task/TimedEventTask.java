@@ -72,6 +72,9 @@ public class TimedEventTask {
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] != 0) {
                             playerService.changeHp(userCode, -1, false);
                         }
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] != 0) {
+                            playerService.changeHp(userCode, 1, false);
+                        }
 
                         // Change vp
                         int newVp = 10;

@@ -655,6 +655,10 @@ public class PlayerServiceImpl implements PlayerService {
             case "c016":
                 playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_BLIND] = 0;
                 break;
+            case "c063":
+                playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_RECOVERING]
+                        = 15 * GamePalConstants.FRAME_PER_SECOND;
+                break;
             default:
                 break;
         }
