@@ -169,10 +169,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         PlayerInfo playerMovement = JSON.toJavaObject(req, PlayerInfo.class);
-        Integer playerStatus = req.getInteger("playerStatus");
-        if (null != playerStatus) {
-            playerInfo.setPlayerStatus(playerStatus);
-        }
+//        Integer playerStatus = req.getInteger("playerStatus");
+//        if (null != playerStatus) {
+//            playerInfo.setPlayerStatus(playerStatus);
+//        }
         playerInfo.setRegionNo(playerMovement.getRegionNo());
         IntegerCoordinate sceneCoordinate = playerMovement.getSceneCoordinate();
         if (null != sceneCoordinate) {
@@ -200,6 +200,19 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public ResponseEntity<String> generateNotificationMessage(String userCode, String content) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        // Only human can receive message 24/08/09
+        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1039));
+        }
         Message message = new Message();
         message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
         message.setScope(GamePalConstants.SCOPE_SELF);
@@ -1019,10 +1032,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public ResponseEntity<String> addDrop(String userCode, String itemNo, int amount) {
-        ResponseEntity<String> result = getItem(userCode, itemNo, -1 * amount);
-        if (result.getStatusCode().isError()) {
-            return result;
-        }
+        JSONObject rst = ContentUtil.generateRst();
         Random random = new Random();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -1035,7 +1045,7 @@ public class PlayerServiceImpl implements PlayerService {
                 worldMovingBlock.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
         worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));
         worldMovingBlock.getSpeed().setY(newSpeed.getY().subtract(worldMovingBlock.getCoordinate().getY()));
-        movementManager.settleSpeed(userCode, worldMovingBlock);
+        movementManager.settleSpeedAndCoordinate(world, worldMovingBlock);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
@@ -1056,7 +1066,7 @@ public class PlayerServiceImpl implements PlayerService {
         worldDrop.setId(drop.getId());
         worldDrop.setCode(drop.getCode());
         world.getBlockMap().put(drop.getId(), worldDrop);
-        return result;
+        return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
@@ -1153,7 +1163,7 @@ public class PlayerServiceImpl implements PlayerService {
                 worldMovingBlock.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
         worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));
         worldMovingBlock.getSpeed().setY(newSpeed.getY().subtract(worldMovingBlock.getCoordinate().getY()));
-        movementManager.settleSpeed(userCode, worldMovingBlock);
+        movementManager.settleSpeedAndCoordinate(world, worldMovingBlock);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         String id = UUID.randomUUID().toString();
         String code = "3100";

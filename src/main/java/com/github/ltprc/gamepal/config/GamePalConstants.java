@@ -18,6 +18,7 @@ public class GamePalConstants {
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
     public static final int FRAME_PER_SECOND = 25;
+    public static final int MINI_MAP_DEFAULT_SIZE = 100;
     public static final int MAX_WORLD_TIME = 86400;
     public static final int UPDATED_WORLD_TIME_PER_SECOND = 60;
     public static final int WORLD_TIME_SUNRISE_BEGIN = 18000;

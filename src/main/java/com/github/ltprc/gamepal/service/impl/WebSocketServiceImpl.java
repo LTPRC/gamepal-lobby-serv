@@ -9,6 +9,8 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.CommandManager;
+import com.github.ltprc.gamepal.manager.GameMapManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
@@ -25,10 +27,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.websocket.Session;
+import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
@@ -59,6 +63,12 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private CommandManager commandManager;
+
+    @Autowired
+    private GameMapManager gameMapManager;
+
+    @Autowired
+    private MovementManager movementManager;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -97,19 +107,19 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Check functions
         JSONObject functions = null;
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
-            if (functions.containsKey("updatePlayerInfo")) {
-                playerService.updatePlayerInfo(userCode, functions.getJSONObject("updatePlayerInfo"));
-            }
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
             if (functions.containsKey("updatePlayerMovement")) {
-                playerService.updatePlayerMovement(userCode, functions.getJSONObject("updatePlayerMovement"));
+                PlayerInfo playerMovement = JSON.toJavaObject(functions.getJSONObject("updatePlayerMovement"), PlayerInfo.class);
+                movementManager.settleCoordinate(world, playerInfo, playerMovement, false);
+                playerInfo.setSpeed(playerMovement.getSpeed());
+                playerInfo.setFaceDirection(playerMovement.getFaceDirection());
             }
             // Detect and expand scenes after updating player's location
-            PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
             worldService.expandScene(world, playerInfo);
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
@@ -152,6 +162,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 });
             }
             // Check incoming messages
+            // These messages are shown to the receiver 24/08/09
             JSONArray messages = functions.getJSONArray("addMessages");
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             for (Object obj : messages) {
@@ -177,7 +188,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             drops.forEach(obj -> {
                 String itemNo = ((JSONObject) obj).getString("itemNo");
                 int itemAmount = ((JSONObject) obj).getInteger("itemAmount");
-                playerService.addDrop(userCode, itemNo, itemAmount);
+                if (playerService.getItem(userCode, itemNo, -1 * itemAmount).getStatusCode().is2xxSuccessful()) {
+                    playerService.addDrop(userCode, itemNo, itemAmount);
+                }
             });
             if (functions.containsKey("useDrop")) {
                 JSONObject useDrop = functions.getJSONObject("useDrop");
@@ -365,14 +378,24 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Response of functions 24/03/17
         JSONObject functionsResponse = new JSONObject();
+        JSONObject miniMap = new JSONObject();
         if (null != functions) {
-            if (functions.containsKey("createPlayerInfoInstance")
-                    && Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
+            if (Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
                 functionsResponse.put("createPlayerInfoInstance",
                         creatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN));
             }
+            if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
+                JSONArray background = gameMapManager.generateMiniMapBackground(region,
+                        new IntegerCoordinate(GamePalConstants.MINI_MAP_DEFAULT_SIZE, GamePalConstants.MINI_MAP_DEFAULT_SIZE));
+                miniMap.put("background", background);
+            }
         }
         rst.put("functions", functionsResponse);
+        IntegerCoordinate sceneCoordinate = gameMapManager.getMiniMapSceneCoordinate(region,
+                new IntegerCoordinate(GamePalConstants.MINI_MAP_DEFAULT_SIZE, GamePalConstants.MINI_MAP_DEFAULT_SIZE),
+                playerInfo.getSceneCoordinate());
+        miniMap.put("sceneCoordinate", sceneCoordinate);
+        rst.put("miniMap", miniMap);
 
         // Latest timestamp
         rst.put("currentSecond", Instant.now().getEpochSecond() % 60);

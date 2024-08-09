@@ -1,8 +1,10 @@
 package com.github.ltprc.gamepal.config;
 
-public class BlockCodeConstants {
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
-    private BlockCodeConstants() {}
+public class BlockCodeConstants {
 
     public static final int BLOCK_CODE_NOTHING = 1001;
 
@@ -49,4 +51,22 @@ public class BlockCodeConstants {
     public static final char BLOCK_CODE_PREFIX_ROCKS = 'r';
     public static final int ROCK_INDEX_1 = 29;
     public static final int ROCK_INDEX_2 = 30;
+
+    public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
+
+    static {
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_NOTHING, new Color(0, 0, 0));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_DIRT, new Color(168, 168, 96));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SAND, new Color(255, 255, 128));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_GRASS, new Color(0, 196, 0));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SNOW, new Color(255, 255, 255));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SWAMP, new Color(0, 128, 64));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_ROUGH, new Color(96, 96, 0));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SUBTERRANEAN, new Color(128, 128, 128));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_LAVA, new Color(96, 16, 16));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER, new Color(64, 192, 255));
+    }
+
+    private BlockCodeConstants() {
+    }
 }

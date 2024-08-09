@@ -332,7 +332,7 @@ public class NpcManagerImpl implements NpcManager {
         playerInfoMap.entrySet().stream()
                 .filter(entry2 -> entry2.getValue().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
                 .filter(entry2 -> SkillUtil.validateActiveness(entry2.getValue()))
-                .forEach(entry2 -> movementManager.settleSpeed(entry2.getKey(), entry2.getValue()));
+                .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue()));
     }
 
     private boolean checkAttackCondition(final String fromUserCode, final String toUserCode) {

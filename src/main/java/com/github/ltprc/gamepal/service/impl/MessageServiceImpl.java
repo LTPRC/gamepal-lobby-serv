@@ -98,7 +98,7 @@ public class MessageServiceImpl implements MessageService {
             logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
         }
-        // Human-only
+        // These messages are shown back to the sender (human-only) 24/08/09
         if (world.getPlayerInfoMap().get(userCode).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             if (!messageMap.containsKey(userCode)) {

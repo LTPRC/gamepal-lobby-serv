@@ -7,10 +7,10 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
+import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +35,12 @@ public class MovementManagerImpl implements MovementManager {
     @Autowired
     private WorldService worldService;
 
+    @Autowired
+    private PlayerService playerService;
+
     @Override
-    public void settleSpeed(String userCode, WorldMovingBlock worldMovingBlock) {
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            logger.warn(ErrorUtil.ERROR_1016);
-            return;
-        }
+    public void settleSpeedAndCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock) {
+        String userCode = worldMovingBlock.getId();
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(userCode, 1);
         WorldCoordinate teleportWc = null;
@@ -80,16 +79,32 @@ public class MovementManagerImpl implements MovementManager {
         }
         // Settle worldMovingBlock position
         if (null == teleportWc) {
-            worldMovingBlock.getCoordinate().setX(worldMovingBlock.getCoordinate().getX()
-                    .add(worldMovingBlock.getSpeed().getX()));
-            worldMovingBlock.getCoordinate().setY(worldMovingBlock.getCoordinate().getY()
-                    .add(worldMovingBlock.getSpeed().getY()));
+            settleCoordinate(world, worldMovingBlock, new WorldCoordinate(
+                    worldMovingBlock.getRegionNo(),
+                    worldMovingBlock.getSceneCoordinate(),
+                    new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
+                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()))), false);
+            BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
         } else {
             worldService.expandScene(world, teleportWc);
-            BlockUtil.copyWorldCoordinate(teleportWc, worldMovingBlock);
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-            region = world.getRegionMap().get(teleportWc.getRegionNo());
+            settleCoordinate(world, worldMovingBlock, teleportWc, false);
         }
-        BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
+    }
+
+    @Override
+    public void settleCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock,
+                                 WorldCoordinate newWorldCoordinate, boolean returnToUser) {
+//        boolean isRegionChanged = worldMovingBlock.getRegionNo() != newWorldCoordinate.getRegionNo();
+//        boolean isSceneChanged = isRegionChanged
+//                || !worldMovingBlock.getSceneCoordinate().getX().equals(newWorldCoordinate.getSceneCoordinate().getX())
+//                || !worldMovingBlock.getSceneCoordinate().getY().equals(newWorldCoordinate.getSceneCoordinate().getY());
+        BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock);
+//        if (isSceneChanged) {
+//            Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
+//            Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
+//            playerService.generateNotificationMessage(worldMovingBlock.getId(),
+//                    "来到【" + region.getName() + "-" + scene.getName() + "】");
+//        }
     }
 }
