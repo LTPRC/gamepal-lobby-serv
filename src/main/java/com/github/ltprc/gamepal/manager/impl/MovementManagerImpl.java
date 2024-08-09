@@ -83,18 +83,18 @@ public class MovementManagerImpl implements MovementManager {
                     worldMovingBlock.getRegionNo(),
                     worldMovingBlock.getSceneCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
-                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()))), false);
+                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()))));
             BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
         } else {
             worldService.expandScene(world, teleportWc);
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-            settleCoordinate(world, worldMovingBlock, teleportWc, false);
+            settleCoordinate(world, worldMovingBlock, teleportWc);
         }
     }
 
     @Override
     public void settleCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock,
-                                 WorldCoordinate newWorldCoordinate, boolean returnToUser) {
+                                 WorldCoordinate newWorldCoordinate) {
 //        boolean isRegionChanged = worldMovingBlock.getRegionNo() != newWorldCoordinate.getRegionNo();
 //        boolean isSceneChanged = isRegionChanged
 //                || !worldMovingBlock.getSceneCoordinate().getX().equals(newWorldCoordinate.getSceneCoordinate().getX())

@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
@@ -82,7 +83,7 @@ public class NpcManagerImpl implements NpcManager {
         BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
         world.getOnlineMap().put(userCode, -1L);
-        world.getFlagMap().putIfAbsent(userCode, new HashSet<>());
+        world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         userService.addUserIntoWorldMap(userCode, world.getId());
         if (CreatureConstants.PLAYER_TYPE_HUMAN != creatureInfo.getPlayerType()) {
             NpcBrain npcBrain = generateNpcBrain();

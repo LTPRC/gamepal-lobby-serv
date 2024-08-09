@@ -31,7 +31,7 @@ public class GameWorld extends GameWorldInfo {
     private Map<Integer, Game> gameMap; // gameNo, game
     private Queue<WorldEvent> eventQueue; // event
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
-    private Map<String, Set<String>> flagMap; // userCode, token
+    private Map<String, boolean[]> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal
     private Map<String, NpcBrain> npcBrainMap; // userCode, npcBrain
 }

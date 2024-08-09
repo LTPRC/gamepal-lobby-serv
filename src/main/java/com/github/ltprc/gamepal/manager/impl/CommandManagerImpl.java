@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.manager.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
@@ -101,8 +102,14 @@ public class CommandManagerImpl implements CommandManager {
                 playerService.generateNotificationMessage(userCode, "自由的灯塔在照耀我前进。");
                 buffManager.resetBuff(playerInfo);
                 break;
-            case "nwcoracle":
             case "nwcwhatisthematrix":
+                playerService.generateNotificationMessage(userCode, "认清现实吧。");
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] == 0) {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
+                } else {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = 0;
+                }
+            case "nwcoracle":
             case "nwcignoranceisbliss":
                 playerService.generateNotificationMessage(userCode, "（暂无效果）");
                 break;
@@ -128,7 +135,8 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwczion":
                 playerService.generateNotificationMessage(userCode, "欢迎回家。");
-                movementManager.settleCoordinate(world, playerInfo, GamePalConstants.DEFAULT_BIRTHPLACE, true);
+                movementManager.settleCoordinate(world, playerInfo, GamePalConstants.DEFAULT_BIRTHPLACE);
+                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
                 break;
         }
         return ResponseEntity.ok().body(rst.toString());

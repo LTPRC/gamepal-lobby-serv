@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
@@ -115,7 +116,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("updatePlayerMovement")) {
                 PlayerInfo playerMovement = JSON.toJavaObject(functions.getJSONObject("updatePlayerMovement"), PlayerInfo.class);
-                movementManager.settleCoordinate(world, playerInfo, playerMovement, false);
+                movementManager.settleCoordinate(world, playerInfo, playerMovement);
                 playerInfo.setSpeed(playerMovement.getSpeed());
                 playerInfo.setFaceDirection(playerMovement.getFaceDirection());
             }
@@ -300,14 +301,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             rst.put("messages", messages);
         }
 
-        // Return flags
-//        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-//        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
-
-        JSONArray flags = new JSONArray();
-        flags.addAll(world.getFlagMap().get(userCode));
-        rst.put("flags", flags);
-        world.getFlagMap().get(userCode).clear();
+        rst.put("flags", world.getFlagMap().get(userCode));
+        world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
 
         // Return playerInfos
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();

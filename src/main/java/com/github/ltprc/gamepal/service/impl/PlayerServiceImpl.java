@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
@@ -326,8 +327,8 @@ public class PlayerServiceImpl implements PlayerService {
             default:
                 break;
         }
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -372,8 +373,8 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -401,8 +402,8 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "储存 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -475,8 +476,8 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -502,7 +503,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .forEach(entry -> getItem(userCode, entry.getKey(), - entry.getValue() * recipeAmount));
         recipe.getValue().entrySet()
                 .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue() * recipeAmount));
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_RECIPES);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_RECIPES] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -690,8 +691,8 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == block) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
         }
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_ITEMS);
-        world.getFlagMap().get(userCode).add(GamePalConstants.FLAG_UPDATE_INTERACTED_ITEMS);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         switch (interactionCode) {
             case GamePalConstants.INTERACTION_USE:
                 switch (block.getType()) {
