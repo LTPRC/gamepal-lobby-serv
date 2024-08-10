@@ -398,6 +398,7 @@ public class WorldServiceImpl implements WorldService {
         Map<Integer, Region> regionMap = world.getRegionMap();
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         WorldEvent worldEvent;
+        int changedHp = SkillUtil.calculateChangedHp(Integer.valueOf(eventBlock.getCode()));
         switch (Integer.valueOf(eventBlock.getCode())) {
             case GamePalConstants.EVENT_CODE_BLOCK:
             case GamePalConstants.EVENT_CODE_CURSE:
@@ -406,24 +407,23 @@ public class WorldServiceImpl implements WorldService {
                 world.getEventQueue().add(worldEvent);
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
-                playerService.changeHp(eventBlock.getId(), GamePalConstants.EVENT_HEAL_HEAL, false);
+                playerService.changeHp(eventBlock.getId(), changedHp, false);
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
             case GamePalConstants.EVENT_CODE_FIRE:
                 playerInfoList.forEach(playerInfo ->
-                    playerService.damageHp(playerInfo.getId(), eventBlock.getId(),
-                            -GamePalConstants.EVENT_DAMAGE_PER_FRAME_FIRE, false));
+                    playerService.damageHp(playerInfo.getId(), eventBlock.getId(), changedHp, false));
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_KICK:
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
                 playerInfoList.forEach(playerInfo -> {
-                    int damageValue = -GamePalConstants.EVENT_DAMAGE_MELEE;
+                    int damageValue = changedHp;
                     if (((PlayerInfo) playerInfo).getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != 0) {
                         damageValue /= 2;
                     }
@@ -450,7 +450,7 @@ public class WorldServiceImpl implements WorldService {
                             && playerInfoMap.containsKey(activatedWorldBlock.getId())
                             && SkillUtil.validateActiveness(playerInfoMap.get(activatedWorldBlock.getId()))) {
                         playerService.damageHp(activatedWorldBlock.getId(), eventBlock.getId(),
-                                -GamePalConstants.EVENT_DAMAGE_SHOOT, false);
+                                changedHp, false);
                         WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                                 world.getRegionMap().get(activatedWorldBlock.getRegionNo()), activatedWorldBlock,
                                 BigDecimal.valueOf(random.nextDouble() * 360),
@@ -503,7 +503,7 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 playerInfoList.stream().forEach(playerInfo -> {
                     playerService.damageHp(playerInfo.getId(), eventBlock.getId(),
-                            -GamePalConstants.EVENT_DAMAGE_EXPLODE, false);
+                            changedHp, false);
                     WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                             world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo,
                             BigDecimal.valueOf(random.nextDouble() * 360), BigDecimal.valueOf(random.nextDouble() / 2));

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Random;
 
 @Component
 public class SkillUtil {
@@ -383,5 +384,45 @@ public class SkillUtil {
     public static boolean checkSkillTypeAttack(final PlayerInfo playerInfo) {
         return Arrays.stream(playerInfo.getSkill())
                 .anyMatch(skill -> skill.getSkillType() == SkillConstants.SKILL_TYPE_ATTACK);
+    }
+
+    /**
+     * At present, we do not determine hp amount based on equipped tool
+     * @param eventCode
+     * @return changed hp amount
+     */
+    public static int calculateChangedHp(final int eventCode) {
+        Random random = new Random();
+        switch (eventCode) {
+            case GamePalConstants.EVENT_CODE_HEAL:
+                return 100;
+            case GamePalConstants.EVENT_CODE_FIRE:
+                return -1;
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+                return -10 + random.nextInt(10);
+            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+                return -20 + random.nextInt(10);
+            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+                return -40 + random.nextInt(30);
+            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+                return -75 + random.nextInt(50);
+            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+                return -100 + random.nextInt(100);
+            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+                return -110 + random.nextInt(20);
+            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+                return -250 + random.nextInt(200);
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+                return -250 + random.nextInt(100);
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+                return -600 + random.nextInt(400);
+            case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_CURSE:
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+            default:
+                return 0;
+        }
     }
 }

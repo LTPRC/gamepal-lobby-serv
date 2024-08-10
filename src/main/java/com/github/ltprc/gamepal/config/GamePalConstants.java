@@ -174,11 +174,8 @@ public class GamePalConstants {
     public static final BigDecimal EVENT_MAX_ANGLE_SHOOT = BigDecimal.valueOf(5D);
     public static final BigDecimal EVENT_MAX_ANGLE_SHOOT_SHOTGUN = BigDecimal.valueOf(10D);
     public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(3);
-    public static final int EVENT_DAMAGE_PER_FRAME_FIRE = 1;
     public static final int EVENT_DAMAGE_MELEE = 10;
     public static final int EVENT_DAMAGE_SHOOT = 200;
-    public static final int EVENT_DAMAGE_EXPLODE = 500;
-    public static final int EVENT_HEAL_HEAL = 100;
 
     public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
     public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";

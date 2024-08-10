@@ -122,9 +122,34 @@ public class NpcManagerImpl implements NpcManager {
                         behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
                         break;
                 }
+                switch (creatureInfo.getSkinColor()) {
+                    case CreatureConstants.SKIN_COLOR_SHEEP:
+                    case CreatureConstants.SKIN_COLOR_HORSE:
+                    case CreatureConstants.SKIN_COLOR_FROG:
+                    case CreatureConstants.SKIN_COLOR_CHICKEN:
+                        exemptionJsonArray.add(true);
+                        exemptionJsonArray.add(true);
+                        break;
+                    case CreatureConstants.SKIN_COLOR_PAOFU:
+                    case CreatureConstants.SKIN_COLOR_MONKEY:
+                    case CreatureConstants.SKIN_COLOR_FOX:
+                    case CreatureConstants.SKIN_COLOR_CAT:
+                    case CreatureConstants.SKIN_COLOR_DOG:
+                    case CreatureConstants.SKIN_COLOR_RACOON:
+                    case CreatureConstants.SKIN_COLOR_BUFFALO:
+                        exemptionJsonArray.add(false);
+                        exemptionJsonArray.add(true);
+                        break;
+                    case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
+                    case CreatureConstants.SKIN_COLOR_TIGER:
+                    case CreatureConstants.SKIN_COLOR_WOLF:
+                    case CreatureConstants.SKIN_COLOR_BOAR:
+                    default:
+                        exemptionJsonArray.add(false);
+                        exemptionJsonArray.add(false);
+                        break;
+                }
                 exemptionJsonArray.add(false);
-                exemptionJsonArray.add(true);
-                exemptionJsonArray.add(true);
                 exemptionJsonArray.add(true);
             }
             behaviorRequest.put("exemption", exemptionJsonArray);
@@ -162,8 +187,12 @@ public class NpcManagerImpl implements NpcManager {
         int behavior = request.getInteger("behavior");
         npcBrain.setBehavior(behavior);
         switch (behavior) {
+            case CreatureConstants.NPC_BEHAVIOR_IDLE:
+                npcBrain.getGreenQueue().clear();
+                npcBrain.getYellowQueue().clear();
+                npcBrain.getRedQueue().clear();
+                break;
             case CreatureConstants.NPC_BEHAVIOR_MOVE:
-            case CreatureConstants.NPC_BEHAVIOR_GUARD:
                 npcBrain.getGreenQueue().add(targetWorldCoordinate);
                 break;
             case CreatureConstants.NPC_BEHAVIOR_PATROL:
@@ -173,7 +202,6 @@ public class NpcManagerImpl implements NpcManager {
             case CreatureConstants.NPC_BEHAVIOR_FOLLOW:
                 npcBrain.getGreenQueue().add(world.getPlayerInfoMap().get(targetUserCode));
                 break;
-            case CreatureConstants.NPC_BEHAVIOR_IDLE:
             default:
                 break;
         }
