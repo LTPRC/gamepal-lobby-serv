@@ -6,6 +6,8 @@ public class CreatureConstants {
 
     private CreatureConstants() {}
 
+    public static final int PLAYER_TYPE_HUMAN = 0;
+    public static final int PLAYER_TYPE_NPC = 1;
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
     public static final int GENDER_MALE = 1;
@@ -32,9 +34,6 @@ public class CreatureConstants {
     public static final int SKIN_COLOR_HORSE = 15;
 
     // Backend constants
-
-    public static final int PLAYER_TYPE_HUMAN = 0;
-    public static final int PLAYER_TYPE_NPC = 1;
 
     public static final int NPC_BRAIN_STATUS_UNAWARE = 0;
     public static final int NPC_BRAIN_STATUS_SUSPICIOUS = 1;
@@ -67,8 +66,8 @@ public class CreatureConstants {
     public static final int NPC_EXEMPTION_SAME_CREATURE = 3;
     public static final int NPC_EXEMPTION_LENGTH = 4;
 
-    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(10);
-    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(5);
+    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(8);
+    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(4);
     public static final BigDecimal DEFAULT_DISTINCT_VISION_ANGLE = BigDecimal.valueOf(120);
     public static final BigDecimal DEFAULT_INDISTINCT_VISION_ANGLE = BigDecimal.valueOf(180);
     public static final BigDecimal DEFAULT_DISTINCT_HEARING_RADIUS = BigDecimal.valueOf(2);

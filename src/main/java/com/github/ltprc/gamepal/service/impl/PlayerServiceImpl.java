@@ -373,8 +373,10 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        if (world.getFlagMap().containsKey(userCode)) {
+            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -402,8 +404,10 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "储存 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        if (world.getFlagMap().containsKey(userCode)) {
+            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -476,8 +480,10 @@ public class PlayerServiceImpl implements PlayerService {
             generateNotificationMessage(userCode,
                     "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
         }
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        if (world.getFlagMap().containsKey(userCode)) {
+            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1184,6 +1190,7 @@ public class PlayerServiceImpl implements PlayerService {
         world.getBagInfoMap().put(id, newBagInfo);
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         scene.getBlocks().add(remainContainer);
+        userService.addUserIntoWorldMap(id, world.getId());
 
         worldMovingBlock.setType(remainContainer.getType());
         worldMovingBlock.setId(remainContainer.getId());
@@ -1204,67 +1211,66 @@ public class PlayerServiceImpl implements PlayerService {
                 switch (playerInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_PAOFU:
                     case CreatureConstants.SKIN_COLOR_CAT:
-                        getItem(id, "c038", random.nextInt(2));
+                        getItem(id, "c038", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FROG:
-                        break;
                     case CreatureConstants.SKIN_COLOR_MONKEY:
-                        break;
                     case CreatureConstants.SKIN_COLOR_RACOON:
+                        getItem(id, "m_leather", 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_CHICKEN:
                         if (random.nextDouble() < 0.25D) {
-                            getItem(id, "c040", random.nextInt(1));
+                            getItem(id, "c040", random.nextInt(1) + 1);
                         }
-                        getItem(id, "c031", random.nextInt(2));
+                        getItem(id, "c031", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_BUFFALO:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "j037", random.nextInt(2));
+                            getItem(id, "j037", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_leather", random.nextInt(3));
+                            getItem(id, "m_leather", random.nextInt(3) + 1);
                         }
-                        getItem(id, "c032", random.nextInt(4));
+                        getItem(id, "c032", random.nextInt(4) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FOX:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2));
+                            getItem(id, "m_leather", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c037", random.nextInt(2));
+                        getItem(id, "c037", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4));
+                            getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2));
+                            getItem(id, "m_leather", random.nextInt(2) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_SHEEP:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c034", random.nextInt(2));
+                        getItem(id, "c034", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_TIGER:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4));
+                            getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_leather", random.nextInt(3));
+                            getItem(id, "m_leather", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_DOG:
@@ -1275,47 +1281,47 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j193", 1);
                         }
                         if (random.nextDouble() < 0.25D) {
-                            getItem(id, "j191", random.nextInt(4));
+                            getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2));
+                            getItem(id, "m_leather", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c037", random.nextInt(2));
+                        getItem(id, "c037", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_WOLF:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4));
+                            getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m_leather", random.nextInt(2));
+                            getItem(id, "m_leather", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c037", random.nextInt(3));
+                        getItem(id, "c037", random.nextInt(3) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_BOAR:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4));
+                            getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_leather", random.nextInt(3));
+                            getItem(id, "m_leather", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_HORSE:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_bone", random.nextInt(2));
+                            getItem(id, "m_bone", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2));
+                            getItem(id, "m_leather", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c036", random.nextInt(2));
+                        getItem(id, "c036", random.nextInt(2) + 1);
                         break;
                     default:
                         return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1038));
@@ -1324,6 +1330,8 @@ public class PlayerServiceImpl implements PlayerService {
             default:
                 return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1037));
         }
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1346,13 +1354,15 @@ public class PlayerServiceImpl implements PlayerService {
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
         if (null != bagInfo) {
-            bagInfo.setCapacity(BigDecimal.ZERO);
             bagInfo.getItems().clear();
+            bagInfo.setCapacity(BigDecimal.ZERO);
+            bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
         }
         BagInfo preservedBagInfo = world.getPreservedBagInfoMap().get(userCode);
         if (null != preservedBagInfo) {
-            preservedBagInfo.setCapacity(BigDecimal.ZERO);
             preservedBagInfo.getItems().clear();
+            preservedBagInfo.setCapacity(BigDecimal.ZERO);
+            bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
         }
         playerInfo.setFaceDirection(BigDecimal.ZERO);
         world.getPlayerInfoMap().values().stream()

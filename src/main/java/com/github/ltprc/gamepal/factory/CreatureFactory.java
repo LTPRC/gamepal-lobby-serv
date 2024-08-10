@@ -79,7 +79,6 @@ public class CreatureFactory {
         playerInfo.setMoney(1);
         playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
-        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), 0);
         if (CreatureConstants.CREATURE_TYPE_ANIMAL != playerInfo.getCreatureType()) {
             SkillUtil.updateHumanSkills(playerInfo);
             randomlyPersonalizePlayerInfo(playerInfo, NameUtil.generateGender());

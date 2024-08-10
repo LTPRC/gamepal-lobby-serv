@@ -122,10 +122,10 @@ public class TimedEventTask {
                         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
                             playerInfo.getPerceptionInfo().setDistinctVisionRadius(
-                                    playerInfo.getPerceptionInfo().getDistinctVisionAngle()
+                                    playerInfo.getPerceptionInfo().getDistinctVisionRadius()
                                             .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
                             playerInfo.getPerceptionInfo().setIndistinctVisionRadius(
-                                    playerInfo.getPerceptionInfo().getIndistinctVisionAngle()
+                                    playerInfo.getPerceptionInfo().getIndistinctVisionRadius()
                                             .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
                         }
 

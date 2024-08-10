@@ -11,7 +11,9 @@ import com.github.ltprc.gamepal.manager.CommandManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
@@ -21,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Map;
+import java.util.UUID;
 
 
 @Component
@@ -110,6 +114,46 @@ public class CommandManagerImpl implements CommandManager {
                     playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = 0;
                 }
             case "nwcoracle":
+                playerService.generateNotificationMessage(userCode, "先知带你看世界。");
+                String animalUserCode = UUID.randomUUID().toString();
+                PlayerInfo animalInfo =
+                        npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                                CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
+                animalInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                animalInfo.setSkinColor(CreatureConstants.SKIN_COLOR_TIGER);
+                WorldCoordinate worldCoordinate = new WorldCoordinate(playerInfo.getRegionNo(),
+                        playerInfo.getSceneCoordinate(),
+                        new Coordinate(playerInfo.getCoordinate().getX().add(BigDecimal.valueOf(3)),
+                                playerInfo.getCoordinate().getY()));
+                npcManager.putCreature(world, animalUserCode, worldCoordinate);
+                animalUserCode = UUID.randomUUID().toString();
+                animalInfo = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                        CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
+                animalInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                animalInfo.setSkinColor(CreatureConstants.SKIN_COLOR_FOX);
+                worldCoordinate = new WorldCoordinate(playerInfo.getRegionNo(), playerInfo.getSceneCoordinate(),
+                        new Coordinate(playerInfo.getCoordinate().getX(),
+                                playerInfo.getCoordinate().getY().add(BigDecimal.valueOf(3))));
+                npcManager.putCreature(world, animalUserCode, worldCoordinate);
+                animalUserCode = UUID.randomUUID().toString();
+                animalInfo = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                        CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
+                animalInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                animalInfo.setSkinColor(CreatureConstants.SKIN_COLOR_RACOON);
+                worldCoordinate = new WorldCoordinate(playerInfo.getRegionNo(), playerInfo.getSceneCoordinate(),
+                        new Coordinate(playerInfo.getCoordinate().getX().subtract(BigDecimal.valueOf(3)),
+                                playerInfo.getCoordinate().getY()));
+                npcManager.putCreature(world, animalUserCode, worldCoordinate);
+                animalUserCode = UUID.randomUUID().toString();
+                animalInfo = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                        CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
+                animalInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                animalInfo.setSkinColor(CreatureConstants.SKIN_COLOR_SHEEP);
+                worldCoordinate = new WorldCoordinate(playerInfo.getRegionNo(), playerInfo.getSceneCoordinate(),
+                        new Coordinate(playerInfo.getCoordinate().getX(),
+                                playerInfo.getCoordinate().getY().subtract(BigDecimal.valueOf(3))));
+                npcManager.putCreature(world, animalUserCode, worldCoordinate);
+                break;
             case "nwcignoranceisbliss":
                 playerService.generateNotificationMessage(userCode, "（暂无效果）");
                 break;

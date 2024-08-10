@@ -60,18 +60,15 @@ public class NpcManagerImpl implements NpcManager {
         playerInfo.setId(userCode);
         playerInfo.setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         playerInfo.setTopBossId(userCode);
+        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
         world.getPlayerInfoMap().put(userCode, playerInfo);
         buffManager.initializeBuff(playerInfo);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         BagInfo bagInfo = new BagInfo();
         bagInfo.setId(userCode);
-        bagInfo.setCapacity(BigDecimal.ZERO);
-        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
         world.getBagInfoMap().put(userCode, bagInfo);
         bagInfo = new BagInfo();
         bagInfo.setId(userCode);
-        bagInfo.setCapacity(BigDecimal.ZERO);
-        bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
         world.getPreservedBagInfoMap().put(userCode, bagInfo);
         return playerInfo;
     }
