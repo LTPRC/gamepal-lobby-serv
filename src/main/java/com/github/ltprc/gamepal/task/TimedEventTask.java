@@ -170,9 +170,10 @@ public class TimedEventTask {
                         PlayerInfo playerInfo = playerInfoMap.get(userCode);
 
                         // Add footstep
-                        if (!playerInfo.getSpeed().getX().equals(BigDecimal.ZERO)
-                                || !playerInfo.getSpeed().getY().equals(BigDecimal.ZERO)) {
-                            WorldEvent worldEvent =BlockUtil.createWorldEvent(userCode,
+                        if (Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
+                                + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)
+                                > Math.pow(playerInfo.getMaxSpeed().doubleValue(), 2)) {
+                            WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode,
                                     GamePalConstants.EVENT_CODE_FOOTSTEP, playerInfo);
                             world.getEventQueue().add(worldEvent);
                         }

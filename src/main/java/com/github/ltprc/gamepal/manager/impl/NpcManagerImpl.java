@@ -63,7 +63,6 @@ public class NpcManagerImpl implements NpcManager {
         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
         world.getPlayerInfoMap().put(userCode, playerInfo);
         buffManager.initializeBuff(playerInfo);
-        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         BagInfo bagInfo = new BagInfo();
         bagInfo.setId(userCode);
         world.getBagInfoMap().put(userCode, bagInfo);

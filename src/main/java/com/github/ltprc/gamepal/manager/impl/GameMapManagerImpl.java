@@ -33,7 +33,7 @@ public class GameMapManagerImpl implements GameMapManager {
     public IntegerCoordinate getMiniMapSceneCoordinate(Region region, IntegerCoordinate miniMapSize,
                                                        IntegerCoordinate sceneCoordinate) {
         return new IntegerCoordinate(
-                miniMapSize.getX() / 2 + sceneCoordinate.getX() * miniMapSize.getX() / region.getRadius(),
-                miniMapSize.getY() / 2 + sceneCoordinate.getY() * miniMapSize.getY() / region.getRadius());
+                miniMapSize.getX() / 2 + sceneCoordinate.getX() * miniMapSize.getX() / 2 / region.getRadius(),
+                miniMapSize.getY() / 2 + sceneCoordinate.getY() * miniMapSize.getY() / 2 / region.getRadius());
     }
 }
