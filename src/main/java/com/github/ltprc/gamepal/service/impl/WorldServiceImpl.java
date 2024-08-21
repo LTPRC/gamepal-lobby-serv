@@ -288,6 +288,7 @@ public class WorldServiceImpl implements WorldService {
                     itemMap.put(junk.getItemNo(), junk);
                     break;
                 case GamePalConstants.ITEM_CHARACTER_MATERIAL:
+                case GamePalConstants.ITEM_CHARACTER_AMMO:
                 case GamePalConstants.ITEM_CHARACTER_NOTE:
                 case GamePalConstants.ITEM_CHARACTER_RECORDING:
                 default:

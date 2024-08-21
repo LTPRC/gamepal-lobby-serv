@@ -320,6 +320,8 @@ public class PlayerServiceImpl implements PlayerService {
                 ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet()
                         .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue()));
                 break;
+            case GamePalConstants.ITEM_CHARACTER_AMMO:
+                break;
             case GamePalConstants.ITEM_CHARACTER_NOTE:
                 break;
             case GamePalConstants.ITEM_CHARACTER_RECORDING:

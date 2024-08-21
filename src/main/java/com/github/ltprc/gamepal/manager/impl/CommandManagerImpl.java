@@ -65,8 +65,8 @@ public class CommandManagerImpl implements CommandManager {
                     PlayerInfo agentInfo = npcManager.putSpecificCreatureByRole(world, userCode, playerInfo,
                             CreatureConstants.NPC_ROLE_MINION);
                     CreatureFactory.randomlyPersonalizePlayerInfo(agentInfo, CreatureConstants.GENDER_MALE);
-                    playerService.getItem(agentInfo.getId(), "a005", 1);
-                    playerService.useItem(agentInfo.getId(), "a005", 1);
+                    playerService.getItem(agentInfo.getId(), "o005", 1);
+                    playerService.useItem(agentInfo.getId(), "o005", 1);
                     playerService.getItem(agentInfo.getId(), "t002", 1);
                     playerService.useItem(agentInfo.getId(), "t002", 1);
                 }
@@ -93,8 +93,8 @@ public class CommandManagerImpl implements CommandManager {
                 PlayerInfo trinityInfo = npcManager.putSpecificCreatureByRole(world, userCode, playerInfo,
                         CreatureConstants.NPC_ROLE_PEER);
                 CreatureFactory.randomlyPersonalizePlayerInfo(trinityInfo, CreatureConstants.GENDER_FEMALE);
-                playerService.getItem(trinityInfo.getId(), "a004", 1);
-                playerService.useItem(trinityInfo.getId(), "a004", 1);
+                playerService.getItem(trinityInfo.getId(), "o004", 1);
+                playerService.useItem(trinityInfo.getId(), "o004", 1);
                 playerService.getItem(trinityInfo.getId(), "t000", 1);
                 playerService.useItem(trinityInfo.getId(), "t000", 1);
                 break;

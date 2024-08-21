@@ -64,7 +64,7 @@ public class CreatureFactory {
         playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         playerInfo.setFaceDirection(BigDecimal.ZERO);
         playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
-        playerInfo.setAcceleration(BigDecimal.valueOf(0.01));
+        playerInfo.setAcceleration(BigDecimal.valueOf(0.005));
         playerInfo.setHpMax(1000);
         playerInfo.setHp(playerInfo.getHpMax() / 2);
         playerInfo.setVpMax(1000);
