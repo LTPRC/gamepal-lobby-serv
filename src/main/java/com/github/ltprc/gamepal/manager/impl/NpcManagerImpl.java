@@ -478,17 +478,25 @@ public class NpcManagerImpl implements NpcManager {
                     world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo, wc));
             return rst;
         }
+        // Speed logics, sync with front-end 24/08/24
         double newSpeed = Math.sqrt(Math.pow(npcPlayerInfo.getSpeed().getX().doubleValue(), 2)
                 + Math.pow(npcPlayerInfo.getSpeed().getY().doubleValue(), 2)) + npcPlayerInfo.getAcceleration().doubleValue();
-        double maxSpeed = npcPlayerInfo.getVp() > 0 ? npcPlayerInfo.getMaxSpeed().doubleValue()
-                : npcPlayerInfo.getMaxSpeed().doubleValue() * 0.5D;
-        newSpeed = Math.min(newSpeed, maxSpeed);
         newSpeed = Math.min(newSpeed, distance - stopDistance);
-        npcPlayerInfo.setFaceDirection(BlockUtil.calculateAngle(world.getRegionMap().get(npcPlayerInfo.getRegionNo()),
-                npcPlayerInfo, wc));
+        if (npcPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_STUNNED] != 0) {
+            newSpeed = 0D;
+        } else if (npcPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
+            newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue() * 0.1, newSpeed);
+        } else if (npcPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+            newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue() * 0.5, newSpeed);
+        } else {
+            newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue(), newSpeed);
+        }
         npcPlayerInfo.setSpeed(new Coordinate(BigDecimal.valueOf(
                 newSpeed * Math.cos(npcPlayerInfo.getFaceDirection().doubleValue() / 180 * Math.PI)),
                 BigDecimal.valueOf(-1 * newSpeed * Math.sin(npcPlayerInfo.getFaceDirection().doubleValue() / 180 * Math.PI))));
+
+        npcPlayerInfo.setFaceDirection(BlockUtil.calculateAngle(world.getRegionMap().get(npcPlayerInfo.getRegionNo()),
+                npcPlayerInfo, wc));
         return rst;
     }
 }
