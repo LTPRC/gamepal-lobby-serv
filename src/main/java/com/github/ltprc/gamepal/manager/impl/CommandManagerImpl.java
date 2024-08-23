@@ -69,6 +69,7 @@ public class CommandManagerImpl implements CommandManager {
                     playerService.useItem(agentInfo.getId(), "o005", 1);
                     playerService.getItem(agentInfo.getId(), "t002", 1);
                     playerService.useItem(agentInfo.getId(), "t002", 1);
+                    playerService.getItem(agentInfo.getId(), "a002", 7);
                 }
                 break;
             case "nwclotsofguns":
@@ -83,6 +84,9 @@ public class CommandManagerImpl implements CommandManager {
                 playerService.addDrop(userCode, "t210", 1);
                 playerService.addDrop(userCode, "t214", 1);
                 playerService.addDrop(userCode, "t220", 1);
+                for (int i = 1; i <= 22; i++) {
+                    playerService.addDrop(userCode, "a" + String.format("%03d", i), 100);
+                }
                 break;
             case "nwcneo":
                 playerService.generateNotificationMessage(userCode, "你要战胜的是你自己。");
@@ -97,6 +101,7 @@ public class CommandManagerImpl implements CommandManager {
                 playerService.useItem(trinityInfo.getId(), "o004", 1);
                 playerService.getItem(trinityInfo.getId(), "t000", 1);
                 playerService.useItem(trinityInfo.getId(), "t000", 1);
+                playerService.getItem(trinityInfo.getId(), "a001", 20);
                 break;
             case "nwcnebuchadnezzar":
                 playerService.generateNotificationMessage(userCode, "跑得快。");

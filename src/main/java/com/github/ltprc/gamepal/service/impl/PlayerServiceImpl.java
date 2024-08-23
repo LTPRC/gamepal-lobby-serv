@@ -776,6 +776,11 @@ public class PlayerServiceImpl implements PlayerService {
             logger.error(ErrorUtil.ERROR_1028 + " skillNo: " + skillNo);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1028));
         }
+        BagInfo bagInfo = world.getBagInfoMap().get(userCode);
+        String ammoCode = playerInfoMap.get(userCode).getSkill()[skillNo].getAmmoCode();
+        if (StringUtils.isNotBlank(ammoCode) && bagInfo.getItems().get(ammoCode) == 0) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1040));
+        }
         if (isDown) {
             // Skill button is pushed down
             if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == 0) {
@@ -784,6 +789,9 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(-1);
                 } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
                     playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
+                    if (StringUtils.isNotBlank(ammoCode)) {
+                        bagInfo.getItems().put(ammoCode, bagInfo.getItems().get(ammoCode) - 1);
+                    }
                     generateEventBySkill(userCode, skillNo);
                 } else {
                     logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode());
@@ -794,6 +802,9 @@ public class PlayerServiceImpl implements PlayerService {
             if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
                 if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == -1) {
                     playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
+                    if (StringUtils.isNotBlank(ammoCode)) {
+                        bagInfo.getItems().put(ammoCode, bagInfo.getItems().get(ammoCode) - 1);
+                    }
                     generateEventBySkill(userCode, skillNo);
                 }
             } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
@@ -1417,11 +1428,7 @@ public class PlayerServiceImpl implements PlayerService {
                 continue;
             }
             playerInfo.getSkill()[i] = new Skill(tool.getSkills()[i]);
-            if (StringUtils.isNotBlank(tool.getAmmoCode())
-                    && worldService.getItemMap().containsKey(tool.getAmmoCode())) {
-                int ammoAmount = bagInfo.getItems().getOrDefault(tool.getAmmoCode(), 0);
-                playerInfo.getSkill()[i].setAmmoAmount(ammoAmount);
-            }
+            playerInfo.getSkill()[i].setAmmoCode(tool.getAmmoCode());
         }
         return ResponseEntity.ok().body(rst.toString());
     }

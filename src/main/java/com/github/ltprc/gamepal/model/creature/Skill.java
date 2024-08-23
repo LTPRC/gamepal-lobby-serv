@@ -16,7 +16,7 @@ public class Skill {
     private int frameMax;
     private int skillType;
     private BigDecimal range;
-    private int ammoAmount;
+    private String ammoCode;
 
     public Skill(Skill skill) {
         skillCode = skill.skillCode;
@@ -25,6 +25,6 @@ public class Skill {
         frameMax = skill.frameMax;
         skillType = skill.skillType;
         range = skill.range;
-        ammoAmount = skill.ammoAmount;
+        ammoCode = skill.ammoCode;
     }
 }
