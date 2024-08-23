@@ -381,7 +381,7 @@
   {"itemNo": "a001", "name": "9mm子弹", "weight": 0.01, "description": ""},
   {"itemNo": "a002", "name": ".357子弹", "weight": 0.01, "description": ""},
   {"itemNo": "a003", "name": ".45子弹", "weight": 0.01, "description": ""},
-  {"itemNo": "a004", "name": "弹弓石子", "weight": 0.01, "description": ""},
+  {"itemNo": "a004", "name": "弹弓珠", "weight": 0.01, "description": ""},
   {"itemNo": "a005", "name": ".44子弹", "weight": 0.01, "description": ""},
   {"itemNo": "a006", "name": "7.62mm手枪弹", "weight": 0.01, "description": ""},
   {"itemNo": "a007", "name": "5.7mm子弹", "weight": 0.01, "description": ""},
