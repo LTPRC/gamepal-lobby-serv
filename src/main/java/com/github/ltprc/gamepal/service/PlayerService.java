@@ -65,4 +65,6 @@ public interface PlayerService {
     ResponseEntity<String> destroyPlayer(String userCode);
 
     ResponseEntity<String> checkLevelUp(String userCode);
+
+    ResponseEntity<String> updateSkillsByTool(String userCode);
 }

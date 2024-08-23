@@ -16,4 +16,15 @@ public class Skill {
     private int frameMax;
     private int skillType;
     private BigDecimal range;
+    private int ammoAmount;
+
+    public Skill(Skill skill) {
+        skillCode = skill.skillCode;
+        skillMode = skill.skillMode;
+        frame = skill.frame;
+        frameMax = skill.frameMax;
+        skillType = skill.skillType;
+        range = skill.range;
+        ammoAmount = skill.ammoAmount;
+    }
 }

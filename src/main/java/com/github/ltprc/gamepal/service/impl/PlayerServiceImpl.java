@@ -15,6 +15,7 @@ import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
+import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
@@ -297,7 +298,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
-        if (!StringUtils.isNotBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
+        if (StringUtils.isBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
         }
         if (bagInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
@@ -499,7 +500,7 @@ public class PlayerServiceImpl implements PlayerService {
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
         Map<String, Recipe> recipeMap = worldService.getRecipeMap();
-        if (!StringUtils.isNotBlank(recipeNo) || !recipeMap.containsKey(recipeNo)) {
+        if (StringUtils.isBlank(recipeNo) || !recipeMap.containsKey(recipeNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1023));
         }
         Recipe recipe = recipeMap.get(recipeNo);
@@ -1014,6 +1015,7 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.getTools().add(itemNo);
         }
         SkillUtil.updateHumanSkills(playerInfo);
+        updateSkillsByTool(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1040,6 +1042,7 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.getOutfits().add(itemNo);
         }
         SkillUtil.updateHumanSkills(playerInfo);
+        updateSkillsByTool(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1389,6 +1392,36 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.setExp(0);
             playerInfo.setLevel(playerInfo.getLevel() + 1);
             SkillUtil.updateExpMax(playerInfo);
+        }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> updateSkillsByTool(String userCode) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        Tool tool = playerInfo.getTools().stream()
+                .filter(toolStr -> worldService.getItemMap().containsKey(toolStr))
+                .map(toolStr -> (Tool) worldService.getItemMap().get(toolStr))
+                .filter(tool1 -> tool1.getItemIndex() == 1)
+                .findFirst()
+                .orElse(new Tool());
+        for (int i = 0; i < SkillConstants.SKILL_LENGTH; i ++) {
+            if (null == tool.getSkills()[i]) {
+                continue;
+            }
+            playerInfo.getSkill()[i] = new Skill(tool.getSkills()[i]);
+            if (StringUtils.isNotBlank(tool.getAmmoCode())
+                    && worldService.getItemMap().containsKey(tool.getAmmoCode())) {
+                int ammoAmount = bagInfo.getItems().getOrDefault(tool.getAmmoCode(), 0);
+                playerInfo.getSkill()[i].setAmmoAmount(ammoAmount);
+            }
         }
         return ResponseEntity.ok().body(rst.toString());
     }
