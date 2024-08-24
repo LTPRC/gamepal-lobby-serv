@@ -113,6 +113,7 @@ public class BuffManagerImpl implements BuffManager {
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] = 0;
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] = 0;
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = 0;
     }
 
     @Override

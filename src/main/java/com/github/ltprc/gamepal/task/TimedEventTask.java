@@ -106,6 +106,9 @@ public class TimedEventTask {
                         }
                         if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                             playerService.changeHunger(userCode, -1, false);
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
+                                playerService.changeHp(userCode, -1, false);
+                            }
                         }
 
                         // Change thirst
@@ -115,6 +118,9 @@ public class TimedEventTask {
                         }
                         if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                             playerService.changeThirst(userCode, -1, false);
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
+                                playerService.changeHp(userCode, -1, false);
+                            }
                         }
 
                         // Change precision
