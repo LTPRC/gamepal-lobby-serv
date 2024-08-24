@@ -595,8 +595,11 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void expandRegion(GameWorld world, int regionNo) {
-        Region region = sceneManager.generateRegion(regionNo);
-        world.getRegionMap().put(regionNo, region);
+        Map<Integer, Region> regionMap = world.getRegionMap();
+        if (!regionMap.containsKey(regionNo)) {
+            Region region = sceneManager.generateRegion(regionNo);
+            world.getRegionMap().put(regionNo, region);
+        }
     }
 
     @Override
@@ -606,9 +609,9 @@ public class WorldServiceImpl implements WorldService {
 
     private void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth) {
         Map<Integer, Region> regionMap = world.getRegionMap();
-        if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
-            expandRegion(world, worldCoordinate.getRegionNo());
-        }
+//        if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
+//            expandRegion(world, worldCoordinate.getRegionNo());
+//        }
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
             sceneManager.fillScene(world, region, worldCoordinate.getSceneCoordinate());

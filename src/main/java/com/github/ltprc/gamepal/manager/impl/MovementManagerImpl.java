@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -87,7 +88,8 @@ public class MovementManagerImpl implements MovementManager {
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
                             worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()))));
         } else {
-//            worldService.expandScene(world, teleportWc);
+            worldService.expandRegion(world, teleportWc.getRegionNo());
+            worldService.expandScene(world, teleportWc);
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
             settleCoordinate(world, worldMovingBlock, teleportWc);
         }
@@ -101,16 +103,18 @@ public class MovementManagerImpl implements MovementManager {
                 || !worldMovingBlock.getSceneCoordinate().getX().equals(newWorldCoordinate.getSceneCoordinate().getX())
                 || !worldMovingBlock.getSceneCoordinate().getY().equals(newWorldCoordinate.getSceneCoordinate().getY());
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock);
-        if (isRegionChanged) {
-            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
-        }
+//        worldService.expandRegion(world, worldMovingBlock.getRegionNo());
+//        worldService.expandScene(world, worldMovingBlock);
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
         if (isSceneChanged) {
-            worldService.expandScene(world, worldMovingBlock);
-            Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
-            playerService.generateNotificationMessage(worldMovingBlock.getId(),
-                    "来到【" + region.getName() + "-" + scene.getName() + "】");
+            if (world.getPlayerInfoMap().containsKey(worldMovingBlock.getId())
+                    && world.getPlayerInfoMap().get(worldMovingBlock.getId()).getPlayerType()
+                    == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
+                playerService.generateNotificationMessage(worldMovingBlock.getId(),
+                        "来到【" + region.getName() + "-" + scene.getName() + "】");
+            }
         }
         syncFloorCode(world, worldMovingBlock);
     }
@@ -120,11 +124,13 @@ public class MovementManagerImpl implements MovementManager {
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
+            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
             return;
         }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         if (null == scene) {
             logger.error(ErrorUtil.ERROR_1041);
+            worldService.expandScene(world, worldMovingBlock);
             return;
         }
         int floorCode = scene.getGird()[worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue()]

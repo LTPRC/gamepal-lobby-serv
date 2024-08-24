@@ -117,6 +117,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("updatePlayerMovement")) {
                 PlayerInfo playerMovement = JSON.toJavaObject(functions.getJSONObject("updatePlayerMovement"), PlayerInfo.class);
+                worldService.expandRegion(world, playerMovement.getRegionNo());
+                worldService.expandScene(world, playerMovement);
                 movementManager.settleCoordinate(world, playerInfo, playerMovement);
                 playerInfo.setSpeed(playerMovement.getSpeed());
                 playerInfo.setFaceDirection(playerMovement.getFaceDirection());
