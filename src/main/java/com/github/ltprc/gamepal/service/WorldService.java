@@ -32,6 +32,8 @@ public interface WorldService {
 
     void updateEvents(GameWorld world);
 
+    void expandRegion(GameWorld world, int regionNo);
+
     void expandScene(GameWorld world, WorldCoordinate worldCoordinate);
 
     void updateWorldTime(GameWorld world, int increment);

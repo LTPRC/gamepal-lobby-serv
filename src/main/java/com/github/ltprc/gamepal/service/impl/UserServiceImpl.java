@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -143,6 +144,8 @@ public class UserServiceImpl implements UserService {
         world.getTokenMap().put(userCode, token);
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));
+        // Register on message map
+        world.getMessageMap().put(userCode, new LinkedBlockingDeque<>());
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -169,10 +172,10 @@ public class UserServiceImpl implements UserService {
         if (needToken && !token.equals(world.getTokenMap().get(userCode))) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));
         }
-        world.getTokenMap().remove(userCode);
+//        world.getTokenMap().remove(userCode);
         world.getOnlineMap().remove(userCode);
-        world.getSessionMap().remove(userCode);
-        userWorldMap.remove(userCode);
+//        world.getSessionMap().remove(userCode);
+//        userWorldMap.remove(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 

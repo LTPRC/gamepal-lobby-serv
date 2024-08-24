@@ -86,9 +86,8 @@ public class MovementManagerImpl implements MovementManager {
                     worldMovingBlock.getSceneCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
                             worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()))));
-            BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
         } else {
-            worldService.expandScene(world, teleportWc);
+//            worldService.expandScene(world, teleportWc);
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
             settleCoordinate(world, worldMovingBlock, teleportWc);
         }
@@ -97,17 +96,22 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void settleCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock,
                                  WorldCoordinate newWorldCoordinate) {
-//        boolean isRegionChanged = worldMovingBlock.getRegionNo() != newWorldCoordinate.getRegionNo();
-//        boolean isSceneChanged = isRegionChanged
-//                || !worldMovingBlock.getSceneCoordinate().getX().equals(newWorldCoordinate.getSceneCoordinate().getX())
-//                || !worldMovingBlock.getSceneCoordinate().getY().equals(newWorldCoordinate.getSceneCoordinate().getY());
+        boolean isRegionChanged = worldMovingBlock.getRegionNo() != newWorldCoordinate.getRegionNo();
+        boolean isSceneChanged = isRegionChanged
+                || !worldMovingBlock.getSceneCoordinate().getX().equals(newWorldCoordinate.getSceneCoordinate().getX())
+                || !worldMovingBlock.getSceneCoordinate().getY().equals(newWorldCoordinate.getSceneCoordinate().getY());
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock);
-//        if (isSceneChanged) {
-//            Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
-//            Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
-//            playerService.generateNotificationMessage(worldMovingBlock.getId(),
-//                    "来到【" + region.getName() + "-" + scene.getName() + "】");
-//        }
+        if (isRegionChanged) {
+            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
+        }
+        Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
+        BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
+        if (isSceneChanged) {
+            worldService.expandScene(world, worldMovingBlock);
+            Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
+            playerService.generateNotificationMessage(worldMovingBlock.getId(),
+                    "来到【" + region.getName() + "-" + scene.getName() + "】");
+        }
         syncFloorCode(world, worldMovingBlock);
     }
 

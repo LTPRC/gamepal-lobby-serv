@@ -37,6 +37,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
 @Service
@@ -121,7 +122,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerInfo.setFaceDirection(playerMovement.getFaceDirection());
             }
             // Detect and expand scenes after updating player's location
-            worldService.expandScene(world, playerInfo);
+//            worldService.expandScene(world, playerInfo);
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.forEach(useItem -> {
@@ -175,13 +176,9 @@ public class WebSocketServiceImpl implements WebSocketService {
                         commandManager.useCommand(userCode, commandContent);
                     }
                 } else if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
-                    messageMap.entrySet().stream()
-                            .filter(entry -> !entry.getKey().equals(msg.getFromUserCode()))
-                            .forEach(entry -> entry.getValue().add(msg));
+                    messageMap.forEach((key, value) -> value.add(msg));
                 } else if (GamePalConstants.SCOPE_INDIVIDUAL == msg.getScope()) {
-                    if (!messageMap.containsKey(msg.getToUserCode())) {
-                        messageMap.put(msg.getToUserCode(), new LinkedList<>());
-                    }
+                    messageMap.get(msg.getFromUserCode()).add(msg);
                     messageMap.get(msg.getToUserCode()).add(msg);
                 }
             }

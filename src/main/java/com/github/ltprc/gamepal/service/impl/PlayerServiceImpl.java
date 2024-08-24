@@ -1087,9 +1087,9 @@ public class PlayerServiceImpl implements PlayerService {
         movementManager.settleSpeedAndCoordinate(world, worldMovingBlock);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
-        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
-            worldService.expandScene(world, worldMovingBlock);
-        }
+//        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
+//            worldService.expandScene(world, worldMovingBlock);
+//        }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
         Drop drop = new Drop(itemNo, amount, new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
                 "3000", new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
@@ -1197,9 +1197,9 @@ public class PlayerServiceImpl implements PlayerService {
         WorldMovingBlock worldMovingBlock = new WorldMovingBlock(playerInfo);
         worldMovingBlock.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
-        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
-            worldService.expandScene(world, worldMovingBlock);
-        }
+//        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
+//            worldService.expandScene(world, worldMovingBlock);
+//        }
         Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(playerInfo.getCoordinate(),
                 worldMovingBlock.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
         worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));

@@ -79,8 +79,6 @@ public class MessageServiceImpl implements MessageService {
                 }
             }
         }
-        rst.put("success", success);
-        rst.put("failure", failure);
         return ResponseEntity.ok().body(rst.toString());
     }
 
