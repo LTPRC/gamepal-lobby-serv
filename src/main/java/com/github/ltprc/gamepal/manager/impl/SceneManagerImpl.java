@@ -52,9 +52,6 @@ public class SceneManagerImpl implements SceneManager {
         region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
         region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
         region.setRadius(GamePalConstants.SCENE_SCAN_MAX_RADIUS);
-        region.setScenes(new HashMap<>());
-        region.setTerrainMap(new HashMap<>());
-        region.setAltitudeMap(new HashMap<>());
         initializeRegionTerrainMap(region);
         return region;
     }
@@ -202,6 +199,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
+        if (region.getScenes().containsKey(sceneCoordinate)) {
+            return;
+        }
         Scene scene = new Scene();
         scene.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
         scene.setName("Auto Scene (" + scene.getSceneCoordinate().getX() + "," + scene.getSceneCoordinate().getY()

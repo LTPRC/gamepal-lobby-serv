@@ -11,12 +11,14 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -106,5 +108,23 @@ public class MovementManagerImpl implements MovementManager {
 //            playerService.generateNotificationMessage(worldMovingBlock.getId(),
 //                    "来到【" + region.getName() + "-" + scene.getName() + "】");
 //        }
+        syncFloorCode(world, worldMovingBlock);
+    }
+
+    @Override
+    public void syncFloorCode(GameWorld world, WorldMovingBlock worldMovingBlock) {
+        Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
+        if (null == region) {
+            logger.error(ErrorUtil.ERROR_1027);
+            return;
+        }
+        Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
+        if (null == scene) {
+            logger.error(ErrorUtil.ERROR_1041);
+            return;
+        }
+        int floorCode = scene.getGird()[worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue()]
+                [worldMovingBlock.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue()];
+        worldMovingBlock.setFloorCode(floorCode);
     }
 }

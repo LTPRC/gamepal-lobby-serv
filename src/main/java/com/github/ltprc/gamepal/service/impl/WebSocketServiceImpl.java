@@ -302,6 +302,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         rst.put("flags", world.getFlagMap().get(userCode));
+        // Clear flags
         world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
 
         // Return playerInfos

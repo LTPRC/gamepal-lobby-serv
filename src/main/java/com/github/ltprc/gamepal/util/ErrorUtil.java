@@ -45,4 +45,5 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1038 = new GamepalError("1038", "Invalid animal skinColor.");
     public static final GamepalError ERROR_1039 = new GamepalError("1039", "Invalid playerType.");
     public static final GamepalError ERROR_1040 = new GamepalError("1040", "Not enough ammo.");
+    public static final GamepalError ERROR_1041 = new GamepalError("1041", "Invalid sceneNo.");
 }

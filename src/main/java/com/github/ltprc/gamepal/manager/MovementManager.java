@@ -9,4 +9,6 @@ public interface MovementManager {
     void settleSpeedAndCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock);
 
     void settleCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock, WorldCoordinate newWorldCoordinate);
+
+    void syncFloorCode(GameWorld world, WorldMovingBlock worldMovingBlock);
 }
