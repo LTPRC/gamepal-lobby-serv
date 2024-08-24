@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -84,6 +85,16 @@ public class BuffManagerImpl implements BuffManager {
         } else if (playerInfoMap.get(userCode).getVp() >= playerInfoMap.get(userCode).getVpMax() / 10
                 && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0){
             playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
+        }
+
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        if (bagInfo.getCapacity().compareTo(bagInfo.getCapacityMax()) > 0
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] == 0) {
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = -1;
+        } else if (bagInfo.getCapacity().compareTo(bagInfo.getCapacityMax()) <= 0
+                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0){
+            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = 0;
         }
     }
 

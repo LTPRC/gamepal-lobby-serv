@@ -117,6 +117,12 @@ public class TimedEventTask {
                             playerService.changeThirst(userCode, -1, false);
                         }
 
+                        // Change precision
+                        playerService.changePrecision(userCode, 50 - 100
+                                * (int) (Math.sqrt(Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
+                                + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2))
+                                / playerInfo.getMaxSpeed().doubleValue()), false);
+
                         // Change view radius
                         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {

@@ -23,4 +23,6 @@ public class CreatureInfo extends WorldMovingBlock {
     private int hungerMax;
     private int thirst;
     private int thirstMax;
+    private int precision;
+    private int precisionMax;
 }

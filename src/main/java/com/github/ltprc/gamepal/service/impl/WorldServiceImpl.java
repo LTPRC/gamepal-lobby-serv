@@ -373,7 +373,11 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                BigDecimal shakingAngle = BigDecimal.valueOf(Math.random() * 2 - 1);
+                Random random = new Random();
+                double gaussianValue = random.nextGaussian();
+
+                // 将生成的值转换成指定的均值和标准差
+                BigDecimal shakingAngle = BigDecimal.valueOf(gaussianValue * (fromPlayerInfo.getPrecisionMax() - fromPlayerInfo.getPrecision()) / fromPlayerInfo.getPrecisionMax());
                 rst = !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
                         .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0

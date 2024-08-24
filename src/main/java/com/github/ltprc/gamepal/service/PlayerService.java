@@ -40,6 +40,8 @@ public interface PlayerService {
 
     ResponseEntity<String> changeThirst(String userCode, int value, boolean isAbsolute);
 
+    ResponseEntity<String> changePrecision(String userCode, int value, boolean isAbsolute);
+
     ResponseEntity<String> interactBlocks(String userCode, int interactionCode);
 
     ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown);

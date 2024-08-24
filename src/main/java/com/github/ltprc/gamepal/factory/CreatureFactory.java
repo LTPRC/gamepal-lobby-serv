@@ -73,6 +73,8 @@ public class CreatureFactory {
         playerInfo.setHunger(playerInfo.getHungerMax() / 2);
         playerInfo.setThirstMax(1000);
         playerInfo.setThirst(playerInfo.getThirstMax() / 2);
+        playerInfo.setPrecisionMax(1000);
+        playerInfo.setPrecision(playerInfo.getPrecisionMax());
         playerInfo.setLevel(1);
         playerInfo.setExp(0);
         SkillUtil.updateExpMax(playerInfo);

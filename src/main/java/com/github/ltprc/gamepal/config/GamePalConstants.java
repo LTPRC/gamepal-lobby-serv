@@ -131,7 +131,8 @@ public class GamePalConstants {
     public static final int BUFF_CODE_HAPPY = 15;
     public static final int BUFF_CODE_SAD = 16;
     public static final int BUFF_CODE_RECOVERING = 17;
-    public static final int BUFF_CODE_LENGTH = 18;
+    public static final int BUFF_CODE_OVERWEIGHTED = 18;
+    public static final int BUFF_CODE_LENGTH = 19;
 
     public static final int FACE_COEFS_LENGTH = 10;
 

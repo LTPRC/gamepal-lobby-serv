@@ -301,7 +301,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (StringUtils.isBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
         }
-        if (bagInfo.getItems().get(itemNo) == 0 || itemAmount <= 0) {
+        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0 || itemAmount <= 0) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         switch (itemNo.charAt(0)) {
@@ -354,7 +354,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
         }
         bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (bagInfo.getItems().get(itemNo) == 0) {
+        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
                     playerInfo.getTools().remove(itemNo);
@@ -461,7 +461,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         interactedBagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldInteractedItemAmount - itemAmount, Integer.MAX_VALUE)));
         bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (bagInfo.getItems().get(itemNo) == 0) {
+        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
                 case GamePalConstants.ITEM_CHARACTER_TOOL:
                     playerInfo.getTools().remove(itemNo);
@@ -505,7 +505,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Recipe recipe = recipeMap.get(recipeNo);
         if (recipe.getCost().entrySet().stream()
-                .anyMatch(entry -> bagInfo.getItems().get(entry.getKey()) < entry.getValue() * recipeAmount)) {
+                .anyMatch(entry -> bagInfo.getItems().getOrDefault(entry.getKey(), 0) < entry.getValue() * recipeAmount)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         recipe.getCost().entrySet()
@@ -594,6 +594,21 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
+    @Override
+    public ResponseEntity<String> changePrecision(String userCode, int value, boolean isAbsolute) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        int oldPrecision = playerInfo.getPrecision();
+        int newPrecision = isAbsolute ? value : oldPrecision + value;
+        playerInfoMap.get(userCode).setPrecision(Math.max(0, Math.min(newPrecision, playerInfo.getPrecisionMax())));
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
     private ResponseEntity<String> useConsumable(String userCode, String itemNo, int itemAmount) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -624,16 +639,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         switch (worldService.getItemMap().get(itemNo).getItemNo()) {
             case "c005":
-                changeHp(userCode, 0, true);
-                changeVp(userCode, 0, true);
-                changeHunger(userCode, 0, true);
-                changeThirst(userCode, 0, true);
+                killPlayer(userCode);
                 break;
             case "c006":
-                changeHp(userCode, playerInfoMap.get(userCode).getHpMax(), true);
-                changeVp(userCode, playerInfoMap.get(userCode).getVpMax(), true);
-                changeHunger(userCode, playerInfoMap.get(userCode).getHungerMax(), true);
-                changeThirst(userCode, playerInfoMap.get(userCode).getThirst(), true);
+                revivePlayer(userCode);
                 break;
             case "c007":
                 playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_STUNNED] = -1;
@@ -778,7 +787,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
         String ammoCode = playerInfoMap.get(userCode).getSkill()[skillNo].getAmmoCode();
-        if (StringUtils.isNotBlank(ammoCode) && bagInfo.getItems().get(ammoCode) == 0) {
+        if (StringUtils.isNotBlank(ammoCode) && bagInfo.getItems().getOrDefault(ammoCode, 0) == 0) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1040));
         }
         if (isDown) {
@@ -790,7 +799,7 @@ public class PlayerServiceImpl implements PlayerService {
                 } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
                     playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
                     if (StringUtils.isNotBlank(ammoCode)) {
-                        bagInfo.getItems().put(ammoCode, bagInfo.getItems().get(ammoCode) - 1);
+                        getItem(userCode, ammoCode, -1);
                     }
                     generateEventBySkill(userCode, skillNo);
                 } else {
@@ -803,7 +812,7 @@ public class PlayerServiceImpl implements PlayerService {
                 if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == -1) {
                     playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
                     if (StringUtils.isNotBlank(ammoCode)) {
-                        bagInfo.getItems().put(ammoCode, bagInfo.getItems().get(ammoCode) - 1);
+                        getItem(userCode, ammoCode, -1);
                     }
                     generateEventBySkill(userCode, skillNo);
                 }
@@ -834,6 +843,9 @@ public class PlayerServiceImpl implements PlayerService {
                 playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
                         GamePalConstants.EVENT_MAX_ANGLE_SHOOT.doubleValue() * 2 * (random.nextDouble() - 0.5D))),
                 GamePalConstants.EVENT_MAX_DISTANCE_SHOOT);
+        if (playerInfo.getSkill()[skillNo].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK) {
+            changePrecision(userCode, -500, false);
+        }
         switch (playerInfo.getSkill()[skillNo].getSkillCode()) {
             case SkillConstants.SKILL_CODE_BLOCK:
                 if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != -1) {
@@ -1125,6 +1137,7 @@ public class PlayerServiceImpl implements PlayerService {
         changeVp(userCode, 0, true);
         changeHunger(userCode, 0, true);
         changeThirst(userCode, 0, true);
+        changePrecision(userCode, 0, true);
         // Reset all skill remaining time
         for (int i = 0; i < playerInfo.getSkill().length; i++) {
             if (null != playerInfo.getSkill()[i]) {
@@ -1162,6 +1175,7 @@ public class PlayerServiceImpl implements PlayerService {
         changeVp(userCode, playerInfo.getVpMax(), true);
         changeHunger(userCode, playerInfo.getHungerMax(), true);
         changeThirst(userCode, playerInfo.getThirstMax(), true);
+        changePrecision(userCode, playerInfo.getThirstMax(), true);
         WorldEvent worldEvent = BlockUtil.createWorldEvent(playerInfo.getId(),
                 GamePalConstants.EVENT_CODE_SACRIFICE, playerInfo);
         world.getEventQueue().add(worldEvent);
@@ -1416,7 +1430,6 @@ public class PlayerServiceImpl implements PlayerService {
         }
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
-        BagInfo bagInfo = bagInfoMap.get(userCode);
         Tool tool = playerInfo.getTools().stream()
                 .filter(toolStr -> worldService.getItemMap().containsKey(toolStr))
                 .map(toolStr -> (Tool) worldService.getItemMap().get(toolStr))

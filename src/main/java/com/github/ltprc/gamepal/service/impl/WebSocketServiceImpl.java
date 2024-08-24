@@ -411,8 +411,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             session.getBasicRemote().sendText(content);
         } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-            // Browser refresh comes here 24/05/29
-//            userService.logoff(userCode, "", false);
+            // Browser refresh does not come here 24/08/29
+            userService.logoff(userCode, "", false);
         }
     }
 }
