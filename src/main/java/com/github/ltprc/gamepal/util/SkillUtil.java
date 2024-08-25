@@ -350,11 +350,6 @@ public class SkillUtil {
         creatureInfo.setSkill(skills);
     }
 
-    public static boolean validateActiveness(final PlayerInfo playerInfo) {
-        return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
-                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0;
-    }
-
     public static boolean isBlockDetected(final PlayerInfo playerInfo, final WorldCoordinate worldCoordinate,
                                           final int sceneScanRadius) {
         if (worldCoordinate.getRegionNo() != playerInfo.getRegionNo()) {

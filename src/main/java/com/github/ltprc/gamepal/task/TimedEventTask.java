@@ -63,7 +63,7 @@ public class TimedEventTask {
                     });
 
             onlineMap.keySet().stream()
-                    .filter(userCode -> SkillUtil.validateActiveness(playerInfoMap.get(userCode)))
+                    .filter(userCode -> playerService.validateActiveness(world, playerInfoMap.get(userCode)))
                     .forEach(userCode -> {
                         PlayerInfo playerInfo = playerInfoMap.get(userCode);
                         double randomNumber;
@@ -82,16 +82,10 @@ public class TimedEventTask {
                             newVp -= 5;
                         }
                         Coordinate speed = playerInfo.getSpeed();
-                        BigDecimal maxSpeed = playerInfo.getMaxSpeed();
                         int vpFracturedFactor = playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
                                 ? 150 : 15;
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
-                            newVp -= speed.getX().equals(BigDecimal.ZERO) && speed.getY().equals(BigDecimal.ZERO)
-                                    ? 0 : vpFracturedFactor;
-                        } else {
-                            newVp -= Math.floor(vpFracturedFactor * Math.sqrt(Math.pow(speed.getX().doubleValue(), 2)
-                                    + Math.pow(speed.getY().doubleValue(), 2)) / maxSpeed.doubleValue());
-                        }
+                        newVp -= speed.getX().equals(BigDecimal.ZERO) && speed.getY().equals(BigDecimal.ZERO)
+                                ? 0 : vpFracturedFactor;
                         if (newVp < 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
                             newVp *= 2;
                         } else if (newVp > 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
@@ -149,6 +143,9 @@ public class TimedEventTask {
 
                         // Check level-up
                         playerService.checkLevelUp(userCode);
+
+                        // Check floorCode
+                        BlockUtil.calculateMaxSpeed(playerInfo);
                     });
 
             // NPC movements
@@ -176,7 +173,7 @@ public class TimedEventTask {
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
             onlineMap.keySet().stream()
-                    .filter(userCode -> SkillUtil.validateActiveness(playerInfoMap.get(userCode)))
+                    .filter(userCode -> playerService.validateActiveness(world, playerInfoMap.get(userCode)))
                     .forEach(userCode -> {
                         PlayerInfo playerInfo = playerInfoMap.get(userCode);
 

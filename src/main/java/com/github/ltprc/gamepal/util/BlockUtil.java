@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
+import com.github.ltprc.gamepal.config.BlockCodeConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
@@ -7,6 +8,7 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.*;
 import com.github.ltprc.gamepal.model.map.world.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -634,5 +636,32 @@ public class BlockUtil {
         } else {
             return distance.compareTo(perceptionInfo.getIndistinctVisionRadius()) <= 0;
         }
+    }
+
+    public static void calculateMaxSpeed(WorldMovingBlock worldMovingBlock) {
+        BigDecimal maxSpeed = CreatureConstants.MAX_SPEED_DEFAULT;
+        switch (worldMovingBlock.getFloorCode()) {
+            case BlockCodeConstants.BLOCK_CODE_SWAMP:
+                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.2));
+                break;
+            case BlockCodeConstants.BLOCK_CODE_SAND:
+                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.4));
+                break;
+            case BlockCodeConstants.BLOCK_CODE_SNOW:
+            case BlockCodeConstants.BLOCK_CODE_LAVA:
+                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.6));
+                break;
+            case BlockCodeConstants.BLOCK_CODE_ROUGH:
+            case BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN:
+            case BlockCodeConstants.BLOCK_CODE_WATER:
+                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.8));
+                break;
+            case BlockCodeConstants.BLOCK_CODE_NOTHING:
+            case BlockCodeConstants.BLOCK_CODE_GRASS:
+            case BlockCodeConstants.BLOCK_CODE_DIRT:
+            default:
+                break;
+        }
+        worldMovingBlock.setMaxSpeed(maxSpeed);
     }
 }

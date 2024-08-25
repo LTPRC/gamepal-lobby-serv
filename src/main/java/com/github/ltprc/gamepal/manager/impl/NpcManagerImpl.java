@@ -286,7 +286,7 @@ public class NpcManagerImpl implements NpcManager {
                         .anyMatch(entry3 -> SkillUtil.isBlockDetected(entry3.getValue(),
                                 world.getPlayerInfoMap().get(entry3.getKey()),
                                 GamePalConstants.SCENE_SCAN_RADIUS)))
-                .filter(entry2 -> SkillUtil.validateActiveness(world.getPlayerInfoMap().get(entry2.getKey())))
+                .filter(entry2 -> playerService.validateActiveness(world, world.getPlayerInfoMap().get(entry2.getKey())))
                 .forEach(entry2 -> {
                     String npcUserCode = entry2.getKey();
                     PlayerInfo npcPlayerInfo = world.getPlayerInfoMap().get(npcUserCode);
@@ -311,7 +311,7 @@ public class NpcManagerImpl implements NpcManager {
                     }
                     Optional<PlayerInfo> red = world.getPlayerInfoMap().values().stream()
                             .filter(playerInfo -> !npcUserCode.equals(playerInfo.getId()))
-                            .filter(SkillUtil::validateActiveness)
+                            .filter(playerInfo -> playerService.validateActiveness(world, playerInfo))
                             .filter(playerInfo -> BlockUtil.checkPerceptionCondition(
                                     world.getRegionMap().get(npcPlayerInfo.getRegionNo()), npcPlayerInfo, playerInfo))
                             .min((playerInfo1, playerInfo2) -> {
@@ -330,7 +330,7 @@ public class NpcManagerImpl implements NpcManager {
                     }
                     // Remove not alive element from red queue 24/08/08
                     while (!npcBrain.getRedQueue().isEmpty()
-                            && !SkillUtil.validateActiveness(npcBrain.getRedQueue().peek())) {
+                            && !playerService.validateActiveness(world, npcBrain.getRedQueue().peek())) {
                         npcBrain.getRedQueue().poll();
                     }
                     // Move & Destroy
@@ -356,7 +356,7 @@ public class NpcManagerImpl implements NpcManager {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         playerInfoMap.entrySet().stream()
                 .filter(entry2 -> entry2.getValue().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
-                .filter(entry2 -> SkillUtil.validateActiveness(entry2.getValue()))
+                .filter(entry2 -> playerService.validateActiveness(world, entry2.getValue()))
                 .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue()));
     }
 
@@ -488,8 +488,6 @@ public class NpcManagerImpl implements NpcManager {
             newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue() * 0.1, newSpeed);
         } else if (npcPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0) {
             newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue() * 0.25, newSpeed);
-        } else if (npcPlayerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
-            newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue() * 0.5, newSpeed);
         } else {
             newSpeed = Math.min(npcPlayerInfo.getMaxSpeed().doubleValue(), newSpeed);
         }

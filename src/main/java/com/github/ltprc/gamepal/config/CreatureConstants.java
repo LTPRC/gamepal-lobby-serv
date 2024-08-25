@@ -33,6 +33,8 @@ public class CreatureConstants {
     public static final int SKIN_COLOR_BOAR = 14;
     public static final int SKIN_COLOR_HORSE = 15;
 
+    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
+
     // Backend constants
 
     public static final int NPC_BRAIN_STATUS_UNAWARE = 0;

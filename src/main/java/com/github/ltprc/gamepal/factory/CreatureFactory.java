@@ -63,7 +63,7 @@ public class CreatureFactory {
         BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, playerInfo);
         playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         playerInfo.setFaceDirection(BigDecimal.ZERO);
-        playerInfo.setMaxSpeed(BigDecimal.valueOf(0.1));
+        BlockUtil.calculateMaxSpeed(playerInfo);
         playerInfo.setAcceleration(BigDecimal.valueOf(0.005));
         playerInfo.setHpMax(1000);
         playerInfo.setHp(playerInfo.getHpMax() / 2);

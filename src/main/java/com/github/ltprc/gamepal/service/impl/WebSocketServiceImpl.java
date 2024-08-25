@@ -87,6 +87,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Override
     public void onClose(String userCode) {
         logger.info("断开连接成功");
+        userService.logoff(userCode, "", false);
     }
 
     @Override
@@ -411,8 +412,11 @@ public class WebSocketServiceImpl implements WebSocketService {
             session.getBasicRemote().sendText(content);
         } catch (IOException | IllegalStateException e) {
             logger.warn(ErrorUtil.ERROR_1010 + "userCode: " + userCode);
-            // Browser refresh does not come here 24/08/29
-            userService.logoff(userCode, "", false);
+            try {
+                session.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 }

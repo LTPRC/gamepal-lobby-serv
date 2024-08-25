@@ -1,7 +1,9 @@
 package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -69,4 +71,6 @@ public interface PlayerService {
     ResponseEntity<String> checkLevelUp(String userCode);
 
     ResponseEntity<String> updateSkillsByTool(String userCode);
+
+    boolean validateActiveness(final GameWorld world, final PlayerInfo playerInfo);
 }

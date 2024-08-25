@@ -6,7 +6,6 @@ import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockCodeConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -15,6 +14,7 @@ import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -39,10 +39,10 @@ public class SceneManagerImpl implements SceneManager {
     private UserService userService;
 
     @Autowired
-    private CreatureFactory creatureFactory;
+    private NpcManager npcManager;
 
     @Autowired
-    private NpcManager npcManager;
+    private PlayerService playerService;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -1243,7 +1243,7 @@ public class SceneManagerImpl implements SceneManager {
         // Collect detected playerInfos
         playerInfoMap.values().stream()
                 // playerInfos contains running players or NPC 24/03/25
-                .filter(SkillUtil::validateActiveness)
+                .filter(playerInfo1 -> playerService.validateActiveness(world, playerInfo1))
                 .filter(playerInfo1 -> SkillUtil.isBlockDetected(playerInfo, playerInfo1, sceneScanRadius))
                 .forEach(playerInfo1 -> {
                     Block block = BlockUtil.convertWorldBlock2Block(region, playerInfo1, false);

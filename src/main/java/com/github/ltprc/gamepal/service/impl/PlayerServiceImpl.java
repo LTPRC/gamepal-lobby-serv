@@ -1445,4 +1445,11 @@ public class PlayerServiceImpl implements PlayerService {
         }
         return ResponseEntity.ok().body(rst.toString());
     }
+
+    @Override
+    public boolean validateActiveness(final GameWorld world, final PlayerInfo playerInfo) {
+        return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0
+                && world.getOnlineMap().containsKey(playerInfo.getId());
+    }
 }

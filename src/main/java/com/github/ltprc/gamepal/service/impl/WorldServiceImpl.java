@@ -328,16 +328,16 @@ public class WorldServiceImpl implements WorldService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         List<WorldBlock> playerInfoList = world.getPlayerInfoMap().values().stream()
-                .filter(playerInfo -> checkEventCondition(eventBlock, playerInfo))
+                .filter(playerInfo -> checkEventCondition(world, eventBlock, playerInfo))
                 .collect(Collectors.toList());
         activateEvent(eventBlock, playerInfoList);
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    private boolean checkEventCondition(final WorldBlock eventBlock, final WorldBlock blocker) {
+    private boolean checkEventCondition(final GameWorld world, final WorldBlock eventBlock, final WorldBlock blocker) {
         return eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
-                || SkillUtil.validateActiveness((PlayerInfo) blocker))
+                || playerService.validateActiveness(world, (PlayerInfo) blocker))
                 && checkEventConditionByEventCode(eventBlock, blocker);
     }
 
@@ -450,7 +450,8 @@ public class WorldServiceImpl implements WorldService {
                     BlockUtil.copyWorldCoordinate(activatedWorldBlock, eventBlock);
                     if (activatedWorldBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
                             && playerInfoMap.containsKey(activatedWorldBlock.getId())
-                            && SkillUtil.validateActiveness(playerInfoMap.get(activatedWorldBlock.getId()))) {
+                            && playerService.validateActiveness(world,
+                            playerInfoMap.get(activatedWorldBlock.getId()))) {
                         playerService.damageHp(activatedWorldBlock.getId(), eventBlock.getId(),
                                 changedHp, false);
                         WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
@@ -542,7 +543,7 @@ public class WorldServiceImpl implements WorldService {
                     })
         );
         preSelectedWorldBlocks.stream()
-                .filter(wb -> checkEventCondition(eventBlock, wb))
+                .filter(wb -> checkEventCondition(world, eventBlock, wb))
                 .forEach(wb -> {
                     BigDecimal distanceOld =
                             BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()),
