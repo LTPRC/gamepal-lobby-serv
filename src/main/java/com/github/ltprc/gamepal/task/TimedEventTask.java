@@ -1,20 +1,16 @@
 package com.github.ltprc.gamepal.task;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,7 +19,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class TimedEventTask {
@@ -42,6 +37,15 @@ public class TimedEventTask {
 
     @Autowired
     private BuffManager buffManager;
+
+    @Scheduled(fixedRate = 20)
+    public void executeByHalfFrame() {
+        for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
+            GameWorld world = entry.getValue();
+            // NPC movements
+            npcManager.updateNpcBrains(world);
+        }
+    }
 
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
@@ -84,10 +88,20 @@ public class TimedEventTask {
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
                             newVp -= 5;
                         }
-                        if (playerInfo.getMaxSpeed().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP)
-                                .pow(2).doubleValue() < playerInfo.getSpeed().getX().pow(2).doubleValue()
-                                + playerInfo.getSpeed().getX().pow(2).doubleValue()) {
-                            newVp -= 15;
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+                            if (playerInfo.getSpeed().getX().multiply(BigDecimal.valueOf(2)).abs()
+                                    .compareTo(BigDecimal.ZERO) > 0
+                                    || playerInfo.getSpeed().getY().multiply(BigDecimal.valueOf(2)).abs()
+                                    .compareTo(BigDecimal.ZERO) > 0) {
+                                newVp -= 15;
+                            }
+                        } else {
+                            if (playerInfo.getSpeed().getX().multiply(BigDecimal.valueOf(2)).abs()
+                                    .compareTo(playerInfo.getMaxSpeed()) > 0
+                                    || playerInfo.getSpeed().getY().multiply(BigDecimal.valueOf(2)).abs()
+                                    .compareTo(playerInfo.getMaxSpeed()) > 0) {
+                                newVp -= 15;
+                            }
                         }
                         playerService.changeVp(userCode, newVp, false);
 
@@ -147,9 +161,6 @@ public class TimedEventTask {
                         // Check floorCode
                         BlockUtil.calculateMaxSpeed(playerInfo);
                     });
-
-            // NPC movements
-            npcManager.updateNpcBrains(world);
 
             // Buff changing
             onlineMap.keySet().stream()

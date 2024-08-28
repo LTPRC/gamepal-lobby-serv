@@ -582,7 +582,7 @@ public class WorldServiceImpl implements WorldService {
             WorldEvent newEvent = updateEvent(eventQueue.poll());
             if (null != newEvent) {
                 eventQueue.add(newEvent);
-                expandByCoordinate(world, null, newEvent, 1);
+                expandByCoordinate(world, null, newEvent, 0);
                 regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
                         .add(BlockUtil.convertWorldEvent2Event(newEvent));
 //                if (!regionMap.containsKey(newEvent.getRegionNo())) {
@@ -629,21 +629,14 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth) {
-        if (depth <= 0) {
+        if (depth < 0) {
             return;
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
-//        if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
-//            expandRegion(world, worldCoordinate.getRegionNo());
-//        }
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
-            sceneManager.fillScene(world, region, worldCoordinate.getSceneCoordinate());
-        }
-        WorldCoordinate newWorldCoordinate = new WorldCoordinate();
-        BlockUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
-        for (int i = - 1; i <= 1; i++) {
-            for (int j = - 1; j <= 1; j++) {
+        WorldCoordinate newWorldCoordinate = new WorldCoordinate(worldCoordinate);
+        for (int i = - depth; i <= depth; i++) {
+            for (int j = - depth; j <= depth; j++) {
                 if (worldCoordinate.getSceneCoordinate().getX() + i >= - region.getRadius()
                         && worldCoordinate.getSceneCoordinate().getX() + i <= region.getRadius()
                         && worldCoordinate.getSceneCoordinate().getY() + j >= - region.getRadius()
@@ -651,7 +644,7 @@ public class WorldServiceImpl implements WorldService {
                     newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
                             worldCoordinate.getSceneCoordinate().getX() + i,
                             worldCoordinate.getSceneCoordinate().getY() + j));
-                    expandScene(world, newWorldCoordinate, depth - 1);
+                    sceneManager.fillScene(world, region, newWorldCoordinate.getSceneCoordinate());
                 }
             }
         }

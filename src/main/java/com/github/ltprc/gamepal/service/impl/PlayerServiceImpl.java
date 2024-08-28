@@ -1084,7 +1084,7 @@ public class PlayerServiceImpl implements PlayerService {
                 worldMovingBlock.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
         worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));
         worldMovingBlock.getSpeed().setY(newSpeed.getY().subtract(worldMovingBlock.getCoordinate().getY()));
-        movementManager.settleSpeedAndCoordinate(world, worldMovingBlock);
+        movementManager.settleSpeedAndCoordinate(world, worldMovingBlock, 0);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
 //        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
@@ -1204,7 +1204,7 @@ public class PlayerServiceImpl implements PlayerService {
                 worldMovingBlock.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
         worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));
         worldMovingBlock.getSpeed().setY(newSpeed.getY().subtract(worldMovingBlock.getCoordinate().getY()));
-        movementManager.settleSpeedAndCoordinate(world, worldMovingBlock);
+        movementManager.settleSpeedAndCoordinate(world, worldMovingBlock, 0);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         String id = UUID.randomUUID().toString();
         String code = "3100";

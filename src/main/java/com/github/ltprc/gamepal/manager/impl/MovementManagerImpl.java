@@ -12,14 +12,12 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -42,7 +40,7 @@ public class MovementManagerImpl implements MovementManager {
     private PlayerService playerService;
 
     @Override
-    public void settleSpeedAndCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock) {
+    public void settleSpeedAndCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock, int sceneScanDepth) {
         String userCode = worldMovingBlock.getId();
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(userCode, 1);
@@ -87,12 +85,11 @@ public class MovementManagerImpl implements MovementManager {
                     worldMovingBlock.getSceneCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
                             worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())));
+            BlockUtil.fixWorldCoordinate(region, teleportWc);
         } else {
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         }
-        worldService.expandByCoordinate(world, worldMovingBlock, teleportWc,
-                worldMovingBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-                        ? GamePalConstants.SCENE_SCAN_RADIUS : 1);
+        worldService.expandByCoordinate(world, worldMovingBlock, teleportWc, sceneScanDepth);
         settleCoordinate(world, worldMovingBlock, teleportWc);
     }
 
@@ -136,9 +133,13 @@ public class MovementManagerImpl implements MovementManager {
         IntegerCoordinate gridCoordinate = new IntegerCoordinate(
                 worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
                 worldMovingBlock.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
-        if (null != scene.getGird() && null != scene.getGird()[gridCoordinate.getX()]) {
-            int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
-            worldMovingBlock.setFloorCode(floorCode);
+        try {
+            if (null != scene.getGird() && null != scene.getGird()[gridCoordinate.getX()]) {
+                int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+                worldMovingBlock.setFloorCode(floorCode);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

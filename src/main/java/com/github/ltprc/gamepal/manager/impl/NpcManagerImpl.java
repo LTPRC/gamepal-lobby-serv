@@ -19,6 +19,7 @@ import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -53,6 +54,9 @@ public class NpcManagerImpl implements NpcManager {
     @Autowired
     private BuffManager buffManager;
 
+    @Autowired
+    private WorldService worldService;
+
     @Override
     public PlayerInfo createCreature(GameWorld world, final int playerType, final int creatureType, String userCode) {
         PlayerInfo playerInfo = creatureFactory.createCreatureInstance(playerType);
@@ -78,6 +82,8 @@ public class NpcManagerImpl implements NpcManager {
         PlayerInfo creatureInfo = playerInfoMap.get(userCode);
         BlockUtil.copyWorldCoordinate(worldCoordinate, creatureInfo);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), creatureInfo);
+        worldService.expandByCoordinate(world, null, creatureInfo,
+                creatureInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
         world.getOnlineMap().put(userCode, -1L);
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         userService.addUserIntoWorldMap(userCode, world.getId());
@@ -357,7 +363,7 @@ public class NpcManagerImpl implements NpcManager {
         playerInfoMap.entrySet().stream()
                 .filter(entry2 -> entry2.getValue().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getValue()))
-                .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue()));
+                .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue(), 1));
     }
 
     private boolean checkAttackCondition(final String fromUserCode, final String toUserCode) {
