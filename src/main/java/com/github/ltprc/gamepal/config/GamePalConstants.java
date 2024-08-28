@@ -140,7 +140,6 @@ public class GamePalConstants {
 
     public static final long ONLINE_TIMEOUT_SECOND = 300L;
     public static final int SCENE_SCAN_RADIUS = 2;
-    public static final int SCENE_SCAN_MAX_RADIUS = 50;
 
     public static final int GAME_STATUS_END = -1;
     public static final int GAME_STATUS_START = 0;

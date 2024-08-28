@@ -2,10 +2,10 @@ package com.github.ltprc.gamepal.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +38,7 @@ public class ContentUtil {
     public static JSONObject jsonFile2JSONObject(String filePath) {
         try {
             File jsonFile = new File(filePath);
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
+            Reader reader = new InputStreamReader(Files.newInputStream(jsonFile.toPath()), "utf-8");
             int ch = 0;
             StringBuffer sb = new StringBuffer();
             while ((ch = reader.read()) != -1) {
@@ -55,7 +55,7 @@ public class ContentUtil {
     public static JSONArray jsonFile2JSONArray(String filePath) {
         try {
             File jsonFile = new File(filePath);
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
+            Reader reader = new InputStreamReader(Files.newInputStream(jsonFile.toPath()), "utf-8");
             int ch = 0;
             StringBuffer sb = new StringBuffer();
             while ((ch = reader.read()) != -1) {

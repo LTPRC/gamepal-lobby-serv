@@ -6,6 +6,12 @@ import java.util.Map;
 
 public class BlockCodeConstants {
 
+    // Backend constants
+
+    public static final int REGION_RADIUS_DEFAULT = 50;
+    public static final int REGION_TYPE_DEFAULT = 0;
+    public static final int REGION_TYPE_ISLAND = 1;
+
     public static final int BLOCK_CODE_NOTHING = 1001;
 
     public static final int BLOCK_CODE_DIRT = 1010;

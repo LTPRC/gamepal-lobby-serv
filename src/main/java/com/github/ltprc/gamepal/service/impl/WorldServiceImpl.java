@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.config.BlockCodeConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -139,16 +140,18 @@ public class WorldServiceImpl implements WorldService {
         }
         for (Object obj : regions) {
             JSONObject region = JSON.parseObject(String.valueOf(obj));
-            Region newRegion = new Region();
             int regionNo = region.getInteger("regionNo");
+            int regionType = region.getInteger("type");
             String regionName =  region.getString("name");
             int height = region.getInteger("height");
             int width = region.getInteger("width");
+            Region newRegion = new Region();
             newRegion.setRegionNo(regionNo);
+            newRegion.setType(regionType);
             newRegion.setName(regionName);
             newRegion.setHeight(height);
             newRegion.setWidth(width);
-            newRegion.setRadius(GamePalConstants.SCENE_SCAN_MAX_RADIUS);
+            newRegion.setRadius(BlockCodeConstants.REGION_RADIUS_DEFAULT);
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));
@@ -579,19 +582,40 @@ public class WorldServiceImpl implements WorldService {
             WorldEvent newEvent = updateEvent(eventQueue.poll());
             if (null != newEvent) {
                 eventQueue.add(newEvent);
-                if (!regionMap.containsKey(newEvent.getRegionNo())) {
-                    logger.error(ErrorUtil.ERROR_1027);
-                } else {
-                    if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
-                        // Detect and expand scenes after updating event's location
-                        expandScene(world, newEvent);
-                    }
-                    regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
-                            .add(BlockUtil.convertWorldEvent2Event(newEvent));
-                }
+                expandByCoordinate(world, null, newEvent, 1);
+                regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
+                        .add(BlockUtil.convertWorldEvent2Event(newEvent));
+//                if (!regionMap.containsKey(newEvent.getRegionNo())) {
+//                    logger.error(ErrorUtil.ERROR_1027);
+//                } else {
+//                    if (!regionMap.get(newEvent.getRegionNo()).getScenes().containsKey(newEvent.getSceneCoordinate())) {
+//                        // Detect and expand scenes after updating event's location
+//                        expandScene(world, newEvent, 1);
+//                    }
+//                    regionMap.get(newEvent.getRegionNo()).getScenes().get(newEvent.getSceneCoordinate()).getEvents()
+//                            .add(BlockUtil.convertWorldEvent2Event(newEvent));
+//                }
             }
         }
         eventQueue.poll();
+    }
+
+    @Override
+    public void expandByCoordinate(GameWorld world, WorldCoordinate fromWorldCoordinate,
+                                   WorldCoordinate toWorldCoordinate, int depth) {
+        boolean isRegionChanged = null == fromWorldCoordinate
+                || fromWorldCoordinate.getRegionNo() != toWorldCoordinate.getRegionNo();
+        if (isRegionChanged) {
+            expandRegion(world, toWorldCoordinate.getRegionNo());
+        }
+        boolean isSceneChanged = isRegionChanged
+                || !fromWorldCoordinate.getSceneCoordinate().getX()
+                .equals(toWorldCoordinate.getSceneCoordinate().getX())
+                || !fromWorldCoordinate.getSceneCoordinate().getY()
+                .equals(toWorldCoordinate.getSceneCoordinate().getY());
+        if (isSceneChanged) {
+            expandScene(world, toWorldCoordinate, depth);
+        }
     }
 
     @Override
@@ -604,11 +628,10 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public void expandScene(GameWorld world, WorldCoordinate worldCoordinate) {
-        expandScene(world, worldCoordinate, GamePalConstants.SCENE_SCAN_RADIUS);
-    }
-
-    private void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth) {
+    public void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth) {
+        if (depth <= 0) {
+            return;
+        }
         Map<Integer, Region> regionMap = world.getRegionMap();
 //        if (!regionMap.containsKey(worldCoordinate.getRegionNo())) {
 //            expandRegion(world, worldCoordinate.getRegionNo());
@@ -617,20 +640,18 @@ public class WorldServiceImpl implements WorldService {
         if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
             sceneManager.fillScene(world, region, worldCoordinate.getSceneCoordinate());
         }
-        if (depth > 0) {
-            WorldCoordinate newWorldCoordinate = new WorldCoordinate();
-            BlockUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
-            for (int i = - 1; i <= 1; i++) {
-                for (int j = - 1; j <= 1; j++) {
-                    if (worldCoordinate.getSceneCoordinate().getX() + i >= - region.getRadius()
-                            && worldCoordinate.getSceneCoordinate().getX() + i <= region.getRadius()
-                            && worldCoordinate.getSceneCoordinate().getY() + j >= - region.getRadius()
-                            && worldCoordinate.getSceneCoordinate().getY() + j <= region.getRadius()) {
-                        newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
-                                worldCoordinate.getSceneCoordinate().getX() + i,
-                                worldCoordinate.getSceneCoordinate().getY() + j));
-                        expandScene(world, newWorldCoordinate, depth - 1);
-                    }
+        WorldCoordinate newWorldCoordinate = new WorldCoordinate();
+        BlockUtil.copyWorldCoordinate(worldCoordinate, newWorldCoordinate);
+        for (int i = - 1; i <= 1; i++) {
+            for (int j = - 1; j <= 1; j++) {
+                if (worldCoordinate.getSceneCoordinate().getX() + i >= - region.getRadius()
+                        && worldCoordinate.getSceneCoordinate().getX() + i <= region.getRadius()
+                        && worldCoordinate.getSceneCoordinate().getY() + j >= - region.getRadius()
+                        && worldCoordinate.getSceneCoordinate().getY() + j <= region.getRadius()) {
+                    newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
+                            worldCoordinate.getSceneCoordinate().getX() + i,
+                            worldCoordinate.getSceneCoordinate().getY() + j));
+                    expandScene(world, newWorldCoordinate, depth - 1);
                 }
             }
         }

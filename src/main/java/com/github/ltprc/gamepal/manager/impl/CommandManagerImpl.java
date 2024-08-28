@@ -16,7 +16,7 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +45,9 @@ public class CommandManagerImpl implements CommandManager {
 
     @Autowired
     private MovementManager movementManager;
+
+    @Autowired
+    private WorldService worldService;
 
     @Override
     public ResponseEntity<String> useCommand(String userCode, String commandContent) {
@@ -184,6 +187,8 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwczion":
                 playerService.generateNotificationMessage(userCode, "欢迎回家。");
+                worldService.expandByCoordinate(world, playerInfo, GamePalConstants.DEFAULT_BIRTHPLACE,
+                        GamePalConstants.SCENE_SCAN_RADIUS);
                 movementManager.settleCoordinate(world, playerInfo, GamePalConstants.DEFAULT_BIRTHPLACE);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
                 break;

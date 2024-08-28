@@ -1,6 +1,7 @@
 [
   {
     "regionNo": 1,
+    "type": 0,
     "name": "撸猫房",
     "height": 10,
     "width": 10,
@@ -132,6 +133,7 @@
   },
   {
     "regionNo": 2,
+    "type": 0,
     "name": "教室",
     "height": 10,
     "width": 10,
@@ -222,6 +224,7 @@
   },
   {
     "regionNo": 3,
+    "type": 0,
     "name": "走廊",
     "height": 10,
     "width": 10,

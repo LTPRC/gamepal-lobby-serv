@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -118,14 +119,12 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
             if (functions.containsKey("updatePlayerMovement")) {
                 PlayerInfo playerMovement = JSON.toJavaObject(functions.getJSONObject("updatePlayerMovement"), PlayerInfo.class);
-                worldService.expandRegion(world, playerMovement.getRegionNo());
-                worldService.expandScene(world, playerMovement);
+                worldService.expandByCoordinate(world, playerInfo, playerMovement, GamePalConstants.SCENE_SCAN_RADIUS);
                 movementManager.settleCoordinate(world, playerInfo, playerMovement);
                 playerInfo.setSpeed(playerMovement.getSpeed());
                 playerInfo.setFaceDirection(playerMovement.getFaceDirection());
             }
             // Detect and expand scenes after updating player's location
-//            worldService.expandScene(world, playerInfo);
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.forEach(useItem -> {
@@ -397,6 +396,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("currentSecond", Instant.now().getEpochSecond() % 60);
         rst.put("currentMillisecond", Instant.now().getNano() / 1000_000);
 
+//        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
+//            analyzeJsonContent(rst);
+//        }
         transmit(rst, userCode, world);
     }
 
@@ -418,5 +420,29 @@ public class WebSocketServiceImpl implements WebSocketService {
                 throw new RuntimeException(ex);
             }
         }
+    }
+
+    private static void analyzeJsonContent(JSONObject rst) {
+        logger.info("Analyze json content now...");
+        int totalLength = 0;
+        for (String key : rst.keySet()) {
+            Object value = rst.get(key);
+            String valueAsString = value.toString();
+            int length = valueAsString.length();
+            logger.info("Key: " + key + ", Value Length: " + length);
+            if (key.equals("playerInfos")) {
+                JSONObject playerInfos = rst.getJSONObject(key);
+                logger.info("playerInfos.count: " + playerInfos.keySet().size());
+//                for (String userCode : playerInfos.keySet()) {
+//                    logger.info("userCode: " + userCode);
+//                    logger.info("playerInfo.size: " + playerInfos.getJSONObject(userCode).toString().length());
+////                    for (String key2 : playerInfos.getJSONObject(userCode).keySet()) {
+////                        logger.info("playerInfo.Key: " + key2 + ", Value Length: " + String.valueOf(playerInfos.getJSONObject(userCode).get(key2)).length());
+////                    }
+//                }
+            }
+            totalLength += length;
+        }
+        logger.info("Total length of all values: " + totalLength);
     }
 }

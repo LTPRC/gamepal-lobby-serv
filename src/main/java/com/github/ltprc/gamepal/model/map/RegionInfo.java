@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RegionInfo {
     private int regionNo;
+    private int type;
     private String name;
     private int height;
     private int width;
@@ -16,6 +17,7 @@ public class RegionInfo {
 
     public RegionInfo(RegionInfo regionInfo) {
         regionNo = regionInfo.regionNo;
+        type = regionInfo.type;
         name = regionInfo.name;
         height = regionInfo.height;
         width = regionInfo.width;

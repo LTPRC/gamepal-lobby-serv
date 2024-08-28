@@ -63,8 +63,8 @@ public class MovementManagerImpl implements MovementManager {
             newMovingBlock.setY(worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()));
             if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT
                     && BlockUtil.detectCollision(newMovingBlock, block)) {
-                    teleportWc = ((Teleport) block).getTo();
-                    break;
+                teleportWc = ((Teleport) block).getTo();
+                break;
             }
             if (GamePalConstants.STRUCTURE_MATERIAL_HOLLOW == block.getStructure().getMaterial()) {
                 continue;
@@ -82,17 +82,18 @@ public class MovementManagerImpl implements MovementManager {
         }
         // Settle worldMovingBlock position
         if (null == teleportWc) {
-            settleCoordinate(world, worldMovingBlock, new WorldCoordinate(
+            teleportWc = new WorldCoordinate(
                     worldMovingBlock.getRegionNo(),
                     worldMovingBlock.getSceneCoordinate(),
                     new Coordinate(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()),
-                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()))));
+                            worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY())));
         } else {
-            worldService.expandRegion(world, teleportWc.getRegionNo());
-            worldService.expandScene(world, teleportWc);
             worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-            settleCoordinate(world, worldMovingBlock, teleportWc);
         }
+        worldService.expandByCoordinate(world, worldMovingBlock, teleportWc,
+                worldMovingBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
+                        ? GamePalConstants.SCENE_SCAN_RADIUS : 1);
+        settleCoordinate(world, worldMovingBlock, teleportWc);
     }
 
     @Override
@@ -102,9 +103,8 @@ public class MovementManagerImpl implements MovementManager {
         boolean isSceneChanged = isRegionChanged
                 || !worldMovingBlock.getSceneCoordinate().getX().equals(newWorldCoordinate.getSceneCoordinate().getX())
                 || !worldMovingBlock.getSceneCoordinate().getY().equals(newWorldCoordinate.getSceneCoordinate().getY());
+
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock);
-//        worldService.expandRegion(world, worldMovingBlock.getRegionNo());
-//        worldService.expandScene(world, worldMovingBlock);
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
         if (isSceneChanged) {
@@ -122,19 +122,23 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void syncFloorCode(GameWorld world, WorldMovingBlock worldMovingBlock) {
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
-        if (null == region) {
-            logger.error(ErrorUtil.ERROR_1027);
-            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
-            return;
-        }
+//        if (null == region) {
+//            logger.error(ErrorUtil.ERROR_1027);
+//            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
+//            return;
+//        }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
-        if (null == scene) {
-            logger.error(ErrorUtil.ERROR_1041);
-            worldService.expandScene(world, worldMovingBlock);
-            return;
+//        if (null == scene) {
+//            logger.error(ErrorUtil.ERROR_1041);
+//            worldService.expandScene(world, worldMovingBlock);
+//            return;
+//        }
+        IntegerCoordinate gridCoordinate = new IntegerCoordinate(
+                worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
+                worldMovingBlock.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
+        if (null != scene.getGird() && null != scene.getGird()[gridCoordinate.getX()]) {
+            int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+            worldMovingBlock.setFloorCode(floorCode);
         }
-        int floorCode = scene.getGird()[worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue()]
-                [worldMovingBlock.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue()];
-        worldMovingBlock.setFloorCode(floorCode);
     }
 }

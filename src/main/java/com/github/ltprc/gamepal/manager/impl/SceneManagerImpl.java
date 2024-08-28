@@ -48,16 +48,21 @@ public class SceneManagerImpl implements SceneManager {
     public Region generateRegion(int regionNo) {
         Region region = new Region();
         region.setRegionNo(regionNo);
+        region.setType(BlockCodeConstants.REGION_TYPE_ISLAND);
         region.setName("Auto Region " + region.getRegionNo());
         region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
         region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
-        region.setRadius(GamePalConstants.SCENE_SCAN_MAX_RADIUS);
+        region.setRadius(BlockCodeConstants.REGION_RADIUS_DEFAULT);
         initializeRegionTerrainMap(region);
         return region;
     }
 
     private void initializeRegionTerrainMap(Region region) {
-        initializeRegionTerrainMapIsland(region);
+        switch (region.getType()) {
+            case BlockCodeConstants.REGION_TYPE_ISLAND:
+                initializeRegionTerrainMapIsland(region);
+                break;
+        }
     }
 
     private void initializeRegionTerrainMapIsland(Region region) {
@@ -1182,6 +1187,10 @@ public class SceneManagerImpl implements SceneManager {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
         Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        if (null == region) {
+            logger.error(ErrorUtil.ERROR_1027);
+            return rankingQueue;
+        }
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
              i <= sceneCoordinate.getY() + sceneScanRadius; i++) {

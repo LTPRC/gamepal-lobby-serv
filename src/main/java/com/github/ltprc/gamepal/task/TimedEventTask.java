@@ -185,6 +185,12 @@ public class TimedEventTask {
                                     GamePalConstants.EVENT_CODE_FOOTSTEP, playerInfo);
                             world.getEventQueue().add(worldEvent);
                         }
+
+                        // Expand scene
+//                        worldService.expandRegion(world, playerInfo.getRegionNo());
+//                        worldService.expandScene(world, playerInfo,
+//                                playerInfo.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
+//                                        ? GamePalConstants.SCENE_SCAN_RADIUS : 1);
                     });
         }
     }
