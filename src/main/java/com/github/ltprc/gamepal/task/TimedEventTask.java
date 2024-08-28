@@ -81,21 +81,20 @@ public class TimedEventTask {
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
                             newVp -= 5;
                         }
-                        Coordinate speed = playerInfo.getSpeed();
-                        int vpFracturedFactor = playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
-                                ? 150 : 15;
-                        newVp -= speed.getX().equals(BigDecimal.ZERO) && speed.getY().equals(BigDecimal.ZERO)
-                                ? 0 : vpFracturedFactor;
-                        if (newVp < 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
-                            newVp *= 2;
-                        } else if (newVp > 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
-                            newVp /= 2;
+                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
+                            newVp -= 5;
+                        }
+                        if (playerInfo.getMaxSpeed().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP)
+                                .pow(2).doubleValue() < playerInfo.getSpeed().getX().pow(2).doubleValue()
+                                + playerInfo.getSpeed().getX().pow(2).doubleValue()) {
+                            newVp -= 15;
                         }
                         playerService.changeVp(userCode, newVp, false);
 
                         // Change hunger
                         randomNumber = Math.random();
-                        if (Math.abs(speed.getX().doubleValue()) > 0 || Math.abs(speed.getY().doubleValue()) > 0) {
+                        if (Math.abs(playerInfo.getSpeed().getX().doubleValue()) > 0
+                                || Math.abs(playerInfo.getSpeed().getY().doubleValue()) > 0) {
                             randomNumber *= 10;
                         }
                         if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
@@ -107,7 +106,8 @@ public class TimedEventTask {
 
                         // Change thirst
                         randomNumber = Math.random();
-                        if (Math.abs(speed.getX().doubleValue()) > 0 || Math.abs(speed.getY().doubleValue()) > 0) {
+                        if (Math.abs(playerInfo.getSpeed().getX().doubleValue()) > 0
+                                || Math.abs(playerInfo.getSpeed().getY().doubleValue()) > 0) {
                             randomNumber *= 10;
                         }
                         if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
