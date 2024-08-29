@@ -23,6 +23,7 @@ import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -310,9 +311,15 @@ public class WebSocketServiceImpl implements WebSocketService {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return;
         }
+        // Only detected blocks of active players or player himself will be collected 24/08/29
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        // All playerInfos are provided, but only blocks of running players or player himself will be collected 24/03/16
-        rst.put("playerInfos", playerInfoMap);
+        JSONObject playerInfos = new JSONObject();
+        playerInfos.put(userCode, playerInfo);
+        playerInfoMap.values().stream()
+                .filter(playerInfo1 -> playerService.validateActiveness(world, playerInfo1))
+                .filter(playerInfo1 -> SkillUtil.isBlockDetected(playerInfo, playerInfo1, 2))
+                .forEach(playerInfo1 -> playerInfos.put(playerInfo1.getId(), playerInfo1));
+        rst.put("playerInfos", playerInfos);
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
         if (world.getInteractionInfoMap().containsKey(userCode)) {
             if (GamePalConstants.BLOCK_TYPE_STORAGE == world.getInteractionInfoMap().get(userCode).getType()) {
@@ -349,10 +356,12 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Return SceneInfos
         JSONArray sceneInfos = new JSONArray();
-        region.getScenes().forEach((key, value) -> {
-            SceneInfo sceneInfo = new SceneInfo(value);
+        region.getScenes().values().stream()
+                .filter(scene -> SkillUtil.isBlockDetected(playerInfo, scene.getSceneCoordinate(), 2))
+                .forEach(scene -> {
+            SceneInfo sceneInfo = new SceneInfo(scene);
             sceneInfos.add(sceneInfo);
-            if (key.equals(playerInfo.getSceneCoordinate())) {
+            if (scene.getSceneCoordinate().equals(playerInfo.getSceneCoordinate())) {
                 rst.put("sceneInfo", JSON.toJSON(sceneInfo));
             }
         });
@@ -363,7 +372,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("grids", grids);
 
         // Collect blocks
-        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, 1);
+        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, 2);
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {

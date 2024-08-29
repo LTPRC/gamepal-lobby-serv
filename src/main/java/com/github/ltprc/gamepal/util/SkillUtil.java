@@ -352,11 +352,14 @@ public class SkillUtil {
 
     public static boolean isBlockDetected(final PlayerInfo playerInfo, final WorldCoordinate worldCoordinate,
                                           final int sceneScanRadius) {
-        if (worldCoordinate.getRegionNo() != playerInfo.getRegionNo()) {
-            return false;
-        }
+        return worldCoordinate.getRegionNo() == playerInfo.getRegionNo()
+                && isBlockDetected(playerInfo, worldCoordinate.getSceneCoordinate(), sceneScanRadius);
+    }
+
+    public static boolean isBlockDetected(final PlayerInfo playerInfo, final IntegerCoordinate sceneCoordinate,
+                                          final int sceneScanRadius) {
         IntegerCoordinate integerCoordinate = BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                worldCoordinate.getSceneCoordinate());
+                sceneCoordinate);
         return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
                 && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
     }
