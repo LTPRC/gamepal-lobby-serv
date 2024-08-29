@@ -161,7 +161,7 @@ public class WorldServiceImpl implements WorldService {
                 int x = scene.getInteger("x");
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
-                newScene.setBlocks(new ArrayList<>());
+                newScene.setBlocks(new CopyOnWriteArrayList<>());
                 newScene.setEvents(new CopyOnWriteArrayList<>());
                 newScene.setGird(new int[newRegion.getWidth() + 1][newRegion.getHeight() + 1]);
                 for (int i = 0; i <= newRegion.getWidth(); i++) {

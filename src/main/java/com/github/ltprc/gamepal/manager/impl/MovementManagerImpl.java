@@ -133,13 +133,7 @@ public class MovementManagerImpl implements MovementManager {
         IntegerCoordinate gridCoordinate = new IntegerCoordinate(
                 worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
                 worldMovingBlock.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
-        try {
-            if (null != scene.getGird() && null != scene.getGird()[gridCoordinate.getX()]) {
-                int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
-                worldMovingBlock.setFloorCode(floorCode);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+        worldMovingBlock.setFloorCode(floorCode);
     }
 }

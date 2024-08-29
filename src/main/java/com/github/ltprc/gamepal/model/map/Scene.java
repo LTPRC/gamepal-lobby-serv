@@ -4,9 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Data
 @NoArgsConstructor
@@ -16,8 +15,8 @@ public class Scene extends SceneInfo {
     private int[][] gird; // terrain grid
 
     public Scene(Scene scene) {
-        blocks = new ArrayList<>(scene.blocks);
-        events = new ArrayList<>(scene.events);
+        blocks = new CopyOnWriteArrayList<>(scene.blocks);
+        events = new CopyOnWriteArrayList<>(scene.events);
         gird = ArrayUtils.clone(scene.gird);
     }
 }

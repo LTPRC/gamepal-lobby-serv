@@ -211,7 +211,7 @@ public class SceneManagerImpl implements SceneManager {
         scene.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
         scene.setName("Auto Scene (" + scene.getSceneCoordinate().getX() + "," + scene.getSceneCoordinate().getY()
                 + ")");
-        scene.setBlocks(new ArrayList<>());
+        scene.setBlocks(new CopyOnWriteArrayList<>());
         if (Math.abs(sceneCoordinate.getX()) > region.getRadius()
                 || Math.abs(sceneCoordinate.getY()) > region.getRadius() ) {
             logger.error(ErrorUtil.ERROR_1031);

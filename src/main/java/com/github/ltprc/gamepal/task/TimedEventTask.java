@@ -89,17 +89,14 @@ public class TimedEventTask {
                             newVp -= 5;
                         }
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
-                            if (playerInfo.getSpeed().getX().multiply(BigDecimal.valueOf(2)).abs()
-                                    .compareTo(BigDecimal.ZERO) > 0
-                                    || playerInfo.getSpeed().getY().multiply(BigDecimal.valueOf(2)).abs()
-                                    .compareTo(BigDecimal.ZERO) > 0) {
+                            if (playerInfo.getSpeed().getX().doubleValue() > 0
+                                    || playerInfo.getSpeed().getY().doubleValue() > 0) {
                                 newVp -= 15;
                             }
                         } else {
-                            if (playerInfo.getSpeed().getX().multiply(BigDecimal.valueOf(2)).abs()
-                                    .compareTo(playerInfo.getMaxSpeed()) > 0
-                                    || playerInfo.getSpeed().getY().multiply(BigDecimal.valueOf(2)).abs()
-                                    .compareTo(playerInfo.getMaxSpeed()) > 0) {
+                            if (Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
+                                    + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)
+                                    > Math.pow(playerInfo.getMaxSpeed().doubleValue() / 2, 2)) {
                                 newVp -= 15;
                             }
                         }
@@ -177,7 +174,7 @@ public class TimedEventTask {
                 GamePalConstants.UPDATED_WORLD_TIME_PER_SECOND / 10));
     }
 
-    @Scheduled(cron = "* * * * * ?")
+    @Scheduled(fixedRate = 1000)
     public void executeBy1s() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
@@ -191,17 +188,11 @@ public class TimedEventTask {
                         // Add footstep
                         if (Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)
-                                > Math.pow(playerInfo.getMaxSpeed().doubleValue(), 2)) {
+                                > Math.pow(playerInfo.getMaxSpeed().doubleValue() / 2, 2)) {
                             WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode,
                                     GamePalConstants.EVENT_CODE_FOOTSTEP, playerInfo);
                             world.getEventQueue().add(worldEvent);
                         }
-
-                        // Expand scene
-//                        worldService.expandRegion(world, playerInfo.getRegionNo());
-//                        worldService.expandScene(world, playerInfo,
-//                                playerInfo.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
-//                                        ? GamePalConstants.SCENE_SCAN_RADIUS : 1);
                     });
         }
     }

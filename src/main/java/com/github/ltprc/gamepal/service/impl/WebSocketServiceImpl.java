@@ -359,11 +359,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("sceneInfos", sceneInfos);
 
         // Collect grids
-        int[][] grids = sceneManager.collectGridsByUserCode(userCode, GamePalConstants.SCENE_SCAN_RADIUS);
+        int[][] grids = sceneManager.collectGridsByUserCode(userCode, 2);
         rst.put("grids", grids);
 
         // Collect blocks
-        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, GamePalConstants.SCENE_SCAN_RADIUS);
+        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, 1);
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {

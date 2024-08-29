@@ -290,8 +290,7 @@ public class NpcManagerImpl implements NpcManager {
                 .filter(entry2 -> world.getPlayerInfoMap().entrySet().stream()
                         .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == entry3.getValue().getPlayerType())
                         .anyMatch(entry3 -> SkillUtil.isBlockDetected(entry3.getValue(),
-                                world.getPlayerInfoMap().get(entry3.getKey()),
-                                GamePalConstants.SCENE_SCAN_RADIUS)))
+                                world.getPlayerInfoMap().get(entry3.getKey()), 1)))
                 .filter(entry2 -> playerService.validateActiveness(world, world.getPlayerInfoMap().get(entry2.getKey())))
                 .forEach(entry2 -> {
                     String npcUserCode = entry2.getKey();
