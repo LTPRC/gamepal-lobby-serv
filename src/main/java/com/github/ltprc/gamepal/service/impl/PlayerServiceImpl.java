@@ -931,6 +931,11 @@ public class PlayerServiceImpl implements PlayerService {
                         world.getRegionMap().get(shootWc.getRegionNo()), userCode,
                         GamePalConstants.EVENT_CODE_SHOOT_ROCKET, shootWc));
                 break;
+            case SkillConstants.SKILL_CODE_LAY:
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
+                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MINE, meleeWc));
+                break;
             default:
                 break;
         }

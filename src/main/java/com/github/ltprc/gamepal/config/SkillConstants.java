@@ -23,6 +23,7 @@ public class SkillConstants {
     public static final int SKILL_CODE_SHOOT_SHOTGUN = 24;
     public static final int SKILL_CODE_SHOOT_MAGNUM = 25;
     public static final int SKILL_CODE_SHOOT_ROCKET = 26;
+    public static final int SKILL_CODE_LAY = 31;
 
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
@@ -36,4 +37,5 @@ public class SkillConstants {
 
     public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
+    public static final BigDecimal SKILL_RANGE_MINE = BigDecimal.ONE;
 }

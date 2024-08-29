@@ -406,6 +406,7 @@ public class WorldServiceImpl implements WorldService {
         int changedHp = SkillUtil.calculateChangedHp(Integer.valueOf(eventBlock.getCode()));
         switch (Integer.valueOf(eventBlock.getCode())) {
             case GamePalConstants.EVENT_CODE_BLOCK:
+            case GamePalConstants.EVENT_CODE_MINE:
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
@@ -624,7 +625,7 @@ public class WorldServiceImpl implements WorldService {
         WorldEvent tailEvent = new WorldEvent();
         eventQueue.add(tailEvent);
         while (tailEvent != eventQueue.peek()) {
-            WorldEvent newEvent = updateEvent(eventQueue.poll());
+            WorldEvent newEvent = updateEvent(world, eventQueue.poll());
             if (null != newEvent) {
                 eventQueue.add(newEvent);
                 expandByCoordinate(world, null, newEvent, 0);
@@ -695,13 +696,42 @@ public class WorldServiceImpl implements WorldService {
         }
     }
 
-    private WorldEvent updateEvent(WorldEvent oldEvent) {
-        GameWorld world = userService.getWorldByUserCode(oldEvent.getUserCode());
-//        triggerEvent(oldEvent); // Deleted 24/04/05
+    private WorldEvent updateEvent(GameWorld world, WorldEvent oldEvent) {
         WorldEvent newEvent = new WorldEvent();
         newEvent.setUserCode(oldEvent.getUserCode());
         newEvent.setCode(oldEvent.getCode());
-        // Set location 24/03/05
+        updateEventLocation(world, oldEvent, newEvent);
+        newEvent.setFrame(oldEvent.getFrame() + 1);
+        newEvent.setFrameMax(oldEvent.getFrameMax());
+        newEvent.setPeriod(oldEvent.getPeriod());
+        if (newEvent.getFrame() >= newEvent.getPeriod()) {
+            if (newEvent.getFrameMax() == -1) {
+                newEvent.setFrame(newEvent.getFrame() - newEvent.getPeriod());
+            } else {
+                return null;
+            }
+        }
+        switch (oldEvent.getCode()) {
+            case GamePalConstants.EVENT_CODE_MINE:
+                if (world.getPlayerInfoMap().values().stream()
+                        .filter(playerInfo -> playerService.validateActiveness(world, playerInfo))
+                        .filter(playerInfo -> !StringUtils.equals(newEvent.getUserCode(), playerInfo.getId()))
+                        .anyMatch(playerInfo -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(newEvent.getRegionNo()), newEvent, playerInfo);
+                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_MINE) < 0;
+                        })) {
+                    newEvent.setCode(GamePalConstants.EVENT_CODE_EXPLODE);
+                    newEvent.setFrame(0);
+                    newEvent.setPeriod(25);
+                    newEvent.setFrameMax(25);
+                }
+                break;
+        }
+        return newEvent;
+    }
+
+    private void updateEventLocation(GameWorld world, WorldEvent oldEvent, WorldEvent newEvent) {
         switch (oldEvent.getCode()) {
             case GamePalConstants.EVENT_CODE_BLOCK:
             case GamePalConstants.EVENT_CODE_HEAL:
@@ -715,17 +745,6 @@ public class WorldServiceImpl implements WorldService {
                 BlockUtil.copyWorldCoordinate(oldEvent, newEvent);
                 break;
         }
-        newEvent.setFrame(oldEvent.getFrame() + 1);
-        newEvent.setFrameMax(oldEvent.getFrameMax());
-        newEvent.setPeriod(oldEvent.getPeriod());
-        if (newEvent.getFrame() >= newEvent.getPeriod()) {
-            if (newEvent.getFrameMax() == -1) {
-                newEvent.setFrame(newEvent.getFrame() - newEvent.getPeriod());
-            } else {
-                return null;
-            }
-        }
-        return newEvent;
     }
 
     @Override

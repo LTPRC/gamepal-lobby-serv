@@ -562,6 +562,7 @@ public class BlockUtil {
         event.setFrame(0);
         switch (code) {
             case GamePalConstants.EVENT_CODE_FIRE:
+            case GamePalConstants.EVENT_CODE_MINE:
                 // Infinite 25-frame event
                 event.setPeriod(25);
                 event.setFrameMax(-1);

@@ -115,9 +115,11 @@ public class SkillUtil {
             case "t009":
                 toolType = SkillConstants.SKILL_CODE_CHEER;
                 break;
+            case "t021":
+                toolType = SkillConstants.SKILL_CODE_LAY;
+                break;
             case "t008":
             case "t011":
-            case "t021":
             case "t218":
                 // TODO
             default:
@@ -275,6 +277,7 @@ public class SkillUtil {
             case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
             case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
             case SkillConstants.SKILL_CODE_MELEE_STAB:
+            case SkillConstants.SKILL_CODE_LAY:
             default:
                 range = GamePalConstants.EVENT_MAX_DISTANCE_MELEE;
                 break;
@@ -411,10 +414,6 @@ public class SkillUtil {
                 return -250 + random.nextInt(100);
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 return -600 + random.nextInt(400);
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_CURSE:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
             default:
                 return 0;
         }
