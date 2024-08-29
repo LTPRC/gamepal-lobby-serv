@@ -331,9 +331,10 @@ public class WorldServiceImpl implements WorldService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         List<WorldBlock> playerInfoList = world.getPlayerInfoMap().values().stream()
+                .filter(playerInfo -> playerService.validateActiveness(world, playerInfo))
                 .filter(playerInfo -> checkEventCondition(world, eventBlock, playerInfo))
                 .collect(Collectors.toList());
-        activateEvent(eventBlock, playerInfoList);
+        activateEvent(world, eventBlock, playerInfoList);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -397,9 +398,8 @@ public class WorldServiceImpl implements WorldService {
         return rst;
     }
 
-    private void activateEvent(final WorldBlock eventBlock, final List<WorldBlock> playerInfoList) {
+    private void activateEvent(GameWorld world, final WorldBlock eventBlock, final List<WorldBlock> playerInfoList) {
         Random random = new Random();
-        GameWorld world = userService.getWorldByUserCode(eventBlock.getId());
         Map<Integer, Region> regionMap = world.getRegionMap();
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         WorldEvent worldEvent;
@@ -416,7 +416,7 @@ public class WorldServiceImpl implements WorldService {
                 break;
             case GamePalConstants.EVENT_CODE_FIRE:
                 playerInfoList.forEach(playerInfo ->
-                    playerService.damageHp(playerInfo.getId(), eventBlock.getId(), changedHp, false));
+                        playerService.damageHp(playerInfo.getId(), eventBlock.getId(), changedHp, false));
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
@@ -519,7 +519,51 @@ public class WorldServiceImpl implements WorldService {
                 world.getEventQueue().add(worldEvent);
                 break;
             case GamePalConstants.EVENT_CODE_CURSE:
+                playerInfoList.stream()
+                        .filter(playerInfo -> !playerInfo.getId().equals(eventBlock.getId()))
+                        .filter(playerInfo -> BlockUtil.calculateDistance(
+                                world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock, playerInfo)
+                                .compareTo(SkillConstants.SKILL_RANGE_CURSE) < 0)
+                        .forEach(worldBlock ->  {
+                            PlayerInfo playerInfo = world.getPlayerInfoMap().get(worldBlock.getId());
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] != -1) {
+                                playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] = GamePalConstants.BUFF_DEFAULT_FRAME_SAD;
+                                playerService.changeVp(worldBlock.getId(), 0, true);
+                            }
+                        });
+                worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
+                world.getEventQueue().add(worldEvent);
+                break;
             case GamePalConstants.EVENT_CODE_CHEER:
+                playerInfoList.stream()
+                        .filter(playerInfo -> !playerInfo.getId().equals(eventBlock.getId()))
+                        .filter(playerInfo -> BlockUtil.calculateDistance(
+                                        world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock, playerInfo)
+                                .compareTo(SkillConstants.SKILL_RANGE_CHEER) < 0)
+                        .forEach(worldBlock ->  {
+                            PlayerInfo playerInfo = world.getPlayerInfoMap().get(worldBlock.getId());
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] != -1) {
+                                playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] = GamePalConstants.BUFF_DEFAULT_FRAME_HAPPY;
+                                playerService.changeVp(worldBlock.getId(), playerInfo.getVpMax(), true);
+                            }
+                        });
+                worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
+                world.getEventQueue().add(worldEvent);
+                break;
+            default:
+                break;
+        }
+        addEventNoise(world, eventBlock);
+    }
+
+    private void addEventNoise(GameWorld world, final WorldBlock eventBlock) {
+        switch (Integer.valueOf(eventBlock.getCode())) {
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+            case GamePalConstants.EVENT_CODE_EXPLODE:
+                world.getEventQueue().add(BlockUtil.createWorldEvent(eventBlock.getId(), GamePalConstants.EVENT_CODE_NOISE,
+                        world.getPlayerInfoMap().get(eventBlock.getId())));
                 break;
             default:
                 break;
@@ -665,13 +709,6 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_DISTURB:
                 // Stick with playerInfo
                 BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
-                break;
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                // Stick with playerInfo above
-                BlockUtil.copyWorldCoordinate(world.getPlayerInfoMap().get(oldEvent.getUserCode()), newEvent);
-                newEvent.getCoordinate().setY(newEvent.getCoordinate().getY().subtract(BigDecimal.ONE));
-                BlockUtil.fixWorldCoordinate(world.getRegionMap().get(newEvent.getRegionNo()), newEvent);
                 break;
             default:
                 // Keep its position

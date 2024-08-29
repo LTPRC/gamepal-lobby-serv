@@ -190,7 +190,7 @@ public class TimedEventTask {
                                 + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)
                                 > Math.pow(playerInfo.getMaxSpeed().doubleValue() / 2, 2)) {
                             WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode,
-                                    GamePalConstants.EVENT_CODE_FOOTSTEP, playerInfo);
+                                    GamePalConstants.EVENT_CODE_NOISE, playerInfo);
                             world.getEventQueue().add(worldEvent);
                         }
                     });

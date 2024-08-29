@@ -126,6 +126,7 @@ public class SkillUtil {
         }
         switch (tool.getItemNo()) {
             case "t008":
+            case "t009":
             case "t011":
             case "t100":
             case "t105":

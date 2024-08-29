@@ -1,5 +1,7 @@
 package com.github.ltprc.gamepal.config;
 
+import java.math.BigDecimal;
+
 public class SkillConstants {
 
     private SkillConstants() {}
@@ -31,4 +33,7 @@ public class SkillConstants {
     public static final int SKILL_TYPE_ATTACK = 1;
 
     // Backend constants
+
+    public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
+    public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
 }
