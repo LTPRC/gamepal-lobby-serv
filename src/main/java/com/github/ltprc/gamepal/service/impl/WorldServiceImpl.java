@@ -406,8 +406,6 @@ public class WorldServiceImpl implements WorldService {
         int changedHp = SkillUtil.calculateChangedHp(Integer.valueOf(eventBlock.getCode()));
         switch (Integer.valueOf(eventBlock.getCode())) {
             case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_CURSE:
-            case GamePalConstants.EVENT_CODE_CHEER:
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
@@ -519,6 +517,9 @@ public class WorldServiceImpl implements WorldService {
                 });
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
+                break;
+            case GamePalConstants.EVENT_CODE_CURSE:
+            case GamePalConstants.EVENT_CODE_CHEER:
                 break;
             default:
                 break;

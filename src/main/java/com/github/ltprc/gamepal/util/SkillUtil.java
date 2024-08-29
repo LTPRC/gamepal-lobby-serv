@@ -112,8 +112,10 @@ public class SkillUtil {
             case "t226":
                 toolType = SkillConstants.SKILL_CODE_SHOOT_ROCKET;
                 break;
-            case "t008":
             case "t009":
+                toolType = SkillConstants.SKILL_CODE_CHEER;
+                break;
+            case "t008":
             case "t011":
             case "t021":
             case "t218":
@@ -207,6 +209,7 @@ public class SkillUtil {
             case "t001":
             case "t004":
             case "t005":
+            case "t009":
             case "t020":
             case "t104":
             case "t112":
@@ -249,7 +252,6 @@ public class SkillUtil {
                 skillTime = 250;
                 break;
             case "t008":
-            case "t009":
             case "t011":
             default:
                 skillTime = SkillConstants.SKILL_DEFAULT_FRAME;
