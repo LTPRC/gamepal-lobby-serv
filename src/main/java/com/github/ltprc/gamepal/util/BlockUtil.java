@@ -561,24 +561,32 @@ public class BlockUtil {
         event.setCode(code);
         event.setFrame(0);
         switch (code) {
-            case GamePalConstants.EVENT_CODE_FIRE:
             case GamePalConstants.EVENT_CODE_MINE:
-                // Infinite 25-frame event
-                event.setPeriod(25);
+                // Infinite
                 event.setFrameMax(-1);
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
             case GamePalConstants.EVENT_CODE_DISTURB:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
-                // Finite 50-frame event
-                event.setPeriod(50);
                 event.setFrameMax(50);
                 break;
+            case GamePalConstants.EVENT_CODE_FIRE:
+                event.setFrameMax(250);
+                break;
             default:
-                // Finite 25-frame event
-                event.setPeriod(25);
                 event.setFrameMax(25);
+                break;
+        }
+        switch (code) {
+            case GamePalConstants.EVENT_CODE_HEAL:
+            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_CHEER:
+            case GamePalConstants.EVENT_CODE_CURSE:
+                event.setPeriod(50);
+                break;
+            default:
+                event.setPeriod(25);
                 break;
         }
         return event;

@@ -91,7 +91,6 @@ public class GamePalConstants {
     public static final int EVENT_CODE_HIT_ICE = 103;
     public static final int EVENT_CODE_HIT_ELECTRICITY = 104;
     public static final int EVENT_CODE_UPGRADE = 105;
-    public static final int EVENT_CODE_FIRE = 106;
     public static final int EVENT_CODE_EXPLODE = 108;
     public static final int EVENT_CODE_BLEED = 109;
     public static final int EVENT_CODE_BLOCK = 110;
@@ -114,6 +113,8 @@ public class GamePalConstants {
     public static final int EVENT_CODE_SPARK = 125;
     public static final int EVENT_CODE_NOISE = 126;
     public static final int EVENT_CODE_MINE = 127;
+    public static final int EVENT_CODE_FIRE = 106;
+    public static final int EVENT_CODE_WATER = 128;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;
@@ -140,7 +141,6 @@ public class GamePalConstants {
     // Backend constants
 
     public static final long ONLINE_TIMEOUT_SECOND = 300L;
-    public static final int SCENE_SCAN_RADIUS = 2;
 
     public static final int GAME_STATUS_END = -1;
     public static final int GAME_STATUS_START = 0;
@@ -167,15 +167,6 @@ public class GamePalConstants {
     public static final int BUFF_DEFAULT_FRAME_BLOCKED = 1 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_HAPPY = 10 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_SAD = 10 * FRAME_PER_SECOND;
-
-    public static final BigDecimal EVENT_MAX_DISTANCE_FIRE = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal EVENT_MAX_DISTANCE_MELEE = BigDecimal.ONE;
-    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT = BigDecimal.valueOf(10);
-    public static final BigDecimal EVENT_MAX_DISTANCE_SHOOT_SHOTGUN = BigDecimal.valueOf(5);
-    public static final BigDecimal EVENT_MAX_ANGLE_MELEE = BigDecimal.valueOf(120D);
-    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT = BigDecimal.valueOf(5D);
-    public static final BigDecimal EVENT_MAX_ANGLE_SHOOT_SHOTGUN = BigDecimal.valueOf(10D);
-    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(3);
 
     public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
     public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";

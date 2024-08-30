@@ -835,14 +835,6 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        WorldCoordinate meleeWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                world.getRegionMap().get(playerInfo.getRegionNo()),
-                playerInfo, playerInfo.getFaceDirection(), GamePalConstants.EVENT_MAX_DISTANCE_MELEE);
-        WorldCoordinate shootWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                world.getRegionMap().get(playerInfo.getRegionNo()),
-                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
-                        GamePalConstants.EVENT_MAX_ANGLE_SHOOT.doubleValue() * 2 * (random.nextDouble() - 0.5D))),
-                GamePalConstants.EVENT_MAX_DISTANCE_SHOOT);
         if (playerInfo.getSkill()[skillNo].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK) {
             changePrecision(userCode, -500, false);
         }
@@ -872,69 +864,130 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_MELEE_HIT:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_MELEE_HIT, meleeWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_HIT, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_KICK:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_MELEE_KICK, meleeWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_KICK, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_MELEE_SCRATCH, meleeWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_SCRATCH, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_MELEE_CLEAVE, meleeWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_CLEAVE, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_STAB:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(meleeWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_MELEE_STAB, meleeWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_STAB, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_HIT:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_SHOOT_HIT, shootWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_HIT, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                        SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                                                * 2 * (random.nextDouble() - 0.5D))),
+                                SkillConstants.SKILL_RANGE_SHOOT)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_ARROW:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_SHOOT_ARROW, shootWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_ARROW, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                        SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                                                * 2 * (random.nextDouble() - 0.5D))),
+                                SkillConstants.SKILL_RANGE_SHOOT)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_GUN:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_SLUG, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                        SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                                                * 2 * (random.nextDouble() - 0.5D))),
+                                SkillConstants.SKILL_RANGE_SHOOT)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_SHOTGUN:
                 for (int i = 0; i < 10; i++) {
                     WorldCoordinate shootShotgunWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                             world.getRegionMap().get(playerInfo.getRegionNo()), playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
-                                    GamePalConstants.EVENT_MAX_ANGLE_SHOOT_SHOTGUN.doubleValue() * 2 * (random.nextDouble() - 0.5D))),
-                            GamePalConstants.EVENT_MAX_DISTANCE_SHOOT_SHOTGUN);
+                                    SkillConstants.SKILL_ANGLE_SHOOT_SHOTGUN_MAX.doubleValue()
+                                            * 2 * (random.nextDouble() - 0.5D))),
+                            SkillConstants.SKILL_RANGE_SHOOT_SHOTGUN);
                     worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                            world.getRegionMap().get(shootWc.getRegionNo()), userCode,
+                            world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
                             GamePalConstants.EVENT_CODE_SHOOT_SLUG, shootShotgunWc));
                 }
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_MAGNUM:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_SHOOT_MAGNUM, shootWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_MAGNUM, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                        SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                                                * 2 * (random.nextDouble() - 0.5D))),
+                                SkillConstants.SKILL_RANGE_SHOOT)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_ROCKET:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_SHOOT_ROCKET, shootWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_ROCKET, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                        SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                                                * 2 * (random.nextDouble() - 0.5D))),
+                                SkillConstants.SKILL_RANGE_SHOOT)));
+                break;
+            case SkillConstants.SKILL_CODE_SHOOT_FIRE:
+                for (BigDecimal distance = SkillConstants.SKILL_RANGE_SHOOT_FIRE_MIN;
+                     distance.compareTo(SkillConstants.SKILL_RANGE_SHOOT_FIRE_MAX) <= 0;
+                     distance = distance.add(BigDecimal.ONE)) {
+                    worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
+                            world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                            GamePalConstants.EVENT_CODE_FIRE, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                    world.getRegionMap().get(playerInfo.getRegionNo()),
+                                    playerInfo, playerInfo.getFaceDirection(), distance)));
+                }
+                break;
+            case SkillConstants.SKILL_CODE_SHOOT_WATER:
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_WATER, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_SHOOT_WATER)));
                 break;
             case SkillConstants.SKILL_CODE_LAY:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                        world.getRegionMap().get(shootWc.getRegionNo()), userCode,
-                        GamePalConstants.EVENT_CODE_MINE, meleeWc));
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MELEE_HIT, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_MINE, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
                 break;
             default:
                 break;

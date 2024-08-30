@@ -112,16 +112,19 @@ public class SkillUtil {
             case "t226":
                 toolType = SkillConstants.SKILL_CODE_SHOOT_ROCKET;
                 break;
+            case "t218":
+                toolType = SkillConstants.SKILL_CODE_SHOOT_FIRE;
+                break;
+            case "t008":
+            case "t011":
+                toolType = SkillConstants.SKILL_CODE_SHOOT_WATER;
+                break;
             case "t009":
                 toolType = SkillConstants.SKILL_CODE_CHEER;
                 break;
             case "t021":
                 toolType = SkillConstants.SKILL_CODE_LAY;
                 break;
-            case "t008":
-            case "t011":
-            case "t218":
-                // TODO
             default:
                 toolType = SkillConstants.SKILL_CODE_MELEE_HIT;
                 break;
@@ -167,7 +170,6 @@ public class SkillUtil {
             case "t205":
             case "t206":
             case "t210":
-            case "t218":
             case "t222":
             case "t228":
                 skillTime = 1;
@@ -221,11 +223,14 @@ public class SkillUtil {
             case "t203":
             case "t204":
             case "t216":
+            case "t218":
                 skillTime = 25;
                 break;
             case "t006":
             case "t007":
+            case "t008":
             case "t010":
+            case "t011":
             case "t012":
             case "t211":
                 skillTime = 50;
@@ -254,8 +259,6 @@ public class SkillUtil {
             case "t107":
                 skillTime = 250;
                 break;
-            case "t008":
-            case "t011":
             default:
                 skillTime = SkillConstants.SKILL_DEFAULT_FRAME;
                 break;
@@ -267,10 +270,16 @@ public class SkillUtil {
             case SkillConstants.SKILL_CODE_SHOOT_GUN:
             case SkillConstants.SKILL_CODE_SHOOT_MAGNUM:
             case SkillConstants.SKILL_CODE_SHOOT_ROCKET:
-                range = GamePalConstants.EVENT_MAX_DISTANCE_SHOOT;
+                range = SkillConstants.SKILL_RANGE_SHOOT;
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_SHOTGUN:
-                range = GamePalConstants.EVENT_MAX_DISTANCE_SHOOT_SHOTGUN;
+                range = SkillConstants.SKILL_RANGE_SHOOT_SHOTGUN;
+                break;
+            case SkillConstants.SKILL_CODE_SHOOT_FIRE:
+                range = SkillConstants.SKILL_RANGE_SHOOT_FIRE_MAX;
+                break;
+            case SkillConstants.SKILL_CODE_SHOOT_WATER:
+                range = SkillConstants.SKILL_RANGE_SHOOT_WATER;
                 break;
             case SkillConstants.SKILL_CODE_MELEE_HIT:
             case SkillConstants.SKILL_CODE_MELEE_KICK:
@@ -279,7 +288,7 @@ public class SkillUtil {
             case SkillConstants.SKILL_CODE_MELEE_STAB:
             case SkillConstants.SKILL_CODE_LAY:
             default:
-                range = GamePalConstants.EVENT_MAX_DISTANCE_MELEE;
+                range = SkillConstants.SKILL_RANGE_MELEE;
                 break;
         }
         Skill skill0 = new Skill(toolType, skillMode, 0, skillTime, SkillConstants.SKILL_TYPE_ATTACK, range, null);
@@ -290,10 +299,10 @@ public class SkillUtil {
         Skill[] skills = new Skill[4];
         skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                SkillConstants.SKILL_RANGE_MELEE, null);
         skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
-                GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                SkillConstants.SKILL_RANGE_MELEE, null);
         skills[2] = new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null);
         skills[3] = new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
@@ -308,51 +317,51 @@ public class SkillUtil {
             case CreatureConstants.SKIN_COLOR_CAT:
             case CreatureConstants.SKIN_COLOR_TIGER:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        10, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        10, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_FROG:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        20, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        20, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_MONKEY:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        15, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_RACOON:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        20, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        20, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_CHICKEN:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_STAB, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        25, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        25, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_BUFFALO:
             case CreatureConstants.SKIN_COLOR_SHEEP:
             case CreatureConstants.SKIN_COLOR_HORSE:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        30, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        30, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_FOX:
             case CreatureConstants.SKIN_COLOR_DOG:
             case CreatureConstants.SKIN_COLOR_WOLF:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        15, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
             case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
             case CreatureConstants.SKIN_COLOR_BOAR:
                 skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        15, SkillConstants.SKILL_TYPE_ATTACK, GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
                 break;
         }
         skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                SkillConstants.SKILL_RANGE_MELEE, null);
         skills[2] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                SkillConstants.SKILL_RANGE_MELEE, null);
         skills[3] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                GamePalConstants.EVENT_MAX_DISTANCE_MELEE, null);
+                SkillConstants.SKILL_RANGE_MELEE, null);
         creatureInfo.setSkill(skills);
     }
 
@@ -393,8 +402,6 @@ public class SkillUtil {
         switch (eventCode) {
             case GamePalConstants.EVENT_CODE_HEAL:
                 return 100;
-            case GamePalConstants.EVENT_CODE_FIRE:
-                return -1;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
                 return -10 + random.nextInt(10);
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
@@ -414,6 +421,8 @@ public class SkillUtil {
                 return -250 + random.nextInt(100);
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 return -600 + random.nextInt(400);
+            case GamePalConstants.EVENT_CODE_FIRE:
+                return -10;
             default:
                 return 0;
         }

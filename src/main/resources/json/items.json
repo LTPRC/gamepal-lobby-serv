@@ -20,7 +20,7 @@
   {"itemNo": "t018", "name": "P09手枪", "weight": 0.8, "description": "", "itemIndex": 1, "ammoCode": "a001"},
   {"itemNo": "t019", "name": "托卡列夫手枪", "weight": 0.9, "description": "", "itemIndex": 1, "ammoCode": "a006"},
   {"itemNo": "t020", "name": "刺刀", "weight": 0.4, "description": "", "itemIndex": 1},
-  {"itemNo": "t021", "name": "地雷", "weight": 2.0, "description": "", "itemIndex": 1},
+  {"itemNo": "t021", "name": "地雷", "weight": 2.0, "description": "", "itemIndex": 1, "ammoCode": "t021"},
 
   {"itemNo": "t100", "name": "P90冲锋枪", "weight": 2.5, "description": "", "itemIndex": 1, "ammoCode": "a007"},
   {"itemNo": "t101", "name": "长剑", "weight": 1.0, "description": "", "itemIndex": 1},

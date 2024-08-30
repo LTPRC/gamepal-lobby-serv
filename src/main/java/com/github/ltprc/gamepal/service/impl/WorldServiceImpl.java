@@ -338,6 +338,13 @@ public class WorldServiceImpl implements WorldService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
+    /**
+     * This method is only for the begining of event
+     * @param world
+     * @param eventBlock
+     * @param blocker
+     * @return
+     */
     private boolean checkEventCondition(final GameWorld world, final WorldBlock eventBlock, final WorldBlock blocker) {
         return eventBlock.getRegionNo() == blocker.getRegionNo()
                 && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
@@ -351,10 +358,6 @@ public class WorldServiceImpl implements WorldService {
         PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
         boolean rst = true;
         switch (Integer.valueOf(eventBlock.getCode())) {
-            case GamePalConstants.EVENT_CODE_FIRE:
-                rst = BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
-                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_FIRE) <= 0;
-                break;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
@@ -366,8 +369,8 @@ public class WorldServiceImpl implements WorldService {
                 double deltaAngle = BlockUtil.compareAnglesInDegrees(angle1, angle2);
                 rst = !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
-                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_MELEE) <= 0
-                        && deltaAngle < GamePalConstants.EVENT_MAX_ANGLE_MELEE.doubleValue();
+                        .compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
+                        && deltaAngle < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_HIT:
             case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
@@ -381,7 +384,7 @@ public class WorldServiceImpl implements WorldService {
                 BigDecimal shakingAngle = BigDecimal.valueOf(gaussianValue * (fromPlayerInfo.getPrecisionMax() - fromPlayerInfo.getPrecision()) / fromPlayerInfo.getPrecisionMax());
                 rst = !eventBlock.getId().equals(blocker.getId())
                         && BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), fromPlayerInfo, blocker)
-                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_SHOOT) <= 0
+                        .compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
                         && BlockUtil.detectLineSquareCollision(regionMap.get(eventBlock.getRegionNo()),
                         fromPlayerInfo, fromPlayerInfo.getFaceDirection().add(shakingAngle), blocker)
                         && BlockUtil.compareAnglesInDegrees(
@@ -390,7 +393,7 @@ public class WorldServiceImpl implements WorldService {
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 rst = BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
-                        .compareTo(GamePalConstants.EVENT_MAX_DISTANCE_EXPLODE) <= 0;
+                        .compareTo(SkillConstants.EVENT_MAX_DISTANCE_EXPLODE) <= 0;
                 break;
             default:
                 break;
@@ -407,17 +410,13 @@ public class WorldServiceImpl implements WorldService {
         switch (Integer.valueOf(eventBlock.getCode())) {
             case GamePalConstants.EVENT_CODE_BLOCK:
             case GamePalConstants.EVENT_CODE_MINE:
+            case GamePalConstants.EVENT_CODE_FIRE:
+            case GamePalConstants.EVENT_CODE_WATER:
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
                 playerService.changeHp(eventBlock.getId(), changedHp, false);
-                worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
-                world.getEventQueue().add(worldEvent);
-                break;
-            case GamePalConstants.EVENT_CODE_FIRE:
-                playerInfoList.forEach(playerInfo ->
-                        playerService.damageHp(playerInfo.getId(), eventBlock.getId(), changedHp, false));
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()), eventBlock);
                 world.getEventQueue().add(worldEvent);
                 break;
@@ -499,7 +498,7 @@ public class WorldServiceImpl implements WorldService {
                     WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                             world.getRegionMap().get(fromPlayerInfo.getRegionNo()), fromPlayerInfo,
                             fromPlayerInfo.getFaceDirection().add(BigDecimal.valueOf(
-                                    GamePalConstants.EVENT_MAX_ANGLE_SHOOT.doubleValue() * 2
+                                    SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
                                             * (random.nextDouble() - 0.5D))), BigDecimal.ONE);
                     worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), GamePalConstants.EVENT_CODE_SPARK, sparkWc);
                     world.getEventQueue().add(worldEvent);
@@ -721,11 +720,40 @@ public class WorldServiceImpl implements WorldService {
                                     world.getRegionMap().get(newEvent.getRegionNo()), newEvent, playerInfo);
                             return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_MINE) < 0;
                         })) {
-                    newEvent.setCode(GamePalConstants.EVENT_CODE_EXPLODE);
-                    newEvent.setFrame(0);
-                    newEvent.setPeriod(25);
-                    newEvent.setFrameMax(25);
+                    addEvent(oldEvent.getUserCode(), BlockUtil.convertEvent2WorldBlock(
+                            world.getRegionMap().get(oldEvent.getRegionNo()), oldEvent.getUserCode(),
+                            GamePalConstants.EVENT_CODE_EXPLODE, oldEvent));
+                    return null;
                 }
+                break;
+            case GamePalConstants.EVENT_CODE_FIRE:
+                // Extinguished by water
+                if (world.getEventQueue().stream()
+                        .filter(worldEvent -> worldEvent.getCode() == GamePalConstants.EVENT_CODE_WATER)
+                        .anyMatch(worldEvent -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(newEvent.getRegionNo()), newEvent, worldEvent);
+                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
+                        })) {
+                    return null;
+                }
+                // Burn players
+                world.getPlayerInfoMap().values().stream()
+                        .filter(playerInfo -> playerService.validateActiveness(world, playerInfo))
+                        .filter(playerInfo -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(newEvent.getRegionNo()), newEvent, playerInfo);
+                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
+                        })
+                        .forEach(playerInfo -> {
+                            playerService.damageHp(playerInfo.getId(), newEvent.getUserCode(),
+                                    SkillUtil.calculateChangedHp(newEvent.getCode()), false);
+                            WorldEvent worldEvent1 = BlockUtil.createWorldEvent(playerInfo.getId(),
+                                    GamePalConstants.EVENT_CODE_BLEED, playerInfo);
+                            world.getEventQueue().add(worldEvent1);
+                        });
+                break;
+            default:
                 break;
         }
         return newEvent;
