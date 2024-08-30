@@ -53,6 +53,10 @@ public class MessageServiceImpl implements MessageService {
         Message msg = JSON.parseObject(String.valueOf(req), Message.class);
         int scope = msg.getScope();
         String fromUserCode = msg.getFromUserCode();
+        if (msg.getType() == GamePalConstants.MESSAGE_TYPE_VOICE) {
+            sendMessage(fromUserCode, new Message(GamePalConstants.MESSAGE_TYPE_PRINTED, scope, fromUserCode,
+                    fromUserCode, GamePalConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+        }
         GameWorld fromWorld = userService.getWorldByUserCode(fromUserCode);
         int success = 0;
         int failure = 0;
@@ -60,6 +64,10 @@ public class MessageServiceImpl implements MessageService {
             for (Entry<String, Session> entry : fromWorld.getSessionMap().entrySet()) {
                 if (!entry.getKey().equals(fromUserCode)) {
                     String toUserCode = entry.getKey();
+                    if (msg.getType() == GamePalConstants.MESSAGE_TYPE_VOICE) {
+                        sendMessage(toUserCode, new Message(GamePalConstants.MESSAGE_TYPE_PRINTED, scope,
+                                fromUserCode, toUserCode, GamePalConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+                    }
                     ResponseEntity responseEntity = sendMessage(toUserCode, msg);
                     if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                         success++;
@@ -71,6 +79,10 @@ public class MessageServiceImpl implements MessageService {
         } else if (scope == GamePalConstants.SCOPE_INDIVIDUAL) {
             String toUserCode = msg.getToUserCode();
             if (toUserCode.equals(fromUserCode) || userService.getWorldByUserCode(toUserCode) == fromWorld) {
+                if (msg.getType() == GamePalConstants.MESSAGE_TYPE_VOICE) {
+                    sendMessage(toUserCode, new Message(GamePalConstants.MESSAGE_TYPE_PRINTED, scope,
+                            fromUserCode, toUserCode, GamePalConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+                }
                 ResponseEntity responseEntity = sendMessage(toUserCode, msg);
                 if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                     success++;
@@ -78,7 +90,16 @@ public class MessageServiceImpl implements MessageService {
                     failure++;
                 }
             }
+        } else if (scope == GamePalConstants.SCOPE_SELF) {
+            ResponseEntity responseEntity = sendMessage(fromUserCode, msg);
+            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                success++;
+            } else {
+                failure++;
+            }
         }
+        rst.put("success", success);
+        rst.put("failure", failure);
         return ResponseEntity.ok().body(rst.toString());
     }
 

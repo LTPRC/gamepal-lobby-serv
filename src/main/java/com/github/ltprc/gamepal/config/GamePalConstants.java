@@ -29,7 +29,6 @@ public class GamePalConstants {
     public static final String COMMAND_PREFIX = "/";
     public static final int MESSAGE_TYPE_PRINTED = 1;
     public static final int MESSAGE_TYPE_VOICE = 2;
-    public static final int MESSAGE_TYPE_TERMINAL = 3;
     public static final int SCOPE_GLOBAL = 0;
     public static final int SCOPE_INDIVIDUAL = 1;
     public static final int SCOPE_SELF = 2;
@@ -192,6 +191,9 @@ public class GamePalConstants {
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 
     public static final int CAPACITY_MAX = 50;
+
+    public static final String MESSAGE_PRINTED_CONTENT_VOICE = "[Voice]";
+
     public static final WorldCoordinate DEFAULT_BIRTHPLACE = new WorldCoordinate(1,
             new IntegerCoordinate(0, 0), new Coordinate(new BigDecimal(5), new BigDecimal(5)));
 }

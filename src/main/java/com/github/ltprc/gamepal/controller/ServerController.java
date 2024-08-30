@@ -41,6 +41,11 @@ public class ServerController {
         return userService.logoff(request);
     }
 
+    /**
+     * Still in use
+     * @param request
+     * @return
+     */
     @RequestMapping(value = "/sendmsg", method = RequestMethod.POST)
     public ResponseEntity<String> sendMessage(HttpServletRequest request) {
         return messageService.sendMessage(request);
