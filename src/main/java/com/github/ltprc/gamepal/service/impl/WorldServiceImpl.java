@@ -393,7 +393,7 @@ public class WorldServiceImpl implements WorldService {
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 rst = BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()), eventBlock, blocker)
-                        .compareTo(SkillConstants.EVENT_MAX_DISTANCE_EXPLODE) <= 0;
+                        .compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
                 break;
             default:
                 break;
@@ -472,7 +472,18 @@ public class WorldServiceImpl implements WorldService {
                 worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), Integer.valueOf(eventBlock.getCode()),
                         eventBlock);
                 world.getEventQueue().add(worldEvent);
-                if (Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
+                if (Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_SLUG
+                        || Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_MAGNUM
+                        || Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
+                    PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
+                    WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            world.getRegionMap().get(fromPlayerInfo.getRegionNo()), fromPlayerInfo,
+                            fromPlayerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                    SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
+                                            * (random.nextDouble() - 0.5D))), BigDecimal.ONE);
+                    worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), GamePalConstants.EVENT_CODE_SPARK, sparkWc);
+                    world.getEventQueue().add(worldEvent);
+                } else if (Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
                     addEvent(eventBlock.getId(), BlockUtil.convertEvent2WorldBlock(
                             world.getRegionMap().get(eventBlock.getRegionNo()), eventBlock.getId(),
                             GamePalConstants.EVENT_CODE_EXPLODE, eventBlock));
@@ -491,18 +502,22 @@ public class WorldServiceImpl implements WorldService {
                                 world.getEventQueue().add(worldEvent1);
                             });
                 }
-                if (Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_SLUG
-                        || Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_MAGNUM
-                        || Integer.valueOf(eventBlock.getCode()) == GamePalConstants.EVENT_CODE_SHOOT_ROCKET) {
-                    PlayerInfo fromPlayerInfo = world.getPlayerInfoMap().get(eventBlock.getId());
-                    WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            world.getRegionMap().get(fromPlayerInfo.getRegionNo()), fromPlayerInfo,
-                            fromPlayerInfo.getFaceDirection().add(BigDecimal.valueOf(
-                                    SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
-                                            * (random.nextDouble() - 0.5D))), BigDecimal.ONE);
-                    worldEvent = BlockUtil.createWorldEvent(eventBlock.getId(), GamePalConstants.EVENT_CODE_SPARK, sparkWc);
-                    world.getEventQueue().add(worldEvent);
-                }
+                break;
+            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+                BigDecimal flameLength = BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()),
+                        world.getPlayerInfoMap().get(eventBlock.getId()), eventBlock);
+                int flameAmount = flameLength.subtract(SkillConstants.SKILL_RANGE_SHOOT_FIRE_MIN).max(BigDecimal.ZERO)
+                        .multiply(BigDecimal.valueOf(2)).intValue() + 1;
+                List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
+                        regionMap.get(eventBlock.getRegionNo()), world.getPlayerInfoMap().get(eventBlock.getId()),
+                        eventBlock, flameAmount);
+                equidistantPoints.stream()
+                        .forEach(flameCoordinate -> {
+                            BlockUtil.fixWorldCoordinate(regionMap.get(eventBlock.getRegionNo()), flameCoordinate);
+                            WorldEvent worldEvent1 = BlockUtil.createWorldEvent(eventBlock.getId(),
+                                    GamePalConstants.EVENT_CODE_FIRE, flameCoordinate);
+                            world.getEventQueue().add(worldEvent1);
+                        });
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 playerInfoList.stream().forEach(playerInfo -> {

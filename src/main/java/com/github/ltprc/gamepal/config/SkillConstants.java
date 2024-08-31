@@ -46,7 +46,7 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_SHOOT_FIRE_MIN = BigDecimal.valueOf(1);
     public static final BigDecimal SKILL_RANGE_SHOOT_FIRE_MAX = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_SHOOT_WATER = BigDecimal.ONE;
-    public static final BigDecimal EVENT_MAX_DISTANCE_EXPLODE = BigDecimal.valueOf(3);
+    public static final BigDecimal SKILL_RANGE_EXPLODE = BigDecimal.valueOf(2);
     public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_MINE = BigDecimal.ONE;

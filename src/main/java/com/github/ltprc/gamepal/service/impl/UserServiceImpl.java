@@ -176,6 +176,7 @@ public class UserServiceImpl implements UserService {
         world.getOnlineMap().remove(userCode);
 //        world.getSessionMap().remove(userCode);
 //        userWorldMap.remove(userCode);
+        world.getMessageMap().remove(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 

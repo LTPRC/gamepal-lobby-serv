@@ -960,15 +960,14 @@ public class PlayerServiceImpl implements PlayerService {
                                 SkillConstants.SKILL_RANGE_SHOOT)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_FIRE:
-                for (BigDecimal distance = SkillConstants.SKILL_RANGE_SHOOT_FIRE_MIN;
-                     distance.compareTo(SkillConstants.SKILL_RANGE_SHOOT_FIRE_MAX) <= 0;
-                     distance = distance.add(BigDecimal.ONE)) {
-                    worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
-                            world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
-                            GamePalConstants.EVENT_CODE_FIRE, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                    world.getRegionMap().get(playerInfo.getRegionNo()),
-                                    playerInfo, playerInfo.getFaceDirection(), distance)));
-                }
+                worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
+                        world.getRegionMap().get(playerInfo.getRegionNo()), userCode,
+                        GamePalConstants.EVENT_CODE_SHOOT_FIRE, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                world.getRegionMap().get(playerInfo.getRegionNo()),
+                                playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
+                                        SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                                                * 2 * (random.nextDouble() - 0.5D))),
+                                SkillConstants.SKILL_RANGE_SHOOT)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_WATER:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(
@@ -1257,8 +1256,7 @@ public class PlayerServiceImpl implements PlayerService {
         movementManager.settleSpeedAndCoordinate(world, worldMovingBlock, 0);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         String id = UUID.randomUUID().toString();
-        String code = "3100";
-        Block remainContainer = new Block(GamePalConstants.BLOCK_TYPE_CONTAINER, id, code,
+        Block remainContainer = new Block(GamePalConstants.BLOCK_TYPE_CONTAINER, id, "3101",
                 new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, GamePalConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),

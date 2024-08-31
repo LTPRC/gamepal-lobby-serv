@@ -311,10 +311,12 @@ public class WebSocketServiceImpl implements WebSocketService {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return;
         }
-        // Only detected blocks of active players or player himself will be collected 24/08/29
+        // Only detected active creatures and all human players will be collected 24/08/31
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         JSONObject playerInfos = new JSONObject();
-        playerInfos.put(userCode, playerInfo);
+        playerInfoMap.values().stream()
+                .filter(playerInfo1 -> playerInfo1.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                .forEach(playerInfo1 -> playerInfos.put(playerInfo1.getId(), playerInfo1));
         playerInfoMap.values().stream()
                 .filter(playerInfo1 -> playerService.validateActiveness(world, playerInfo1))
                 .filter(playerInfo1 -> SkillUtil.isBlockDetected(playerInfo, playerInfo1, 2))
