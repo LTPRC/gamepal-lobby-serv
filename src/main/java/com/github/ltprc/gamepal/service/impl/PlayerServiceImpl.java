@@ -3,10 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.FlagConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -216,8 +213,8 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1039));
         }
         Message message = new Message();
-        message.setType(GamePalConstants.MESSAGE_TYPE_PRINTED);
-        message.setScope(GamePalConstants.SCOPE_SELF);
+        message.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
+        message.setScope(MessageConstants.SCOPE_SELF);
         message.setToUserCode(userCode);
         message.setContent(content);
         return messageService.sendMessage(userCode, message);
@@ -967,7 +964,7 @@ public class PlayerServiceImpl implements PlayerService {
                                 playerInfo, playerInfo.getFaceDirection().add(BigDecimal.valueOf(
                                         SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
                                                 * 2 * (random.nextDouble() - 0.5D))),
-                                SkillConstants.SKILL_RANGE_SHOOT)));
+                                SkillConstants.SKILL_RANGE_SHOOT_FIRE_MAX)));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_WATER:
                 worldService.addEvent(userCode, BlockUtil.convertEvent2WorldBlock(

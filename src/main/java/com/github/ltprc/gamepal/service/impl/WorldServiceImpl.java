@@ -576,6 +576,7 @@ public class WorldServiceImpl implements WorldService {
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 world.getEventQueue().add(BlockUtil.createWorldEvent(eventBlock.getId(), GamePalConstants.EVENT_CODE_NOISE,
                         world.getPlayerInfoMap().get(eventBlock.getId())));

@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.FlagConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.CommandManager;
 import com.github.ltprc.gamepal.manager.GameMapManager;
@@ -29,17 +26,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.websocket.Session;
-import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.logging.Logger;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -172,17 +166,26 @@ public class WebSocketServiceImpl implements WebSocketService {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             for (Object obj : messages) {
                 Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
-                if (null != msg.getContent() && msg.getContent().indexOf(GamePalConstants.COMMAND_PREFIX) == 0) {
+                if (null != msg.getContent() && msg.getContent().indexOf(MessageConstants.COMMAND_PREFIX) == 0) {
                     // Command detected
                     String commandContent = StringUtils.trim(msg.getContent().substring(1));
                     if (StringUtils.isNotBlank(commandContent)) {
                         commandManager.useCommand(userCode, commandContent);
                     }
-                } else if (GamePalConstants.SCOPE_GLOBAL == msg.getScope()) {
+                } else if (MessageConstants.SCOPE_GLOBAL == msg.getScope()) {
                     messageMap.forEach((key, value) -> value.add(msg));
-                } else if (GamePalConstants.SCOPE_INDIVIDUAL == msg.getScope()) {
+                } else if (MessageConstants.SCOPE_TEAMMATE == msg.getScope()) {
+                    messageMap.entrySet().stream()
+                            .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
+                                    playerService.findTopBossId(msg.getFromUserCode())))
+                            .forEach(entry -> entry.getValue().add(msg));
+                } else if (MessageConstants.SCOPE_INDIVIDUAL == msg.getScope()) {
+                    if (messageMap.containsKey(msg.getToUserCode())) {
+                        messageMap.get(msg.getFromUserCode()).add(msg);
+                        messageMap.get(msg.getToUserCode()).add(msg);
+                    }
+                } else if (MessageConstants.SCOPE_SELF == msg.getScope()) {
                     messageMap.get(msg.getFromUserCode()).add(msg);
-                    messageMap.get(msg.getToUserCode()).add(msg);
                 }
             }
             JSONArray drops = functions.getJSONArray("addDrops");

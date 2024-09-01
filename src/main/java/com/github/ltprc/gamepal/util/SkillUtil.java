@@ -422,7 +422,7 @@ public class SkillUtil {
             case GamePalConstants.EVENT_CODE_EXPLODE:
                 return -600 + random.nextInt(400);
             case GamePalConstants.EVENT_CODE_FIRE:
-                return -10;
+                return -1;
             default:
                 return 0;
         }

@@ -11,7 +11,10 @@ import javax.websocket.Session;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.MessageConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.service.PlayerService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,9 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PlayerService playerService;
+
     /**
      * Send one message to the specific receiver.
      * As long as voice message cannot be transmitted by websocket, this method must be used.
@@ -53,53 +59,53 @@ public class MessageServiceImpl implements MessageService {
         Message msg = JSON.parseObject(String.valueOf(req), Message.class);
         int scope = msg.getScope();
         String fromUserCode = msg.getFromUserCode();
-        if (msg.getType() == GamePalConstants.MESSAGE_TYPE_VOICE) {
-            sendMessage(fromUserCode, new Message(GamePalConstants.MESSAGE_TYPE_PRINTED, scope, fromUserCode,
-                    fromUserCode, GamePalConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+        if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
+            sendMessage(fromUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope, fromUserCode,
+                    fromUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
         }
-        GameWorld fromWorld = userService.getWorldByUserCode(fromUserCode);
-        int success = 0;
-        int failure = 0;
-        if (GamePalConstants.SCOPE_GLOBAL == scope) {
-            for (Entry<String, Session> entry : fromWorld.getSessionMap().entrySet()) {
+        GameWorld world = userService.getWorldByUserCode(fromUserCode);
+        if (MessageConstants.SCOPE_GLOBAL == scope) {
+            world.getPlayerInfoMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                    .filter(entry -> playerService.validateActiveness(world, entry.getValue()))
+                    .forEach(entry -> {
                 if (!entry.getKey().equals(fromUserCode)) {
                     String toUserCode = entry.getKey();
-                    if (msg.getType() == GamePalConstants.MESSAGE_TYPE_VOICE) {
-                        sendMessage(toUserCode, new Message(GamePalConstants.MESSAGE_TYPE_PRINTED, scope,
-                                fromUserCode, toUserCode, GamePalConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+                    if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
+                        sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                                fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
                     }
-                    ResponseEntity responseEntity = sendMessage(toUserCode, msg);
-                    if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                        success++;
-                    } else {
-                        failure++;
-                    }
+                    sendMessage(toUserCode, msg);
                 }
-            }
-        } else if (scope == GamePalConstants.SCOPE_INDIVIDUAL) {
+            });
+        } else if (MessageConstants.SCOPE_TEAMMATE == scope) {
+            world.getPlayerInfoMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                    .filter(entry -> playerService.validateActiveness(world, entry.getValue()))
+                    .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
+                            playerService.findTopBossId(fromUserCode)))
+                    .forEach(entry -> {
+                if (!entry.getKey().equals(fromUserCode)) {
+                    String toUserCode = entry.getKey();
+                    if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
+                        sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                                fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+                    }
+                    sendMessage(toUserCode, msg);
+                }
+            });
+        } else if (scope == MessageConstants.SCOPE_INDIVIDUAL) {
             String toUserCode = msg.getToUserCode();
-            if (toUserCode.equals(fromUserCode) || userService.getWorldByUserCode(toUserCode) == fromWorld) {
-                if (msg.getType() == GamePalConstants.MESSAGE_TYPE_VOICE) {
-                    sendMessage(toUserCode, new Message(GamePalConstants.MESSAGE_TYPE_PRINTED, scope,
-                            fromUserCode, toUserCode, GamePalConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+            if (toUserCode.equals(fromUserCode) || userService.getWorldByUserCode(toUserCode) == world) {
+                if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
+                    sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                            fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
                 }
-                ResponseEntity responseEntity = sendMessage(toUserCode, msg);
-                if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                    success++;
-                } else {
-                    failure++;
-                }
+                sendMessage(toUserCode, msg);
             }
-        } else if (scope == GamePalConstants.SCOPE_SELF) {
-            ResponseEntity responseEntity = sendMessage(fromUserCode, msg);
-            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                success++;
-            } else {
-                failure++;
-            }
+        } else if (scope == MessageConstants.SCOPE_SELF) {
+            sendMessage(fromUserCode, msg);
         }
-        rst.put("success", success);
-        rst.put("failure", failure);
         return ResponseEntity.ok().body(rst.toString());
     }
 
