@@ -10,6 +10,10 @@ public class CreatureConstants {
     public static final int PLAYER_TYPE_NPC = 1;
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
+    public static final int FACE_COEFS_LENGTH = 10;
+
+    // Backend constants
+
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
     public static final int SKIN_COLOR_C = 1;
@@ -34,8 +38,6 @@ public class CreatureConstants {
     public static final int SKIN_COLOR_HORSE = 15;
 
     public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
-
-    // Backend constants
 
     public static final int NPC_BRAIN_STATUS_UNAWARE = 0;
     public static final int NPC_BRAIN_STATUS_SUSPICIOUS = 1;
@@ -69,4 +71,13 @@ public class CreatureConstants {
     public static final BigDecimal DEFAULT_INDISTINCT_VISION_ANGLE = BigDecimal.valueOf(180);
     public static final BigDecimal DEFAULT_DISTINCT_HEARING_RADIUS = BigDecimal.valueOf(2);
     public static final BigDecimal DEFAULT_INDISTINCT_HEARING_RADIUS = BigDecimal.valueOf(10);
+
+    public static final String ORIGIN_CHINESE = "ORIGIN_CHINESE";
+    public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
+    public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
+    public static final int AVATARS_LENGTH = 110;
+    public static final int HAIRSTYLE_LENGTH = 5;
+    public static final int EYES_LENGTH = 5;
+
+    public static final int CAPACITY_MAX = 50;
 }

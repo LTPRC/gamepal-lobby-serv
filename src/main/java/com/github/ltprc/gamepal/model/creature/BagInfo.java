@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.model.creature;
 
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BagInfo {
     private String id;
     private BigDecimal capacity = BigDecimal.ZERO;
-    private BigDecimal capacityMax = BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX);
+    private BigDecimal capacityMax = BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX);
     private Map<String, Integer> items = new ConcurrentHashMap<>(); // itemId, amount
 }

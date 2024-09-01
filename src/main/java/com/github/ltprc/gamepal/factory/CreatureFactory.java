@@ -1,15 +1,14 @@
 package com.github.ltprc.gamepal.factory;
 
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.NameUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -26,7 +25,7 @@ public class CreatureFactory {
         Random random = new Random();
         String origin = NameUtil.generateOrigin();
         String[] names = NameUtil.generateNames(origin, gender);
-        playerInfo.setAvatar(String.valueOf(random.nextInt(GamePalConstants.AVATARS_LENGTH)));
+        playerInfo.setAvatar(String.valueOf(random.nextInt(CreatureConstants.AVATARS_LENGTH)));
         playerInfo.setGender(gender);
         playerInfo.setFirstName(names[0]);
         playerInfo.setLastName(names[1]);
@@ -35,8 +34,8 @@ public class CreatureFactory {
         playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
         playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
         playerInfo.setHairColor(random.nextInt(3) + 1);
-        playerInfo.setEyes(random.nextInt(GamePalConstants.EYES_LENGTH) + 1);
-        playerInfo.setFaceCoefs(Arrays.stream(new int[GamePalConstants.FACE_COEFS_LENGTH])
+        playerInfo.setEyes(random.nextInt(CreatureConstants.EYES_LENGTH) + 1);
+        playerInfo.setFaceCoefs(Arrays.stream(new int[CreatureConstants.FACE_COEFS_LENGTH])
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }
 
@@ -52,12 +51,12 @@ public class CreatureFactory {
 
     public static PlayerInfo createCreatureInstance(final int playerType) {
         PlayerInfo playerInfo = new PlayerInfo();
-        playerInfo.setStructure(new Structure(GamePalConstants.STRUCTURE_MATERIAL_FLESH,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
-                new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        playerInfo.setStructure(new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(GamePalConstants.PLAYER_RADIUS, GamePalConstants.PLAYER_RADIUS))));
-        playerInfo.setType(GamePalConstants.BLOCK_TYPE_PLAYER);
+                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
+        playerInfo.setType(BlockConstants.BLOCK_TYPE_PLAYER);
         playerInfo.setPlayerType(playerType);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
         BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, playerInfo);

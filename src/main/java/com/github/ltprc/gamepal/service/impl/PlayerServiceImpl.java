@@ -143,8 +143,8 @@ public class PlayerServiceImpl implements PlayerService {
         }
         JSONArray faceCoefs = req.getJSONArray("faceCoefs");
         if (null != faceCoefs) {
-            playerInfo.setFaceCoefs(new int[GamePalConstants.FACE_COEFS_LENGTH]);
-            for (int i = 0; i < GamePalConstants.FACE_COEFS_LENGTH; i++) {
+            playerInfo.setFaceCoefs(new int[CreatureConstants.FACE_COEFS_LENGTH]);
+            for (int i = 0; i < CreatureConstants.FACE_COEFS_LENGTH; i++) {
                 playerInfo.getFaceCoefs()[i] = faceCoefs.getInteger(i);
             }
         }
@@ -441,12 +441,12 @@ public class PlayerServiceImpl implements PlayerService {
         BagInfo interactedBagInfo;
         int oldInteractedItemAmount;
         switch (block.getType()) {
-            case GamePalConstants.BLOCK_TYPE_STORAGE:
+            case BlockConstants.BLOCK_TYPE_STORAGE:
                 Map<String, BagInfo> preservedBagInfoMap = world.getPreservedBagInfoMap();
                 interactedBagInfo = preservedBagInfoMap.get(userCode);
                 oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
                 break;
-            case GamePalConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
                 interactedBagInfo = bagInfoMap.get(id);
                 oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
                 break;
@@ -711,13 +711,13 @@ public class PlayerServiceImpl implements PlayerService {
         switch (interactionCode) {
             case GamePalConstants.INTERACTION_USE:
                 switch (block.getType()) {
-                    case GamePalConstants.BLOCK_TYPE_TOILET:
+                    case BlockConstants.BLOCK_TYPE_TOILET:
                         generateNotificationMessage(userCode, "你正在使用马桶。");
                         break;
-                    case GamePalConstants.BLOCK_TYPE_WORKSHOP:
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP:
                         generateNotificationMessage(userCode, "你正在使用工作台。");
                         break;
-                    case GamePalConstants.BLOCK_TYPE_GAME:
+                    case BlockConstants.BLOCK_TYPE_GAME:
                         generateNotificationMessage(userCode, "你开启了桌游。");
                         if (!world.getTerminalMap().containsKey(id)) {
                             GameTerminal gameTerminal = new GameTerminal(world);
@@ -729,10 +729,10 @@ public class PlayerServiceImpl implements PlayerService {
                         }
                         stateMachineService.gameTerminalInput((GameTerminal) world.getTerminalMap().get(id), "1");
                         break;
-                    case GamePalConstants.BLOCK_TYPE_COOKER:
+                    case BlockConstants.BLOCK_TYPE_COOKER:
                         generateNotificationMessage(userCode, "你正在使用灶台。");
                         break;
-                    case GamePalConstants.BLOCK_TYPE_SINK:
+                    case BlockConstants.BLOCK_TYPE_SINK:
                         generateNotificationMessage(userCode, "你正在使用饮水台。");
                         break;
                     default:
@@ -741,10 +741,10 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case GamePalConstants.INTERACTION_EXCHANGE:
                 switch (block.getType()) {
-                    case GamePalConstants.BLOCK_TYPE_STORAGE:
+                    case BlockConstants.BLOCK_TYPE_STORAGE:
                         generateNotificationMessage(userCode, "你正在交换个人物品。");
                         break;
-                    case GamePalConstants.BLOCK_TYPE_CONTAINER:
+                    case BlockConstants.BLOCK_TYPE_CONTAINER:
                         generateNotificationMessage(userCode, "你正在使用容器。");
                         break;
                     default:
@@ -1137,10 +1137,10 @@ public class PlayerServiceImpl implements PlayerService {
 //            worldService.expandScene(world, worldMovingBlock);
 //        }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
-        Drop drop = new Drop(itemNo, amount, new Block(GamePalConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
-                "3000", new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
-                new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        Drop drop = new Drop(itemNo, amount, new Block(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
+                "3000", new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)))),
                 worldMovingBlock.getCoordinate()));
@@ -1253,9 +1253,9 @@ public class PlayerServiceImpl implements PlayerService {
         movementManager.settleSpeedAndCoordinate(world, worldMovingBlock, 0);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         String id = UUID.randomUUID().toString();
-        Block remainContainer = new Block(GamePalConstants.BLOCK_TYPE_CONTAINER, id, "3101",
-                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, GamePalConstants.STRUCTURE_LAYER_MIDDLE,
-                        new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        Block remainContainer = new Block(BlockConstants.BLOCK_TYPE_CONTAINER, id, "3101",
+                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                                 new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)))),
                 worldMovingBlock.getCoordinate());
@@ -1431,13 +1431,13 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != bagInfo) {
             bagInfo.getItems().clear();
             bagInfo.setCapacity(BigDecimal.ZERO);
-            bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+            bagInfo.setCapacityMax(BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX));
         }
         BagInfo preservedBagInfo = world.getPreservedBagInfoMap().get(userCode);
         if (null != preservedBagInfo) {
             preservedBagInfo.getItems().clear();
             preservedBagInfo.setCapacity(BigDecimal.ZERO);
-            bagInfo.setCapacityMax(BigDecimal.valueOf(GamePalConstants.CAPACITY_MAX));
+            bagInfo.setCapacityMax(BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX));
         }
         playerInfo.setFaceDirection(BigDecimal.ZERO);
         world.getPlayerInfoMap().values().stream()

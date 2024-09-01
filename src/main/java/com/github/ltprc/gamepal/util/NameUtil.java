@@ -93,20 +93,20 @@ public class NameUtil {
     }
 
     public static String[] generateNames(String origin, int gender) {
-        if (StringUtils.isNotBlank(origin) || (!GamePalConstants.ORIGIN_CHINESE.equals(origin)
-                && !GamePalConstants.ORIGIN_JAPANESE.equals(origin)
-                && !GamePalConstants.ORIGIN_INTERNATIONAL.equals(origin))) {
+        if (StringUtils.isNotBlank(origin) || (!CreatureConstants.ORIGIN_CHINESE.equals(origin)
+                && !CreatureConstants.ORIGIN_JAPANESE.equals(origin)
+                && !CreatureConstants.ORIGIN_INTERNATIONAL.equals(origin))) {
             origin = generateOrigin();
         }
         if (gender != CreatureConstants.GENDER_MALE && gender != CreatureConstants.GENDER_FEMALE) {
             gender = generateGender();
         }
         switch (origin) {
-            case GamePalConstants.ORIGIN_CHINESE:
+            case CreatureConstants.ORIGIN_CHINESE:
                 return generateChineseNames(gender);
-            case GamePalConstants.ORIGIN_JAPANESE:
+            case CreatureConstants.ORIGIN_JAPANESE:
                 return generateJapaneseNames(gender);
-            case GamePalConstants.ORIGIN_INTERNATIONAL:
+            case CreatureConstants.ORIGIN_INTERNATIONAL:
                 return generateInternationalNames(gender);
             default:
                 return new String[] { "", "佚名", "佚名" };
@@ -117,11 +117,11 @@ public class NameUtil {
         double r = Math.random();
         String origin;
         if (r < 0.9D) {
-            origin = GamePalConstants.ORIGIN_CHINESE;
+            origin = CreatureConstants.ORIGIN_CHINESE;
         } else if (r < 0.92D) {
-            origin = GamePalConstants.ORIGIN_JAPANESE;
+            origin = CreatureConstants.ORIGIN_JAPANESE;
         } else {
-            origin = GamePalConstants.ORIGIN_INTERNATIONAL;
+            origin = CreatureConstants.ORIGIN_INTERNATIONAL;
         }
         return origin;
     }
@@ -222,44 +222,44 @@ public class NameUtil {
         double r = Math.random();
         int rst;
         switch (origin) {
-            case GamePalConstants.ORIGIN_CHINESE:
+            case CreatureConstants.ORIGIN_CHINESE:
                 if (r < 0.01D) {
-                    rst = GamePalConstants.SKIN_COLOR_B;
+                    rst = CreatureConstants.SKIN_COLOR_B;
                 } else if (r < 0.03D) {
-                    rst = GamePalConstants.SKIN_COLOR_C;
+                    rst = CreatureConstants.SKIN_COLOR_C;
                 } else if (r < 0.1D) {
-                    rst = GamePalConstants.SKIN_COLOR_L;
+                    rst = CreatureConstants.SKIN_COLOR_L;
                 } else if (r < 0.2D) {
-                    rst = GamePalConstants.SKIN_COLOR_M;
+                    rst = CreatureConstants.SKIN_COLOR_M;
                 } else {
-                    rst = GamePalConstants.SKIN_COLOR_A;
+                    rst = CreatureConstants.SKIN_COLOR_A;
                 }
                 break;
-            case GamePalConstants.ORIGIN_JAPANESE:
+            case CreatureConstants.ORIGIN_JAPANESE:
                 if (r < 0.01D) {
-                    rst = GamePalConstants.SKIN_COLOR_C;
+                    rst = CreatureConstants.SKIN_COLOR_C;
                 } else if (r < 0.03D) {
-                    rst = GamePalConstants.SKIN_COLOR_B;
+                    rst = CreatureConstants.SKIN_COLOR_B;
                 } else if (r < 0.1D) {
-                    rst = GamePalConstants.SKIN_COLOR_L;
+                    rst = CreatureConstants.SKIN_COLOR_L;
                 } else if (r < 0.2D) {
-                    rst = GamePalConstants.SKIN_COLOR_M;
+                    rst = CreatureConstants.SKIN_COLOR_M;
                 } else {
-                    rst = GamePalConstants.SKIN_COLOR_A;
+                    rst = CreatureConstants.SKIN_COLOR_A;
                 }
                 break;
-            case GamePalConstants.ORIGIN_INTERNATIONAL:
+            case CreatureConstants.ORIGIN_INTERNATIONAL:
             default:
                 if (r < 0.2D) {
-                    rst = GamePalConstants.SKIN_COLOR_C;
+                    rst = CreatureConstants.SKIN_COLOR_C;
                 } else if (r < 0.4D) {
-                    rst = GamePalConstants.SKIN_COLOR_B;
+                    rst = CreatureConstants.SKIN_COLOR_B;
                 } else if (r < 0.6D) {
-                    rst = GamePalConstants.SKIN_COLOR_A;
+                    rst = CreatureConstants.SKIN_COLOR_A;
                 } else if (r < 0.8D) {
-                    rst = GamePalConstants.SKIN_COLOR_M;
+                    rst = CreatureConstants.SKIN_COLOR_M;
                 } else {
-                    rst = GamePalConstants.SKIN_COLOR_L;
+                    rst = CreatureConstants.SKIN_COLOR_L;
                 }
                 break;
         }

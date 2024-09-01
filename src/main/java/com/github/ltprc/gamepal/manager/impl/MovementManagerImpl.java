@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.map.*;
@@ -52,19 +52,19 @@ public class MovementManagerImpl implements MovementManager {
                 break;
             }
             Block block = rankingQueueList.get(i);
-            if (block.getType() == GamePalConstants.BLOCK_TYPE_PLAYER && block.getId().equals(userCode)) {
+            if (block.getType() == BlockConstants.BLOCK_TYPE_PLAYER && block.getId().equals(userCode)) {
                 continue;
             }
             Block movingBlock = BlockUtil.convertWorldBlock2Block(region, worldMovingBlock, false);
             Block newMovingBlock = new Block(movingBlock);
             newMovingBlock.setX(worldMovingBlock.getCoordinate().getX().add(worldMovingBlock.getSpeed().getX()));
             newMovingBlock.setY(worldMovingBlock.getCoordinate().getY().add(worldMovingBlock.getSpeed().getY()));
-            if (block.getType() == GamePalConstants.BLOCK_TYPE_TELEPORT
+            if (block.getType() == BlockConstants.BLOCK_TYPE_TELEPORT
                     && BlockUtil.detectCollision(newMovingBlock, block)) {
                 teleportWc = ((Teleport) block).getTo();
                 break;
             }
-            if (GamePalConstants.STRUCTURE_MATERIAL_HOLLOW == block.getStructure().getMaterial()) {
+            if (BlockConstants.STRUCTURE_MATERIAL_HOLLOW == block.getStructure().getMaterial()) {
                 continue;
             }
             newMovingBlock = new Block(movingBlock);

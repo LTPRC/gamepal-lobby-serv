@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.model.creature;
 
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,7 +24,7 @@ public class PlayerInfo extends CreatureInfo {
     private int hairstyle;
     private int hairColor;
     private int eyes;
-    private int[] faceCoefs = new int[GamePalConstants.FACE_COEFS_LENGTH];
+    private int[] faceCoefs = new int[CreatureConstants.FACE_COEFS_LENGTH];
 
     // Dynamic properties
     private int level;

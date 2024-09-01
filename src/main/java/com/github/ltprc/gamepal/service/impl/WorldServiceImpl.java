@@ -3,7 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.BlockCodeConstants;
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -151,7 +151,7 @@ public class WorldServiceImpl implements WorldService {
             newRegion.setName(regionName);
             newRegion.setHeight(height);
             newRegion.setWidth(width);
-            newRegion.setRadius(BlockCodeConstants.REGION_RADIUS_DEFAULT);
+            newRegion.setRadius(BlockConstants.REGION_RADIUS_DEFAULT);
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));
@@ -176,21 +176,21 @@ public class WorldServiceImpl implements WorldService {
                         JSONArray blockRow = map.getJSONArray(i);
                         for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                             Integer value = blockRow.getInteger(j);
-                            int blockType = GamePalConstants.BLOCK_TYPE_NORMAL;
+                            int blockType = BlockConstants.BLOCK_TYPE_NORMAL;
                             Structure structure;
                             switch (value / 10000) {
                                 case 2:
-                                    structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                            GamePalConstants.STRUCTURE_LAYER_MIDDLE);
+                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                            BlockConstants.STRUCTURE_LAYER_MIDDLE);
                                     break;
                                 case 3:
-                                    structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            GamePalConstants.STRUCTURE_LAYER_TOP);
+                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                            BlockConstants.STRUCTURE_LAYER_TOP);
                                     break;
                                 case 1:
                                 default:
-                                    structure = new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            GamePalConstants.STRUCTURE_LAYER_BOTTOM);
+                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                            BlockConstants.STRUCTURE_LAYER_BOTTOM);
                                     break;
                             }
                             Block block = new Block(blockType, null, String.valueOf(value % 10000), structure,
@@ -206,25 +206,25 @@ public class WorldServiceImpl implements WorldService {
                         JSONArray blockRow = blocks.getJSONArray(i);
                         Integer type = blockRow.getInteger(0);
                         Block block = new Block(type, null, String.valueOf(blockRow.getInteger(1)),
-                                new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                        GamePalConstants.STRUCTURE_LAYER_MIDDLE_DECORATION),
+                                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
                                                 BigDecimal.valueOf(blockRow.getInteger(3))));
                         switch (type) {
-                            case GamePalConstants.BLOCK_TYPE_DROP:
-                                block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
-                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_MIDDLE);
+                            case BlockConstants.BLOCK_TYPE_DROP:
+                                block.getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_HOLLOW);
+                                block.getStructure().setLayer(BlockConstants.STRUCTURE_LAYER_MIDDLE);
                                 Drop drop = new Drop(blockRow.getString(4), blockRow.getInteger(5), block);
                                 newScene.getBlocks().add(drop);
                                 break;
-                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                            case BlockConstants.BLOCK_TYPE_TELEPORT:
                                 WorldCoordinate to = new WorldCoordinate(blockRow.getInteger(4),
                                         new IntegerCoordinate(blockRow.getInteger(5),
                                                 blockRow.getInteger(6)),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
                                                 BigDecimal.valueOf(blockRow.getInteger(8))));
-                                block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW);
-                                block.getStructure().setLayer(GamePalConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
+                                block.getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_HOLLOW);
+                                block.getStructure().setLayer(BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
                                 Teleport teleport = new Teleport(to, block);
                                 newScene.getBlocks().add(teleport);
                                 break;
@@ -248,13 +248,13 @@ public class WorldServiceImpl implements WorldService {
             block.setId(id);
             WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(block, region.getRegionNo(),
                     scene.getSceneCoordinate(), block);
-            if (GamePalConstants.BLOCK_TYPE_CONTAINER == block.getType()) {
+            if (BlockConstants.BLOCK_TYPE_CONTAINER == block.getType()) {
                 BagInfo bagInfo = new BagInfo();
                 bagInfo.setId(id);
                 world.getBagInfoMap().put(id, bagInfo);
             }
-            if (GamePalConstants.BLOCK_TYPE_DROP == block.getType()
-                    || GamePalConstants.BLOCK_TYPE_TELEPORT == block.getType()
+            if (BlockConstants.BLOCK_TYPE_DROP == block.getType()
+                    || BlockConstants.BLOCK_TYPE_TELEPORT == block.getType()
                     || BlockUtil.checkBlockTypeInteractive(block.getType())) {
                 world.getBlockMap().put(id, worldBlock);
             }
@@ -347,7 +347,7 @@ public class WorldServiceImpl implements WorldService {
      */
     private boolean checkEventCondition(final GameWorld world, final WorldBlock eventBlock, final WorldBlock blocker) {
         return eventBlock.getRegionNo() == blocker.getRegionNo()
-                && (blocker.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
+                && (blocker.getType() != BlockConstants.BLOCK_TYPE_PLAYER
                 || playerService.validateActiveness(world, (PlayerInfo) blocker))
                 && checkEventConditionByEventCode(eventBlock, blocker);
     }
@@ -449,7 +449,7 @@ public class WorldServiceImpl implements WorldService {
                 List<WorldBlock> activatedWorldBlockList = calculateBallisticWorldBlocks(eventBlock, playerInfoList);
                 activatedWorldBlockList.forEach((WorldBlock activatedWorldBlock) -> {
                     BlockUtil.copyWorldCoordinate(activatedWorldBlock, eventBlock);
-                    if (activatedWorldBlock.getType() == GamePalConstants.BLOCK_TYPE_PLAYER
+                    if (activatedWorldBlock.getType() == BlockConstants.BLOCK_TYPE_PLAYER
                             && playerInfoMap.containsKey(activatedWorldBlock.getId())
                             && playerService.validateActiveness(world,
                             playerInfoMap.get(activatedWorldBlock.getId()))) {
@@ -599,7 +599,7 @@ public class WorldServiceImpl implements WorldService {
         preSelectedSceneCoordinates.forEach(sceneCoordinate ->
             regionMap.get(eventBlock.getRegionNo()).getScenes().get(sceneCoordinate).getBlocks().stream()
                     .filter(blocker ->
-                            GamePalConstants.STRUCTURE_MATERIAL_HOLLOW != blocker.getStructure().getMaterial())
+                            BlockConstants.STRUCTURE_MATERIAL_HOLLOW != blocker.getStructure().getMaterial())
                     .forEach(blocker -> {
                         WorldBlock worldBlock = BlockUtil.convertBlock2WorldBlock(blocker, eventBlock.getRegionNo(),
                                 sceneCoordinate, blocker);
@@ -616,7 +616,7 @@ public class WorldServiceImpl implements WorldService {
                             BlockUtil.calculateDistance(regionMap.get(eventBlock.getRegionNo()),
                                     eventPlayerInfo, wb);
                     if (null != distanceOld && null != distanceNew && distanceOld.compareTo(distanceNew) > 0) {
-                        if (wb.getType() != GamePalConstants.BLOCK_TYPE_PLAYER
+                        if (wb.getType() != BlockConstants.BLOCK_TYPE_PLAYER
                                 || eventBlock.getType() != SkillConstants.SKILL_CODE_SHOOT_MAGNUM) {
                             activatedWorldBlockList.clear();
                         }

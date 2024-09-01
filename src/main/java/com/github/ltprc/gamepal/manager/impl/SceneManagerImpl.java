@@ -3,7 +3,7 @@ package com.github.ltprc.gamepal.manager.impl;
 import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
-import com.github.ltprc.gamepal.config.BlockCodeConstants;
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -48,18 +48,18 @@ public class SceneManagerImpl implements SceneManager {
     public Region generateRegion(int regionNo) {
         Region region = new Region();
         region.setRegionNo(regionNo);
-        region.setType(BlockCodeConstants.REGION_TYPE_ISLAND);
+        region.setType(BlockConstants.REGION_TYPE_ISLAND);
         region.setName("Auto Region " + region.getRegionNo());
-        region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
-        region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
-        region.setRadius(BlockCodeConstants.REGION_RADIUS_DEFAULT);
+        region.setWidth(BlockConstants.SCENE_DEFAULT_WIDTH);
+        region.setHeight(BlockConstants.SCENE_DEFAULT_HEIGHT);
+        region.setRadius(BlockConstants.REGION_RADIUS_DEFAULT);
         initializeRegionTerrainMap(region);
         return region;
     }
 
     private void initializeRegionTerrainMap(Region region) {
         switch (region.getType()) {
-            case BlockCodeConstants.REGION_TYPE_ISLAND:
+            case BlockConstants.REGION_TYPE_ISLAND:
                 initializeRegionTerrainMapIsland(region);
                 break;
         }
@@ -86,27 +86,27 @@ public class SceneManagerImpl implements SceneManager {
         Map<IntegerCoordinate, Integer> terrainMap = region.getTerrainMap();
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius());
-            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
             sceneCoordinate = new IntegerCoordinate(i, -region.getRadius());
-            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
             sceneCoordinate = new IntegerCoordinate(region.getRadius(), i);
-            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
             sceneCoordinate = new IntegerCoordinate(-region.getRadius(), i);
-            region.getTerrainMap().put(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
         }
         for (int i = - region.getRadius() + 1; i < region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius() - 1);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
             sceneCoordinate = new IntegerCoordinate(i, - region.getRadius() + 1);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
             sceneCoordinate = new IntegerCoordinate(region.getRadius() - 1, i);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
             sceneCoordinate = new IntegerCoordinate(- region.getRadius() + 1, i);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockCodeConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
         }
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             for (int j = - region.getRadius(); j <= region.getRadius(); j++) {
@@ -114,32 +114,32 @@ public class SceneManagerImpl implements SceneManager {
                 int blockCode;
                 double d = random.nextDouble();
                 if (altitudeMap.get(sceneCoordinate) >= 0.65D) {
-                    blockCode = BlockCodeConstants.BLOCK_CODE_SNOW;
+                    blockCode = BlockConstants.BLOCK_CODE_SNOW;
                     defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
                             altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else if (altitudeMap.get(sceneCoordinate) >= 0.6D) {
-                    blockCode = BlockCodeConstants.BLOCK_CODE_ROUGH;
+                    blockCode = BlockConstants.BLOCK_CODE_ROUGH;
                     defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
                             altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else if (altitudeMap.get(sceneCoordinate) >= 0.4D) {
                     if (d >= 0.75D) {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_DIRT;
+                        blockCode = BlockConstants.BLOCK_CODE_DIRT;
                     } else {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_GRASS;
+                        blockCode = BlockConstants.BLOCK_CODE_GRASS;
                     }
                     defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
                             altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else {
                     if (d >= 0.8D) {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_WATER;
+                        blockCode = BlockConstants.BLOCK_CODE_WATER;
                     } else if (d >= 0.6D) {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_SWAMP;
+                        blockCode = BlockConstants.BLOCK_CODE_SWAMP;
                     } else if (d >= 0.4D) {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_SAND;
+                        blockCode = BlockConstants.BLOCK_CODE_SAND;
                     } else if (d >= 0.2D) {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_LAVA;
+                        blockCode = BlockConstants.BLOCK_CODE_LAVA;
                     } else {
-                        blockCode = BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN;
+                        blockCode = BlockConstants.BLOCK_CODE_SUBTERRANEAN;
                     }
                     defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
                             altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
@@ -217,10 +217,10 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1031);
             return;
         }
-        int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockCodeConstants.BLOCK_CODE_NOTHING);
+        int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
         fillSceneTemplate(region, scene, regionIndex);
-        if (regionIndex == BlockCodeConstants.BLOCK_CODE_NOTHING) {
-            scene.getBlocks().forEach(block -> block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_SOLID));
+        if (regionIndex == BlockConstants.BLOCK_CODE_NOTHING) {
+            scene.getBlocks().forEach(block -> block.getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
         } else {
             // Add animals 24/06/19
             addSceneAnimals(world, region, scene);
@@ -365,202 +365,202 @@ public class SceneManagerImpl implements SceneManager {
 
     @Deprecated
     private Scene fillSceneDirt(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_DIRT);
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_DIRT);
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
         // 橡树
-        addSceneObject(region, scene, 10, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
         // 细橡树
-        addSceneObject(region, scene, 10, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneSand(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_SAND);
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SAND);
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
         // 棕榈树
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
         // 仙人掌
         for (int i = 0; i < 3; i++) {
-            addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                    BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-8", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                    GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+            addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                    BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-8", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                    BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
         }
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneGrass(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_GRASS);
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_GRASS);
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
         // 松树
-        addSceneObject(region, scene, 10, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
         // 橡树
-        addSceneObject(region, scene, 10, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
         // 死树
-        addSceneObject(region, scene, 2, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
         // 细松树
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
         // 细橡树
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
         // 细死树
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
-        roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
+        roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
                 new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
         // 大石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
         // 小石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
         // 树桩1
-        addSceneObject(region, scene, 2, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
+        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
         // 树桩2
-        addSceneObject(region, scene, 2, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
+        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
         // 空心树干
-        addSceneObject(region, scene, 2, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
+        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
         // 灌木丛1
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
         // 灌木丛2
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
         // 鲜花
         for (int i = 0; i < 6; i++) {
-            addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                    BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-5", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                    GamePalConstants.STRUCTURE_LAYER_BOTTOM, null, null);
+            addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                    BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-5", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                    BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
         }
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneSnow(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_SNOW);
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SNOW);
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneSwamp(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_SWAMP);
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SWAMP);
         // 霸王花
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_BOTTOM, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
         // 杂草
         for (int i = 0; i < 4; i++) {
-            addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                    BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-7", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                    GamePalConstants.STRUCTURE_LAYER_BOTTOM, null, null);
+            addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                    BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-7", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                    BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
         }
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneRough(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_ROUGH);
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_ROUGH);
         // 灌木丛1
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
         // 灌木丛2
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneSubterranean(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN);
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SUBTERRANEAN);
         // 霸王花
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_BOTTOM, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
         // 蘑菇1
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
         // 蘑菇2
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
                 new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
         // 大石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
         // 小石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneLava(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_LAVA);
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_LAVA);
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
                 new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
         // 大石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                GamePalConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
         // 小石头
-        addSceneObject(region, scene, 5, GamePalConstants.BLOCK_TYPE_NORMAL,
-                BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                GamePalConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
+        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
+                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                BlockConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneOcean(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_WATER);
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_WATER);
         return scene;
     }
 
     @Deprecated
     private Scene fillSceneNothing(final Region region, final Scene scene) {
-        fillSceneTemplate(region, scene, BlockCodeConstants.BLOCK_CODE_NOTHING);
-        scene.getBlocks().forEach(block -> block.getStructure().setMaterial(GamePalConstants.STRUCTURE_MATERIAL_SOLID));
+        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_NOTHING);
+        scene.getBlocks().forEach(block -> block.getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
         return scene;
     }
 
@@ -621,207 +621,207 @@ public class SceneManagerImpl implements SceneManager {
         Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
                 y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 2000);
+        weightMap.put(BlockConstants.BLOCK_CODE_NOTHING, 2000);
         switch (blockCode) {
-            case BlockCodeConstants.BLOCK_CODE_DIRT:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_OAK, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PINE, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_OAK, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PALM, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_RAFFLESIA, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_STUMP, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BUSH, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_1, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_2, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_1, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_2, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_3, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_4, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_3, 0);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_1, 1);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_2, 1);
+            case BlockConstants.BLOCK_CODE_DIRT:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_OAK, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_PINE, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_OAK, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_PALM, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_RAFFLESIA, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_STUMP, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_MOSSY_STUMP, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_HOLLOW_TRUNK, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_FLOWER_BUSH, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BUSH, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_3, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_3, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_1, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_2, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_1, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_2, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_3, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_4, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_3, 0);
+                weightMap.put(BlockConstants.ROCK_INDEX_1, 1);
+                weightMap.put(BlockConstants.ROCK_INDEX_2, 1);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SAND:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_OAK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PINE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_OAK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PALM, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_RAFFLESIA, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_STUMP, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BUSH, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_1, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_2, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_3, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_4, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_1, 50);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_2, 50);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_3, 50);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_1, 0);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_2, 0);
+            case BlockConstants.BLOCK_CODE_SAND:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_OAK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_PINE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_OAK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_PALM, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_RAFFLESIA, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_STUMP, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_MOSSY_STUMP, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_HOLLOW_TRUNK, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_FLOWER_BUSH, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BUSH, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_3, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_3, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_1, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_2, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_3, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_4, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_1, 50);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_2, 50);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_3, 50);
+                weightMap.put(BlockConstants.ROCK_INDEX_1, 0);
+                weightMap.put(BlockConstants.ROCK_INDEX_2, 0);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_GRASS:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_OAK, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PINE, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_OAK, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PALM, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_RAFFLESIA, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_STUMP, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BUSH, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_1, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_2, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_1, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_2, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_3, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_4, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_3, 0);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_1, 10);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_2, 10);
+            case BlockConstants.BLOCK_CODE_GRASS:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_OAK, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_PINE, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_OAK, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_PALM, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_RAFFLESIA, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_STUMP, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_MOSSY_STUMP, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_HOLLOW_TRUNK, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_FLOWER_BUSH, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_BUSH, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_1, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_2, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_3, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_1, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_2, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_3, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_1, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_2, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_1, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_2, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_3, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_4, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_3, 0);
+                weightMap.put(BlockConstants.ROCK_INDEX_1, 10);
+                weightMap.put(BlockConstants.ROCK_INDEX_2, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SWAMP:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_OAK, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PINE, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_OAK, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PALM, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_RAFFLESIA, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_STUMP, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BUSH, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_1, 50);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_2, 50);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_1, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_2, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_3, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_4, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_3, 0);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_1, 10);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_2, 10);
+            case BlockConstants.BLOCK_CODE_SWAMP:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_OAK, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_PINE, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_OAK, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_PALM, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_RAFFLESIA, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_STUMP, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_MOSSY_STUMP, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_HOLLOW_TRUNK, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_FLOWER_BUSH, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_BUSH, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_1, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_2, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_3, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_1, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_2, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_3, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_1, 50);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_2, 50);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_1, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_2, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_3, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_4, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_3, 0);
+                weightMap.put(BlockConstants.ROCK_INDEX_1, 10);
+                weightMap.put(BlockConstants.ROCK_INDEX_2, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_ROUGH:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_OAK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PINE, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_OAK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PALM, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_RAFFLESIA, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_STUMP, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK, 1);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BUSH, 20);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3, 2);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_3, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_4, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_3, 5);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_1, 50);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_2, 50);
+            case BlockConstants.BLOCK_CODE_ROUGH:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_OAK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_PINE, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_OAK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_PALM, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_RAFFLESIA, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_STUMP, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_MOSSY_STUMP, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_HOLLOW_TRUNK, 1);
+                weightMap.put(BlockConstants.PLANT_INDEX_FLOWER_BUSH, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_BUSH, 20);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_1, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_2, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_3, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_1, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_2, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_3, 2);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_3, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_4, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_3, 5);
+                weightMap.put(BlockConstants.ROCK_INDEX_1, 50);
+                weightMap.put(BlockConstants.ROCK_INDEX_2, 50);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_PINE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_OAK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PINE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_OAK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_PALM, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_RAFFLESIA, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_STUMP, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BUSH, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3, 5);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_1, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_MUSHROOM_2, 100);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_1, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_2, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_3, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_GRASS_4, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_1, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_2, 0);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_CACTUS_3, 0);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_1, 100);
-                weightMap.put(BlockCodeConstants.ROCK_INDEX_2, 100);
+            case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_OAK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_PINE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_OAK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_PALM, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_RAFFLESIA, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_STUMP, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_MOSSY_STUMP, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_HOLLOW_TRUNK, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_FLOWER_BUSH, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_BUSH, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_SMALL_FLOWER_3, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_1, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_2, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_FLOWER_3, 5);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_1, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_MUSHROOM_2, 100);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_1, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_2, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_3, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_GRASS_4, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_1, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_2, 0);
+                weightMap.put(BlockConstants.PLANT_INDEX_CACTUS_3, 0);
+                weightMap.put(BlockConstants.ROCK_INDEX_1, 100);
+                weightMap.put(BlockConstants.ROCK_INDEX_2, 100);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_LAVA:
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE, 10);
-                weightMap.put(BlockCodeConstants.PLANT_INDEX_WITHERED_TREE, 10);
+            case BlockConstants.BLOCK_CODE_LAVA:
+                weightMap.put(BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE, 10);
+                weightMap.put(BlockConstants.PLANT_INDEX_WITHERED_TREE, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SNOW:
-            case BlockCodeConstants.BLOCK_CODE_WATER:
-            case BlockCodeConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_SNOW:
+            case BlockConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_NOTHING:
             default:
                 break;
         }
@@ -838,236 +838,236 @@ public class SceneManagerImpl implements SceneManager {
 
     private void addSceneObjectByCode(RegionInfo regionInfo, Scene scene, int blockCode, Coordinate coordinate) {
         Block block = null;
-        Shape roundShape = new Shape(GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
         switch (blockCode) {
-            case BlockCodeConstants.PLANT_INDEX_BIG_PINE:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_BIG_PINE:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_BIG_OAK:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_BIG_OAK:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_BIG_WITHERED_TREE:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_PINE:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_PINE:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_OAK:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_OAK:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_WITHERED_TREE:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_WITHERED_TREE:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_PALM:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_PALM:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_RAFFLESIA:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_RAFFLESIA:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_STUMP:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_STUMP:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_MOSSY_STUMP:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_MOSSY_STUMP:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_HOLLOW_TRUNK:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.PLANT_INDEX_HOLLOW_TRUNK:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_FLOWER_BUSH:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+            case BlockConstants.PLANT_INDEX_FLOWER_BUSH:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_BUSH:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+            case BlockConstants.PLANT_INDEX_BUSH:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_1:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-5",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_1:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_2:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-5",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_2:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_SMALL_FLOWER_3:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-5",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_3:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_1:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-5",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_BIG_FLOWER_1:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_2:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-5",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_BIG_FLOWER_2:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_BIG_FLOWER_3:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-5",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_BIG_FLOWER_3:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_MUSHROOM_1:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_MUSHROOM_1:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_MUSHROOM_2:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_MUSHROOM_2:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_GRASS_1:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-7",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_GRASS_1:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_GRASS_2:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-7",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_GRASS_2:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_GRASS_3:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-7",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_GRASS_3:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_GRASS_4:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-7",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM),
+            case BlockConstants.PLANT_INDEX_GRASS_4:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_CACTUS_1:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-8",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+            case BlockConstants.PLANT_INDEX_CACTUS_1:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-8",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_CACTUS_2:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-8",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+            case BlockConstants.PLANT_INDEX_CACTUS_2:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-8",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
                         coordinate);
                 break;
-            case BlockCodeConstants.PLANT_INDEX_CACTUS_3:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-8",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE),
+            case BlockConstants.PLANT_INDEX_CACTUS_3:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-8",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
                         coordinate);
                 break;
-            case BlockCodeConstants.ROCK_INDEX_1:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_SOLID,
-                                GamePalConstants.STRUCTURE_LAYER_MIDDLE,
+            case BlockConstants.ROCK_INDEX_1:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape),
                         coordinate);
                 break;
-            case BlockCodeConstants.ROCK_INDEX_2:
-                block = new Block(GamePalConstants.BLOCK_TYPE_NORMAL, null,
-                        BlockCodeConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
-                        new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                GamePalConstants.STRUCTURE_LAYER_BOTTOM,
+            case BlockConstants.ROCK_INDEX_2:
+                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM,
                                 roundShape),
                         coordinate);
                 break;
@@ -1115,12 +1115,12 @@ public class SceneManagerImpl implements SceneManager {
                                 BigDecimal y) {
         Random random = new Random();
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockCodeConstants.BLOCK_CODE_NOTHING, 10000);
+        weightMap.put(BlockConstants.BLOCK_CODE_NOTHING, 10000);
         switch (blockCode) {
-            case BlockCodeConstants.BLOCK_CODE_DIRT:
+            case BlockConstants.BLOCK_CODE_DIRT:
                 weightMap.put(CreatureConstants.SKIN_COLOR_DOG, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_GRASS:
+            case BlockConstants.BLOCK_CODE_GRASS:
                 weightMap.put(CreatureConstants.SKIN_COLOR_MONKEY, 2);
                 weightMap.put(CreatureConstants.SKIN_COLOR_CHICKEN, 20);
                 weightMap.put(CreatureConstants.SKIN_COLOR_BUFFALO, 10);
@@ -1128,25 +1128,25 @@ public class SceneManagerImpl implements SceneManager {
                 weightMap.put(CreatureConstants.SKIN_COLOR_CAT, 5);
                 weightMap.put(CreatureConstants.SKIN_COLOR_HORSE, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SNOW:
+            case BlockConstants.BLOCK_CODE_SNOW:
                 weightMap.put(CreatureConstants.SKIN_COLOR_POLAR_BEAR, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SWAMP:
+            case BlockConstants.BLOCK_CODE_SWAMP:
                 weightMap.put(CreatureConstants.SKIN_COLOR_FROG, 50);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_ROUGH:
+            case BlockConstants.BLOCK_CODE_ROUGH:
                 weightMap.put(CreatureConstants.SKIN_COLOR_FOX, 10);
                 weightMap.put(CreatureConstants.SKIN_COLOR_WOLF, 10);
                 weightMap.put(CreatureConstants.SKIN_COLOR_TIGER, 10);
                 weightMap.put(CreatureConstants.SKIN_COLOR_BOAR, 10);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN:
+            case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
                 weightMap.put(CreatureConstants.SKIN_COLOR_RACOON, 5);
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SAND:
-            case BlockCodeConstants.BLOCK_CODE_LAVA:
-            case BlockCodeConstants.BLOCK_CODE_WATER:
-            case BlockCodeConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_SAND:
+            case BlockConstants.BLOCK_CODE_LAVA:
+            case BlockConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_NOTHING:
             default:
                 break;
         }
@@ -1154,7 +1154,7 @@ public class SceneManagerImpl implements SceneManager {
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()
-                    && BlockCodeConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
+                    && BlockConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
                 String animalUserCode = UUID.randomUUID().toString();
                 PlayerInfo animalInfo =
                         npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
@@ -1205,10 +1205,10 @@ public class SceneManagerImpl implements SceneManager {
                     scene.getBlocks().forEach(block -> {
                         Block newBlock;
                         switch (block.getType()) {
-                            case GamePalConstants.BLOCK_TYPE_DROP:
+                            case BlockConstants.BLOCK_TYPE_DROP:
                                 newBlock = new Drop((Drop) block);
                                 break;
-                            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+                            case BlockConstants.BLOCK_TYPE_TELEPORT:
                                 newBlock = new Teleport((Teleport) block);
                                 break;
                             default:
@@ -1281,7 +1281,7 @@ public class SceneManagerImpl implements SceneManager {
                 Scene scene = region.getScenes().get(newSceneCoordinate);
                 for (int l = 0; l <= region.getWidth(); l++) {
                     for (int k = 0; k <= region.getHeight(); k++) {
-                        int val = BlockCodeConstants.BLOCK_CODE_NOTHING;
+                        int val = BlockConstants.BLOCK_CODE_NOTHING;
                         if (null != scene && null != scene.getGird()) {
                             val = scene.getGird()[l][k];
                         }

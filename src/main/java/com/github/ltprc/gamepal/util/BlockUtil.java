@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
-import com.github.ltprc.gamepal.config.BlockCodeConstants;
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
@@ -98,10 +98,10 @@ public class BlockUtil {
                 worldBlock.getStructure(), convertSceneCoordinate
                 ? convertWorldCoordinate2Coordinate(regionInfo, worldBlock) : worldBlock.getCoordinate());
         switch (worldBlock.getType()) {
-            case GamePalConstants.BLOCK_TYPE_DROP:
+            case BlockConstants.BLOCK_TYPE_DROP:
                 newBlock = new Drop(((WorldDrop) worldBlock).getItemNo(), ((WorldDrop) worldBlock).getAmount(), newBlock);
                 break;
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+            case BlockConstants.BLOCK_TYPE_TELEPORT:
                 newBlock = new Teleport(((WorldTeleport) worldBlock).getTo(), newBlock);
                 break;
             default:
@@ -114,10 +114,10 @@ public class BlockUtil {
         WorldBlock worldBlock = new WorldBlock(block.getType(), block.getId(), block.getCode(),
                 block.getStructure(), new WorldCoordinate(regionNo, sceneCoordinate, coordinate));
         switch (block.getType()) {
-            case GamePalConstants.BLOCK_TYPE_DROP:
+            case BlockConstants.BLOCK_TYPE_DROP:
                 worldBlock = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(), worldBlock);
                 break;
-            case GamePalConstants.BLOCK_TYPE_TELEPORT:
+            case BlockConstants.BLOCK_TYPE_TELEPORT:
                 worldBlock = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
                 break;
             default:
@@ -342,12 +342,12 @@ public class BlockUtil {
                 oldBlock2.getStructure(),
                 new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
                         oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
-            block1.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
+            block1.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
             block1.getStructure().getShape().getRadius().setY(block1.getStructure().getShape().getRadius().getX());
         }
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
-            block2.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
+            block2.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
             block2.getStructure().getShape().getRadius().setY(block2.getStructure().getShape().getRadius().getX());
         }
         if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
@@ -357,8 +357,8 @@ public class BlockUtil {
                     .add(block2.getStructure().getShape().getRadius().getX()).doubleValue();
         }
         // Round vs. round
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
-                && GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
             return calculateBallisticDistance(block1, ballisticAngle, block2)
                     .compareTo(block1.getStructure().getShape().getRadius().getX()
                             .add(block2.getStructure().getShape().getRadius().getX())) < 0;
@@ -369,8 +369,8 @@ public class BlockUtil {
         BigDecimal yLeft = xLeft.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
         BigDecimal yRight = xRight.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
         // Rectangle vs. rectangle
-//        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
-//                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
+//        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
+//                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
 //        if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
 //                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0
 //                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
@@ -384,7 +384,7 @@ public class BlockUtil {
 //            return false;
 //        }
         // Round vs. rectangle
-//        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+//        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
 //            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
 //        }
         // TODO make round vs. rectangle specific
@@ -430,25 +430,25 @@ public class BlockUtil {
                 oldBlock2.getStructure(),
                 new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
                         oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
-            block1.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
+            block1.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
             block1.getStructure().getShape().getRadius().setY(block1.getStructure().getShape().getRadius().getX());
         }
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
-            block2.getStructure().getShape().setShapeType(GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
+            block2.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
             block2.getStructure().getShape().getRadius().setY(block2.getStructure().getShape().getRadius().getX());
         }
         // Round vs. round
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
-                && GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
             return Math.sqrt(Math.pow(block1.getX().subtract(block2.getX()).doubleValue(), 2)
                     + Math.pow(block1.getY().subtract(block2.getY()).doubleValue(), 2))
                     <= block1.getStructure().getShape().getRadius().getX()
                     .add(block2.getStructure().getShape().getRadius().getX()).doubleValue();
         }
         // Rectangle vs. rectangle
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
-                && GamePalConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
             return Math.abs(block1.getX().subtract(block2.getX()).doubleValue())
                     <= block1.getStructure().getShape().getRadius().getX()
                     .add(block2.getStructure().getShape().getRadius().getX()).doubleValue()
@@ -457,7 +457,7 @@ public class BlockUtil {
                     .add(block2.getStructure().getShape().getRadius().getY()).doubleValue();
         }
         // Round vs. rectangle
-        if (GamePalConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
             return detectCollision(oldBlock2, oldBlock1);
         }
         return block1.getX().add(block1.getStructure().getShape().getRadius().getX()).doubleValue()
@@ -472,16 +472,16 @@ public class BlockUtil {
 
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
-            case GamePalConstants.BLOCK_TYPE_PLAYER:
-            case GamePalConstants.BLOCK_TYPE_BED:
-            case GamePalConstants.BLOCK_TYPE_TOILET:
-            case GamePalConstants.BLOCK_TYPE_DRESSER:
-            case GamePalConstants.BLOCK_TYPE_WORKSHOP:
-            case GamePalConstants.BLOCK_TYPE_GAME:
-            case GamePalConstants.BLOCK_TYPE_STORAGE:
-            case GamePalConstants.BLOCK_TYPE_COOKER:
-            case GamePalConstants.BLOCK_TYPE_SINK:
-            case GamePalConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+            case BlockConstants.BLOCK_TYPE_BED:
+            case BlockConstants.BLOCK_TYPE_TOILET:
+            case BlockConstants.BLOCK_TYPE_DRESSER:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+            case BlockConstants.BLOCK_TYPE_GAME:
+            case BlockConstants.BLOCK_TYPE_STORAGE:
+            case BlockConstants.BLOCK_TYPE_COOKER:
+            case BlockConstants.BLOCK_TYPE_SINK:
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
                 return true;
             default:
                 return false;
@@ -518,17 +518,17 @@ public class BlockUtil {
 
     public static WorldBlock convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
                                                      WorldCoordinate worldCoordinate) {
-        WorldBlock block = new WorldBlock(GamePalConstants.BLOCK_TYPE_NORMAL, userCode, String.valueOf(eventCode),
-                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW,
+        WorldBlock block = new WorldBlock(BlockConstants.BLOCK_TYPE_NORMAL, userCode, String.valueOf(eventCode),
+                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                 convertEventCode2Layer(eventCode)), worldCoordinate);
         BlockUtil.fixWorldCoordinate(regionInfo, block);
         return block;
     }
 
     public static Block convertEvent2Block(Event event) {
-        Block block = new Block(GamePalConstants.BLOCK_TYPE_EVENT, null,
+        Block block = new Block(BlockConstants.BLOCK_TYPE_EVENT, null,
                 event.getCode() + "-" + event.getFrame(),
-                new Structure(GamePalConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())),
+                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())),
                 event);
         return block;
     }
@@ -545,10 +545,10 @@ public class BlockUtil {
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
-                layer = GamePalConstants.STRUCTURE_LAYER_TOP_DECORATION;
+                layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
             default:
-                layer = GamePalConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
+                layer = BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
                 break;
         }
         return layer;
@@ -637,7 +637,7 @@ public class BlockUtil {
         if (distance.compareTo(perceptionInfo.getDistinctHearingRadius()) <= 0) {
             return true;
         }
-        if (block2.getType() == GamePalConstants.BLOCK_TYPE_PLAYER) {
+        if (block2.getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
             return distance.compareTo(perceptionInfo.getDistinctVisionRadius()) <= 0
                     && angle.subtract(faceDirection).abs().doubleValue() % 360D
                     < perceptionInfo.getDistinctVisionAngle().doubleValue() / 2;
@@ -649,24 +649,24 @@ public class BlockUtil {
     public static void calculateMaxSpeed(WorldMovingBlock worldMovingBlock) {
         BigDecimal maxSpeed = CreatureConstants.MAX_SPEED_DEFAULT;
         switch (worldMovingBlock.getFloorCode()) {
-            case BlockCodeConstants.BLOCK_CODE_SWAMP:
+            case BlockConstants.BLOCK_CODE_SWAMP:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.2));
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SAND:
+            case BlockConstants.BLOCK_CODE_SAND:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.4));
                 break;
-            case BlockCodeConstants.BLOCK_CODE_SNOW:
-            case BlockCodeConstants.BLOCK_CODE_LAVA:
+            case BlockConstants.BLOCK_CODE_SNOW:
+            case BlockConstants.BLOCK_CODE_LAVA:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.6));
                 break;
-            case BlockCodeConstants.BLOCK_CODE_ROUGH:
-            case BlockCodeConstants.BLOCK_CODE_SUBTERRANEAN:
-            case BlockCodeConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_ROUGH:
+            case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
+            case BlockConstants.BLOCK_CODE_WATER:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.8));
                 break;
-            case BlockCodeConstants.BLOCK_CODE_NOTHING:
-            case BlockCodeConstants.BLOCK_CODE_GRASS:
-            case BlockCodeConstants.BLOCK_CODE_DIRT:
+            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_GRASS:
+            case BlockConstants.BLOCK_CODE_DIRT:
             default:
                 break;
         }

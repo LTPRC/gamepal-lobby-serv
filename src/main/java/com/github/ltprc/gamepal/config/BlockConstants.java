@@ -1,10 +1,28 @@
 package com.github.ltprc.gamepal.config;
 
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BlockCodeConstants {
+public class BlockConstants {
+
+    public static final int SCENE_DEFAULT_WIDTH = 10;
+    public static final int SCENE_DEFAULT_HEIGHT = 10;
+    public static final int BLOCK_TYPE_NORMAL = 0;
+    public static final int BLOCK_TYPE_EVENT = 1;
+    public static final int BLOCK_TYPE_PLAYER = 2;
+    public static final int BLOCK_TYPE_DROP = 3;
+    public static final int BLOCK_TYPE_TELEPORT = 4;
+    public static final int BLOCK_TYPE_BED = 5;
+    public static final int BLOCK_TYPE_TOILET = 6;
+    public static final int BLOCK_TYPE_DRESSER = 7;
+    public static final int BLOCK_TYPE_WORKSHOP = 8;
+    public static final int BLOCK_TYPE_GAME = 9;
+    public static final int BLOCK_TYPE_STORAGE = 10;
+    public static final int BLOCK_TYPE_COOKER = 11;
+    public static final int BLOCK_TYPE_SINK = 12;
+    public static final int BLOCK_TYPE_CONTAINER = 13;
 
     // Backend constants
 
@@ -58,6 +76,25 @@ public class BlockCodeConstants {
     public static final int ROCK_INDEX_1 = 29;
     public static final int ROCK_INDEX_2 = 30;
 
+    public static final int STRUCTURE_LAYER_GROUND = 10;
+    public static final int STRUCTURE_LAYER_GROUND_DECORATION = 15;
+    public static final int STRUCTURE_LAYER_BOTTOM = 20;
+    public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 25;
+    public static final int STRUCTURE_LAYER_MIDDLE = 30;
+    public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 35;
+    public static final int STRUCTURE_LAYER_TOP = 40;
+    public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
+    public static final int STRUCTURE_LAYER_SKY = 50;
+    public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
+
+    public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
+    public static final int STRUCTURE_MATERIAL_SOLID = 1;
+    public static final int STRUCTURE_MATERIAL_FLESH = 2;
+    public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
+    public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
+    public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
+    public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
 
     static {
@@ -73,6 +110,6 @@ public class BlockCodeConstants {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER, new Color(64, 192, 255));
     }
 
-    private BlockCodeConstants() {
+    private BlockConstants() {
     }
 }

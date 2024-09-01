@@ -327,7 +327,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("playerInfos", playerInfos);
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
         if (world.getInteractionInfoMap().containsKey(userCode)) {
-            if (GamePalConstants.BLOCK_TYPE_STORAGE == world.getInteractionInfoMap().get(userCode).getType()) {
+            if (BlockConstants.BLOCK_TYPE_STORAGE == world.getInteractionInfoMap().get(userCode).getType()) {
                 rst.put("interactedBagInfo", world.getPreservedBagInfoMap().get(userCode));
             } else if (world.getBagInfoMap().containsKey(world.getInteractionInfoMap().get(userCode).getId())) {
                 rst.put("interactedBagInfo", world.getBagInfoMap().get(world.getInteractionInfoMap().get(userCode).getId()));
