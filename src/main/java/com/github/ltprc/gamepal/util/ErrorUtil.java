@@ -18,7 +18,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1011 = new GamepalError("1011", "Contact does not exist.");
     public static final GamepalError ERROR_1012 = new GamepalError("1012", "Invalid block code.");
     public static final GamepalError ERROR_1013 = new GamepalError("1013", "Invalid block type.");
-    public static final GamepalError ERROR_1014 = new GamepalError("1014", "Game status is invalid.");
+    public static final GamepalError ERROR_1014 = new GamepalError("1014", "");
     public static final GamepalError ERROR_1015 = new GamepalError("1015", "World with this worldCode has been created.");
     public static final GamepalError ERROR_1016 = new GamepalError("1016", "Invalid worldCode.");
     public static final GamepalError ERROR_1017 = new GamepalError("1017", "Different worlds detected.");
@@ -46,4 +46,9 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1039 = new GamepalError("1039", "Invalid playerType.");
     public static final GamepalError ERROR_1040 = new GamepalError("1040", "Not enough ammo.");
     public static final GamepalError ERROR_1041 = new GamepalError("1041", "Invalid sceneNo.");
+
+    public static final GamepalError ERROR_1101 = new GamepalError("1101", "Invalid gameNo.");
+    public static final GamepalError ERROR_1102 = new GamepalError("1102", "Invalid playerCount.");
+    public static final GamepalError ERROR_1103 = new GamepalError("1103", "Invalid gameStatus.");
+    public static final GamepalError ERROR_1104 = new GamepalError("1104", "Invalid playerStatus.");
 }

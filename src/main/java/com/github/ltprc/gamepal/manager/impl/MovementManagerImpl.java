@@ -12,6 +12,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,17 +120,17 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void syncFloorCode(GameWorld world, WorldMovingBlock worldMovingBlock) {
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
-//        if (null == region) {
-//            logger.error(ErrorUtil.ERROR_1027);
-//            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
-//            return;
-//        }
+        if (null == region) {
+            logger.error(ErrorUtil.ERROR_1027);
+            worldService.expandRegion(world, worldMovingBlock.getRegionNo());
+            return;
+        }
         Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
-//        if (null == scene) {
-//            logger.error(ErrorUtil.ERROR_1041);
-//            worldService.expandScene(world, worldMovingBlock);
-//            return;
-//        }
+        if (null == scene) {
+            logger.error(ErrorUtil.ERROR_1041);
+            worldService.expandScene(world, worldMovingBlock, 1);
+            return;
+        }
         IntegerCoordinate gridCoordinate = new IntegerCoordinate(
                 worldMovingBlock.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
                 worldMovingBlock.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());

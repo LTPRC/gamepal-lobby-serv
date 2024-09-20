@@ -7,7 +7,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.CommandManager;
-import com.github.ltprc.gamepal.manager.GameMapManager;
+import com.github.ltprc.gamepal.manager.MiniMapManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -33,7 +33,6 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,7 +62,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     private CommandManager commandManager;
 
     @Autowired
-    private GameMapManager gameMapManager;
+    private MiniMapManager MiniMapManager;
 
     @Autowired
     private MovementManager movementManager;
@@ -318,6 +317,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         JSONObject playerInfos = new JSONObject();
         playerInfoMap.values().stream()
+                .filter(playerInfo1 -> StringUtils.equals(userCode, playerInfo1.getId())
+                        || playerInfo1.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .filter(playerInfo1 -> playerInfo1.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
                 .forEach(playerInfo1 -> playerInfos.put(playerInfo1.getId(), playerInfo1));
         playerInfoMap.values().stream()
@@ -394,13 +395,13 @@ public class WebSocketServiceImpl implements WebSocketService {
                         creatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN));
             }
             if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
-                JSONArray background = gameMapManager.generateMiniMapBackground(region,
+                JSONArray background = MiniMapManager.generateMiniMapBackground(region,
                         new IntegerCoordinate(GamePalConstants.MINI_MAP_DEFAULT_SIZE, GamePalConstants.MINI_MAP_DEFAULT_SIZE));
                 miniMap.put("background", background);
             }
         }
         rst.put("functions", functionsResponse);
-        IntegerCoordinate sceneCoordinate = gameMapManager.getMiniMapSceneCoordinate(region,
+        IntegerCoordinate sceneCoordinate = MiniMapManager.getMiniMapSceneCoordinate(region,
                 new IntegerCoordinate(GamePalConstants.MINI_MAP_DEFAULT_SIZE, GamePalConstants.MINI_MAP_DEFAULT_SIZE),
                 playerInfo.getSceneCoordinate());
         miniMap.put("sceneCoordinate", sceneCoordinate);

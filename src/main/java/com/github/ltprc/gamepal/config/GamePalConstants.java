@@ -38,21 +38,6 @@ public class GamePalConstants {
     public static final int INTERACTION_SUCCUMB = 9;
     public static final int INTERACTION_EXPEL = 10;
 
-    public static final char ITEM_CHARACTER_TOOL = 't';
-    public static final char ITEM_CHARACTER_OUTFIT = 'o';
-    public static final char ITEM_CHARACTER_CONSUMABLE = 'c';
-    public static final char ITEM_CHARACTER_MATERIAL = 'm';
-    public static final char ITEM_CHARACTER_JUNK = 'j';
-    public static final char ITEM_CHARACTER_AMMO = 'a';
-    public static final char ITEM_CHARACTER_NOTE = 'n';
-    public static final char ITEM_CHARACTER_RECORDING = 'r';
-    public static final char RECIPE_CHARACTER_WORKSHOP = 'w';
-    public static final char RECIPE_CHARACTER_COOKER = 'c';
-    public static final char RECIPE_CHARACTER_SINK = 's';
-
-    public static final int TERMINAL_TYPE_GAME = 1;
-    public static final int GAME_TYPE_LAS_VEGAS = 1;
-
     public static final int EVENT_CODE_HIT_FIRE = 102;
     public static final int EVENT_CODE_HIT_ICE = 103;
     public static final int EVENT_CODE_HIT_ELECTRICITY = 104;
@@ -107,23 +92,11 @@ public class GamePalConstants {
 
     public static final long ONLINE_TIMEOUT_SECOND = 300L;
 
-    public static final int GAME_STATUS_END = -1;
-    public static final int GAME_STATUS_START = 0;
-    public static final int GAME_STATUS_WAITING = 1;
-    public static final int GAME_STATUS_RUNNING = 2;
-    public static final int GAME_PLAYER_STATUS_END = -1;
-    public static final int GAME_PLAYER_STATUS_START = 0;
-    public static final int GAME_PLAYER_STATUS_SEEKING = 1;
-    public static final int GAME_PLAYER_STATUS_STANDBY = 2;
-    public static final int GAME_PLAYER_STATUS_PREPARED = 3;
-    public static final int GAME_PLAYER_STATUS_PLAYING = 4;
-
-    public static final int TOOL_INDEX_DEFAULT = 0;
-    public static final int TOOL_INDEX_PRIMARY = 1;
-    public static final int TOOL_INDEX_SECONDARY = 2;
-
-    public static final int OUTFIT_INDEX_DEFAULT = 0;
-    public static final int OUTFIT_INDEX_CLOTHES = 1;
+    public static final int REGION_RADIUS_DEFAULT = 50;
+    public static final int SCENE_DEFAULT_WIDTH = 10;
+    public static final int SCENE_DEFAULT_HEIGHT = 10;
+    public static final int REGION_TYPE_DEFAULT = 0;
+    public static final int REGION_TYPE_ISLAND = 10;
 
     public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.ONE;
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.25D);

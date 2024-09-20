@@ -48,18 +48,18 @@ public class SceneManagerImpl implements SceneManager {
     public Region generateRegion(int regionNo) {
         Region region = new Region();
         region.setRegionNo(regionNo);
-        region.setType(BlockConstants.REGION_TYPE_ISLAND);
+        region.setType(GamePalConstants.REGION_TYPE_ISLAND);
         region.setName("Auto Region " + region.getRegionNo());
-        region.setWidth(BlockConstants.SCENE_DEFAULT_WIDTH);
-        region.setHeight(BlockConstants.SCENE_DEFAULT_HEIGHT);
-        region.setRadius(BlockConstants.REGION_RADIUS_DEFAULT);
+        region.setWidth(GamePalConstants.SCENE_DEFAULT_WIDTH);
+        region.setHeight(GamePalConstants.SCENE_DEFAULT_HEIGHT);
+        region.setRadius(GamePalConstants.REGION_RADIUS_DEFAULT);
         initializeRegionTerrainMap(region);
         return region;
     }
 
     private void initializeRegionTerrainMap(Region region) {
         switch (region.getType()) {
-            case BlockConstants.REGION_TYPE_ISLAND:
+            case GamePalConstants.REGION_TYPE_ISLAND:
                 initializeRegionTerrainMapIsland(region);
                 break;
         }

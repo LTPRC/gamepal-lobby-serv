@@ -25,8 +25,6 @@ public interface WorldService {
 
     void loadRecipes();
 
-    void initiateGame(GameWorld world);
-
     ResponseEntity<String> addEvent(String userCode, WorldBlock event);
 
     void updateEvents(GameWorld world);

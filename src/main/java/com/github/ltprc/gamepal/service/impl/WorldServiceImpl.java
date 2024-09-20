@@ -5,12 +5,12 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
-import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
@@ -22,7 +22,6 @@ import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
-import com.github.ltprc.gamepal.util.lv.LasVegasGameUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -129,11 +128,10 @@ public class WorldServiceImpl implements WorldService {
         world.setNpcBrainMap(new ConcurrentHashMap<>());
         loadScenes(world);
         registerInteractiveBlocks(world);
-        initiateGame(world);
     }
 
     private void loadScenes(GameWorld world) {
-        JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/json/regions.json");
+        JSONArray regions = ContentUtil.jsonFile2JSONArray("src/main/resources/config/regions.json");
         if (null == regions) {
             logger.error(ErrorUtil.ERROR_1032);
             return;
@@ -151,7 +149,7 @@ public class WorldServiceImpl implements WorldService {
             newRegion.setName(regionName);
             newRegion.setHeight(height);
             newRegion.setWidth(width);
-            newRegion.setRadius(BlockConstants.REGION_RADIUS_DEFAULT);
+            newRegion.setRadius(GamePalConstants.REGION_RADIUS_DEFAULT);
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));
@@ -263,34 +261,34 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void loadItems() {
-        JSONArray items = ContentUtil.jsonFile2JSONArray("src/main/resources/json/items.json");
+        JSONArray items = ContentUtil.jsonFile2JSONArray("src/main/resources/config/items.json");
         if (null == items) {
             logger.error(ErrorUtil.ERROR_1032);
             return;
         }
         items.forEach(itemObj -> {
             switch (((JSONObject) itemObj).getString("itemNo").charAt(0)) {
-                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                case ItemConstants.ITEM_CHARACTER_TOOL:
                     Tool tool = JSON.parseObject(String.valueOf(itemObj), Tool.class);
                     SkillUtil.defineToolProps(tool);
                     itemMap.put(tool.getItemNo(), tool);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                case ItemConstants.ITEM_CHARACTER_OUTFIT:
                     Outfit outfit = JSON.parseObject(String.valueOf(itemObj), Outfit.class);
                     itemMap.put(outfit.getItemNo(), outfit);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
+                case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                     Consumable consumable = JSON.parseObject(String.valueOf(itemObj), Consumable.class);
                     itemMap.put(consumable.getItemNo(), consumable);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_JUNK:
+                case ItemConstants.ITEM_CHARACTER_JUNK:
                     Junk junk = JSON.parseObject(String.valueOf(itemObj), Junk.class);
                     itemMap.put(junk.getItemNo(), junk);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_MATERIAL:
-                case GamePalConstants.ITEM_CHARACTER_AMMO:
-                case GamePalConstants.ITEM_CHARACTER_NOTE:
-                case GamePalConstants.ITEM_CHARACTER_RECORDING:
+                case ItemConstants.ITEM_CHARACTER_MATERIAL:
+                case ItemConstants.ITEM_CHARACTER_AMMO:
+                case ItemConstants.ITEM_CHARACTER_NOTE:
+                case ItemConstants.ITEM_CHARACTER_RECORDING:
                 default:
                     Item item = JSON.parseObject(String.valueOf(itemObj), Item.class);
                     itemMap.put(item.getItemNo(), item);
@@ -301,7 +299,7 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void loadRecipes() {
-        JSONArray recipes = ContentUtil.jsonFile2JSONArray("src/main/resources/json/recipes.json");
+        JSONArray recipes = ContentUtil.jsonFile2JSONArray("src/main/resources/config/recipes.json");
         if (null == recipes) {
             logger.error(ErrorUtil.ERROR_1032);
             return;
@@ -310,17 +308,6 @@ public class WorldServiceImpl implements WorldService {
                 .map(recipeObj -> ((JSONObject) recipeObj).toJavaObject(Recipe.class))
                 .sorted((recipe1, recipe2) -> StringUtils.compare(recipe1.getRecipeNo(), recipe2.getRecipeNo()))
                 .forEach(recipe -> recipeMap.put(recipe.getRecipeNo(), recipe));
-    }
-
-    @Override
-    public void initiateGame(GameWorld world) {
-        Game game = LasVegasGameUtil.getInstance();
-        for (int i = 1; i < Integer.MAX_VALUE; i++) {
-            if (!world.getGameMap().containsKey(i)) {
-                world.getGameMap().put(i, game);
-                break;
-            }
-        }
     }
 
     @Override

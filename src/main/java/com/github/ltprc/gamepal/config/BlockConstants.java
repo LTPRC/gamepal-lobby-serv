@@ -7,8 +7,28 @@ import java.util.Map;
 
 public class BlockConstants {
 
-    public static final int SCENE_DEFAULT_WIDTH = 10;
-    public static final int SCENE_DEFAULT_HEIGHT = 10;
+    public static final int BLOCK_CODE_NOTHING = 1001;
+    public static final int BLOCK_CODE_DIRT = 1010;
+    public static final int BLOCK_CODE_SAND = 1011;
+    public static final int BLOCK_CODE_GRASS = 1012;
+    public static final int BLOCK_CODE_SNOW = 1013;
+    public static final int BLOCK_CODE_SWAMP = 1014;
+    public static final int BLOCK_CODE_ROUGH = 1015;
+    public static final int BLOCK_CODE_SUBTERRANEAN = 1016;
+    public static final int BLOCK_CODE_LAVA = 1017;
+    public static final int BLOCK_CODE_WATER = 1018;
+    public static final int BLOCK_CODE_EDGE_DIRT_UP = 1020;
+    public static final int BLOCK_CODE_EDGE_DIRT_LEFT = 1021;
+    public static final int BLOCK_CODE_EDGE_DIRT_RIGHT = 1022;
+    public static final int BLOCK_CODE_EDGE_DIRT_DOWN = 1023;
+    public static final int BLOCK_CODE_EDGE_SAND_UP = 1024;
+    public static final int BLOCK_CODE_EDGE_SAND_LEFT = 1025;
+    public static final int BLOCK_CODE_EDGE_SAND_RIGHT = 1026;
+    public static final int BLOCK_CODE_EDGE_SAND_DOWN = 1027;
+
+    public static final char BLOCK_CODE_PREFIX_PLANTS = 'p';
+    public static final char BLOCK_CODE_PREFIX_ROCKS = 'r';
+
     public static final int BLOCK_TYPE_NORMAL = 0;
     public static final int BLOCK_TYPE_EVENT = 1;
     public static final int BLOCK_TYPE_PLAYER = 2;
@@ -26,23 +46,6 @@ public class BlockConstants {
 
     // Backend constants
 
-    public static final int REGION_RADIUS_DEFAULT = 50;
-    public static final int REGION_TYPE_DEFAULT = 0;
-    public static final int REGION_TYPE_ISLAND = 1;
-
-    public static final int BLOCK_CODE_NOTHING = 1001;
-
-    public static final int BLOCK_CODE_DIRT = 1010;
-    public static final int BLOCK_CODE_SAND = 1011;
-    public static final int BLOCK_CODE_GRASS = 1012;
-    public static final int BLOCK_CODE_SNOW = 1013;
-    public static final int BLOCK_CODE_SWAMP = 1014;
-    public static final int BLOCK_CODE_ROUGH = 1015;
-    public static final int BLOCK_CODE_SUBTERRANEAN = 1016;
-    public static final int BLOCK_CODE_LAVA = 1017;
-    public static final int BLOCK_CODE_WATER = 1018;
-
-    public static final char BLOCK_CODE_PREFIX_PLANTS = 'p';
     public static final int PLANT_INDEX_BIG_PINE = 1;
     public static final int PLANT_INDEX_BIG_OAK = 2;
     public static final int PLANT_INDEX_BIG_WITHERED_TREE = 3;
@@ -71,8 +74,6 @@ public class BlockConstants {
     public static final int PLANT_INDEX_CACTUS_1 = 26;
     public static final int PLANT_INDEX_CACTUS_2 = 27;
     public static final int PLANT_INDEX_CACTUS_3 = 28;
-
-    public static final char BLOCK_CODE_PREFIX_ROCKS = 'r';
     public static final int ROCK_INDEX_1 = 29;
     public static final int ROCK_INDEX_2 = 30;
 

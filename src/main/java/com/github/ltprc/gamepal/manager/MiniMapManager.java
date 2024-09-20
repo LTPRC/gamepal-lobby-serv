@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
 
-public interface GameMapManager {
+public interface MiniMapManager {
 
     JSONArray generateMiniMapBackground(Region region, IntegerCoordinate miniMapSize);
 

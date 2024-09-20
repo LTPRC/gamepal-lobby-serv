@@ -302,27 +302,27 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
         switch (itemNo.charAt(0)) {
-            case GamePalConstants.ITEM_CHARACTER_TOOL:
+            case ItemConstants.ITEM_CHARACTER_TOOL:
                 useTools(userCode, itemNo);
                 break;
-            case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+            case ItemConstants.ITEM_CHARACTER_OUTFIT:
                 useOutfits(userCode, itemNo);
                 break;
-            case GamePalConstants.ITEM_CHARACTER_CONSUMABLE:
+            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(userCode, itemNo, itemAmount);
                 break;
-            case GamePalConstants.ITEM_CHARACTER_MATERIAL:
+            case ItemConstants.ITEM_CHARACTER_MATERIAL:
                 break;
-            case GamePalConstants.ITEM_CHARACTER_JUNK:
+            case ItemConstants.ITEM_CHARACTER_JUNK:
                 getItem(userCode, itemNo, -1);
                 ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet()
                         .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue()));
                 break;
-            case GamePalConstants.ITEM_CHARACTER_AMMO:
+            case ItemConstants.ITEM_CHARACTER_AMMO:
                 break;
-            case GamePalConstants.ITEM_CHARACTER_NOTE:
+            case ItemConstants.ITEM_CHARACTER_NOTE:
                 break;
-            case GamePalConstants.ITEM_CHARACTER_RECORDING:
+            case ItemConstants.ITEM_CHARACTER_RECORDING:
                 break;
             default:
                 break;
@@ -353,10 +353,10 @@ public class PlayerServiceImpl implements PlayerService {
         bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
-                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                case ItemConstants.ITEM_CHARACTER_TOOL:
                     playerInfo.getTools().remove(itemNo);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                case ItemConstants.ITEM_CHARACTER_OUTFIT:
                     playerInfo.getOutfits().remove(itemNo);
                     break;
                 default:
@@ -460,10 +460,10 @@ public class PlayerServiceImpl implements PlayerService {
         bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
-                case GamePalConstants.ITEM_CHARACTER_TOOL:
+                case ItemConstants.ITEM_CHARACTER_TOOL:
                     playerInfo.getTools().remove(itemNo);
                     break;
-                case GamePalConstants.ITEM_CHARACTER_OUTFIT:
+                case ItemConstants.ITEM_CHARACTER_OUTFIT:
                     playerInfo.getOutfits().remove(itemNo);
                     break;
                 default:
@@ -723,7 +723,7 @@ public class PlayerServiceImpl implements PlayerService {
                             GameTerminal gameTerminal = new GameTerminal(world);
                             gameTerminal.setId(id);
                             gameTerminal.setUserCode(userCode);
-                            gameTerminal.setStatus(GamePalConstants.GAME_PLAYER_STATUS_START);
+                            gameTerminal.setStatus(GameConstants.GAME_PLAYER_STATUS_START);
                             gameTerminal.setOutputs(new ArrayList<>());
                             world.getTerminalMap().put(id, gameTerminal);
                         }
@@ -1074,7 +1074,7 @@ public class PlayerServiceImpl implements PlayerService {
                     .filter(toolNo -> !itemNo.equals(toolNo))
                     .forEach(newTools::add);
             playerInfo.setTools(newTools);
-        } else if (toolIndex != GamePalConstants.TOOL_INDEX_DEFAULT){
+        } else if (toolIndex != ItemConstants.TOOL_INDEX_DEFAULT) {
             playerInfo.getTools().stream()
                     .filter(toolNo -> toolIndex != ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex())
                     .forEach(newTools::add);
@@ -1101,7 +1101,7 @@ public class PlayerServiceImpl implements PlayerService {
                     .filter(outfitNo -> !itemNo.equals(outfitNo))
                     .forEach(newOutfits::add);
             playerInfo.setOutfits(newOutfits);
-        } else if (outfitIndex != GamePalConstants.OUTFIT_INDEX_DEFAULT){
+        } else if (outfitIndex != ItemConstants.OUTFIT_INDEX_DEFAULT) {
             playerInfo.getOutfits().stream()
                     .filter(outfitNo -> outfitIndex != ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex())
                     .forEach(newOutfits::add);

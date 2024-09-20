@@ -2,7 +2,7 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.manager.GameMapManager;
+import com.github.ltprc.gamepal.manager.MiniMapManager;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import java.awt.*;
 
 
 @Component
-public class GameMapManagerImpl implements GameMapManager {
+public class MiniMapManagerImpl implements MiniMapManager {
 
     @Override
     public JSONArray generateMiniMapBackground(Region region, IntegerCoordinate miniMapSize) {

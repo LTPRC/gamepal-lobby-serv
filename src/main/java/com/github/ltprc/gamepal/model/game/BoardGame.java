@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class Game {
     private String id;
-    private int gameType;
-    private int gameStatus;
+    private int type;
+    private int status;
     private int gameNumber; // Current game No
     private int roundNumber; // Current round No
     private int PlayerNumber; // Current player's No
