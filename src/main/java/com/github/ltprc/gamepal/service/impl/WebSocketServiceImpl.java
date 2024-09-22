@@ -198,17 +198,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("useDrop")) {
                 JSONObject useDrop = functions.getJSONObject("useDrop");
                 String id = useDrop.getString("id");
-                if (!world.getBlockMap().containsKey(id)) {
-                    logger.warn(ErrorUtil.ERROR_1030);
-                } else {
-                    WorldDrop worldDrop = (WorldDrop) world.getBlockMap().get(id);
-                    playerService.getItem(userCode, worldDrop.getItemNo(), worldDrop.getAmount());
-                    Region region = world.getRegionMap().get(worldDrop.getRegionNo());
-                    Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
-                    scene.setBlocks(scene.getBlocks().stream()
-                            .filter(block -> !id.equals(block.getId())).collect(Collectors.toList()));
-                    world.getBlockMap().remove(id);
-                }
+                playerService.useDrop(userCode, id);
             }
             if (functions.containsKey("setRelation")) {
                 JSONObject setRelation = functions.getJSONObject("setRelation");

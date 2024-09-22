@@ -37,12 +37,18 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_BED = 5;
     public static final int BLOCK_TYPE_TOILET = 6;
     public static final int BLOCK_TYPE_DRESSER = 7;
-    public static final int BLOCK_TYPE_WORKSHOP = 8;
     public static final int BLOCK_TYPE_GAME = 9;
     public static final int BLOCK_TYPE_STORAGE = 10;
     public static final int BLOCK_TYPE_COOKER = 11;
     public static final int BLOCK_TYPE_SINK = 12;
     public static final int BLOCK_TYPE_CONTAINER = 13;
+    public static final int BLOCK_TYPE_RADIO = 14;
+    public static final int BLOCK_TYPE_WORKSHOP = 20;
+    public static final int BLOCK_TYPE_WORKSHOP_TOOL = 21;
+    public static final int BLOCK_TYPE_WORKSHOP_AMMO = 22;
+    public static final int BLOCK_TYPE_WORKSHOP_OUTFIT = 23;
+    public static final int BLOCK_TYPE_WORKSHOP_CHEM = 24;
+    public static final int BLOCK_TYPE_WORKSHOP_RECYCLE = 25;
 
     // Backend constants
 
@@ -95,6 +101,7 @@ public class BlockConstants {
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+    public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
 

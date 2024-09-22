@@ -39,6 +39,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -1151,6 +1152,27 @@ public class PlayerServiceImpl implements PlayerService {
         worldDrop.setId(drop.getId());
         worldDrop.setCode(drop.getCode());
         world.getBlockMap().put(drop.getId(), worldDrop);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> useDrop(String userCode, String dropId) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        if (!world.getBlockMap().containsKey(dropId)) {
+            logger.warn(ErrorUtil.ERROR_1030);
+        } else {
+            WorldDrop worldDrop = (WorldDrop) world.getBlockMap().get(dropId);
+            getItem(userCode, worldDrop.getItemNo(), worldDrop.getAmount());
+            Region region = world.getRegionMap().get(worldDrop.getRegionNo());
+            Scene scene = region.getScenes().get(worldDrop.getSceneCoordinate());
+            scene.setBlocks(scene.getBlocks().stream()
+                    .filter(block -> !dropId.equals(block.getId())).collect(Collectors.toList()));
+            world.getBlockMap().remove(dropId);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 

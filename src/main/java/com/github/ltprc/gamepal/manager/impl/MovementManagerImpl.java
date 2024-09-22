@@ -105,14 +105,24 @@ public class MovementManagerImpl implements MovementManager {
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock);
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
         BlockUtil.fixWorldCoordinate(region, worldMovingBlock);
-        if (isSceneChanged) {
-            if (world.getPlayerInfoMap().containsKey(worldMovingBlock.getId())
-                    && world.getPlayerInfoMap().get(worldMovingBlock.getId()).getPlayerType()
-                    == CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (world.getPlayerInfoMap().containsKey(worldMovingBlock.getId())
+                && world.getPlayerInfoMap().get(worldMovingBlock.getId()).getPlayerType()
+                == CreatureConstants.PLAYER_TYPE_HUMAN) {
+            // Check location change
+            if (isSceneChanged) {
                 Scene scene = region.getScenes().get(worldMovingBlock.getSceneCoordinate());
                 playerService.generateNotificationMessage(worldMovingBlock.getId(),
                         "来到【" + region.getName() + "-" + scene.getName() + "】");
             }
+            // Check drop
+            world.getBlockMap().values().stream()
+                    .filter(worldMovingBlock1 -> worldMovingBlock1.getType() == BlockConstants.BLOCK_TYPE_DROP)
+                    .filter(worldMovingBlock1 -> worldMovingBlock1.getRegionNo() == region.getRegionNo())
+                    .filter(worldMovingBlock1 ->
+                            BlockUtil.calculateDistance(region, worldMovingBlock, worldMovingBlock1)
+                                    .compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0)
+                    .forEach(drop -> playerService.useDrop(worldMovingBlock.getId(), drop.getId()));
+            // TODO Check interaction
         }
         syncFloorCode(world, worldMovingBlock);
     }
