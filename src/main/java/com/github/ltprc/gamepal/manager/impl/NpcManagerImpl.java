@@ -417,7 +417,7 @@ public class NpcManagerImpl implements NpcManager {
         if (null == distance) {
             return;
         }
-        BigDecimal stopDistance = Arrays.stream(npcPlayerInfo.getSkill())
+        BigDecimal stopDistance = npcPlayerInfo.getSkills().stream()
                 .map(Skill::getRange)
                 .max(BigDecimal::compareTo)
                 .get()
@@ -439,9 +439,9 @@ public class NpcManagerImpl implements NpcManager {
         moveReq.put("wc", npcBrain.getRedQueue().peek());
         moveReq.put("stopDistance", stopDistance);
         JSONObject moveResp = runNpcMoveTask(moveReq);
-        for (int i = 0; i < npcPlayerInfo.getSkill().length; i++) {
-            if (npcPlayerInfo.getSkill()[i].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK
-                    && distance.compareTo(npcPlayerInfo.getSkill()[i].getRange()) <= 0) {
+        for (int i = 0; i < npcPlayerInfo.getSkills().size(); i++) {
+            if (npcPlayerInfo.getSkills().get(i).getSkillType() == SkillConstants.SKILL_TYPE_ATTACK
+                    && distance.compareTo(npcPlayerInfo.getSkills().get(i).getRange()) <= 0) {
                 playerService.useSkill(npcPlayerInfo.getId(), i, true);
                 playerService.useSkill(npcPlayerInfo.getId(), i, false);
             }

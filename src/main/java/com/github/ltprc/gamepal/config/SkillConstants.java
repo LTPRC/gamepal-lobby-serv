@@ -26,6 +26,7 @@ public class SkillConstants {
     public static final int SKILL_CODE_SHOOT_FIRE = 27;
     public static final int SKILL_CODE_SHOOT_WATER = 28;
     public static final int SKILL_CODE_LAY = 31;
+    public static final int SKILL_CODE_BUILD = 32;
 
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;

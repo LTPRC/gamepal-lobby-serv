@@ -146,9 +146,9 @@ public class TimedEventTask {
                         }
 
                         // Change skill remaining time
-                        for (int i = 0; i < playerInfo.getSkill().length; i++) {
-                            if (null != playerInfo.getSkill()[i] && playerInfo.getSkill()[i].getFrame() > 0) {
-                                playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrame() - 1);
+                        for (int i = 0; i < playerInfo.getSkills().size(); i++) {
+                            if (null != playerInfo.getSkills().get(i) && playerInfo.getSkills().get(i).getFrame() > 0) {
+                                playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrame() - 1);
                             }
                         }
 

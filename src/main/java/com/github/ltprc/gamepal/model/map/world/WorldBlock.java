@@ -1,18 +1,18 @@
 package com.github.ltprc.gamepal.model.map.world;
 
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class WorldBlock extends WorldCoordinate {
     private int type;
     private String id;
     private String code;
-    private Structure structure;
+    private Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+            BlockConstants.STRUCTURE_LAYER_MIDDLE);
 
     public WorldBlock(WorldBlock worldBlock) {
         super(worldBlock);

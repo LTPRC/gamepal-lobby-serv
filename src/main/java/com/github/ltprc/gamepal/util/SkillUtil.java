@@ -12,7 +12,9 @@ import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 @Component
@@ -124,6 +126,23 @@ public class SkillUtil {
                 break;
             case "t021":
                 toolType = SkillConstants.SKILL_CODE_LAY;
+                break;
+            case "t301":
+            case "t302":
+            case "t303":
+            case "t304":
+            case "t305":
+            case "t306":
+            case "t307":
+            case "t308":
+            case "t309":
+            case "t310":
+            case "t311":
+            case "t312":
+            case "t313":
+            case "t314":
+            case "t315":
+                toolType = SkillConstants.SKILL_CODE_BUILD;
                 break;
             default:
                 toolType = SkillConstants.SKILL_CODE_MELEE_HIT;
@@ -291,78 +310,100 @@ public class SkillUtil {
                 range = SkillConstants.SKILL_RANGE_MELEE;
                 break;
         }
-        Skill skill0 = new Skill(toolType, skillMode, 0, skillTime, SkillConstants.SKILL_TYPE_ATTACK, range, null);
-        tool.getSkills()[0] = skill0;
+        int skillType;
+        switch (toolType) {
+            case SkillConstants.SKILL_CODE_SHOOT_HIT:
+            case SkillConstants.SKILL_CODE_SHOOT_ARROW:
+            case SkillConstants.SKILL_CODE_SHOOT_GUN:
+            case SkillConstants.SKILL_CODE_SHOOT_MAGNUM:
+            case SkillConstants.SKILL_CODE_SHOOT_ROCKET:
+            case SkillConstants.SKILL_CODE_SHOOT_SHOTGUN:
+            case SkillConstants.SKILL_CODE_SHOOT_FIRE:
+            case SkillConstants.SKILL_CODE_SHOOT_WATER:
+            case SkillConstants.SKILL_CODE_MELEE_HIT:
+            case SkillConstants.SKILL_CODE_MELEE_KICK:
+            case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
+            case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
+            case SkillConstants.SKILL_CODE_MELEE_STAB:
+            case SkillConstants.SKILL_CODE_LAY:
+                skillType = SkillConstants.SKILL_TYPE_ATTACK;
+                break;
+            default:
+                skillType = SkillConstants.SKILL_TYPE_DEFAULT;
+                break;
+        }
+        Skill skill0 = new Skill(toolType, skillMode, 0, skillTime, skillType, range, null);
+        tool.getSkills().set(0, skill0);
     }
 
     public static void updateHumanSkills(PlayerInfo playerInfo) {
-        Skill[] skills = new Skill[4];
-        skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
+        skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null);
-        skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.set(1, new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null);
-        skills[2] = new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null);
-        skills[3] = new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null);
-        playerInfo.setSkill(skills);
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.set(2, new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
+        skills.set(3, new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
+        playerInfo.setSkills(skills);
     }
 
     public static void updateAnimalSkills(CreatureInfo creatureInfo) {
-        Skill[] skills = new Skill[4];
+        List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
         switch (creatureInfo.getSkinColor()) {
             case CreatureConstants.SKIN_COLOR_PAOFU:
             case CreatureConstants.SKIN_COLOR_CAT:
             case CreatureConstants.SKIN_COLOR_TIGER:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        10, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        10, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_FROG:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        20, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        20, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_MONKEY:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_RACOON:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        20, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        20, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_CHICKEN:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_STAB, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        25, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_STAB, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        25, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_BUFFALO:
             case CreatureConstants.SKIN_COLOR_SHEEP:
             case CreatureConstants.SKIN_COLOR_HORSE:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        30, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        30, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_FOX:
             case CreatureConstants.SKIN_COLOR_DOG:
             case CreatureConstants.SKIN_COLOR_WOLF:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
             case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
             case CreatureConstants.SKIN_COLOR_BOAR:
-                skills[0] = new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null);
+                skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                        15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
         }
-        skills[1] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        skills.set(1, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null);
-        skills[2] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.set(2, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null);
-        skills[3] = new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.set(3, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null);
-        creatureInfo.setSkill(skills);
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        creatureInfo.setSkills(skills);
     }
 
     public static boolean isBlockDetected(final PlayerInfo playerInfo, final WorldCoordinate worldCoordinate,
@@ -388,7 +429,7 @@ public class SkillUtil {
     }
 
     public static boolean checkSkillTypeAttack(final PlayerInfo playerInfo) {
-        return Arrays.stream(playerInfo.getSkill())
+        return playerInfo.getSkills().stream()
                 .anyMatch(skill -> skill.getSkillType() == SkillConstants.SKILL_TYPE_ATTACK);
     }
 

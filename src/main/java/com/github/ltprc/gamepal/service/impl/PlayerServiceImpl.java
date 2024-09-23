@@ -779,45 +779,45 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (null == playerInfoMap.get(userCode).getSkill() || playerInfoMap.get(userCode).getSkill().length <= skillNo) {
+        if (null == playerInfoMap.get(userCode).getSkills() || playerInfoMap.get(userCode).getSkills().size() <= skillNo) {
             logger.error(ErrorUtil.ERROR_1028 + " skillNo: " + skillNo);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1028));
         }
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
-        String ammoCode = playerInfoMap.get(userCode).getSkill()[skillNo].getAmmoCode();
+        String ammoCode = playerInfoMap.get(userCode).getSkills().get(skillNo).getAmmoCode();
         if (StringUtils.isNotBlank(ammoCode) && bagInfo.getItems().getOrDefault(ammoCode, 0) == 0) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1040));
         }
         if (isDown) {
             // Skill button is pushed down
-            if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == 0) {
-                if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
+            if (playerInfoMap.get(userCode).getSkills().get(skillNo).getFrame() == 0) {
+                if (playerInfoMap.get(userCode).getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
                     // It must be -1, otherwise it will be triggered automatically 24/03/05
-                    playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(-1);
-                } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
-                    playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
+                    playerInfoMap.get(userCode).getSkills().get(skillNo).setFrame(-1);
+                } else if (playerInfoMap.get(userCode).getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
+                    playerInfoMap.get(userCode).getSkills().get(skillNo).setFrame(playerInfoMap.get(userCode).getSkills().get(skillNo).getFrameMax());
                     if (StringUtils.isNotBlank(ammoCode)) {
                         getItem(userCode, ammoCode, -1);
                     }
                     generateEventBySkill(userCode, skillNo);
                 } else {
-                    logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode());
+                    logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkills().get(skillNo).getSkillMode());
                 }
             }
         } else {
             // Skill button is released
-            if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
-                if (playerInfoMap.get(userCode).getSkill()[skillNo].getFrame() == -1) {
-                    playerInfoMap.get(userCode).getSkill()[skillNo].setFrame(playerInfoMap.get(userCode).getSkill()[skillNo].getFrameMax());
+            if (playerInfoMap.get(userCode).getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
+                if (playerInfoMap.get(userCode).getSkills().get(skillNo).getFrame() == -1) {
+                    playerInfoMap.get(userCode).getSkills().get(skillNo).setFrame(playerInfoMap.get(userCode).getSkills().get(skillNo).getFrameMax());
                     if (StringUtils.isNotBlank(ammoCode)) {
                         getItem(userCode, ammoCode, -1);
                     }
                     generateEventBySkill(userCode, skillNo);
                 }
-            } else if (playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
+            } else if (playerInfoMap.get(userCode).getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
                 // Nothing
             } else {
-                logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkill()[skillNo].getSkillMode());
+                logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfoMap.get(userCode).getSkills().get(skillNo).getSkillMode());
             }
 
         }
@@ -833,10 +833,10 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (playerInfo.getSkill()[skillNo].getSkillType() == SkillConstants.SKILL_TYPE_ATTACK) {
+        if (playerInfo.getSkills().get(skillNo).getSkillType() == SkillConstants.SKILL_TYPE_ATTACK) {
             changePrecision(userCode, -500, false);
         }
-        switch (playerInfo.getSkill()[skillNo].getSkillCode()) {
+        switch (playerInfo.getSkills().get(skillNo).getSkillCode()) {
             case SkillConstants.SKILL_CODE_BLOCK:
                 if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != -1) {
                     playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] = GamePalConstants.BUFF_DEFAULT_FRAME_BLOCKED;
@@ -985,6 +985,9 @@ public class PlayerServiceImpl implements PlayerService {
                         GamePalConstants.EVENT_CODE_MINE, BlockUtil.locateCoordinateWithDirectionAndDistance(
                                 world.getRegionMap().get(playerInfo.getRegionNo()),
                                 playerInfo, playerInfo.getFaceDirection(), SkillConstants.SKILL_RANGE_MELEE)));
+                break;
+            case SkillConstants.SKILL_CODE_BUILD:
+                // TODO
                 break;
             default:
                 break;
@@ -1207,9 +1210,9 @@ public class PlayerServiceImpl implements PlayerService {
         changeThirst(userCode, 0, true);
         changePrecision(userCode, 0, true);
         // Reset all skill remaining time
-        for (int i = 0; i < playerInfo.getSkill().length; i++) {
-            if (null != playerInfo.getSkill()[i]) {
-                playerInfo.getSkill()[i].setFrame(playerInfo.getSkill()[i].getFrameMax());
+        for (int i = 0; i < playerInfo.getSkills().size(); i++) {
+            if (null != playerInfo.getSkills().get(i)) {
+                playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrameMax());
             }
         }
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
@@ -1265,15 +1268,13 @@ public class PlayerServiceImpl implements PlayerService {
         WorldMovingBlock worldMovingBlock = new WorldMovingBlock(playerInfo);
         worldMovingBlock.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
         Region region = world.getRegionMap().get(worldMovingBlock.getRegionNo());
-//        if (!region.getScenes().containsKey(worldMovingBlock.getSceneCoordinate())) {
-//            worldService.expandScene(world, worldMovingBlock);
-//        }
         Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(playerInfo.getCoordinate(),
                 worldMovingBlock.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
         worldMovingBlock.getSpeed().setX(newSpeed.getX().subtract(worldMovingBlock.getCoordinate().getX()));
         worldMovingBlock.getSpeed().setY(newSpeed.getY().subtract(worldMovingBlock.getCoordinate().getY()));
         movementManager.settleSpeedAndCoordinate(world, worldMovingBlock, 0);
         worldMovingBlock.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+
         String id = UUID.randomUUID().toString();
         Block remainContainer = new Block(BlockConstants.BLOCK_TYPE_CONTAINER, id, "3101",
                 new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -1289,10 +1290,10 @@ public class PlayerServiceImpl implements PlayerService {
         scene.getBlocks().add(remainContainer);
         userService.addUserIntoWorldMap(id, world.getId());
 
-        worldMovingBlock.setType(remainContainer.getType());
-        worldMovingBlock.setId(remainContainer.getId());
-        worldMovingBlock.setCode(remainContainer.getCode());
-        world.getBlockMap().put(id, worldMovingBlock);
+        WorldBlock worldBlock = new WorldBlock(remainContainer.getType(), remainContainer.getId(),
+                remainContainer.getCode(), new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                BlockConstants.STRUCTURE_LAYER_MIDDLE), worldMovingBlock);
+        world.getBlockMap().put(id, worldBlock);
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());
@@ -1504,11 +1505,11 @@ public class PlayerServiceImpl implements PlayerService {
                 .findFirst()
                 .orElse(new Tool());
         for (int i = 0; i < SkillConstants.SKILL_LENGTH; i ++) {
-            if (null == tool.getSkills()[i]) {
+            if (null == tool.getSkills().get(i)) {
                 continue;
             }
-            playerInfo.getSkill()[i] = new Skill(tool.getSkills()[i]);
-            playerInfo.getSkill()[i].setAmmoCode(tool.getAmmoCode());
+            playerInfo.getSkills().set(i, new Skill(tool.getSkills().get(i)));
+            playerInfo.getSkills().get(i).setAmmoCode(tool.getAmmoCode());
         }
         return ResponseEntity.ok().body(rst.toString());
     }

@@ -6,6 +6,9 @@ import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class CreatureInfo extends WorldMovingBlock {
@@ -13,7 +16,7 @@ public class CreatureInfo extends WorldMovingBlock {
     private int gender;
     private int skinColor;
     private int[] buff = new int[GamePalConstants.BUFF_CODE_LENGTH]; // buff code, remaining frame
-    private Skill[] skill = new Skill[SkillConstants.SKILL_LENGTH];
+    private List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
     private PerceptionInfo perceptionInfo;
     private int hpMax;
     private int hp;
