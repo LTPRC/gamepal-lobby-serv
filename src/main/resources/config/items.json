@@ -1,5 +1,5 @@
 [
-  {"itemNo": "t000", "name": "G19手枪", "weight": 0.6, "description": "", "itemIndex": 1, "ammoCode": "a001"},
+  {"itemNo": "t000", "name": "G19手枪", "weight": 0.6, "description": "", "itemIndex": 1, "skills": [{"skillCode": 23, "skillMode": 0, "frame": 0, "frameMax": 5, "skillType": 1, "range": 10.0, "ammoCode": "a001"}]},
   {"itemNo": "t001", "name": "匕首", "weight": 0.4, "description": "", "itemIndex": 1},
   {"itemNo": "t002", "name": "沙漠之鹰手枪", "weight": 2.0, "description": "", "itemIndex": 1, "ammoCode": "a002"},
   {"itemNo": "t003", "name": "USP手枪", "weight": 0.9, "description": "", "itemIndex": 1, "ammoCode": "a003"},

@@ -1497,7 +1497,6 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
-        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         Tool tool = playerInfo.getTools().stream()
                 .filter(toolStr -> worldService.getItemMap().containsKey(toolStr))
                 .map(toolStr -> (Tool) worldService.getItemMap().get(toolStr))
@@ -1509,7 +1508,6 @@ public class PlayerServiceImpl implements PlayerService {
                 continue;
             }
             playerInfo.getSkills().set(i, new Skill(tool.getSkills().get(i)));
-            playerInfo.getSkills().get(i).setAmmoCode(tool.getAmmoCode());
         }
         return ResponseEntity.ok().body(rst.toString());
     }
