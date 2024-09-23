@@ -92,6 +92,7 @@ public class BlockUtil {
      * @param convertSceneCoordinate whether sceneCoordinate will be converted into new block coordinate
      * @return Block
      */
+    @Deprecated
     public static Block convertWorldBlock2Block(RegionInfo regionInfo, WorldBlock worldBlock,
                                                 boolean convertSceneCoordinate) {
         Block newBlock = new Block(worldBlock.getType(), worldBlock.getId(), worldBlock.getCode(),
@@ -109,6 +110,8 @@ public class BlockUtil {
         }
         return newBlock;
     }
+
+    @Deprecated
     public static WorldBlock convertBlock2WorldBlock(Block block, int regionNo, IntegerCoordinate sceneCoordinate,
                                                      Coordinate coordinate) {
         WorldBlock worldBlock = new WorldBlock(block.getType(), block.getId(), block.getCode(),

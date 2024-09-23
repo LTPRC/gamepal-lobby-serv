@@ -37,4 +37,6 @@ public interface WorldService {
     void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth);
 
     void updateWorldTime(GameWorld world, int increment);
+
+    ResponseEntity<String> putBlock(GameWorld world, WorldBlock worldBlock);
 }

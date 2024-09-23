@@ -782,4 +782,14 @@ public class WorldServiceImpl implements WorldService {
     public void updateWorldTime(GameWorld world, int increment) {
         world.setWorldTime((world.getWorldTime() + increment) % GamePalConstants.MAX_WORLD_TIME);
     }
+
+    @Override
+    public ResponseEntity<String> putBlock(GameWorld world, WorldBlock worldBlock) {
+        expandByCoordinate(world, null, worldBlock, 0);
+        Region region = world.getRegionMap().get(worldBlock.getRegionNo());
+        Scene scene = region.getScenes().get(worldBlock.getSceneCoordinate());
+        scene.getBlocks().add(BlockUtil.convertWorldBlock2Block(region, worldBlock, false));
+        // TODO
+        return null;
+    }
 }

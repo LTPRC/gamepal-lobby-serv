@@ -1,9 +1,9 @@
 package com.github.ltprc.gamepal.util.lv;
 
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.GameConstants;
 import com.github.ltprc.gamepal.model.game.Cash;
 import com.github.ltprc.gamepal.model.game.Dice;
-import com.github.ltprc.gamepal.model.game.Game;
+import com.github.ltprc.gamepal.model.game.BoardGame;
 import com.github.ltprc.gamepal.model.game.Player;
 import com.github.ltprc.gamepal.model.game.lv.Casino;
 import com.github.ltprc.gamepal.model.game.lv.LasVegasGame;
@@ -20,8 +20,8 @@ public class LasVegasGameUtil {
     public static LasVegasGame getInstance() {
         LasVegasGame lasVegasGame = new LasVegasGame();
         lasVegasGame.setId(UUID.randomUUID().toString());
-        lasVegasGame.setGameType(GamePalConstants.GAME_TYPE_LAS_VEGAS);
-        lasVegasGame.setGameStatus(GamePalConstants.GAME_STATUS_WAITING);
+        lasVegasGame.setType(GameConstants.GAME_TYPE_LAS_VEGAS);
+        lasVegasGame.setStatus(GameConstants.GAME_STATUS_WAITING);
         lasVegasGame.setGameNumber(1);
         lasVegasGame.setRoundNumber(1);
         lasVegasGame.setPlayerNumber(1);
@@ -100,7 +100,7 @@ public class LasVegasGameUtil {
         }
     }
 
-    public static void updatePlayerNo(Game game) {
+    public static void updatePlayerNo(BoardGame game) {
         if (game.getPlayerNumber() == game.getPlayerMap().size()) {
             game.setGameNumber(1);
             game.setRoundNumber(game.getRoundNumber() + 1);

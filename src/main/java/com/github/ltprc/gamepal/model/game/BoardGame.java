@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Data
-public class Game {
+public class BoardGame {
     private String id;
     private int type;
     private int status;

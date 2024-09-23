@@ -1,8 +1,8 @@
 package com.github.ltprc.gamepal.terminal;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.model.game.Game;
+import com.github.ltprc.gamepal.config.GameConstants;
+import com.github.ltprc.gamepal.model.game.BoardGame;
 import com.github.ltprc.gamepal.model.game.Player;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -21,7 +21,7 @@ public class GameTerminal implements Terminal {
     private List<String> outputs;
     private JSONObject gameOutput;
     private GameWorld world;
-    private Game game;
+    private BoardGame game;
     private Player player;
 
     @Autowired
@@ -33,7 +33,7 @@ public class GameTerminal implements Terminal {
 
     @Override
     public int getType() {
-        return GamePalConstants.TERMINAL_TYPE_GAME;
+        return GameConstants.TERMINAL_TYPE_GAME;
     }
 
     @Override
