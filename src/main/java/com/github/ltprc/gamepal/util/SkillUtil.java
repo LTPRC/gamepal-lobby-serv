@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -22,6 +21,7 @@ public class SkillUtil {
 
     private SkillUtil() {}
 
+    @Deprecated
     public static void defineToolProps(Tool tool) {
         int toolType;
         int skillMode;
