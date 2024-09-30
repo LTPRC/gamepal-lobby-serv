@@ -2,16 +2,21 @@ package com.github.ltprc.gamepal.model.creature;
 
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
-import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class CreatureInfo extends WorldMovingBlock {
+public class CreatureInfoOld extends BlockInfo {
+
+    private int playerStatus;
     private int creatureType;
     private int gender;
     private int skinColor;

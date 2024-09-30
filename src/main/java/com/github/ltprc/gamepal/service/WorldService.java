@@ -3,7 +3,7 @@ package com.github.ltprc.gamepal.service;
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Recipe;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldBlock;
+import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
@@ -25,7 +25,7 @@ public interface WorldService {
 
     void loadRecipes();
 
-    ResponseEntity<String> addEvent(String userCode, WorldBlock event);
+    ResponseEntity<String> addEvent(String userCode, Block event);
 
     void updateEvents(GameWorld world);
 
@@ -38,5 +38,5 @@ public interface WorldService {
 
     void updateWorldTime(GameWorld world, int increment);
 
-    ResponseEntity<String> putBlock(GameWorld world, WorldBlock worldBlock);
+    ResponseEntity<String> putBlock(GameWorld world, Block block);
 }

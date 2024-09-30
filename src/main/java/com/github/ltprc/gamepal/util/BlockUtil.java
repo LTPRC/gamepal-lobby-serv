@@ -1,11 +1,15 @@
 package com.github.ltprc.gamepal.util;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.*;
 import com.github.ltprc.gamepal.model.map.world.*;
 
@@ -85,49 +89,49 @@ public class BlockUtil {
         }
     }
 
-    /**
-     * Ignore sceneCoordinate
-     * @param regionInfo RegionInfo
-     * @param worldBlock WorldBlock
-     * @param convertSceneCoordinate whether sceneCoordinate will be converted into new block coordinate
-     * @return Block
-     */
-    @Deprecated
-    public static Block convertWorldBlock2Block(RegionInfo regionInfo, WorldBlock worldBlock,
-                                                boolean convertSceneCoordinate) {
-        Block newBlock = new Block(worldBlock.getType(), worldBlock.getId(), worldBlock.getCode(),
-                worldBlock.getStructure(), convertSceneCoordinate
-                ? convertWorldCoordinate2Coordinate(regionInfo, worldBlock) : worldBlock.getCoordinate());
-        switch (worldBlock.getType()) {
-            case BlockConstants.BLOCK_TYPE_DROP:
-                newBlock = new Drop(((WorldDrop) worldBlock).getItemNo(), ((WorldDrop) worldBlock).getAmount(), newBlock);
-                break;
-            case BlockConstants.BLOCK_TYPE_TELEPORT:
-                newBlock = new Teleport(((WorldTeleport) worldBlock).getTo(), newBlock);
-                break;
-            default:
-                break;
-        }
-        return newBlock;
-    }
+//    /**
+//     * Ignore sceneCoordinate
+//     * @param regionInfo RegionInfo
+//     * @param worldBlock WorldBlock
+//     * @param convertSceneCoordinate whether sceneCoordinate will be converted into new block coordinate
+//     * @return Block
+//     */
+//    @Deprecated
+//    public static Block convertWorldBlock2Block(RegionInfo regionInfo, WorldBlock worldBlock,
+//                                                boolean convertSceneCoordinate) {
+//        Block newBlock = new Block(worldBlock.getType(), worldBlock.getId(), worldBlock.getCode(),
+//                worldBlock.getStructure(), convertSceneCoordinate
+//                ? convertWorldCoordinate2Coordinate(regionInfo, worldBlock) : worldBlock.getCoordinate());
+//        switch (worldBlock.getType()) {
+//            case BlockConstants.BLOCK_TYPE_DROP:
+//                newBlock = new Drop(((WorldDrop) worldBlock).getItemNo(), ((WorldDrop) worldBlock).getAmount(), newBlock);
+//                break;
+//            case BlockConstants.BLOCK_TYPE_TELEPORT:
+//                newBlock = new Teleport(((WorldTeleport) worldBlock).getTo(), newBlock);
+//                break;
+//            default:
+//                break;
+//        }
+//        return newBlock;
+//    }
 
-    @Deprecated
-    public static WorldBlock convertBlock2WorldBlock(Block block, int regionNo, IntegerCoordinate sceneCoordinate,
-                                                     Coordinate coordinate) {
-        WorldBlock worldBlock = new WorldBlock(block.getType(), block.getId(), block.getCode(),
-                block.getStructure(), new WorldCoordinate(regionNo, sceneCoordinate, coordinate));
-        switch (block.getType()) {
-            case BlockConstants.BLOCK_TYPE_DROP:
-                worldBlock = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(), worldBlock);
-                break;
-            case BlockConstants.BLOCK_TYPE_TELEPORT:
-                worldBlock = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
-                break;
-            default:
-                break;
-        }
-        return worldBlock;
-    }
+//    @Deprecated
+//    public static Block convertBlock2WorldBlock(Block block, int regionNo, IntegerCoordinate sceneCoordinate,
+//                                                     Coordinate coordinate) {
+//        Block worldBlock = new Block(block.getType(), block.getId(), block.getCode(),
+//                block.getStructure(), new WorldCoordinate(regionNo, sceneCoordinate, coordinate));
+//        switch (block.getType()) {
+//            case BlockConstants.BLOCK_TYPE_DROP:
+//                worldBlock = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(), worldBlock);
+//                break;
+//            case BlockConstants.BLOCK_TYPE_TELEPORT:
+//                worldBlock = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
+//                break;
+//            default:
+//                break;
+//        }
+//        return worldBlock;
+//    }
 
     public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
         return new Event(worldEvent.getUserCode(), worldEvent.getCode(), worldEvent.getFrame(),
@@ -325,52 +329,40 @@ public class BlockUtil {
         return wc;
     }
 
-    public static boolean detectLineSquareCollision(RegionInfo regionInfo, WorldBlock worldBlock1,
-                                                    BigDecimal ballisticAngle, WorldBlock worldBlock2) {
-        if (worldBlock1.getRegionNo() != regionInfo.getRegionNo()
-                || worldBlock2.getRegionNo() != regionInfo.getRegionNo()) {
+    public static boolean detectLineSquareCollision(RegionInfo regionInfo, Block block1,
+                                                    BigDecimal ballisticAngle, Block block2) {
+        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-        Block block1 = convertWorldBlock2Block(regionInfo, worldBlock1, true);
-        Block block2 = convertWorldBlock2Block(regionInfo, worldBlock2, true);
-        return detectLineSquareCollision(block1, ballisticAngle, block2);
-    }
-
-    public static boolean detectLineSquareCollision(Block oldBlock1, BigDecimal ballisticAngle, Block oldBlock2) {
-        Block block1 = new Block(oldBlock1.getType(), oldBlock1.getId(), oldBlock1.getCode(),
-                oldBlock1.getStructure(),
-                new Coordinate(oldBlock1.getX().add(oldBlock1.getStructure().getShape().getCenter().getX()),
-                        oldBlock1.getY().add(oldBlock1.getStructure().getShape().getCenter().getY())));
-        Block block2 = new Block(oldBlock2.getType(), oldBlock2.getId(), oldBlock2.getCode(),
-                oldBlock2.getStructure(),
-                new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
-                        oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
-            block1.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block1.getStructure().getShape().getRadius().setY(block1.getStructure().getShape().getRadius().getX());
+        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
+        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getBlockInfo().getStructure().getShape().getShapeType()) {
+            block1.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block1.getBlockInfo().getStructure().getShape().getRadius().setY(block1.getBlockInfo().getStructure().getShape().getRadius().getX());
         }
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
-            block2.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block2.getStructure().getShape().getRadius().setY(block2.getStructure().getShape().getRadius().getX());
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+            block2.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block2.getBlockInfo().getStructure().getShape().getRadius().setY(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
         }
         if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
                 || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
-            return block1.getX().subtract(block2.getX()).abs().doubleValue()
-                    < block1.getStructure().getShape().getRadius().getX()
-                    .add(block2.getStructure().getShape().getRadius().getX()).doubleValue();
+            return coordinate1.getX().subtract(coordinate2.getX()).abs().doubleValue()
+                    < block1.getBlockInfo().getStructure().getShape().getRadius().getX()
+                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue();
         }
         // Round vs. round
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
-            return calculateBallisticDistance(block1, ballisticAngle, block2)
-                    .compareTo(block1.getStructure().getShape().getRadius().getX()
-                            .add(block2.getStructure().getShape().getRadius().getX())) < 0;
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getBlockInfo().getStructure().getShape().getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+            return calculateBallisticDistance(coordinate1, ballisticAngle, coordinate2)
+                    .compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getX()
+                            .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX())) < 0;
         }
         double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
-        BigDecimal xLeft = block2.getX().subtract(block2.getStructure().getShape().getRadius().getX());
-        BigDecimal xRight = block2.getX().add(block2.getStructure().getShape().getRadius().getX());
-        BigDecimal yLeft = xLeft.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
-        BigDecimal yRight = xRight.subtract(block1.getX()).multiply(BigDecimal.valueOf(slope)).add(block1.getY());
+        BigDecimal xLeft = coordinate2.getX().subtract(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
+        BigDecimal xRight = coordinate2.getX().add(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
+        BigDecimal yLeft = xLeft.subtract(coordinate1.getX()).multiply(BigDecimal.valueOf(slope)).add(coordinate1.getY());
+        BigDecimal yRight = xRight.subtract(coordinate1.getX()).multiply(BigDecimal.valueOf(slope)).add(coordinate1.getY());
         // Rectangle vs. rectangle
 //        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
 //                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
@@ -391,14 +383,14 @@ public class BlockUtil {
 //            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
 //        }
         // TODO make round vs. rectangle specific
-        return (yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0
-                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY())) < 0)
-                || (yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY())) < 0
-                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0);
+        return (yLeft.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
+                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).negate()) > 0
+                && yRight.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
+                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY())) < 0)
+                || (yLeft.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
+                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY())) < 0
+                && yRight.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
+                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).negate()) > 0);
     }
 
     /**
@@ -418,88 +410,74 @@ public class BlockUtil {
                 + c1.getY().doubleValue() + slope * c1.getX().doubleValue()) / Math.sqrt(slope * slope + 1));
     }
 
-    public static boolean detectCollision(RegionInfo regionInfo, WorldBlock worldBlock1, WorldBlock worldBlock2) {
-        Block block1 = convertWorldBlock2Block(regionInfo, worldBlock1, true);
-        Block block2 = convertWorldBlock2Block(regionInfo, worldBlock2, true);
-        return detectCollision(block1, block2);
-    }
-
-    public static boolean detectCollision(Block oldBlock1, Block oldBlock2) {
-        Block block1 = new Block(oldBlock1.getType(), oldBlock1.getId(), oldBlock1.getCode(),
-                oldBlock1.getStructure(),
-                new Coordinate(oldBlock1.getX().add(oldBlock1.getStructure().getShape().getCenter().getX()),
-                        oldBlock1.getY().add(oldBlock1.getStructure().getShape().getCenter().getY())));
-        Block block2 = new Block(oldBlock2.getType(), oldBlock2.getId(), oldBlock2.getCode(),
-                oldBlock2.getStructure(),
-                new Coordinate(oldBlock2.getX().add(oldBlock2.getStructure().getShape().getCenter().getX()),
-                        oldBlock2.getY().add(oldBlock2.getStructure().getShape().getCenter().getY())));
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getStructure().getShape().getShapeType()) {
-            block1.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block1.getStructure().getShape().getRadius().setY(block1.getStructure().getShape().getRadius().getX());
+    public static boolean detectCollision(RegionInfo regionInfo, Block block1, Block block2) {
+        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
+        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getBlockInfo().getStructure().getShape().getShapeType()) {
+            block1.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block1.getBlockInfo().getStructure().getShape().getRadius().setY(block1.getBlockInfo().getStructure().getShape().getRadius().getX());
         }
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getStructure().getShape().getShapeType()) {
-            block2.getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block2.getStructure().getShape().getRadius().setY(block2.getStructure().getShape().getRadius().getX());
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+            block2.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            block2.getBlockInfo().getStructure().getShape().getRadius().setY(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
         }
         // Round vs. round
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getStructure().getShape().getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
-            return Math.sqrt(Math.pow(block1.getX().subtract(block2.getX()).doubleValue(), 2)
-                    + Math.pow(block1.getY().subtract(block2.getY()).doubleValue(), 2))
-                    <= block1.getStructure().getShape().getRadius().getX()
-                    .add(block2.getStructure().getShape().getRadius().getX()).doubleValue();
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getBlockInfo().getStructure().getShape().getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+            return Math.sqrt(Math.pow(coordinate1.getX().subtract(coordinate2.getX()).doubleValue(), 2)
+                    + Math.pow(coordinate1.getY().subtract(coordinate2.getY()).doubleValue(), 2))
+                    <= block1.getBlockInfo().getStructure().getShape().getRadius().getX()
+                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue();
         }
         // Rectangle vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
-            return Math.abs(block1.getX().subtract(block2.getX()).doubleValue())
-                    <= block1.getStructure().getShape().getRadius().getX()
-                    .add(block2.getStructure().getShape().getRadius().getX()).doubleValue()
-                    && Math.abs(block1.getY().subtract(block2.getY()).doubleValue())
-                    <= block1.getStructure().getShape().getRadius().getY()
-                    .add(block2.getStructure().getShape().getRadius().getY()).doubleValue();
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getBlockInfo().getStructure().getShape().getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+            return Math.abs(coordinate1.getX().subtract(coordinate2.getX()).doubleValue())
+                    <= block1.getBlockInfo().getStructure().getShape().getRadius().getX()
+                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
+                    && Math.abs(coordinate1.getY().subtract(coordinate2.getY()).doubleValue())
+                    <= block1.getBlockInfo().getStructure().getShape().getRadius().getY()
+                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue();
         }
         // Round vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
-            return detectCollision(oldBlock2, oldBlock1);
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+            return detectCollision(regionInfo, block2, block1);
         }
-        return block1.getX().add(block1.getStructure().getShape().getRadius().getX()).doubleValue()
-                >= block2.getX().subtract(block2.getStructure().getShape().getRadius().getX()).doubleValue()
-                && block1.getX().subtract(block1.getStructure().getShape().getRadius().getX()).doubleValue()
-                <= block2.getX().add(block2.getStructure().getShape().getRadius().getX()).doubleValue()
-                && block1.getY().add(block1.getStructure().getShape().getRadius().getY()).doubleValue()
-                >= block2.getY().subtract(block2.getStructure().getShape().getRadius().getY()).doubleValue()
-                && block1.getY().subtract(block1.getStructure().getShape().getRadius().getY()).doubleValue()
-                <= block2.getY().add(block2.getStructure().getShape().getRadius().getY()).doubleValue();
+        return coordinate1.getX().add(block1.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
+                >= coordinate2.getX().subtract(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
+                && coordinate1.getX().subtract(block1.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
+                <= coordinate2.getX().add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
+                && coordinate1.getY().add(block1.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue()
+                >= coordinate2.getY().subtract(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue()
+                && coordinate1.getY().subtract(block1.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue()
+                <= coordinate2.getY().add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue();
     }
 
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
-            case BlockConstants.BLOCK_TYPE_PLAYER:
-            case BlockConstants.BLOCK_TYPE_BED:
-            case BlockConstants.BLOCK_TYPE_TOILET:
-            case BlockConstants.BLOCK_TYPE_DRESSER:
-            case BlockConstants.BLOCK_TYPE_WORKSHOP:
-            case BlockConstants.BLOCK_TYPE_GAME:
-            case BlockConstants.BLOCK_TYPE_STORAGE:
-            case BlockConstants.BLOCK_TYPE_COOKER:
-            case BlockConstants.BLOCK_TYPE_SINK:
-            case BlockConstants.BLOCK_TYPE_CONTAINER:
-                return true;
-            default:
+            case BlockConstants.BLOCK_TYPE_NORMAL:
+            case BlockConstants.BLOCK_TYPE_EVENT:
+            case BlockConstants.BLOCK_TYPE_DROP:
+            case BlockConstants.BLOCK_TYPE_TELEPORT:
                 return false;
+            default:
+                return true;
         }
     }
 
     public static Queue<Block> createRankingQueue() {
         return new PriorityQueue<>((o1, o2) -> {
-            if (!Objects.equals(o1.getStructure().getLayer() / 10, o2.getStructure().getLayer() / 10)) {
-                return o1.getStructure().getLayer() / 10 - o2.getStructure().getLayer() / 10;
+            if (!Objects.equals(o1.getBlockInfo().getStructure().getLayer() / 10,
+                    o2.getBlockInfo().getStructure().getLayer() / 10)) {
+                return o1.getBlockInfo().getStructure().getLayer() / 10
+                        - o2.getBlockInfo().getStructure().getLayer() / 10;
             }
-            if (!Objects.equals(o1.getY(), o2.getY())) {
-                return o1.getY().compareTo(o2.getY());
+            if (!Objects.equals(o1.getWorldCoordinate().getCoordinate().getY(),
+                    o2.getWorldCoordinate().getCoordinate().getY())) {
+                return o1.getWorldCoordinate().getCoordinate().getY()
+                        .compareTo(o2.getWorldCoordinate().getCoordinate().getY());
             }
-            return o1.getStructure().getLayer() % 10 - o2.getStructure().getLayer() % 10;
+            return o1.getBlockInfo().getStructure().getLayer() % 10 - o2.getBlockInfo().getStructure().getLayer() % 10;
         });
     }
 
@@ -519,20 +497,21 @@ public class BlockUtil {
                 coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
     }
 
-    public static WorldBlock convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
+    public static Block convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
                                                      WorldCoordinate worldCoordinate) {
-        WorldBlock block = new WorldBlock(BlockConstants.BLOCK_TYPE_NORMAL, userCode, String.valueOf(eventCode),
+        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, userCode, String.valueOf(eventCode),
                 new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                convertEventCode2Layer(eventCode)), worldCoordinate);
-        BlockUtil.fixWorldCoordinate(regionInfo, block);
+                convertEventCode2Layer(eventCode)));
+        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
+        BlockUtil.fixWorldCoordinate(regionInfo, block.getWorldCoordinate());
         return block;
     }
 
-    public static Block convertEvent2Block(Event event) {
-        Block block = new Block(BlockConstants.BLOCK_TYPE_EVENT, null,
+    public static Block convertEvent2Block(Event event, WorldCoordinate worldCoordinate) {
+        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, null,
                 event.getCode() + "-" + event.getFrame(),
-                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())),
-                event);
+                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())));
+        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
         return block;
     }
 
@@ -622,36 +601,34 @@ public class BlockUtil {
         perceptionInfo.setIndistinctHearingRadius(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
     }
 
-    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final PlayerInfo playerInfo1,
-                                                   final WorldBlock worldBlock2) {
-        if (playerInfo1.getRegionNo() != regionInfo.getRegionNo()
-                || worldBlock2.getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        Block block1 = convertWorldBlock2Block(regionInfo, playerInfo1, true);
-        Block block2 = convertWorldBlock2Block(regionInfo, worldBlock2, true);
-        return checkPerceptionCondition(playerInfo1.getPerceptionInfo(), playerInfo1.getFaceDirection(), block1, block2);
-    }
-
-    public static boolean checkPerceptionCondition(final PerceptionInfo perceptionInfo, final BigDecimal faceDirection,
-                                                   final Coordinate coordinate1, final Block block2) {
-        BigDecimal distance = BlockUtil.calculateDistance(coordinate1, block2);
-        BigDecimal angle = BlockUtil.calculateAngle(coordinate1, block2);
-        if (distance.compareTo(perceptionInfo.getDistinctHearingRadius()) <= 0) {
+    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final Block playerInfo1,
+                                                   final Block block2) {
+        if (playerInfo1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
             return true;
         }
-        if (block2.getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
-            return distance.compareTo(perceptionInfo.getDistinctVisionRadius()) <= 0
-                    && angle.subtract(faceDirection).abs().doubleValue() % 360D
-                    < perceptionInfo.getDistinctVisionAngle().doubleValue() / 2;
+        if (playerInfo1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, playerInfo1.getWorldCoordinate());
+        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
+        BigDecimal distance = BlockUtil.calculateDistance(coordinate1, coordinate2);
+        BigDecimal angle = BlockUtil.calculateAngle(coordinate1, coordinate2);
+        if (distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctHearingRadius()) <= 0) {
+            return true;
+        }
+        if (block2.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
+            return distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctVisionRadius()) <= 0
+                    && angle.subtract(playerInfo1.getMovementInfo().getFaceDirection()).abs().doubleValue() % 360D
+                    < playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctVisionAngle().doubleValue() / 2;
         } else {
-            return distance.compareTo(perceptionInfo.getIndistinctVisionRadius()) <= 0;
+            return distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getIndistinctVisionRadius()) <= 0;
         }
     }
 
-    public static void calculateMaxSpeed(WorldMovingBlock worldMovingBlock) {
+    public static void calculateMaxSpeed(MovementInfo movementInfo) {
         BigDecimal maxSpeed = CreatureConstants.MAX_SPEED_DEFAULT;
-        switch (worldMovingBlock.getFloorCode()) {
+        switch (movementInfo.getFloorCode()) {
             case BlockConstants.BLOCK_CODE_SWAMP:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.2));
                 break;
@@ -673,6 +650,6 @@ public class BlockUtil {
             default:
                 break;
         }
-        worldMovingBlock.setMaxSpeed(maxSpeed);
+        movementInfo.setMaxSpeed(maxSpeed);
     }
 }

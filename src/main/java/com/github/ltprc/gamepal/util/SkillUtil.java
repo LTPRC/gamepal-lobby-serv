@@ -3,7 +3,7 @@ package com.github.ltprc.gamepal.util;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
-import com.github.ltprc.gamepal.model.creature.CreatureInfo;
+import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Tool;
@@ -333,27 +333,39 @@ public class SkillUtil {
                 break;
         }
         Skill skill0 = new Skill(toolType, skillMode, 0, skillTime, skillType, range, null);
-        tool.getSkills().set(0, skill0);
+        tool.getSkills().add(skill0);
     }
 
     public static void updateHumanSkills(PlayerInfo playerInfo) {
         List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
-        skills.set(0, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.set(1, new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.set(2, new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
-        skills.set(3, new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
         playerInfo.setSkills(skills);
     }
 
-    public static void updateAnimalSkills(CreatureInfo creatureInfo) {
+    public static void updateAnimalSkills(PlayerInfo playerInfo) {
         List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
-        switch (creatureInfo.getSkinColor()) {
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                SkillConstants.SKILL_RANGE_MELEE, null));
+        switch (playerInfo.getSkinColor()) {
             case CreatureConstants.SKIN_COLOR_PAOFU:
             case CreatureConstants.SKIN_COLOR_CAT:
             case CreatureConstants.SKIN_COLOR_TIGER:
@@ -394,28 +406,19 @@ public class SkillUtil {
                         15, SkillConstants.SKILL_TYPE_ATTACK, SkillConstants.SKILL_RANGE_MELEE, null));
                 break;
         }
-        skills.set(1, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.set(2, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.set(3, new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null));
-        creatureInfo.setSkills(skills);
+        playerInfo.setSkills(skills);
     }
 
-    public static boolean isBlockDetected(final PlayerInfo playerInfo, final WorldCoordinate worldCoordinate,
+    public static boolean isBlockDetected(final Block player, final WorldCoordinate worldCoordinate,
                                           final int sceneScanRadius) {
-        return worldCoordinate.getRegionNo() == playerInfo.getRegionNo()
-                && isBlockDetected(playerInfo, worldCoordinate.getSceneCoordinate(), sceneScanRadius);
+        return worldCoordinate.getRegionNo() == player.getWorldCoordinate().getRegionNo()
+                && isBlockDetected(player, worldCoordinate.getSceneCoordinate(), sceneScanRadius);
     }
 
-    public static boolean isBlockDetected(final PlayerInfo playerInfo, final IntegerCoordinate sceneCoordinate,
+    public static boolean isBlockDetected(final Block player, final IntegerCoordinate sceneCoordinate,
                                           final int sceneScanRadius) {
-        IntegerCoordinate integerCoordinate = BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                sceneCoordinate);
+        IntegerCoordinate integerCoordinate = BlockUtil.getCoordinateRelation(
+                player.getWorldCoordinate().getSceneCoordinate(), sceneCoordinate);
         return Math.abs(integerCoordinate.getX()) <= sceneScanRadius
                 && Math.abs(integerCoordinate.getY()) <= sceneScanRadius;
     }

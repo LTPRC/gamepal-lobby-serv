@@ -5,6 +5,8 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -56,20 +58,22 @@ public class TimedEventTask {
             worldService.updateEvents(world);
 
             Map<String, Long> onlineMap = world.getOnlineMap();
-            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+            Map<String, Block> creatureMap = world.getCreatureMap();
 
             onlineMap.keySet().stream()
-                    .filter(playerInfoMap::containsKey)
-                    .filter(userCode -> playerInfoMap.get(userCode).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .filter(creatureMap::containsKey)
+                    .filter(userCode -> creatureMap.get(userCode).getPlayerInfo().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(userCode -> {
                         buffManager.updateBuffTime(world, userCode);
                         buffManager.changeBuff(world, userCode);
                     });
 
             onlineMap.keySet().stream()
-                    .filter(userCode -> playerService.validateActiveness(world, playerInfoMap.get(userCode)))
+                    .filter(userCode -> playerService.validateActiveness(world, userCode))
                     .forEach(userCode -> {
-                        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+                        Block player = creatureMap.get(userCode);
+                        MovementInfo movementInfo = player.getMovementInfo();
+                        PlayerInfo playerInfo = player.getPlayerInfo();
                         double randomNumber;
 
                         // Change hp
@@ -89,14 +93,14 @@ public class TimedEventTask {
                             newVp -= 5;
                         }
                         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
-                            if (playerInfo.getSpeed().getX().doubleValue() > 0
-                                    || playerInfo.getSpeed().getY().doubleValue() > 0) {
+                            if (movementInfo.getSpeed().getX().doubleValue() > 0
+                                    || movementInfo.getSpeed().getY().doubleValue() > 0) {
                                 newVp -= 15;
                             }
                         } else {
-                            if (Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
-                                    + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)
-                                    > Math.pow(playerInfo.getMaxSpeed().doubleValue() / 2, 2)) {
+                            if (Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
+                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
+                                    > Math.pow(movementInfo.getMaxSpeed().doubleValue() / 2, 2)) {
                                 newVp -= 15;
                             }
                         }
@@ -104,8 +108,8 @@ public class TimedEventTask {
 
                         // Change hunger
                         randomNumber = Math.random();
-                        if (Math.abs(playerInfo.getSpeed().getX().doubleValue()) > 0
-                                || Math.abs(playerInfo.getSpeed().getY().doubleValue()) > 0) {
+                        if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
+                                || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
                             randomNumber *= 10;
                         }
                         if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
@@ -117,8 +121,8 @@ public class TimedEventTask {
 
                         // Change thirst
                         randomNumber = Math.random();
-                        if (Math.abs(playerInfo.getSpeed().getX().doubleValue()) > 0
-                                || Math.abs(playerInfo.getSpeed().getY().doubleValue()) > 0) {
+                        if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
+                                || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
                             randomNumber *= 10;
                         }
                         if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
@@ -130,9 +134,9 @@ public class TimedEventTask {
 
                         // Change precision
                         playerService.changePrecision(userCode, 50 - 100
-                                * (int) (Math.sqrt(Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
-                                + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2))
-                                / playerInfo.getMaxSpeed().doubleValue()), false);
+                                * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
+                                + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
+                                / movementInfo.getMaxSpeed().doubleValue()), false);
 
                         // Change view radius
                         BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
@@ -156,13 +160,13 @@ public class TimedEventTask {
                         playerService.checkLevelUp(userCode);
 
                         // Check floorCode
-                        BlockUtil.calculateMaxSpeed(playerInfo);
+                        BlockUtil.calculateMaxSpeed(movementInfo);
                     });
 
             // Buff changing
             onlineMap.keySet().stream()
-                    .filter(playerInfoMap::containsKey)
-                    .filter(userCode -> playerInfoMap.get(userCode).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .filter(creatureMap::containsKey)
+                    .filter(userCode -> creatureMap.get(userCode).getPlayerInfo().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(userCode -> buffManager.changeBuff(world, userCode));
         }
     }
@@ -179,18 +183,18 @@ public class TimedEventTask {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
             Map<String, Long> onlineMap = world.getOnlineMap();
-            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+            Map<String, Block> creatureMap = world.getCreatureMap();
             onlineMap.keySet().stream()
-                    .filter(userCode -> playerService.validateActiveness(world, playerInfoMap.get(userCode)))
+                    .filter(userCode -> playerService.validateActiveness(world, userCode))
                     .forEach(userCode -> {
-                        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+                        Block player = creatureMap.get(userCode);
 
                         // Add footstep
-                        if (Math.pow(playerInfo.getSpeed().getX().doubleValue(), 2)
-                                + Math.pow(playerInfo.getSpeed().getY().doubleValue(), 2)
-                                > Math.pow(playerInfo.getMaxSpeed().doubleValue() / 2, 2)) {
+                        if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
+                                + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
+                                > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
                             WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode,
-                                    GamePalConstants.EVENT_CODE_NOISE, playerInfo);
+                                    GamePalConstants.EVENT_CODE_NOISE, player.getWorldCoordinate());
                             world.getEventQueue().add(worldEvent);
                         }
                     });
@@ -207,8 +211,8 @@ public class TimedEventTask {
         for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry1.getValue();
             world.getOnlineMap().forEach((key, value) -> {
-                PlayerInfo playerInfo = world.getPlayerInfoMap().get(key);
-                if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN
+                Block player = world.getCreatureMap().get(key);
+                if (player.getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN
                         && timestamp - value > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
                     userService.logoff(key, "", false);
                 }

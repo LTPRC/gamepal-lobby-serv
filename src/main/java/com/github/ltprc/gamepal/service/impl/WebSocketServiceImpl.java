@@ -12,11 +12,15 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -49,9 +53,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private StateMachineService stateMachineService;
-
-    @Autowired
-    private CreatureFactory creatureFactory;
 
     @Autowired
     private SceneManager sceneManager;
@@ -103,18 +104,20 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Check functions
         JSONObject functions = null;
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        Block player = world.getCreatureMap().get(userCode);
+        PlayerInfo playerInfo = player.getPlayerInfo();
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
             if (functions.containsKey("updatePlayerMovement")) {
-                PlayerInfo playerMovement = JSON.toJavaObject(functions.getJSONObject("updatePlayerMovement"), PlayerInfo.class);
-                worldService.expandByCoordinate(world, playerInfo, playerMovement, 1);
-                movementManager.settleCoordinate(world, playerInfo, playerMovement);
-                playerInfo.setSpeed(playerMovement.getSpeed());
-                playerInfo.setFaceDirection(playerMovement.getFaceDirection());
+                JSONObject updatePlayerMovement = functions.getJSONObject("updatePlayerMovement");
+                WorldCoordinate worldCoordinate = JSON.toJavaObject(updatePlayerMovement
+                        .getJSONObject("worldCoordinate"), WorldCoordinate.class);
+                MovementInfo movementInfo = JSON.toJavaObject(updatePlayerMovement
+                        .getJSONObject("movementInfo"), MovementInfo.class);
+                playerService.updatePlayerMovement(userCode, worldCoordinate, movementInfo);
             }
             // Detect and expand scenes after updating player's location
             if (functions.containsKey("useItems")) {
@@ -296,24 +299,28 @@ public class WebSocketServiceImpl implements WebSocketService {
         world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
 
         // Return playerInfos
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
+        // Old block format 24/09/30
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return;
         }
         // Only detected active creatures and all human players will be collected 24/08/31
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Block player = creatureMap.get(userCode);
         JSONObject playerInfos = new JSONObject();
-        playerInfoMap.values().stream()
-                .filter(playerInfo1 -> StringUtils.equals(userCode, playerInfo1.getId())
-                        || playerInfo1.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                .filter(playerInfo1 -> playerInfo1.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
-                .forEach(playerInfo1 -> playerInfos.put(playerInfo1.getId(), playerInfo1));
-        playerInfoMap.values().stream()
-                .filter(playerInfo1 -> playerService.validateActiveness(world, playerInfo1))
-                .filter(playerInfo1 -> SkillUtil.isBlockDetected(playerInfo, playerInfo1, 2))
-                .forEach(playerInfo1 -> playerInfos.put(playerInfo1.getId(), playerInfo1));
+        creatureMap.values().stream()
+                .filter(player1 -> (player1.getPlayerInfo()).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                .filter(player1 -> StringUtils.equals(userCode, player1.getBlockInfo().getId())
+                        || (player1.getPlayerInfo()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
+                        sceneManager.convertBlock2OldBlockInstance(world, player1, true)));
+        creatureMap.values().stream()
+                .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
+                .filter(player1 -> SkillUtil.isBlockDetected(player, player1.getWorldCoordinate(), 2))
+                .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
+                        sceneManager.convertBlock2OldBlockInstance(world, player1, true)));
         rst.put("playerInfos", playerInfos);
+
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
         if (world.getInteractionInfoMap().containsKey(userCode)) {
             if (BlockConstants.BLOCK_TYPE_STORAGE == world.getInteractionInfoMap().get(userCode).getType()) {
@@ -322,6 +329,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                 rst.put("interactedBagInfo", world.getBagInfoMap().get(world.getInteractionInfoMap().get(userCode).getId()));
             }
         }
+
+        rst.put("drops", world.getDropMap());
+
+        rst.put("teleports", world.getTeleportMap());
+
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
@@ -345,17 +357,17 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         // Return regionInfo not region 24/03/18
-        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         rst.put("regionInfo", JSON.toJSON(new RegionInfo(region)));
 
         // Return SceneInfos
         JSONArray sceneInfos = new JSONArray();
         region.getScenes().values().stream()
-                .filter(scene -> SkillUtil.isBlockDetected(playerInfo, scene.getSceneCoordinate(), 2))
+                .filter(scene -> SkillUtil.isBlockDetected(player, scene.getSceneCoordinate(), 2))
                 .forEach(scene -> {
             SceneInfo sceneInfo = new SceneInfo(scene);
             sceneInfos.add(sceneInfo);
-            if (scene.getSceneCoordinate().equals(playerInfo.getSceneCoordinate())) {
+            if (scene.getSceneCoordinate().equals(player.getWorldCoordinate().getSceneCoordinate())) {
                 rst.put("sceneInfo", JSON.toJSON(sceneInfo));
             }
         });
@@ -366,11 +378,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("grids", grids);
 
         // Collect blocks
-        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(userCode, 2);
+        // Old block format 24/09/30
+        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(world, player, 2);
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
-            blocks.add(blockQueue.poll());
+            blocks.add(sceneManager.convertBlock2OldBlockInstance(world, blockQueue.poll(), false));
         }
         rst.put("blocks", blocks);
 
@@ -379,8 +392,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONObject miniMap = new JSONObject();
         if (null != functions) {
             if (Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
-                functionsResponse.put("createPlayerInfoInstance",
-                        creatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN));
+                functionsResponse.put("createPlayerInfoInstance", sceneManager.convertBlock2OldBlockInstance(world,
+                        CreatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN), true));
             }
             if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
                 JSONArray background = MiniMapManager.generateMiniMapBackground(region,
@@ -391,7 +404,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("functions", functionsResponse);
         IntegerCoordinate sceneCoordinate = MiniMapManager.getMiniMapSceneCoordinate(region,
                 new IntegerCoordinate(GamePalConstants.MINI_MAP_DEFAULT_SIZE, GamePalConstants.MINI_MAP_DEFAULT_SIZE),
-                playerInfo.getSceneCoordinate());
+                player.getWorldCoordinate().getSceneCoordinate());
         miniMap.put("sceneCoordinate", sceneCoordinate);
         rst.put("miniMap", miniMap);
 

@@ -9,10 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -49,9 +48,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserInfoRepository userInfoRepository;
-
-    @Autowired
-    private CreatureFactory creatureFactory;
 
     @Autowired
     private NpcManager npcManager;
@@ -133,12 +129,12 @@ public class UserServiceImpl implements UserService {
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        if (!world.getPlayerInfoMap().containsKey(userCode)) {
-            world.getPlayerInfoMap().put(userCode, npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_HUMAN,
+        if (!world.getCreatureMap().containsKey(userCode)) {
+            world.getCreatureMap().put(userCode, npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_HUMAN,
                     CreatureConstants.CREATURE_TYPE_HUMAN, userCode));
         }
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
-        npcManager.putCreature(world, userCode, playerInfo);
+        Block player = world.getCreatureMap().get(userCode);
+        npcManager.putCreature(world, userCode, player.getWorldCoordinate());
         // Update online token
         String token = UUID.randomUUID().toString();
         world.getTokenMap().put(userCode, token);
@@ -196,7 +192,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public GameWorld getWorldByUserCode(String userCode) {
-        return worldService.getWorldMap().get(userWorldMap.get(userCode));
+        GameWorld world = worldService.getWorldMap().get(userWorldMap.get(userCode));
+        if (null == world) {
+            logger.error(ErrorUtil.ERROR_1016 + "userCode: " + userCode);
+        }
+        return world;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.model.creature;
 
+import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import lombok.Data;
 
@@ -14,5 +15,5 @@ public class NpcBrain {
     private boolean[] exemption;
     private Queue<WorldCoordinate> greenQueue;
     private Deque<WorldCoordinate> yellowQueue;
-    private Queue<PlayerInfo> redQueue;
+    private Queue<Block> redQueue;
 }

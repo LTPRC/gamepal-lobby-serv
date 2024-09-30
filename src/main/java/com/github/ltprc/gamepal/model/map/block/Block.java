@@ -1,31 +1,33 @@
-package com.github.ltprc.gamepal.model.map;
+package com.github.ltprc.gamepal.model.map.block;
 
-import com.github.ltprc.gamepal.model.map.structure.Structure;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-public class Block extends Coordinate {
-    private int type;
-    private String id;
-    private String code;
-    private Structure structure;
+public class Block {
 
-    public Block(Block block) {
-        super(block);
-        type = block.type;
-        id = block.id;
-        code = block.code;
-        structure = block.structure;
+    private WorldCoordinate worldCoordinate;
+    private BlockInfo blockInfo;
+    private MovementInfo movementInfo;
+    private PlayerInfo playerInfo;
+
+    public Block(Block worldBlock) {
+        worldCoordinate = new WorldCoordinate(worldBlock.worldCoordinate);
+        blockInfo = new BlockInfo(worldBlock.blockInfo);
+        movementInfo = new MovementInfo(worldBlock.movementInfo);
+        playerInfo = worldBlock.playerInfo; // Shallow copy
     }
 
-    public Block(Integer type, String id, String code, Structure structure, Coordinate coordinate) {
-        super(coordinate);
-        this.type = type;
-        this.id = id;
-        this.code = code;
-        this.structure = new Structure(structure.getMaterial(), structure.getLayer(), structure.getShape(),
-                structure.getImageSize());
+    public Block(WorldCoordinate worldCoordinate, BlockInfo blockInfo, MovementInfo movementInfo) {
+        this.worldCoordinate = new WorldCoordinate(worldCoordinate);
+        this.blockInfo = new BlockInfo(blockInfo);
+        this.movementInfo = new MovementInfo(movementInfo);
+    }
+
+    public Block(WorldCoordinate worldCoordinate, BlockInfo blockInfo, MovementInfo movementInfo,
+                 PlayerInfo playerInfo) {
+        this(worldCoordinate, blockInfo, movementInfo);
+        this.playerInfo = playerInfo; // Shallow copy
     }
 }

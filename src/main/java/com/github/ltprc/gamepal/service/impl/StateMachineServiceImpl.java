@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.*;
 
+@Deprecated
 @Service
 public class StateMachineServiceImpl implements StateMachineService {
 
@@ -72,17 +73,17 @@ public class StateMachineServiceImpl implements StateMachineService {
                     notifyAllTerminals(gameTerminal, "");
                     notifyAllTerminals(gameTerminal, "桌游局信息发生更新。");
                     notifyAllTerminals(gameTerminal, "玩家如下：");
-                    gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                        Terminal terminal = world.getTerminalMap().get(entry.getValue().getId());
-                        notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
-                                + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
-                    });
+//                    gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
+//                        Terminal terminal = world.getTerminalMap().get(entry.getValue().getId());
+//                        notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
+//                                + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+//                    });
                     notifyAllTerminals(gameTerminal, "游客如下：");
-                    gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
-                        Terminal terminal = world.getTerminalMap().get(standBy);
-                        notifyAllTerminals(gameTerminal, "- "
-                                + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
-                    });
+//                    gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
+//                        Terminal terminal = world.getTerminalMap().get(standBy);
+//                        notifyAllTerminals(gameTerminal, "- "
+//                                + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+//                    });
                     notifyAllTerminals(gameTerminal, "输入【0】退出桌游局");
                     notifyAllTerminals(gameTerminal, "输入【1】进入准备状态");
                 } else if (GameConstants.GAME_PLAYER_STATUS_PLAYING == gameTerminal.getGame().getStatus()) {
@@ -93,17 +94,17 @@ public class StateMachineServiceImpl implements StateMachineService {
                 notifyAllTerminals(gameTerminal, "");
                 notifyAllTerminals(gameTerminal, "桌游局信息发生更新。");
                 notifyAllTerminals(gameTerminal, "玩家如下：");
-                gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
-                    Terminal terminal = world.getTerminalMap().get(entry.getValue().getId());
-                    notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
-                            + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
-                });
+//                gameTerminal.getGame().getPlayerMap().entrySet().stream().forEach(entry -> {
+//                    Terminal terminal = world.getTerminalMap().get(entry.getValue().getId());
+//                    notifyAllTerminals(gameTerminal, "[" + entry.getKey() + "] "
+//                            + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+//                });
                 notifyAllTerminals(gameTerminal, "游客如下：");
-                gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
-                    Terminal terminal = world.getTerminalMap().get(standBy);
-                    notifyAllTerminals(gameTerminal, "- "
-                            + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
-                });
+//                gameTerminal.getGame().getStandbySet().stream().forEach(standBy -> {
+//                    Terminal terminal = world.getTerminalMap().get(standBy);
+//                    notifyAllTerminals(gameTerminal, "- "
+//                            + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+//                });
                 notifyAllTerminals(gameTerminal, "输入【0】退出桌游局");
                 notifyAllTerminals(gameTerminal, "输入【1】取消准备状态");
                 break;
@@ -176,7 +177,7 @@ public class StateMachineServiceImpl implements StateMachineService {
                     gameTerminal.setStatus(GameConstants.GAME_PLAYER_STATUS_PREPARED);
                     LasVegasPlayer lasVegasPlayer = new LasVegasPlayer();
                     lasVegasPlayer.setId(gameTerminal.getId());
-                    lasVegasPlayer.setName(world.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
+//                    lasVegasPlayer.setName(world.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
                     for (int i = 0; i < 8; i++) {
                         lasVegasPlayer.getDiceQueue().add(new Dice());
                     }
@@ -242,10 +243,10 @@ public class StateMachineServiceImpl implements StateMachineService {
         if (game.getCashStack().empty()) {
             notifyAllTerminals(gameTerminal, "货币全部入场，游戏结束！获胜者：");
             List<String> winners = LasVegasGameUtil.calculateWinners(game);
-            winners.stream().forEach(winner -> {
-                Terminal terminal = world.getTerminalMap().get(winner);
-                gameTerminal.addOutput("- " + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
-            });
+//            winners.stream().forEach(winner -> {
+//                Terminal terminal = world.getTerminalMap().get(winner);
+//                gameTerminal.addOutput("- " + world.getPlayerInfoMap().get(terminal.getUserCode()).getNickname());
+//            });
             game.setStatus(GameConstants.GAME_STATUS_END);
         }
         if (game.getRoundNumber() > 4) {
@@ -264,9 +265,9 @@ public class StateMachineServiceImpl implements StateMachineService {
             game.setRoundNumber(1);
         }
         // Play
-        notifyAllTerminals(gameTerminal, "局数[" + game.getGameNumber() + "] 轮数[" + game.getRoundNumber() + "] 玩家["
-                + game.getPlayerNumber() + "]"
-                + world.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
+//        notifyAllTerminals(gameTerminal, "局数[" + game.getGameNumber() + "] 轮数[" + game.getRoundNumber() + "] 玩家["
+//                + game.getPlayerNumber() + "]"
+//                + world.getPlayerInfoMap().get(gameTerminal.getUserCode()).getNickname());
         if (GameConstants.GAME_PLAYER_STATUS_PLAYING == gameTerminal.getStatus()
                 && game.getPlayerNumber() == gameTerminal.getPlayer().getPlayerNo()) {
             LasVegasPlayer player = (LasVegasPlayer) gameTerminal.getPlayer();

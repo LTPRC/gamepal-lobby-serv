@@ -3,13 +3,11 @@ package com.github.ltprc.gamepal.service.impl;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Map.Entry;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.Session;
 
-import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.MessageConstants;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -18,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -65,9 +62,9 @@ public class MessageServiceImpl implements MessageService {
         }
         GameWorld world = userService.getWorldByUserCode(fromUserCode);
         if (MessageConstants.SCOPE_GLOBAL == scope) {
-            world.getPlayerInfoMap().entrySet().stream()
-                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
-                    .filter(entry -> playerService.validateActiveness(world, entry.getValue()))
+            world.getCreatureMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
                     .forEach(entry -> {
                 if (!entry.getKey().equals(fromUserCode)) {
                     String toUserCode = entry.getKey();
@@ -79,9 +76,9 @@ public class MessageServiceImpl implements MessageService {
                 }
             });
         } else if (MessageConstants.SCOPE_TEAMMATE == scope) {
-            world.getPlayerInfoMap().entrySet().stream()
-                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
-                    .filter(entry -> playerService.validateActiveness(world, entry.getValue()))
+            world.getCreatureMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
                     .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
                             playerService.findTopBossId(fromUserCode)))
                     .forEach(entry -> {
@@ -124,7 +121,7 @@ public class MessageServiceImpl implements MessageService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
         }
         // These messages are shown back to the sender (human-only) 24/08/09
-        if (world.getPlayerInfoMap().get(userCode).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (world.getCreatureMap().get(userCode).getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             if (!messageMap.containsKey(userCode)) {
                 messageMap.put(userCode, new LinkedBlockingDeque<>());

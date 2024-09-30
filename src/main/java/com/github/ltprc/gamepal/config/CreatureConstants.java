@@ -38,6 +38,9 @@ public class CreatureConstants {
     public static final int SKIN_COLOR_HORSE = 15;
 
     public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
+    public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.005);
+    public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
+    public static final int FLOOR_CODE_DEFAULT = 0;
 
     public static final int NPC_BRAIN_STATUS_UNAWARE = 0;
     public static final int NPC_BRAIN_STATUS_SUSPICIOUS = 1;

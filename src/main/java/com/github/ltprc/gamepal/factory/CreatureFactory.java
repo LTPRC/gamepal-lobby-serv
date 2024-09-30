@@ -3,12 +3,15 @@ package com.github.ltprc.gamepal.factory;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.model.creature.CreatureInfo;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.NameUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -39,7 +42,7 @@ public class CreatureFactory {
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }
 
-    public static void randomlyPersonalizeAnimalInfo(CreatureInfo animalInfo, int gender) {
+    public static void randomlyPersonalizeAnimalInfo(PlayerInfo animalInfo, int gender) {
         animalInfo.setGender(gender);
         animalInfo.setSkinColor(generateAnimalSkinColor());
     }
@@ -49,21 +52,27 @@ public class CreatureFactory {
         return random.nextInt(14) + 1;
     }
 
-    public static PlayerInfo createCreatureInstance(final int playerType) {
-        PlayerInfo playerInfo = new PlayerInfo();
-        playerInfo.setStructure(new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
+    public static Block createCreatureInstance(final int playerType) {
+        WorldCoordinate worldCoordinate = new WorldCoordinate();
+        BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
+
+        BlockInfo blockInfo = new BlockInfo();
+        blockInfo.setType(BlockConstants.BLOCK_TYPE_PLAYER);
+        blockInfo.setStructure(new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
-        playerInfo.setType(BlockConstants.BLOCK_TYPE_PLAYER);
+
+        MovementInfo movementInfo = new MovementInfo();
+        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        movementInfo.setFaceDirection(CreatureConstants.FACE_DIRECTION_DEFAULT);
+        BlockUtil.calculateMaxSpeed(movementInfo);
+        movementInfo.setAcceleration(CreatureConstants.ACCELERATION_DEFAULT);
+
+        PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setPlayerType(playerType);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-        BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, playerInfo);
-        playerInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        playerInfo.setFaceDirection(BigDecimal.ZERO);
-        BlockUtil.calculateMaxSpeed(playerInfo);
-        playerInfo.setAcceleration(BigDecimal.valueOf(0.005));
         playerInfo.setHpMax(1000);
         playerInfo.setHp(playerInfo.getHpMax() / 2);
         playerInfo.setVpMax(1000);
@@ -87,6 +96,8 @@ public class CreatureFactory {
             SkillUtil.updateAnimalSkills(playerInfo);
             randomlyPersonalizeAnimalInfo(playerInfo, NameUtil.generateGender());
         }
-        return playerInfo;
+
+        Block player = new Block(worldCoordinate, blockInfo, movementInfo, playerInfo);
+        return player;
     }
 }

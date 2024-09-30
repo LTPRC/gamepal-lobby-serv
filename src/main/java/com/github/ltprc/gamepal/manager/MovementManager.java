@@ -1,14 +1,14 @@
 package com.github.ltprc.gamepal.manager;
 
+import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldMovingBlock;
 
 public interface MovementManager {
 
-    void settleSpeedAndCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock, int sceneScanDepth);
+    void settleSpeedAndCoordinate(GameWorld world, Block block, int sceneScanDepth);
 
-    void settleCoordinate(GameWorld world, WorldMovingBlock worldMovingBlock, WorldCoordinate newWorldCoordinate);
+    void settleCoordinate(GameWorld world, Block block, WorldCoordinate newWorldCoordinate);
 
-    void syncFloorCode(GameWorld world, WorldMovingBlock worldMovingBlock);
+    void syncFloorCode(GameWorld world, Block block);
 }

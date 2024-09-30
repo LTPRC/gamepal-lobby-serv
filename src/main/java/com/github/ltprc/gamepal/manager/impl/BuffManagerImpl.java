@@ -6,16 +6,12 @@ import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.util.BlockUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Map;
 
 
@@ -30,10 +26,10 @@ public class BuffManagerImpl implements BuffManager {
 
     @Override
     public void updateBuffTime(GameWorld world, String userCode) {
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Block player = world.getCreatureMap().get(userCode);
+        PlayerInfo playerInfo = player.getPlayerInfo();
         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
-            if (playerInfo.getBuff()[i] <= 0) {
+            if (player.getPlayerInfo().getBuff()[i] <= 0) {
                 continue;
             }
             playerInfo.getBuff()[i] = playerInfo.getBuff()[i] - 1;
@@ -56,45 +52,45 @@ public class BuffManagerImpl implements BuffManager {
      */
     @Override
     public void changeBuff(GameWorld world, String userCode) {
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Block player = world.getCreatureMap().get(userCode);
+        PlayerInfo playerInfo = player.getPlayerInfo();
 
         if (playerInfo.getHp() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
             playerService.killPlayer(userCode);
         }
 
-        if (playerInfoMap.get(userCode).getHunger() < playerInfoMap.get(userCode).getHungerMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = -1;
-        } else if (playerInfoMap.get(userCode).getHunger() >= playerInfoMap.get(userCode).getHungerMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = 0;
+        if (playerInfo.getHunger() < playerInfo.getHungerMax() / 10
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] == 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = -1;
+        } else if (playerInfo.getHunger() >= playerInfo.getHungerMax() / 10
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0){
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] = 0;
         }
 
-        if (playerInfoMap.get(userCode).getThirst() < playerInfoMap.get(userCode).getThirstMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = -1;
-        } else if (playerInfoMap.get(userCode).getThirst() >= playerInfoMap.get(userCode).getThirstMax() / 10
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = 0;
+        if (playerInfo.getThirst() < playerInfo.getThirstMax() / 10
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] == 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = -1;
+        } else if (playerInfo.getThirst() >= playerInfo.getThirstMax() / 10
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0){
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] = 0;
         }
 
-        if (playerInfoMap.get(userCode).getVp() == 0
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = -1;
-        } else if (playerInfoMap.get(userCode).getVp() > 0
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
+        if (playerInfo.getVp() == 0
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] == 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = -1;
+        } else if (playerInfo.getVp() > 0
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0){
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] = 0;
         }
 
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
         if (bagInfo.getCapacity().compareTo(bagInfo.getCapacityMax()) > 0
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] == 0) {
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = -1;
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] == 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = -1;
         } else if (bagInfo.getCapacity().compareTo(bagInfo.getCapacityMax()) <= 0
-                && playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0){
-            playerInfoMap.get(userCode).getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = 0;
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0){
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = 0;
         }
     }
 

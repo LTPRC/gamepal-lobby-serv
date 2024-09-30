@@ -1,5 +1,7 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
@@ -10,6 +12,9 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -220,7 +225,7 @@ public class SceneManagerImpl implements SceneManager {
         int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
         fillSceneTemplate(region, scene, regionIndex);
         if (regionIndex == BlockConstants.BLOCK_CODE_NOTHING) {
-            scene.getBlocks().forEach(block -> block.getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
+            scene.getBlocks().forEach(block -> block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
         } else {
             // Add animals 24/06/19
             addSceneAnimals(world, region, scene);
@@ -560,7 +565,7 @@ public class SceneManagerImpl implements SceneManager {
     @Deprecated
     private Scene fillSceneNothing(final Region region, final Scene scene) {
         fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_NOTHING);
-        scene.getBlocks().forEach(block -> block.getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
+        scene.getBlocks().forEach(block -> block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
         return scene;
     }
 
@@ -577,9 +582,11 @@ public class SceneManagerImpl implements SceneManager {
             structure = new Structure(material, layer);
         }
         for (int j = 0; j < random.nextInt(maxAmount); j++) {
-            Block block = new Block(blockType, null, blockCode, structure,
+            BlockInfo blockInfo = new BlockInfo(blockType, null, blockCode, structure);
+            WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                     new Coordinate(BigDecimal.valueOf(random.nextDouble() * regionInfo.getWidth()),
                             BigDecimal.valueOf(random.nextDouble() * regionInfo.getHeight())));
+            Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
             scene.getBlocks().add(block);
         }
     }
@@ -620,6 +627,8 @@ public class SceneManagerImpl implements SceneManager {
         Random random = new Random();
         Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
                 y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
+        WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
+                coordinate);
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
         weightMap.put(BlockConstants.BLOCK_CODE_NOTHING, 2000);
         switch (blockCode) {
@@ -829,252 +838,223 @@ public class SceneManagerImpl implements SceneManager {
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()) {
-                addSceneObjectByCode(regionInfo, scene, weightList.get(i).getKey(), coordinate);
+                addSceneObjectByCode(scene, weightList.get(i).getKey(), worldCoordinate);
                 break;
             }
             randomInt -= weightList.get(i).getValue();
         }
     }
 
-    private void addSceneObjectByCode(RegionInfo regionInfo, Scene scene, int blockCode, Coordinate coordinate) {
-        Block block = null;
+    private void addSceneObjectByCode(Scene scene, int blockCode, WorldCoordinate worldCoordinate) {
+        BlockInfo blockInfo = null;
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
         switch (blockCode) {
             case BlockConstants.PLANT_INDEX_BIG_PINE:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_OAK:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_PINE:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_OAK:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_WITHERED_TREE:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_PALM:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
-                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))),
-                        coordinate);
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_RAFFLESIA:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_STUMP:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                                roundShape),
-                        coordinate);
+                                roundShape));
                 break;
             case BlockConstants.PLANT_INDEX_MOSSY_STUMP:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                                roundShape),
-                        coordinate);
+                                roundShape));
                 break;
             case BlockConstants.PLANT_INDEX_HOLLOW_TRUNK:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                                roundShape),
-                        coordinate);
+                                roundShape));
                 break;
             case BlockConstants.PLANT_INDEX_FLOWER_BUSH:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_BUSH:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_SMALL_FLOWER_1:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_SMALL_FLOWER_2:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_SMALL_FLOWER_3:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_FLOWER_1:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_FLOWER_2:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_FLOWER_3:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_MUSHROOM_1:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_MUSHROOM_2:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_1:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_2:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_3:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_4:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_CACTUS_1:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-8",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_CACTUS_2:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-8",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_CACTUS_3:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-8",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE),
-                        coordinate);
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.ROCK_INDEX_1:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                                roundShape),
-                        coordinate);
+                                roundShape));
                 break;
             case BlockConstants.ROCK_INDEX_2:
-                block = new Block(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM,
-                                roundShape),
-                        coordinate);
+                                roundShape));
                 break;
             default:
                 break;
         }
-        if (null != block) {
+        if (null != blockInfo) {
+            Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
             scene.getBlocks().add(block);
         }
     }
@@ -1156,12 +1136,11 @@ public class SceneManagerImpl implements SceneManager {
             if (randomInt < weightList.get(i).getValue()
                     && BlockConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
                 String animalUserCode = UUID.randomUUID().toString();
-                PlayerInfo animalInfo =
-                        npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
-                                CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
-                animalInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                Block animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                        CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
+                animal.getPlayerInfo().setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
                 int skinColor = weightList.get(i).getKey();
-                animalInfo.setSkinColor(skinColor);
+                animal.getPlayerInfo().setSkinColor(skinColor);
                 WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(),
                         scene.getSceneCoordinate(), new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
                         y.add(BigDecimal.valueOf(random.nextDouble() / 2))));
@@ -1173,20 +1152,17 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksByUserCode(String userCode, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = collectBlocksFromScenes(userCode, sceneScanRadius);
-        rankingQueue.addAll(collectBlocksFromPlayerInfoMap(userCode, sceneScanRadius));
+    public Queue<Block> collectBlocksByUserCode(final GameWorld world, final Block player, final int sceneScanRadius) {
+        Queue<Block> rankingQueue = collectBlocksFromScenes(world, player, sceneScanRadius);
+        rankingQueue.addAll(collectBlocksFromPlayerInfoMap(world, player, sceneScanRadius));
         return rankingQueue;
     }
 
     @Override
-    public Queue<Block> collectBlocksFromScenes(String userCode, final int sceneScanRadius) {
+    public Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius) {
         Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
-        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
             return rankingQueue;
@@ -1203,23 +1179,11 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 if (!CollectionUtils.isEmpty(scene.getBlocks())) {
                     scene.getBlocks().forEach(block -> {
-                        Block newBlock;
-                        switch (block.getType()) {
-                            case BlockConstants.BLOCK_TYPE_DROP:
-                                newBlock = new Drop((Drop) block);
-                                break;
-                            case BlockConstants.BLOCK_TYPE_TELEPORT:
-                                newBlock = new Teleport((Teleport) block);
-                                break;
-                            default:
-                                newBlock = new Block(block);
-                                break;
-                        }
-                        BlockUtil.adjustCoordinate(newBlock,
-                                BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                                        newSceneCoordinate), region.getHeight(), region.getWidth());
-                        if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
-                                playerInfo.getFaceDirection(), playerInfo.getCoordinate(), newBlock)) {
+                        if (BlockUtil.checkPerceptionCondition(region, player, block)) {
+                            Block newBlock = new Block(block);
+                            BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+                                    BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
+                                            newSceneCoordinate), region.getHeight(), region.getWidth());
                             rankingQueue.add(newBlock);
                         }
                     });
@@ -1227,12 +1191,13 @@ public class SceneManagerImpl implements SceneManager {
                 // Generate blocks from scene events 24/02/16
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
                     new ArrayList<>(scene.getEvents()).forEach(event -> {
-                        Block newBlock = BlockUtil.convertEvent2Block(event);
-                        BlockUtil.adjustCoordinate(newBlock,
-                                BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                                        newSceneCoordinate), region.getHeight(), region.getWidth());
-                        if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
-                                playerInfo.getFaceDirection(), playerInfo.getCoordinate(), newBlock)) {
+                        WorldCoordinate worldCoordinate =
+                                new WorldCoordinate(region.getRegionNo(), newSceneCoordinate, event);
+                        Block newBlock = BlockUtil.convertEvent2Block(event, worldCoordinate);
+                        if (BlockUtil.checkPerceptionCondition(region, player, newBlock)) {
+                            BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+                                    BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
+                                            newSceneCoordinate), region.getHeight(), region.getWidth());
                             rankingQueue.add(newBlock);
                         }
                     });
@@ -1243,24 +1208,23 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksFromPlayerInfoMap(String userCode, final int sceneScanRadius) {
+    public Queue<Block> collectBlocksFromPlayerInfoMap(final GameWorld world, final Block player, final int sceneScanRadius) {
         Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         // Collect detected playerInfos
-        playerInfoMap.values().stream()
+        creatureMap.values().stream()
                 // playerInfos contains running players or NPC 24/03/25
-                .filter(playerInfo1 -> playerService.validateActiveness(world, playerInfo1))
-                .filter(playerInfo1 -> SkillUtil.isBlockDetected(playerInfo, playerInfo1, sceneScanRadius))
-                .forEach(playerInfo1 -> {
-                    Block block = BlockUtil.convertWorldBlock2Block(region, playerInfo1, false);
-                    BlockUtil.adjustCoordinate(block, BlockUtil.getCoordinateRelation(playerInfo.getSceneCoordinate(),
-                            playerInfo1.getSceneCoordinate()), region.getHeight(), region.getWidth());
-                    if (BlockUtil.checkPerceptionCondition(playerInfo.getPerceptionInfo(),
-                            playerInfo.getFaceDirection(), playerInfo.getCoordinate(), block)) {
-                        rankingQueue.add(block);
+                .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
+                .filter(player1 -> SkillUtil.isBlockDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
+                .forEach(player1 -> {
+                    Block newBlock = new Block(player1);
+                    if (BlockUtil.checkPerceptionCondition(region, player, newBlock)) {
+                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
+                                        player.getWorldCoordinate().getSceneCoordinate()),
+                                region.getHeight(), region.getWidth());
+                        rankingQueue.add(newBlock);
                     }
                 });
         return rankingQueue;
@@ -1269,10 +1233,10 @@ public class SceneManagerImpl implements SceneManager {
     @Override
     public int[][] collectGridsByUserCode(String userCode, int sceneScanRadius) {
         GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        IntegerCoordinate sceneCoordinate = playerInfo.getSceneCoordinate();
-        Region region = world.getRegionMap().get(playerInfo.getRegionNo());
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        Block player = creatureMap.get(userCode);
+        IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         int[][] grids = new int[region.getWidth() * (sceneScanRadius * 2 + 1) + 1]
                 [region.getHeight() * (sceneScanRadius * 2 + 1) + 1];
         for (int i = sceneCoordinate.getY() - sceneScanRadius; i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
@@ -1292,5 +1256,34 @@ public class SceneManagerImpl implements SceneManager {
             }
         }
         return grids;
+    }
+
+    @Override
+    public JSONObject convertBlock2OldBlockInstance(final GameWorld world, final Block block,
+                                                    final boolean useWorldCoordinate) {
+        JSONObject rst = new JSONObject();
+        rst.putAll(JSON.parseObject(JSON.toJSONString(block.getBlockInfo())));
+        if (useWorldCoordinate) {
+            rst.putAll(JSON.parseObject(JSON.toJSONString(block.getWorldCoordinate())));
+        } else {
+            rst.putAll(JSON.parseObject(JSON.toJSONString(block.getWorldCoordinate().getCoordinate())));
+        }
+        rst.putAll(JSON.parseObject(JSON.toJSONString(block.getMovementInfo())));
+        switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                rst.putAll(JSON.parseObject(JSON.toJSONString(block.getPlayerInfo())));
+                break;
+            case BlockConstants.BLOCK_TYPE_DROP:
+                Map.Entry<String, Integer> entry = world.getDropMap().get(block.getBlockInfo().getId());
+                rst.put("itemNo", entry.getKey());
+                rst.put("amount", entry.getValue());
+                break;
+            case BlockConstants.BLOCK_TYPE_TELEPORT:
+                rst.put("to", world.getTeleportMap().get(block.getBlockInfo().getId()));
+                break;
+            default:
+                break;
+        }
+        return rst;
     }
 }

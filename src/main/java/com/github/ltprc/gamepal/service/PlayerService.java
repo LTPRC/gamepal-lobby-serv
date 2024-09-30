@@ -1,20 +1,20 @@
 package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
 
 public interface PlayerService {
 
-    ResponseEntity<String> updatePlayerInfo(String userCode, JSONObject req);
-
     ResponseEntity<String> updatePlayerInfoCharacter(String userCode, JSONObject req);
 
-    ResponseEntity<String> updatePlayerMovement(String userCode, JSONObject req);
+    ResponseEntity<String> updatePlayerMovement(String userCode, WorldCoordinate worldCoordinate,
+                                                MovementInfo movementInfo);
 
     ResponseEntity<String> generateNotificationMessage(String userCode, String content);
 
@@ -74,5 +74,5 @@ public interface PlayerService {
 
     ResponseEntity<String> updateSkillsByTool(String userCode);
 
-    boolean validateActiveness(final GameWorld world, final PlayerInfo playerInfo);
+    boolean validateActiveness(final GameWorld world, final String id);
 }
