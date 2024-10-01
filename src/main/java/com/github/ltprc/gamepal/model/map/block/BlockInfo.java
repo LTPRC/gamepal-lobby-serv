@@ -12,11 +12,14 @@ public class BlockInfo {
     String code;
     Structure structure;
 
-    public BlockInfo(BlockInfo block) {
-        type = block.type;
-        id = block.id;
-        code = block.code;
-        structure = block.structure;
+    public BlockInfo(BlockInfo blockInfo) {
+        if (null == blockInfo) {
+            return;
+        }
+        type = blockInfo.type;
+        id = blockInfo.id;
+        code = blockInfo.code;
+        structure = blockInfo.structure;
     }
 
     public BlockInfo(Integer type, String id, String code, Structure structure) {

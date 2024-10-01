@@ -1,7 +1,6 @@
 package com.github.ltprc.gamepal.model.map.world;
 
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
@@ -27,7 +26,7 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, String> tokenMap; // userCode, token
     private Map<String, Long> onlineMap; // userCode, timestamp
     private Map<Integer, Game> gameMap; // gameNo, game
-    private Queue<WorldEvent> eventQueue; // event
+    private Queue<Block> eventQueue; // event
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
     private Map<String, boolean[]> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal

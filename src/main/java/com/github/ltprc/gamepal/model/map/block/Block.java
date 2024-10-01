@@ -11,12 +11,14 @@ public class Block {
     private BlockInfo blockInfo;
     private MovementInfo movementInfo;
     private PlayerInfo playerInfo;
+    private EventInfo eventInfo;
 
     public Block(Block worldBlock) {
         worldCoordinate = new WorldCoordinate(worldBlock.worldCoordinate);
         blockInfo = new BlockInfo(worldBlock.blockInfo);
         movementInfo = new MovementInfo(worldBlock.movementInfo);
         playerInfo = worldBlock.playerInfo; // Shallow copy
+        eventInfo = new EventInfo(worldBlock.eventInfo);
     }
 
     public Block(WorldCoordinate worldCoordinate, BlockInfo blockInfo, MovementInfo movementInfo) {
@@ -26,8 +28,9 @@ public class Block {
     }
 
     public Block(WorldCoordinate worldCoordinate, BlockInfo blockInfo, MovementInfo movementInfo,
-                 PlayerInfo playerInfo) {
+                 PlayerInfo playerInfo, EventInfo eventInfo) {
         this(worldCoordinate, blockInfo, movementInfo);
         this.playerInfo = playerInfo; // Shallow copy
+        this.eventInfo = new EventInfo(eventInfo);
     }
 }

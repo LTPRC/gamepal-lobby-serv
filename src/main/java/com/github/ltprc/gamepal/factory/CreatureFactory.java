@@ -97,7 +97,7 @@ public class CreatureFactory {
             randomlyPersonalizeAnimalInfo(playerInfo, NameUtil.generateGender());
         }
 
-        Block player = new Block(worldCoordinate, blockInfo, movementInfo, playerInfo);
+        Block player = new Block(worldCoordinate, blockInfo, movementInfo, playerInfo, null);
         return player;
     }
 }

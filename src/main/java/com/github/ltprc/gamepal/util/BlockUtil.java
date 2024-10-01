@@ -1,14 +1,14 @@
 package com.github.ltprc.gamepal.util;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.*;
 import com.github.ltprc.gamepal.model.map.world.*;
@@ -133,10 +133,10 @@ public class BlockUtil {
 //        return worldBlock;
 //    }
 
-    public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
-        return new Event(worldEvent.getUserCode(), worldEvent.getCode(), worldEvent.getFrame(),
-                worldEvent.getFrameMax(), worldEvent.getPeriod(), worldEvent.getCoordinate());
-    }
+//    public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
+//        return new Event(worldEvent.getUserCode(), worldEvent.getCode(), worldEvent.getFrame(),
+//                worldEvent.getFrameMax(), worldEvent.getPeriod(), worldEvent.getCoordinate());
+//    }
 
     public static Coordinate convertWorldCoordinate2Coordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
         Coordinate coordinate = new Coordinate(worldCoordinate.getCoordinate());
@@ -499,7 +499,7 @@ public class BlockUtil {
 
     public static Block convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
                                                      WorldCoordinate worldCoordinate) {
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, userCode, String.valueOf(eventCode),
+        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, userCode, String.valueOf(eventCode),
                 new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                 convertEventCode2Layer(eventCode)));
         Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
@@ -507,13 +507,13 @@ public class BlockUtil {
         return block;
     }
 
-    public static Block convertEvent2Block(Event event, WorldCoordinate worldCoordinate) {
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, null,
-                event.getCode() + "-" + event.getFrame(),
-                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getCode())));
-        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
-        return block;
-    }
+//    public static Block convertEvent2Block(Block event, WorldCoordinate worldCoordinate) {
+//        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, null,
+//                event.getEventInfo().getEventCode() + "-" + event.getEventInfo().getFrame(),
+//                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getEventInfo().getEventCode())));
+//        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
+//        return block;
+//    }
 
     private static int convertEventCode2Layer(int eventCode) {
         int layer;
@@ -536,42 +536,43 @@ public class BlockUtil {
         return layer;
     }
 
-    public static WorldEvent createWorldEvent(String userCode, int code, WorldCoordinate worldCoordinate) {
-        WorldEvent event = new WorldEvent();
-        BlockUtil.copyWorldCoordinate(worldCoordinate, event);
-        event.setUserCode(userCode);
-        event.setCode(code);
-        event.setFrame(0);
-        switch (code) {
+    public static Block createWorldEvent(String userCode, int eventCode, WorldCoordinate worldCoordinate) {
+        EventInfo eventInfo = new EventInfo();
+        eventInfo.setEventId(userCode);
+        eventInfo.setEventCode(eventCode);
+        eventInfo.setFrame(0);
+        switch (eventCode) {
             case GamePalConstants.EVENT_CODE_MINE:
                 // Infinite
-                event.setFrameMax(-1);
+                eventInfo.setFrameMax(-1);
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
             case GamePalConstants.EVENT_CODE_DISTURB:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
-                event.setFrameMax(50);
+                eventInfo.setFrameMax(50);
                 break;
             case GamePalConstants.EVENT_CODE_FIRE:
-                event.setFrameMax(250);
+                eventInfo.setFrameMax(250);
                 break;
             default:
-                event.setFrameMax(25);
+                eventInfo.setFrameMax(25);
                 break;
         }
-        switch (code) {
+        switch (eventCode) {
             case GamePalConstants.EVENT_CODE_HEAL:
             case GamePalConstants.EVENT_CODE_DISTURB:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
-                event.setPeriod(50);
+                eventInfo.setPeriod(50);
                 break;
             default:
-                event.setPeriod(25);
+                eventInfo.setPeriod(25);
                 break;
         }
-        return event;
+        return new Block(worldCoordinate, new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, "", "",
+                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE)),
+                new MovementInfo(), new PlayerInfo(), eventInfo);
     }
 
     public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {

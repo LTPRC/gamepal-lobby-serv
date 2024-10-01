@@ -32,6 +32,9 @@ public class MovementInfo {
     }
 
     public MovementInfo(MovementInfo movementInfo) {
+        if (null == movementInfo) {
+            return;
+        }
         speed = new Coordinate(movementInfo.speed);
         maxSpeed = movementInfo.maxSpeed;
         acceleration = movementInfo.acceleration;

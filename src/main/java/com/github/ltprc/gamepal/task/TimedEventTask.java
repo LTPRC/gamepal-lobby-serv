@@ -8,7 +8,6 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldEvent;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -193,8 +192,8 @@ public class TimedEventTask {
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
-                            WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode,
-                                    GamePalConstants.EVENT_CODE_NOISE, player.getWorldCoordinate());
+                            Block worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_NOISE,
+                                    player.getWorldCoordinate());
                             world.getEventQueue().add(worldEvent);
                         }
                     });

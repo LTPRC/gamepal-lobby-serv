@@ -12,6 +12,9 @@ public class IntegerCoordinate {
     private Integer y;
 
     public IntegerCoordinate(IntegerCoordinate integerCoordinate) {
+        if (null == integerCoordinate) {
+            return;
+        }
         x = integerCoordinate.getX().intValue();
         y = integerCoordinate.getY().intValue();
     }

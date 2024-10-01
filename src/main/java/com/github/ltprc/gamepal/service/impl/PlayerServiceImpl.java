@@ -1205,7 +1205,7 @@ public class PlayerServiceImpl implements PlayerService {
             world.getOnlineMap().remove(userCode);
             npcManager.resetNpcBrainQueues(userCode);
         }
-        WorldEvent worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
+        Block worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_DISTURB,
                 player.getWorldCoordinate());
         world.getEventQueue().add(worldEvent);
         buffManager.resetBuff(playerInfo);
@@ -1235,7 +1235,7 @@ public class PlayerServiceImpl implements PlayerService {
         changeHunger(userCode, playerInfo.getHungerMax(), true);
         changeThirst(userCode, playerInfo.getThirstMax(), true);
         changePrecision(userCode, playerInfo.getThirstMax(), true);
-        WorldEvent worldEvent = BlockUtil.createWorldEvent(player.getBlockInfo().getId(),
+        Block worldEvent = BlockUtil.createWorldEvent(player.getBlockInfo().getId(),
                 GamePalConstants.EVENT_CODE_SACRIFICE, player.getWorldCoordinate());
         world.getEventQueue().add(worldEvent);
         buffManager.resetBuff(playerInfo);

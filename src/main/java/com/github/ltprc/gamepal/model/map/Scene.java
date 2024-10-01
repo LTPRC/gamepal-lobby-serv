@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @NoArgsConstructor
 public class Scene extends SceneInfo {
     private List<Block> blocks;
-    private List<Event> events;
+    private List<Block> events;
     private int[][] gird; // terrain grid
 
     public Scene(Scene scene) {

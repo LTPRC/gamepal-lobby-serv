@@ -10,7 +10,6 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
@@ -1191,14 +1190,11 @@ public class SceneManagerImpl implements SceneManager {
                 // Generate blocks from scene events 24/02/16
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
                     new ArrayList<>(scene.getEvents()).forEach(event -> {
-                        WorldCoordinate worldCoordinate =
-                                new WorldCoordinate(region.getRegionNo(), newSceneCoordinate, event);
-                        Block newBlock = BlockUtil.convertEvent2Block(event, worldCoordinate);
-                        if (BlockUtil.checkPerceptionCondition(region, player, newBlock)) {
-                            BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+                        if (BlockUtil.checkPerceptionCondition(region, player, event)) {
+                            BlockUtil.adjustCoordinate(event.getWorldCoordinate().getCoordinate(),
                                     BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
                                             newSceneCoordinate), region.getHeight(), region.getWidth());
-                            rankingQueue.add(newBlock);
+                            rankingQueue.add(event);
                         }
                     });
                 }
@@ -1272,6 +1268,9 @@ public class SceneManagerImpl implements SceneManager {
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 rst.putAll(JSON.parseObject(JSON.toJSONString(block.getPlayerInfo())));
+                break;
+            case BlockConstants.BLOCK_TYPE_EVENT:
+                rst.put("code", block.getEventInfo().getEventCode() + "-" + block.getEventInfo().getFrame());
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
                 Map.Entry<String, Integer> entry = world.getDropMap().get(block.getBlockInfo().getId());
