@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;

@@ -4,16 +4,13 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.*;
-import com.github.ltprc.gamepal.model.map.world.*;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.*;
 
@@ -25,40 +22,10 @@ public class BlockUtil {
         return new IntegerCoordinate(to.getX() - from.getX(), to.getY() - from.getY());
     }
 
-    @Deprecated
-    public static int getCoordinateRelationOld(IntegerCoordinate from, IntegerCoordinate to) {
-        if (from.getY() - to.getY() == 1) {
-            if (from.getX() - to.getX() == 1) {
-                return 0;
-            } else if (from.getX() - to.getX() == 0) {
-                return 1;
-            } else if (from.getX() - to.getX() == -1) {
-                return 2;
-            }
-        } else if (from.getY() - to.getY() == 0) {
-            if (from.getX() - to.getX() == 1) {
-                return 3;
-            } else if (from.getX() - to.getX() == 0) {
-                return 4;
-            } else if (from.getX() - to.getX() == -1) {
-                return 5;
-            }
-        } else if (from.getY() - to.getY() == -1) {
-            if (from.getX() - to.getX() == 1) {
-                return 6;
-            } else if (from.getX() - to.getX() == 0) {
-                return 7;
-            } else if (from.getX() - to.getX() == -1) {
-                return 8;
-            }
-        }
-        return -1;
-    }
-
     public static void adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, int height, int width) {
         // Pos-y is south, neg-y is north
-        coordinate.setX(coordinate.getX().add(BigDecimal.valueOf((long) integerCoordinate.getX() * width)));
-        coordinate.setY(coordinate.getY().add(BigDecimal.valueOf((long) integerCoordinate.getY() * height)));
+        coordinate.setX(coordinate.getX().add(BigDecimal.valueOf(integerCoordinate.getX() * width)));
+        coordinate.setY(coordinate.getY().add(BigDecimal.valueOf(integerCoordinate.getY() * height)));
     }
 
     /**
@@ -88,55 +55,6 @@ public class BlockUtil {
                     .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(regionInfo.getWidth())));
         }
     }
-
-//    /**
-//     * Ignore sceneCoordinate
-//     * @param regionInfo RegionInfo
-//     * @param worldBlock WorldBlock
-//     * @param convertSceneCoordinate whether sceneCoordinate will be converted into new block coordinate
-//     * @return Block
-//     */
-//    @Deprecated
-//    public static Block convertWorldBlock2Block(RegionInfo regionInfo, WorldBlock worldBlock,
-//                                                boolean convertSceneCoordinate) {
-//        Block newBlock = new Block(worldBlock.getType(), worldBlock.getId(), worldBlock.getCode(),
-//                worldBlock.getStructure(), convertSceneCoordinate
-//                ? convertWorldCoordinate2Coordinate(regionInfo, worldBlock) : worldBlock.getCoordinate());
-//        switch (worldBlock.getType()) {
-//            case BlockConstants.BLOCK_TYPE_DROP:
-//                newBlock = new Drop(((WorldDrop) worldBlock).getItemNo(), ((WorldDrop) worldBlock).getAmount(), newBlock);
-//                break;
-//            case BlockConstants.BLOCK_TYPE_TELEPORT:
-//                newBlock = new Teleport(((WorldTeleport) worldBlock).getTo(), newBlock);
-//                break;
-//            default:
-//                break;
-//        }
-//        return newBlock;
-//    }
-
-//    @Deprecated
-//    public static Block convertBlock2WorldBlock(Block block, int regionNo, IntegerCoordinate sceneCoordinate,
-//                                                     Coordinate coordinate) {
-//        Block worldBlock = new Block(block.getType(), block.getId(), block.getCode(),
-//                block.getStructure(), new WorldCoordinate(regionNo, sceneCoordinate, coordinate));
-//        switch (block.getType()) {
-//            case BlockConstants.BLOCK_TYPE_DROP:
-//                worldBlock = new WorldDrop(((Drop) block).getItemNo(), ((Drop) block).getAmount(), worldBlock);
-//                break;
-//            case BlockConstants.BLOCK_TYPE_TELEPORT:
-//                worldBlock = new WorldTeleport(((Teleport) block).getTo(), worldBlock);
-//                break;
-//            default:
-//                break;
-//        }
-//        return worldBlock;
-//    }
-
-//    public static Event convertWorldEvent2Event(WorldEvent worldEvent) {
-//        return new Event(worldEvent.getUserCode(), worldEvent.getCode(), worldEvent.getFrame(),
-//                worldEvent.getFrameMax(), worldEvent.getPeriod(), worldEvent.getCoordinate());
-//    }
 
     public static Coordinate convertWorldCoordinate2Coordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
         Coordinate coordinate = new Coordinate(worldCoordinate.getCoordinate());
@@ -252,7 +170,8 @@ public class BlockUtil {
         while (a2 >= 360) {
             a2 -= 360;
         }
-        return Math.abs(a2 - a1);
+        double rst = Math.abs(a2 - a1);
+        return rst >= 180D ? 360D - rst : rst;
     }
 
     public static List<WorldCoordinate> collectEquidistantPoints(RegionInfo regionInfo, WorldCoordinate wc1,
@@ -268,15 +187,12 @@ public class BlockUtil {
         }
         deltaWidth = deltaWidth.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         deltaHeight = deltaHeight.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
-        WorldCoordinate wc3 = new WorldCoordinate();
-        copyWorldCoordinate(wc1, wc3);
+        WorldCoordinate wc3 = new WorldCoordinate(wc1);
         for (int i = 1; i < amount; i++) {
             wc3.getCoordinate().setX(wc3.getCoordinate().getX().add(deltaWidth));
             wc3.getCoordinate().setY(wc3.getCoordinate().getY().add(deltaHeight));
             fixWorldCoordinate(regionInfo, wc3);
-            WorldCoordinate wc4 = new WorldCoordinate();
-            copyWorldCoordinate(wc3, wc4);
-            rst.add(wc4);
+            rst.add(new WorldCoordinate(wc3));
         }
         return rst;
     }
@@ -294,15 +210,17 @@ public class BlockUtil {
         for (int i = 1; i < amount; i++) {
             c3.setX(c3.getX().add(deltaWidth));
             c3.setY(c3.getY().add(deltaHeight));
-            Coordinate c4 = new Coordinate(c3);
-            rst.add(c4);
+            rst.add(new Coordinate(c3));
         }
         return rst;
     }
 
-    public static List<IntegerCoordinate> preSelectSceneCoordinates(Region region, WorldCoordinate wc1,
-                                                                       WorldCoordinate wc2) {
-        List<IntegerCoordinate> rst = new ArrayList<>();
+    public static Set<IntegerCoordinate> preSelectSceneCoordinates(Region region, WorldCoordinate wc1,
+                                                                    WorldCoordinate wc2) {
+        Set<IntegerCoordinate> rst = new HashSet<>();
+        if (wc1.getRegionNo() != region.getRegionNo() || wc2.getRegionNo() != region.getRegionNo()) {
+            return rst;
+        }
         int x1 = Math.min(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
         int x2 = Math.max(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
         int y1 = Math.min(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
@@ -318,17 +236,101 @@ public class BlockUtil {
         return rst;
     }
 
-    public static WorldCoordinate convertCoordinate2WorldCoordinate(RegionInfo regionInfo,
-                                                                    IntegerCoordinate sceneCoordinate,
-                                                                    Coordinate coordinate) {
-        WorldCoordinate wc = new WorldCoordinate();
-        wc.setRegionNo(regionInfo.getRegionNo());
-        wc.setSceneCoordinate(new IntegerCoordinate(sceneCoordinate));
-        wc.setCoordinate(new Coordinate(coordinate));
-        fixWorldCoordinate(regionInfo, wc);
-        return wc;
+    /**
+     *
+     * @param regionInfo
+     * @param from
+     * @param block1
+     * @param block2
+     * @param correctBlock1
+     * @return
+     */
+    public static boolean detectLineCollision(RegionInfo regionInfo, WorldCoordinate from, Block block1,
+                                              Block block2, boolean correctBlock1) {
+        if (from.getRegionNo() != regionInfo.getRegionNo()
+                || block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+//        BigDecimal eventDirection =
+//                BlockUtil.calculateAngle(from.getCoordinate(), block1.getWorldCoordinate().getCoordinate());
+        Coordinate coordinate0 = convertWorldCoordinate2Coordinate(regionInfo, from);
+        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
+        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
+//        if (eventDirection.compareTo(BigDecimal.valueOf(90D)) == 0
+//                || eventDirection.compareTo(BigDecimal.valueOf(270D)) == 0) {
+//            boolean rst = coordinate1.getX().subtract(coordinate2.getX()).abs().doubleValue()
+//                    < block1.getBlockInfo().getStructure().getShape().getRadius().getX()
+//                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue();
+//            if (rst && correctBlock1) {
+//                block1.getWorldCoordinate().getCoordinate().setX(block1.getWorldCoordinate().getCoordinate().getX()
+//                        .subtract(coordinate1.getX()).add(coordinate3.getX()));
+//                block1.getWorldCoordinate().getCoordinate().setY(block1.getWorldCoordinate().getCoordinate().getY()
+//                        .subtract(coordinate1.getY()).add(coordinate3.getY()));
+//            }
+//            return rst;
+//        }
+        Coordinate coordinate3 = findClosestPoint(coordinate0, coordinate1, coordinate2);
+        Block block3 = new Block(block1);
+        WorldCoordinate worldCoordinate3 = BlockUtil.locateCoordinateWithDirectionAndDistance(regionInfo,
+                block1.getWorldCoordinate(),
+                BlockUtil.calculateAngle(coordinate1, coordinate3), BlockUtil.calculateDistance(coordinate1, coordinate3));
+        block3.setWorldCoordinate(worldCoordinate3);
+        if (detectCollision(regionInfo, block3, block2)) {
+            if (correctBlock1) {
+                block1.setWorldCoordinate(block3.getWorldCoordinate());
+            }
+            return true;
+        }
+        return false;
     }
 
+    /**
+     * 通义千问
+     * @param coordinate0
+     * @param coordinate1
+     * @param coordinate2
+     * @return
+     */
+    public static Coordinate findClosestPoint(Coordinate coordinate0, Coordinate coordinate1, Coordinate coordinate2) {
+        Coordinate segmentVector = new Coordinate(coordinate1.getX().subtract(coordinate0.getX()), coordinate1.getY().subtract(coordinate0.getY()));
+        Coordinate pointVector = new Coordinate(coordinate2.getX().subtract(coordinate0.getX()), coordinate2.getY().subtract(coordinate0.getY()));
+
+        BigDecimal segmentLengthSquared = segmentVector.getX().pow(2).add(segmentVector.getY().pow(2));
+        if (segmentLengthSquared.equals(BigDecimal.ZERO)) {
+            return new Coordinate(coordinate0);
+        }
+        BigDecimal dotProduct = dotProduct(segmentVector, pointVector);
+
+        BigDecimal t;
+        try {
+            t = dotProduct.divide(segmentLengthSquared, RoundingMode.HALF_UP);
+        } catch (ArithmeticException ignored) {
+            t = BigDecimal.ONE.negate();
+        }
+        if (t.compareTo(BigDecimal.ZERO) < 0) {
+            return coordinate0; // 投影点在线段外，取起点
+        } else if (t.compareTo(BigDecimal.ONE) > 0) {
+            return coordinate1; // 投影点在线段外，取终点
+        } else {
+            BigDecimal newX = coordinate0.getX().add(segmentVector.getX().multiply(t));
+            BigDecimal newY = coordinate0.getY().add(segmentVector.getY().multiply(t));
+            return new Coordinate(newX.round(new MathContext(3, RoundingMode.FLOOR)),
+                    newY.round(new MathContext(3, RoundingMode.FLOOR)));
+        }
+    }
+
+    /**
+     * 通义千问
+     * @param coordinate1
+     * @param coordinate2
+     * @return
+     */
+    public static BigDecimal dotProduct(Coordinate coordinate1, Coordinate coordinate2) {
+        return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
+    }
+
+    @Deprecated
     public static boolean detectLineSquareCollision(RegionInfo regionInfo, Block block1,
                                                     BigDecimal ballisticAngle, Block block2) {
         if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
@@ -413,44 +415,47 @@ public class BlockUtil {
     public static boolean detectCollision(RegionInfo regionInfo, Block block1, Block block2) {
         Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
         Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getBlockInfo().getStructure().getShape().getShapeType()) {
-            block1.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block1.getBlockInfo().getStructure().getShape().getRadius().setY(block1.getBlockInfo().getStructure().getShape().getRadius().getX());
+        Shape shape1 = block1.getBlockInfo().getStructure().getShape();
+        Shape shape2 = block2.getBlockInfo().getStructure().getShape();
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape1.getShapeType()) {
+            shape1.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            shape1.getRadius().setY(shape1.getRadius().getX());
         }
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
-            block2.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block2.getBlockInfo().getStructure().getShape().getRadius().setY(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape2.getShapeType()) {
+            shape2.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            shape2.getRadius().setY(shape2.getRadius().getX());
         }
         // Round vs. round
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getBlockInfo().getStructure().getShape().getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
-            return Math.sqrt(Math.pow(coordinate1.getX().subtract(coordinate2.getX()).doubleValue(), 2)
-                    + Math.pow(coordinate1.getY().subtract(coordinate2.getY()).doubleValue(), 2))
-                    <= block1.getBlockInfo().getStructure().getShape().getRadius().getX()
-                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue();
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape1.getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
+            return BlockUtil.calculateDistance(coordinate1, coordinate2).doubleValue()
+                    <= shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue();
         }
         // Rectangle vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getBlockInfo().getStructure().getShape().getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
             return Math.abs(coordinate1.getX().subtract(coordinate2.getX()).doubleValue())
-                    <= block1.getBlockInfo().getStructure().getShape().getRadius().getX()
-                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
+                    <= shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
                     && Math.abs(coordinate1.getY().subtract(coordinate2.getY()).doubleValue())
-                    <= block1.getBlockInfo().getStructure().getShape().getRadius().getY()
-                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue();
+                    <= shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
         }
         // Round vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
             return detectCollision(regionInfo, block2, block1);
         }
-        return coordinate1.getX().add(block1.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
-                >= coordinate2.getX().subtract(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
-                && coordinate1.getX().subtract(block1.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
-                <= coordinate2.getX().add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue()
-                && coordinate1.getY().add(block1.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue()
-                >= coordinate2.getY().subtract(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue()
-                && coordinate1.getY().subtract(block1.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue()
-                <= coordinate2.getY().add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).doubleValue();
+//        return (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() >= coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+//                || coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue())
+//                && (coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+//                || coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue());
+        return ((coordinate1.getX().doubleValue() >= coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getX().doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+                && coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue())
+                || (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() >= coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getY().doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+                && coordinate1.getY().doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue()));
+//                && (); // 4 apexes
     }
 
     public static boolean checkBlockTypeInteractive(int blockType) {
@@ -471,6 +476,11 @@ public class BlockUtil {
                     o2.getBlockInfo().getStructure().getLayer() / 10)) {
                 return o1.getBlockInfo().getStructure().getLayer() / 10
                         - o2.getBlockInfo().getStructure().getLayer() / 10;
+            }
+            if (!Objects.equals(o1.getWorldCoordinate().getSceneCoordinate().getY(),
+                    o2.getWorldCoordinate().getSceneCoordinate().getY())) {
+                return o1.getWorldCoordinate().getSceneCoordinate().getY()
+                        .compareTo(o2.getWorldCoordinate().getSceneCoordinate().getY());
             }
             if (!Objects.equals(o1.getWorldCoordinate().getCoordinate().getY(),
                     o2.getWorldCoordinate().getCoordinate().getY())) {
@@ -497,25 +507,34 @@ public class BlockUtil {
                 coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
     }
 
-    public static Block convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
-                                                     WorldCoordinate worldCoordinate) {
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, userCode, String.valueOf(eventCode),
-                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                convertEventCode2Layer(eventCode)));
-        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
-        BlockUtil.fixWorldCoordinate(regionInfo, block.getWorldCoordinate());
-        return block;
+    public static WorldCoordinate locateBuildingCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate,
+                                                           BigDecimal direction, BigDecimal distance) {
+        WorldCoordinate rst = new WorldCoordinate(worldCoordinate);
+        rst.setCoordinate(locateBuildingCoordinate(rst.getCoordinate(), direction, distance));
+        BlockUtil.fixWorldCoordinate(regionInfo, rst);
+        return rst;
     }
 
-//    public static Block convertEvent2Block(Block event, WorldCoordinate worldCoordinate) {
-//        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, null,
-//                event.getEventInfo().getEventCode() + "-" + event.getEventInfo().getFrame(),
-//                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, convertEventCode2Layer(event.getEventInfo().getEventCode())));
+    public static Coordinate locateBuildingCoordinate(Coordinate coordinate, BigDecimal direction, BigDecimal distance) {
+        double angle = direction.doubleValue() / 180 * Math.PI;
+        return new Coordinate(
+                coordinate.getX().add(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(Math.cos(angle)))
+                        .round(new MathContext(0, RoundingMode.FLOOR)),
+                coordinate.getY().add(BigDecimal.valueOf(0.5)).subtract(BigDecimal.valueOf(Math.sin(angle)))
+                        .round(new MathContext(0, RoundingMode.FLOOR)).subtract(BigDecimal.valueOf(0.5)));
+    }
+
+//    public static Block convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
+//                                                     WorldCoordinate worldCoordinate) {
+//        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, userCode, String.valueOf(eventCode),
+//                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+//                convertEventCode2Layer(eventCode)));
 //        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
+//        BlockUtil.fixWorldCoordinate(regionInfo, block.getWorldCoordinate());
 //        return block;
 //    }
 
-    private static int convertEventCode2Layer(int eventCode) {
+    public static int convertEventCode2Layer(int eventCode) {
         int layer;
         switch (eventCode) {
             case GamePalConstants.EVENT_CODE_EXPLODE:
@@ -536,44 +555,44 @@ public class BlockUtil {
         return layer;
     }
 
-    public static Block createWorldEvent(String userCode, int eventCode, WorldCoordinate worldCoordinate) {
-        EventInfo eventInfo = new EventInfo();
-        eventInfo.setEventId(userCode);
-        eventInfo.setEventCode(eventCode);
-        eventInfo.setFrame(0);
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MINE:
-                // Infinite
-                eventInfo.setFrameMax(-1);
-                break;
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                eventInfo.setFrameMax(50);
-                break;
-            case GamePalConstants.EVENT_CODE_FIRE:
-                eventInfo.setFrameMax(250);
-                break;
-            default:
-                eventInfo.setFrameMax(25);
-                break;
-        }
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                eventInfo.setPeriod(50);
-                break;
-            default:
-                eventInfo.setPeriod(25);
-                break;
-        }
-        return new Block(worldCoordinate, new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, "", "",
-                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE)),
-                new MovementInfo(), new PlayerInfo(), eventInfo);
-    }
+//    public static Block createWorldEvent(String userCode, int eventCode, WorldCoordinate worldCoordinate) {
+//        EventInfo eventInfo = new EventInfo();
+//        eventInfo.setEventId(userCode);
+//        eventInfo.setEventCode(eventCode);
+//        eventInfo.setFrame(0);
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_MINE:
+//                // Infinite
+//                eventInfo.setFrameMax(-1);
+//                break;
+//            case GamePalConstants.EVENT_CODE_HEAL:
+//            case GamePalConstants.EVENT_CODE_DISTURB:
+//            case GamePalConstants.EVENT_CODE_CHEER:
+//            case GamePalConstants.EVENT_CODE_CURSE:
+//                eventInfo.setFrameMax(50);
+//                break;
+//            case GamePalConstants.EVENT_CODE_FIRE:
+//                eventInfo.setFrameMax(250);
+//                break;
+//            default:
+//                eventInfo.setFrameMax(25);
+//                break;
+//        }
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_HEAL:
+//            case GamePalConstants.EVENT_CODE_DISTURB:
+//            case GamePalConstants.EVENT_CODE_CHEER:
+//            case GamePalConstants.EVENT_CODE_CURSE:
+//                eventInfo.setPeriod(50);
+//                break;
+//            default:
+//                eventInfo.setPeriod(25);
+//                break;
+//        }
+//        return new Block(worldCoordinate, new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, "", "",
+//                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE)),
+//                new MovementInfo(), new PlayerInfo(), eventInfo);
+//    }
 
     public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {
         BigDecimal visionRadius = CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS;
@@ -611,16 +630,20 @@ public class BlockUtil {
                 || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, playerInfo1.getWorldCoordinate());
-        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        BigDecimal distance = BlockUtil.calculateDistance(coordinate1, coordinate2);
-        BigDecimal angle = BlockUtil.calculateAngle(coordinate1, coordinate2);
+//        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, playerInfo1.getWorldCoordinate());
+//        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
+        BigDecimal distance = BlockUtil.calculateDistance(regionInfo, playerInfo1.getWorldCoordinate(), block2.getWorldCoordinate());
+        BigDecimal angle = BlockUtil.calculateAngle(regionInfo, playerInfo1.getWorldCoordinate(), block2.getWorldCoordinate());
+        if (null == distance || null == angle) {
+            return false;
+        }
         if (distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctHearingRadius()) <= 0) {
             return true;
         }
         if (block2.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
             return distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctVisionRadius()) <= 0
-                    && angle.subtract(playerInfo1.getMovementInfo().getFaceDirection()).abs().doubleValue() % 360D
+                    && BlockUtil.compareAnglesInDegrees(angle.doubleValue(),
+                    playerInfo1.getMovementInfo().getFaceDirection().doubleValue())
                     < playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctVisionAngle().doubleValue() / 2;
         } else {
             return distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getIndistinctVisionRadius()) <= 0;
@@ -652,5 +675,23 @@ public class BlockUtil {
                 break;
         }
         movementInfo.setMaxSpeed(maxSpeed);
+    }
+
+    public static boolean checkMaterialCollision(int structureMaterial1, int structureMaterial2) {
+        switch (structureMaterial1) {
+            case BlockConstants.STRUCTURE_MATERIAL_FLESH:
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_FLESH;
+            case BlockConstants.STRUCTURE_MATERIAL_MAGNUM:
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
+            case BlockConstants.STRUCTURE_MATERIAL_PLASMA:
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID;
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID:
+                return structureMaterial2 != BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
+            case BlockConstants.STRUCTURE_MATERIAL_HOLLOW:
+            default:
+                return false;
+        }
     }
 }

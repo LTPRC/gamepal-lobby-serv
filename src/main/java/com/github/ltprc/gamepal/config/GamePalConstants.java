@@ -2,7 +2,7 @@ package com.github.ltprc.gamepal.config;
 
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 
 import java.math.BigDecimal;
 
@@ -62,11 +62,13 @@ public class GamePalConstants {
     public static final int EVENT_CODE_SHOOT_MAGNUM = 124;
     public static final int EVENT_CODE_SHOOT_ROCKET = 121;
     public static final int EVENT_CODE_SHOOT_FIRE = 128;
+    public static final int EVENT_CODE_SHOOT_WATER = 129;
     public static final int EVENT_CODE_SPARK = 125;
     public static final int EVENT_CODE_NOISE = 126;
     public static final int EVENT_CODE_MINE = 127;
     public static final int EVENT_CODE_FIRE = 106;
-    public static final int EVENT_CODE_WATER = 129;
+    public static final int EVENT_CODE_WATER = 130;
+    public static final int EVENT_CODE_BUILDING = 131;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;

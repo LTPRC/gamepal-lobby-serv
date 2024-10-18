@@ -15,7 +15,7 @@ import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -285,7 +285,7 @@ public class NpcManagerImpl implements NpcManager {
                 // Filtered NPCs not detected by human players 24/08/01
                 .filter(entry2 -> world.getCreatureMap().entrySet().stream()
                         .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == entry3.getValue().getPlayerInfo().getPlayerType())
-                        .anyMatch(entry3 -> SkillUtil.isBlockDetected(entry3.getValue(),
+                        .anyMatch(entry3 -> SkillUtil.isSceneDetected(entry3.getValue(),
                                 world.getCreatureMap().get(entry3.getKey()).getWorldCoordinate(), 1)))
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
                 .forEach(entry2 -> {

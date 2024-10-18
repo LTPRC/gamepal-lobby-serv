@@ -1,7 +1,5 @@
-package com.github.ltprc.gamepal.model.map.world;
+package com.github.ltprc.gamepal.model.map;
 
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import lombok.Data;
 
 import java.math.BigDecimal;

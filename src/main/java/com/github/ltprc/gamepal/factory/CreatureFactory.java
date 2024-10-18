@@ -11,7 +11,7 @@ import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.NameUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;

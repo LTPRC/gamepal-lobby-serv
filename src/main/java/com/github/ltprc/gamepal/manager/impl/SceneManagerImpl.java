@@ -17,7 +17,7 @@ import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
@@ -1180,9 +1180,9 @@ public class SceneManagerImpl implements SceneManager {
                     scene.getBlocks().forEach(block -> {
                         if (BlockUtil.checkPerceptionCondition(region, player, block)) {
                             Block newBlock = new Block(block);
-                            BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
-                                    BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
-                                            newSceneCoordinate), region.getHeight(), region.getWidth());
+//                            BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+//                                    BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
+//                                            newSceneCoordinate), region.getHeight(), region.getWidth());
                             rankingQueue.add(newBlock);
                         }
                     });
@@ -1191,10 +1191,11 @@ public class SceneManagerImpl implements SceneManager {
                 if (!CollectionUtils.isEmpty(scene.getEvents())) {
                     new ArrayList<>(scene.getEvents()).forEach(event -> {
                         if (BlockUtil.checkPerceptionCondition(region, player, event)) {
-                            BlockUtil.adjustCoordinate(event.getWorldCoordinate().getCoordinate(),
-                                    BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
-                                            newSceneCoordinate), region.getHeight(), region.getWidth());
-                            rankingQueue.add(event);
+                            Block newBlock = new Block(event);
+//                            BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+//                                    BlockUtil.getCoordinateRelation(event.getWorldCoordinate().getSceneCoordinate(),
+//                                            newSceneCoordinate), region.getHeight(), region.getWidth());
+                            rankingQueue.add(newBlock);
                         }
                     });
                 }
@@ -1212,14 +1213,14 @@ public class SceneManagerImpl implements SceneManager {
         creatureMap.values().stream()
                 // playerInfos contains running players or NPC 24/03/25
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
-                .filter(player1 -> SkillUtil.isBlockDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
+                .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
                 .forEach(player1 -> {
                     Block newBlock = new Block(player1);
                     if (BlockUtil.checkPerceptionCondition(region, player, newBlock)) {
-                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
-                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
-                                        player.getWorldCoordinate().getSceneCoordinate()),
-                                region.getHeight(), region.getWidth());
+//                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+//                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
+//                                        player.getWorldCoordinate().getSceneCoordinate()),
+//                                region.getHeight(), region.getWidth());
                         rankingQueue.add(newBlock);
                     }
                 });
@@ -1255,14 +1256,19 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public JSONObject convertBlock2OldBlockInstance(final GameWorld world, final Block block,
+    public JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
                                                     final boolean useWorldCoordinate) {
         JSONObject rst = new JSONObject();
         rst.putAll(JSON.parseObject(JSON.toJSONString(block.getBlockInfo())));
         if (useWorldCoordinate) {
             rst.putAll(JSON.parseObject(JSON.toJSONString(block.getWorldCoordinate())));
         } else {
-            rst.putAll(JSON.parseObject(JSON.toJSONString(block.getWorldCoordinate().getCoordinate())));
+            Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
+            Block from = world.getCreatureMap().get(userCode);
+            Coordinate coordinate = new Coordinate(block.getWorldCoordinate().getCoordinate());
+            BlockUtil.adjustCoordinate(coordinate, BlockUtil.getCoordinateRelation(from.getWorldCoordinate().getSceneCoordinate(),
+                    block.getWorldCoordinate().getSceneCoordinate()), region.getHeight(), region.getWidth());
+            rst.putAll(JSON.parseObject(JSON.toJSONString(coordinate)));
         }
         rst.putAll(JSON.parseObject(JSON.toJSONString(block.getMovementInfo())));
         switch (block.getBlockInfo().getType()) {

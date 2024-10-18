@@ -4,7 +4,7 @@ import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Recipe;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;
@@ -25,9 +25,9 @@ public interface WorldService {
 
     void loadRecipes();
 
-    ResponseEntity<String> addEvent(String userCode, Block event);
+//    ResponseEntity<String> addEvent(String userCode, Block event);
 
-    void updateEvents(GameWorld world);
+//    void updateEvents(GameWorld world);
 
     void expandByCoordinate(GameWorld world, WorldCoordinate fromWorldCoordinate, WorldCoordinate toWorldCoordinate,
                             int depth);

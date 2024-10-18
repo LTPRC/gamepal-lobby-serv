@@ -22,5 +22,6 @@ public interface SceneManager {
 
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
 
-    JSONObject convertBlock2OldBlockInstance(final GameWorld world, final Block block, final boolean useWorldCoordinate);
+    JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
+                                             final boolean useWorldCoordinate);
 }

@@ -8,7 +8,7 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -69,21 +71,31 @@ public class MovementManagerImpl implements MovementManager {
                 teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                 break;
             }
-            if (BlockConstants.STRUCTURE_MATERIAL_HOLLOW == block.getBlockInfo().getStructure().getMaterial()) {
-                continue;
-            }
+//            if (BlockConstants.STRUCTURE_MATERIAL_HOLLOW == block.getBlockInfo().getStructure().getMaterial()) {
+//                continue;
+//            }
+//            if (BlockUtil.checkMaterialCollision(worldMovingBlock.getBlockInfo().getStructure().getMaterial(),
+//                    block.getBlockInfo().getStructure().getMaterial())) {
+//                continue;
+//            }
             newMovingBlock = new Block(worldMovingBlock);
             newMovingBlock.getWorldCoordinate().getCoordinate().setX(
                     worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
                             .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
-            if (!BlockUtil.detectCollision(region, worldMovingBlock, block) && BlockUtil.detectCollision(region, newMovingBlock, block)) {
+            if (!BlockUtil.detectCollision(region, worldMovingBlock, block)
+                    && BlockUtil.detectCollision(region, newMovingBlock, block)
+                    && BlockUtil.checkMaterialCollision(newMovingBlock.getBlockInfo().getStructure().getMaterial(),
+                    block.getBlockInfo().getStructure().getMaterial())) {
                 worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
             }
             newMovingBlock = new Block(worldMovingBlock);
             newMovingBlock.getWorldCoordinate().getCoordinate().setY(
                     worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
                             .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
-            if (!BlockUtil.detectCollision(region, worldMovingBlock, block) && BlockUtil.detectCollision(region, newMovingBlock, block)) {
+            if (!BlockUtil.detectCollision(region, worldMovingBlock, block)
+                    && BlockUtil.detectCollision(region, newMovingBlock, block)
+                    && BlockUtil.checkMaterialCollision(newMovingBlock.getBlockInfo().getStructure().getMaterial(),
+                    block.getBlockInfo().getStructure().getMaterial())) {
                 worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
             }
         }

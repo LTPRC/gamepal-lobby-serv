@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Map;

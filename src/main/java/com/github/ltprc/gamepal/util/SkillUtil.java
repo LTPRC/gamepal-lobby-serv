@@ -8,7 +8,7 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -409,13 +409,13 @@ public class SkillUtil {
         playerInfo.setSkills(skills);
     }
 
-    public static boolean isBlockDetected(final Block player, final WorldCoordinate worldCoordinate,
+    public static boolean isSceneDetected(final Block player, final WorldCoordinate worldCoordinate,
                                           final int sceneScanRadius) {
         return worldCoordinate.getRegionNo() == player.getWorldCoordinate().getRegionNo()
-                && isBlockDetected(player, worldCoordinate.getSceneCoordinate(), sceneScanRadius);
+                && isSceneDetected(player, worldCoordinate.getSceneCoordinate(), sceneScanRadius);
     }
 
-    public static boolean isBlockDetected(final Block player, final IntegerCoordinate sceneCoordinate,
+    public static boolean isSceneDetected(final Block player, final IntegerCoordinate sceneCoordinate,
                                           final int sceneScanRadius) {
         IntegerCoordinate integerCoordinate = BlockUtil.getCoordinateRelation(
                 player.getWorldCoordinate().getSceneCoordinate(), sceneCoordinate);

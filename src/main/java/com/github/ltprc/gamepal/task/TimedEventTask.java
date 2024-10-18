@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.task;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
+import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -39,6 +40,9 @@ public class TimedEventTask {
     @Autowired
     private BuffManager buffManager;
 
+    @Autowired
+    private EventManager eventManager;
+
     @Scheduled(fixedRate = 20)
     public void executeByHalfFrame() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
@@ -54,7 +58,7 @@ public class TimedEventTask {
             GameWorld world = entry.getValue();
 
             // Update events
-            worldService.updateEvents(world);
+            eventManager.updateEvents(world);
 
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
@@ -192,9 +196,8 @@ public class TimedEventTask {
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
-                            Block worldEvent = BlockUtil.createWorldEvent(userCode, GamePalConstants.EVENT_CODE_NOISE,
+                            eventManager.addEvent(world, GamePalConstants.EVENT_CODE_NOISE, userCode,
                                     player.getWorldCoordinate());
-                            world.getEventQueue().add(worldEvent);
                         }
                     });
         }

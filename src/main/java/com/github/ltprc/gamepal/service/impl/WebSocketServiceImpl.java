@@ -15,12 +15,11 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.world.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -313,12 +312,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .filter(player1 -> StringUtils.equals(userCode, player1.getBlockInfo().getId())
                         || (player1.getPlayerInfo()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
-                        sceneManager.convertBlock2OldBlockInstance(world, player1, true)));
+                        sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true)));
         creatureMap.values().stream()
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
-                .filter(player1 -> SkillUtil.isBlockDetected(player, player1.getWorldCoordinate(), 2))
+                .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), 2))
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
-                        sceneManager.convertBlock2OldBlockInstance(world, player1, true)));
+                        sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true)));
         rst.put("playerInfos", playerInfos);
 
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
@@ -363,7 +362,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Return SceneInfos
         JSONArray sceneInfos = new JSONArray();
         region.getScenes().values().stream()
-                .filter(scene -> SkillUtil.isBlockDetected(player, scene.getSceneCoordinate(), 2))
+                .filter(scene -> SkillUtil.isSceneDetected(player, scene.getSceneCoordinate(), 2))
                 .forEach(scene -> {
             SceneInfo sceneInfo = new SceneInfo(scene);
             sceneInfos.add(sceneInfo);
@@ -383,7 +382,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
-            blocks.add(sceneManager.convertBlock2OldBlockInstance(world, blockQueue.poll(), false));
+            blocks.add(sceneManager.convertBlock2OldBlockInstance(world, userCode, blockQueue.poll(), false));
         }
         rst.put("blocks", blocks);
 
@@ -393,7 +392,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (null != functions) {
             if (Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
                 functionsResponse.put("createPlayerInfoInstance", sceneManager.convertBlock2OldBlockInstance(world,
-                        CreatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN), true));
+                        userCode, CreatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN), true));
             }
             if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
                 JSONArray background = MiniMapManager.generateMiniMapBackground(region,

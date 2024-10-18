@@ -94,13 +94,16 @@ public class BlockConstants {
     public static final int STRUCTURE_LAYER_SKY = 50;
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 
-    public static final int STRUCTURE_MATERIAL_HOLLOW = 0;
-    public static final int STRUCTURE_MATERIAL_SOLID = 1;
-    public static final int STRUCTURE_MATERIAL_FLESH = 2;
+    public static final int STRUCTURE_MATERIAL_HOLLOW = 0; // Collide to none
+    public static final int STRUCTURE_MATERIAL_SOLID = 1; // Collide to 1, 2, 3, 4
+    public static final int STRUCTURE_MATERIAL_FLESH = 2; // Collide to 1, 2
+    public static final int STRUCTURE_MATERIAL_MAGNUM = 3; // Collide to 1, 3
+    public static final int STRUCTURE_MATERIAL_PLASMA = 4; // Collide to 1
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
+    public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.1);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
