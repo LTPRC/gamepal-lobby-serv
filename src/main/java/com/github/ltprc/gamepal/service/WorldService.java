@@ -3,7 +3,6 @@ package com.github.ltprc.gamepal.service;
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Recipe;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
 
@@ -37,6 +36,4 @@ public interface WorldService {
     void expandScene(GameWorld world, WorldCoordinate worldCoordinate, int depth);
 
     void updateWorldTime(GameWorld world, int increment);
-
-    ResponseEntity<String> putBlock(GameWorld world, Block block);
 }

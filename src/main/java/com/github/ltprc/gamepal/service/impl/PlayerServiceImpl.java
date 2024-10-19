@@ -1061,27 +1061,30 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
         Block player = creatureMap.get(userCode);
-        BlockInfo dropBlockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
-                "3000", new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
-                new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
-        WorldCoordinate dropWorldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
-        MovementInfo dropMovementInfo = new MovementInfo();
+        Block drop = sceneManager.addDropBlock(world, player.getWorldCoordinate(),
+                new AbstractMap.SimpleEntry<>(itemNo, amount));
+//        BlockInfo dropBlockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
+//                "3000", new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+//                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+//                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+//                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
+//                new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
+//        WorldCoordinate dropWorldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
+//        MovementInfo dropMovementInfo = new MovementInfo();
+        MovementInfo dropMovementInfo = drop.getMovementInfo();
         dropMovementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
         Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
                 dropMovementInfo.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
         dropMovementInfo.setSpeed(newSpeed);
-        Block drop = new Block(dropWorldCoordinate, dropBlockInfo, dropMovementInfo);
+//        Block drop = new Block(dropWorldCoordinate, dropBlockInfo, dropMovementInfo);
         movementManager.settleSpeedAndCoordinate(world, drop, 0);
         dropMovementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        Region region = world.getRegionMap().get(dropWorldCoordinate.getRegionNo());
-        Scene scene = region.getScenes().get(dropWorldCoordinate.getSceneCoordinate());
-        scene.getBlocks().add(drop);
-        world.getBlockMap().put(dropBlockInfo.getId(), drop);
-        world.getDropMap().put(dropBlockInfo.getId(), new AbstractMap.SimpleEntry<>(itemNo, amount));
+//        Region region = world.getRegionMap().get(dropWorldCoordinate.getRegionNo());
+//        Scene scene = region.getScenes().get(dropWorldCoordinate.getSceneCoordinate());
+//        scene.getBlocks().add(drop);
+//        world.getBlockMap().put(dropBlockInfo.getId(), drop);
+//        world.getDropMap().put(dropBlockInfo.getId(), new AbstractMap.SimpleEntry<>(itemNo, amount));
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1197,30 +1200,33 @@ public class PlayerServiceImpl implements PlayerService {
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
         String id = UUID.randomUUID().toString();
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, id, "3101",
-                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
-                        new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
-        WorldCoordinate worldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
-        MovementInfo movementInfo = new MovementInfo(player.getMovementInfo());
+        Block remainContainer = sceneManager.addOtherBlock(world, BlockConstants.BLOCK_TYPE_CONTAINER, "3101", player.getWorldCoordinate());
+//        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, id, "3101",
+//                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE,
+//                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+//                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+//                                new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
+//                        new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
+//        WorldCoordinate worldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
+//        MovementInfo movementInfo = new MovementInfo(player.getMovementInfo());
+        WorldCoordinate worldCoordinate = remainContainer.getWorldCoordinate();
+        MovementInfo movementInfo = remainContainer.getMovementInfo();
         movementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
         Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(worldCoordinate.getCoordinate(),
                 movementInfo.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
         movementInfo.getSpeed().setX(newSpeed.getX().subtract(worldCoordinate.getCoordinate().getX()));
         movementInfo.getSpeed().setY(newSpeed.getY().subtract(worldCoordinate.getCoordinate().getY()));
-        Block remainContainer = new Block(worldCoordinate, blockInfo, movementInfo);
+//        Block remainContainer = new Block(worldCoordinate, blockInfo, movementInfo);
         movementManager.settleSpeedAndCoordinate(world, remainContainer, 0);
         movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
-        scene.getBlocks().add(remainContainer);
-        world.getBlockMap().put(id, remainContainer);
-        BagInfo newBagInfo = new BagInfo();
-        newBagInfo.setId(id);
-        world.getBagInfoMap().put(id, newBagInfo);
-        userService.addUserIntoWorldMap(id, world.getId());
+//        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+//        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+//        scene.getBlocks().add(remainContainer);
+//        world.getBlockMap().put(id, remainContainer);
+//        BagInfo newBagInfo = new BagInfo();
+//        newBagInfo.setId(id);
+//        world.getBagInfoMap().put(id, newBagInfo);
+//        userService.addUserIntoWorldMap(id, world.getId());
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());

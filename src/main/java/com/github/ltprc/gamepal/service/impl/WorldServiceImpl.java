@@ -152,6 +152,7 @@ public class WorldServiceImpl implements WorldService {
             int width = region.getInteger("width");
             Region newRegion = new Region();
             newRegion.setRegionNo(regionNo);
+            world.getRegionMap().put(regionNo, newRegion);
             newRegion.setType(regionType);
             newRegion.setName(regionName);
             newRegion.setHeight(height);
@@ -166,6 +167,7 @@ public class WorldServiceImpl implements WorldService {
                 int x = scene.getInteger("x");
                 newScene.setName(name);
                 newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
+                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
                 newScene.setBlocks(new CopyOnWriteArrayList<>());
                 newScene.setEvents(new CopyOnWriteArrayList<>());
                 newScene.setGird(new int[newRegion.getWidth() + 1][newRegion.getHeight() + 1]);
@@ -181,34 +183,35 @@ public class WorldServiceImpl implements WorldService {
                         JSONArray blockRow = map.getJSONArray(i);
                         for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                             Integer value = blockRow.getInteger(j);
-                            int blockType = BlockConstants.BLOCK_TYPE_NORMAL;
-                            Structure structure;
-                            switch (value / 10000) {
-                                case 2:
-                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                                            BlockConstants.STRUCTURE_LAYER_MIDDLE);
-                                    break;
-                                case 3:
-                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            BlockConstants.STRUCTURE_LAYER_TOP);
-                                    break;
-                                case 1:
-                                default:
-                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                                            BlockConstants.STRUCTURE_LAYER_BOTTOM);
-                                    break;
-                            }
+//                            int blockType = BlockConstants.BLOCK_TYPE_NORMAL;
+//                            Structure structure;
+//                            switch (value / 10000) {
+//                                case 2:
+//                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+//                                            BlockConstants.STRUCTURE_LAYER_MIDDLE);
+//                                    break;
+//                                case 3:
+//                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+//                                            BlockConstants.STRUCTURE_LAYER_TOP);
+//                                    break;
+//                                case 1:
+//                                default:
+//                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+//                                            BlockConstants.STRUCTURE_LAYER_BOTTOM);
+//                                    break;
+//                            }
                             WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                     newScene.getSceneCoordinate(),
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
-                            String id = UUID.randomUUID().toString();
-                            BlockInfo blockInfo = new BlockInfo(blockType, id, String.valueOf(value % 10000), structure);
-                            MovementInfo movementInfo = new MovementInfo();
-                            Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-                            newScene.getBlocks().add(block);
-                            if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
-                                world.getBlockMap().put(id, block);
-                            }
+                            Block block = sceneManager.addLoadedBlock(world, String.valueOf(value % 10000), value / 10000, worldCoordinate);
+//                            String id = UUID.randomUUID().toString();
+//                            BlockInfo blockInfo = new BlockInfo(blockType, id, String.valueOf(value % 10000), structure);
+//                            MovementInfo movementInfo = new MovementInfo();
+//                            Block block = new Block(worldCoordinate, blockInfo, movementInfo);
+//                            newScene.getBlocks().add(block);
+//                            if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
+//                                world.getBlockMap().put(id, block);
+//                            }
                         }
                     }
                 }
@@ -222,46 +225,52 @@ public class WorldServiceImpl implements WorldService {
                                 newScene.getSceneCoordinate(),
                                 new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
                                         BigDecimal.valueOf(blockRow.getInteger(3))));
-                        String id = UUID.randomUUID().toString();
-                        BlockInfo blockInfo = new BlockInfo(type, id, String.valueOf(blockRow.getInteger(1)),
-                                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
-                        MovementInfo movementInfo = new MovementInfo();
-                        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-                        newScene.getBlocks().add(block);
-                        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
-                            world.getBlockMap().put(id, block);
-                        }
+//                        String id = UUID.randomUUID().toString();
+//                        BlockInfo blockInfo = new BlockInfo(type, id, String.valueOf(blockRow.getInteger(1)),
+//                                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+//                                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
+//                        MovementInfo movementInfo = new MovementInfo();
+//                        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
+//                        newScene.getBlocks().add(block);
+//                        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
+//                            world.getBlockMap().put(id, block);
+//                        }
+                        Block block;
                         switch (type) {
                             case BlockConstants.BLOCK_TYPE_DROP:
-                                block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_HOLLOW);
-                                block.getBlockInfo().getStructure().setLayer(BlockConstants.STRUCTURE_LAYER_MIDDLE);
-                                world.getDropMap().put(block.getBlockInfo().getId(),
-                                        new AbstractMap.SimpleEntry<>(blockRow.getString(4), blockRow.getInteger(5)));
+//                                block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_HOLLOW);
+//                                block.getBlockInfo().getStructure().setLayer(BlockConstants.STRUCTURE_LAYER_MIDDLE);
+//                                world.getDropMap().put(block.getBlockInfo().getId(),
+//                                        new AbstractMap.SimpleEntry<>(blockRow.getString(4), blockRow.getInteger(5)));
+                                block = sceneManager.addDropBlock(world, worldCoordinate, new AbstractMap.SimpleEntry<>(blockRow.getString(4), blockRow.getInteger(5)));
                                 break;
                             case BlockConstants.BLOCK_TYPE_TELEPORT:
-                                block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_HOLLOW);
-                                block.getBlockInfo().getStructure().setLayer(BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
-                                WorldCoordinate to = new WorldCoordinate(blockRow.getInteger(4),
+//                                block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_HOLLOW);
+//                                block.getBlockInfo().getStructure().setLayer(BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
+//                                WorldCoordinate to = new WorldCoordinate(blockRow.getInteger(4),
+//                                        new IntegerCoordinate(blockRow.getInteger(5),
+//                                                blockRow.getInteger(6)),
+//                                        new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
+//                                                BigDecimal.valueOf(blockRow.getInteger(8))));
+//                                world.getTeleportMap().put(block.getBlockInfo().getId(), to);
+                                block = sceneManager.addTeleportBlock(world, String.valueOf(blockRow.getInteger(1)), worldCoordinate, new WorldCoordinate(blockRow.getInteger(4),
                                         new IntegerCoordinate(blockRow.getInteger(5),
                                                 blockRow.getInteger(6)),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
-                                                BigDecimal.valueOf(blockRow.getInteger(8))));
-                                world.getTeleportMap().put(block.getBlockInfo().getId(), to);
+                                                BigDecimal.valueOf(blockRow.getInteger(8)))));
                                 break;
-                            case BlockConstants.BLOCK_TYPE_CONTAINER:
-                                BagInfo bagInfo = new BagInfo();
-                                bagInfo.setId(block.getBlockInfo().getId());
-                                world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
-                                break;
+//                            case BlockConstants.BLOCK_TYPE_CONTAINER:
+//                                BagInfo bagInfo = new BagInfo();
+//                                bagInfo.setId(block.getBlockInfo().getId());
+//                                world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
+//                                break;
                             default:
+                                block = sceneManager.addOtherBlock(world, type, String.valueOf(blockRow.getInteger(1)), worldCoordinate);
                                 break;
                         }
                     }
                 }
-                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
             }
-            world.getRegionMap().put(regionNo, newRegion);
         }
     }
 
@@ -799,14 +808,5 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void updateWorldTime(GameWorld world, int increment) {
         world.setWorldTime((world.getWorldTime() + increment) % GamePalConstants.MAX_WORLD_TIME);
-    }
-
-    @Override
-    public ResponseEntity<String> putBlock(GameWorld world, Block worldBlock) {
-        expandByCoordinate(world, null, worldBlock.getWorldCoordinate(), 0);
-        Region region = world.getRegionMap().get(worldBlock.getWorldCoordinate().getRegionNo());
-        Scene scene = region.getScenes().get(worldBlock.getWorldCoordinate().getSceneCoordinate());
-        // TODO
-        return null;
     }
 }

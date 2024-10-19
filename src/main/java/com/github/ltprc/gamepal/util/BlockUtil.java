@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.*;
 
@@ -693,5 +694,218 @@ public class BlockUtil {
             default:
                 return false;
         }
+    }
+
+    public static BlockInfo generateSceneObjectBlockInfo(int blockCode) {
+        BlockInfo blockInfo = null;
+        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
+        switch (blockCode) {
+            case BlockConstants.PLANT_INDEX_BIG_PINE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_BIG_OAK:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_PINE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_OAK:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_WITHERED_TREE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_PALM:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape,
+                                new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
+                break;
+            case BlockConstants.PLANT_INDEX_RAFFLESIA:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_STUMP:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape));
+                break;
+            case BlockConstants.PLANT_INDEX_MOSSY_STUMP:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape));
+                break;
+            case BlockConstants.PLANT_INDEX_HOLLOW_TRUNK:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape));
+                break;
+            case BlockConstants.PLANT_INDEX_FLOWER_BUSH:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.PLANT_INDEX_BUSH:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_1:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_2:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_3:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_BIG_FLOWER_1:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_BIG_FLOWER_2:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_BIG_FLOWER_3:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-5",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_MUSHROOM_1:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_MUSHROOM_2:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_GRASS_1:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_GRASS_2:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_GRASS_3:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_GRASS_4:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-7",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                break;
+            case BlockConstants.PLANT_INDEX_CACTUS_1:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-8",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.PLANT_INDEX_CACTUS_2:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-8",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.PLANT_INDEX_CACTUS_3:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-8",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.ROCK_INDEX_1:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape));
+                break;
+            case BlockConstants.ROCK_INDEX_2:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                        BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM,
+                                roundShape));
+                break;
+            default:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null, "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+        }
+        return blockInfo;
     }
 }
