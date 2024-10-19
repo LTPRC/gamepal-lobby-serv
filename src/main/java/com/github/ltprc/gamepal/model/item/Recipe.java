@@ -11,6 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class Recipe {
     private String recipeNo;
+    private int type; // block type
     private Map<String, Integer> cost;
     private Map<String, Integer> value;
 }
