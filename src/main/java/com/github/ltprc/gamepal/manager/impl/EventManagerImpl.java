@@ -134,14 +134,6 @@ public class EventManagerImpl implements EventManager {
                                 BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
                                 BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate()).doubleValue()) < 135D)
 //                        .filter(blocker -> {
-//                            System.out.println("angle1:"+BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue());
-//                            System.out.println("angle2:"+fromCreature.getMovementInfo().getFaceDirection().doubleValue());
-//                            System.out.println("angleX:"+BlockUtil.compareAnglesInDegrees(
-//                                    BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
-//                                    fromCreature.getMovementInfo().getFaceDirection().doubleValue()));
-//                            System.out.println("angleY:"+(BlockUtil.compareAnglesInDegrees(
-//                                    BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
-//                                    fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D));
 //                            return BlockUtil.compareAnglesInDegrees(
 //                                BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
 //                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D;

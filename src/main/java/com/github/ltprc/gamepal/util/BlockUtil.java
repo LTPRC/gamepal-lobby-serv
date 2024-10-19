@@ -430,15 +430,15 @@ public class BlockUtil {
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape1.getShapeType()
                 && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
             return BlockUtil.calculateDistance(coordinate1, coordinate2).doubleValue()
-                    <= shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue();
+                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue();
         }
         // Rectangle vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
                 && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
             return Math.abs(coordinate1.getX().subtract(coordinate2.getX()).doubleValue())
-                    <= shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
+                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
                     && Math.abs(coordinate1.getY().subtract(coordinate2.getY()).doubleValue())
-                    <= shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
+                    < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
         }
         // Round vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
@@ -448,14 +448,14 @@ public class BlockUtil {
 //                || coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue())
 //                && (coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
 //                || coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue());
-        return ((coordinate1.getX().doubleValue() >= coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getX().doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-                && coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue())
-                || (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() >= coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getY().doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-                && coordinate1.getY().doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue()));
+        return ((coordinate1.getX().doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getX().doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+                && coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue())
+                || (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
+                && coordinate1.getY().doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+                && coordinate1.getY().doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue()));
 //                && (); // 4 apexes
     }
 
@@ -519,21 +519,11 @@ public class BlockUtil {
     public static Coordinate locateBuildingCoordinate(Coordinate coordinate, BigDecimal direction, BigDecimal distance) {
         double angle = direction.doubleValue() / 180 * Math.PI;
         return new Coordinate(
-                coordinate.getX().add(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(Math.cos(angle)))
-                        .round(new MathContext(0, RoundingMode.FLOOR)),
-                coordinate.getY().add(BigDecimal.valueOf(0.5)).subtract(BigDecimal.valueOf(Math.sin(angle)))
-                        .round(new MathContext(0, RoundingMode.FLOOR)).subtract(BigDecimal.valueOf(0.5)));
+                coordinate.getX().add(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(Math.cos(angle)).multiply(distance))
+                        .setScale(0, RoundingMode.FLOOR),
+                coordinate.getY().add(BigDecimal.valueOf(0.5)).subtract(BigDecimal.valueOf(Math.sin(angle)).multiply(distance))
+                        .setScale(0, RoundingMode.FLOOR));
     }
-
-//    public static Block convertEvent2WorldBlock(RegionInfo regionInfo, String userCode, int eventCode,
-//                                                     WorldCoordinate worldCoordinate) {
-//        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, userCode, String.valueOf(eventCode),
-//                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                convertEventCode2Layer(eventCode)));
-//        Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
-//        BlockUtil.fixWorldCoordinate(regionInfo, block.getWorldCoordinate());
-//        return block;
-//    }
 
     public static int convertEventCode2Layer(int eventCode) {
         int layer;
@@ -555,45 +545,6 @@ public class BlockUtil {
         }
         return layer;
     }
-
-//    public static Block createWorldEvent(String userCode, int eventCode, WorldCoordinate worldCoordinate) {
-//        EventInfo eventInfo = new EventInfo();
-//        eventInfo.setEventId(userCode);
-//        eventInfo.setEventCode(eventCode);
-//        eventInfo.setFrame(0);
-//        switch (eventCode) {
-//            case GamePalConstants.EVENT_CODE_MINE:
-//                // Infinite
-//                eventInfo.setFrameMax(-1);
-//                break;
-//            case GamePalConstants.EVENT_CODE_HEAL:
-//            case GamePalConstants.EVENT_CODE_DISTURB:
-//            case GamePalConstants.EVENT_CODE_CHEER:
-//            case GamePalConstants.EVENT_CODE_CURSE:
-//                eventInfo.setFrameMax(50);
-//                break;
-//            case GamePalConstants.EVENT_CODE_FIRE:
-//                eventInfo.setFrameMax(250);
-//                break;
-//            default:
-//                eventInfo.setFrameMax(25);
-//                break;
-//        }
-//        switch (eventCode) {
-//            case GamePalConstants.EVENT_CODE_HEAL:
-//            case GamePalConstants.EVENT_CODE_DISTURB:
-//            case GamePalConstants.EVENT_CODE_CHEER:
-//            case GamePalConstants.EVENT_CODE_CURSE:
-//                eventInfo.setPeriod(50);
-//                break;
-//            default:
-//                eventInfo.setPeriod(25);
-//                break;
-//        }
-//        return new Block(worldCoordinate, new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, "", "",
-//                new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE)),
-//                new MovementInfo(), new PlayerInfo(), eventInfo);
-//    }
 
     public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {
         BigDecimal visionRadius = CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS;

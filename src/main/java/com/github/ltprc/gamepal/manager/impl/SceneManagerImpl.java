@@ -1219,8 +1219,7 @@ public class SceneManagerImpl implements SceneManager {
         return block;
     }
 
-    @Override
-    public Block addBlock(GameWorld world, Block block) {
+    private Block addBlock(GameWorld world, Block block) {
         Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         Scene scene = region.getScenes().get(block.getWorldCoordinate().getSceneCoordinate());
         scene.getBlocks().add(block);
@@ -1228,5 +1227,16 @@ public class SceneManagerImpl implements SceneManager {
             world.getBlockMap().put(block.getBlockInfo().getId(), block);
         }
         return block;
+    }
+
+    @Override
+    public boolean checkBlockSpace(GameWorld world, Block block) {
+        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        return scene.getBlocks().stream()
+                .filter(blocker -> BlockUtil.detectCollision(region, block, blocker))
+                .noneMatch(blocker -> BlockUtil.checkMaterialCollision(block.getBlockInfo().getStructure().getMaterial(),
+                        blocker.getBlockInfo().getStructure().getMaterial()));
     }
 }

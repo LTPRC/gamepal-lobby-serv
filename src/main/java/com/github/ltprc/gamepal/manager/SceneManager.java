@@ -42,5 +42,5 @@ public interface SceneManager {
 
     Block addOtherBlock(final GameWorld world, final int type, final String code, final WorldCoordinate worldCoordinate);
 
-    Block addBlock(final GameWorld world, final Block block);
+    boolean checkBlockSpace(final GameWorld world, final Block block);
 }

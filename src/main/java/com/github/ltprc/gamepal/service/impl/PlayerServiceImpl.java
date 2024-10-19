@@ -12,7 +12,6 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
@@ -322,9 +321,11 @@ public class PlayerServiceImpl implements PlayerService {
             switch (itemNo.charAt(0)) {
                 case ItemConstants.ITEM_CHARACTER_TOOL:
                     creatureMap.get(userCode).getPlayerInfo().getTools().remove(itemNo);
+                    updateSkillsByTool(userCode);
                     break;
                 case ItemConstants.ITEM_CHARACTER_OUTFIT:
                     creatureMap.get(userCode).getPlayerInfo().getOutfits().remove(itemNo);
+                    updateSkillsByTool(userCode);
                     break;
                 default:
                     break;
@@ -762,10 +763,10 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfo.getSkills().get(skillNo).setFrame(-1);
                 } else if (playerInfo.getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
                     playerInfo.getSkills().get(skillNo).setFrame(playerInfo.getSkills().get(skillNo).getFrameMax());
-                    if (StringUtils.isNotBlank(ammoCode)) {
+                    boolean skillResult = generateEventBySkill(userCode, skillNo);
+                    if (skillResult && StringUtils.isNotBlank(ammoCode)) {
                         getItem(userCode, ammoCode, -1);
                     }
-                    generateEventBySkill(userCode, skillNo);
                 } else {
                     logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfo.getSkills().get(skillNo).getSkillMode());
                 }
@@ -775,10 +776,10 @@ public class PlayerServiceImpl implements PlayerService {
             if (playerInfo.getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_SEMI_AUTO) {
                 if (playerInfo.getSkills().get(skillNo).getFrame() == -1) {
                     playerInfo.getSkills().get(skillNo).setFrame(playerInfo.getSkills().get(skillNo).getFrameMax());
-                    if (StringUtils.isNotBlank(ammoCode)) {
+                    boolean skillResult = generateEventBySkill(userCode, skillNo);
+                    if (skillResult && StringUtils.isNotBlank(ammoCode)) {
                         getItem(userCode, ammoCode, -1);
                     }
-                    generateEventBySkill(userCode, skillNo);
                 }
             } else if (playerInfo.getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
                 // Nothing
@@ -790,11 +791,11 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    private void generateEventBySkill(String userCode, int skillNo) {
+    private boolean generateEventBySkill(String userCode, int skillNo) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
-            return;
+            return false;
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
         Block player = creatureMap.get(userCode);
@@ -910,15 +911,99 @@ public class PlayerServiceImpl implements PlayerService {
                 eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MINE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_BUILD:
-                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_BUILDING, userCode,
-                        BlockUtil.locateBuildingCoordinate(region, player.getWorldCoordinate(),
-                                direction, SkillConstants.SKILL_RANGE_BUILD));
+                WorldCoordinate buildingWorldCoordinate = BlockUtil.locateBuildingCoordinate(region,
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
+                BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                MovementInfo movementInfo = new MovementInfo();
+                Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
+                if (sceneManager.checkBlockSpace(world, fakeBuilding)) {
+                    int type;
+                    String code;
+                    if (player.getPlayerInfo().getTools().contains("t301")) {
+                        type = BlockConstants.BLOCK_TYPE_WORKSHOP;
+                        code = "4001";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t302")) {
+                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL;
+                        code = "4002";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t303")) {
+                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO;
+                        code = "4003";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t304")) {
+                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT;
+                        code = "4004";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t305")) {
+                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM;
+                        code = "4005";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t306")) {
+                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE;
+                        code = "4006";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t308")) {
+                        type = BlockConstants.BLOCK_TYPE_BED;
+                        code = "3006";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t309")) {
+                        type = BlockConstants.BLOCK_TYPE_TOILET;
+                        code = "3008";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t310")) {
+                        type = BlockConstants.BLOCK_TYPE_DRESSER;
+                        code = "3010";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t311")) {
+                        type = BlockConstants.BLOCK_TYPE_STORAGE;
+                        code = "3002";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t312")) {
+                        type = BlockConstants.BLOCK_TYPE_COOKER;
+                        code = "3004";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t313")) {
+                        type = BlockConstants.BLOCK_TYPE_SINK;
+                        code = "3005";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t314")) {
+                        type = BlockConstants.BLOCK_TYPE_CONTAINER;
+                        code = "3001";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    } else if (player.getPlayerInfo().getTools().contains("t315")) {
+                        type = BlockConstants.BLOCK_TYPE_RADIO;
+                        code = "1000";
+                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                    }
+                } else {
+                    return false;
+                }
                 break;
             default:
                 break;
         }
+        return true;
     }
 
     @Override
@@ -1019,7 +1104,6 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getTools().add(itemNo);
         }
-        SkillUtil.updateHumanSkills(playerInfo);
         updateSkillsByTool(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -1046,7 +1130,6 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getOutfits().add(itemNo);
         }
-        SkillUtil.updateHumanSkills(playerInfo);
         updateSkillsByTool(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -1432,6 +1515,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         PlayerInfo playerInfo = world.getCreatureMap().get(userCode).getPlayerInfo();
+        SkillUtil.updateHumanSkills(playerInfo);
         Tool tool = playerInfo.getTools().stream()
                 .filter(toolStr -> worldService.getItemMap().containsKey(toolStr))
                 .map(toolStr -> (Tool) worldService.getItemMap().get(toolStr))
