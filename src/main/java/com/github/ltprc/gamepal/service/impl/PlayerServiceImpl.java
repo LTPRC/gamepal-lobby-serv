@@ -1232,7 +1232,7 @@ public class PlayerServiceImpl implements PlayerService {
             }
         }
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
-            world.getOnlineMap().remove(userCode);
+//            world.getOnlineMap().remove(userCode);
             npcManager.resetNpcBrainQueues(userCode);
         }
         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_DISTURB, userCode, player.getWorldCoordinate());
@@ -1292,6 +1292,7 @@ public class PlayerServiceImpl implements PlayerService {
 //                        new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
 //        WorldCoordinate worldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
 //        MovementInfo movementInfo = new MovementInfo(player.getMovementInfo());
+        remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_MAGNUM); // Special container 24/10/20
         WorldCoordinate worldCoordinate = remainContainer.getWorldCoordinate();
         MovementInfo movementInfo = remainContainer.getMovementInfo();
         movementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));

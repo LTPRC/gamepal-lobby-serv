@@ -433,7 +433,7 @@ public class NpcManagerImpl implements NpcManager {
         }
         JSONObject moveReq = new JSONObject();
         moveReq.put("userCode", npcUserCode);
-        moveReq.put("wc", npcBrain.getRedQueue().peek());
+        moveReq.put("redBlock", npcBrain.getRedQueue().peek());
         moveReq.put("stopDistance", stopDistance);
         JSONObject moveResp = runNpcMoveTask(moveReq);
         for (int i = 0; i < npcPlayer.getPlayerInfo().getSkills().size(); i++) {
@@ -460,7 +460,8 @@ public class NpcManagerImpl implements NpcManager {
     private JSONObject runNpcMoveTask(JSONObject request) {
         JSONObject rst = ContentUtil.generateRst();
         String npcUserCode = request.getString("userCode");
-        WorldCoordinate wc = request.getObject("wc", WorldCoordinate.class);
+        Block redBlock = request.getObject("redBlock", Block.class);
+        WorldCoordinate wc = redBlock.getWorldCoordinate();
         if (null == wc) {
             return rst;
         }
