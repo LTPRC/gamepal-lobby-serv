@@ -91,8 +91,6 @@ public class GamePalConstants {
 
     // Backend constants
 
-    public static final long ONLINE_TIMEOUT_SECOND = 300L;
-
     public static final int REGION_RADIUS_DEFAULT = 50;
     public static final int SCENE_DEFAULT_WIDTH = 10;
     public static final int SCENE_DEFAULT_HEIGHT = 10;

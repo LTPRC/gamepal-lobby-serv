@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,7 +26,7 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, Map<String, Integer>> relationMap;
     private Map<String, Session> sessionMap; // userCode, session
     private Map<String, String> tokenMap; // userCode, token
-    private Map<String, Long> onlineMap; // userCode, timestamp
+    private Map<BlockInfo, Long> onlineMap; // blockInfo, timestamp
     private Map<Integer, Game> gameMap; // gameNo, game
     private Queue<Block> eventQueue; // event
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
@@ -36,7 +37,6 @@ public class GameWorld extends GameWorldInfo {
     // Special block info maps
     private Map<String, Block> blockMap; // code, non-creature block
     private Map<String, Block> creatureMap; // code, creature block
-//    private Map<String, PlayerInfo> playerInfoMap;
     private Map<String, BagInfo> bagInfoMap;
     private Map<String, BagInfo> preservedBagInfoMap;
     private Map<String, Map.Entry<String, Integer>> dropMap;

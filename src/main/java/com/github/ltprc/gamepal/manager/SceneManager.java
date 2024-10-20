@@ -5,6 +5,7 @@ import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 
 import java.util.Map;
@@ -32,7 +33,7 @@ public interface SceneManager {
 
     Block addSceneBlock(final GameWorld world, final int blockCode, final WorldCoordinate worldCoordinate);
 
-    Block addEventBlock(final GameWorld world, final int eventCode, final WorldCoordinate worldCoordinate);
+    Block addEventBlock(final GameWorld world, final EventInfo eventInfo, final WorldCoordinate worldCoordinate);
 
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);
@@ -43,4 +44,6 @@ public interface SceneManager {
     Block addOtherBlock(final GameWorld world, final int type, final String code, final WorldCoordinate worldCoordinate);
 
     boolean checkBlockSpace(final GameWorld world, final Block block);
+
+    void removeBlock(GameWorld world, Block block);
 }

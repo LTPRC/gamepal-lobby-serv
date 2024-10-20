@@ -1184,11 +1184,12 @@ public class PlayerServiceImpl implements PlayerService {
             Map.Entry<String, Integer> drop = world.getDropMap().get(dropId);
             getItem(userCode, drop.getKey(), drop.getValue());
             Block dropBlock = world.getBlockMap().get(dropId);
-            Region region = world.getRegionMap().get(dropBlock.getWorldCoordinate().getRegionNo());
-            Scene scene = region.getScenes().get(dropBlock.getWorldCoordinate().getSceneCoordinate());
-            scene.setBlocks(scene.getBlocks().stream()
-                    .filter(block -> !dropId.equals(block.getBlockInfo().getId())).collect(Collectors.toList()));
-            world.getBlockMap().remove(dropId);
+//            Region region = world.getRegionMap().get(dropBlock.getWorldCoordinate().getRegionNo());
+//            Scene scene = region.getScenes().get(dropBlock.getWorldCoordinate().getSceneCoordinate());
+//            scene.setBlocks(scene.getBlocks().stream()
+//                    .filter(block -> !dropId.equals(block.getBlockInfo().getId())).collect(Collectors.toList()));
+//            world.getBlockMap().remove(dropId);
+            sceneManager.removeBlock(world, dropBlock);
         }
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -1232,7 +1233,6 @@ public class PlayerServiceImpl implements PlayerService {
             }
         }
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
-//            world.getOnlineMap().remove(userCode);
             npcManager.resetNpcBrainQueues(userCode);
         }
         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_DISTURB, userCode, player.getWorldCoordinate());
@@ -1282,35 +1282,19 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = player.getPlayerInfo();
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        String id = UUID.randomUUID().toString();
         Block remainContainer = sceneManager.addOtherBlock(world, BlockConstants.BLOCK_TYPE_CONTAINER, "3101", player.getWorldCoordinate());
-//        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, id, "3101",
-//                new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE,
-//                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                                new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
-//                        new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
-//        WorldCoordinate worldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
-//        MovementInfo movementInfo = new MovementInfo(player.getMovementInfo());
+        String id = remainContainer.getBlockInfo().getId();
+        worldService.registerOnline(world, remainContainer.getBlockInfo());
         remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_MAGNUM); // Special container 24/10/20
-        WorldCoordinate worldCoordinate = remainContainer.getWorldCoordinate();
-        MovementInfo movementInfo = remainContainer.getMovementInfo();
-        movementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
-        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(worldCoordinate.getCoordinate(),
-                movementInfo.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
-        movementInfo.getSpeed().setX(newSpeed.getX().subtract(worldCoordinate.getCoordinate().getX()));
-        movementInfo.getSpeed().setY(newSpeed.getY().subtract(worldCoordinate.getCoordinate().getY()));
-//        Block remainContainer = new Block(worldCoordinate, blockInfo, movementInfo);
-        movementManager.settleSpeedAndCoordinate(world, remainContainer, 0);
-        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-//        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-//        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
-//        scene.getBlocks().add(remainContainer);
-//        world.getBlockMap().put(id, remainContainer);
-//        BagInfo newBagInfo = new BagInfo();
-//        newBagInfo.setId(id);
-//        world.getBagInfoMap().put(id, newBagInfo);
-//        userService.addUserIntoWorldMap(id, world.getId());
+//        WorldCoordinate worldCoordinate = remainContainer.getWorldCoordinate();
+//        MovementInfo movementInfo = remainContainer.getMovementInfo();
+//        movementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
+//        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(worldCoordinate.getCoordinate(),
+//                movementInfo.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
+//        movementInfo.getSpeed().setX(newSpeed.getX().subtract(worldCoordinate.getCoordinate().getX()));
+//        movementInfo.getSpeed().setY(newSpeed.getY().subtract(worldCoordinate.getCoordinate().getY()));
+//        movementManager.settleSpeedAndCoordinate(world, remainContainer, 0);
+//        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());
@@ -1544,6 +1528,6 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = block.getPlayerInfo();
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0
-                && world.getOnlineMap().containsKey(id);
+                && world.getOnlineMap().containsKey(block.getBlockInfo());
     }
 }

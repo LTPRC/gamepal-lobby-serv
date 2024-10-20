@@ -80,7 +80,7 @@ public class NpcManagerImpl implements NpcManager {
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), player.getWorldCoordinate());
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
                 player.getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
-        world.getOnlineMap().put(userCode, -1L);
+        worldService.registerOnline(world, player.getBlockInfo());
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         userService.addUserIntoWorldMap(userCode, world.getId());
         if (CreatureConstants.PLAYER_TYPE_HUMAN != player.getPlayerInfo().getPlayerType()) {

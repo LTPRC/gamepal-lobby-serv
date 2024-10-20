@@ -107,6 +107,7 @@ public class BlockConstants {
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
+    public static Map<Integer, Long> BLOCK_TYPE_TIMEOUT_MAP = new HashMap<>();
 
     static {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_NOTHING, new Color(0, 0, 0));
@@ -119,6 +120,10 @@ public class BlockConstants {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SUBTERRANEAN, new Color(128, 128, 128));
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_LAVA, new Color(96, 16, 16));
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER, new Color(64, 192, 255));
+
+        BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_PLAYER, 300L);
+        BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_DROP, 60L);
+        BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_CONTAINER, 300L);
     }
 
     private BlockConstants() {

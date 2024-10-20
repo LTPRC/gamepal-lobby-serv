@@ -1,18 +1,22 @@
 package com.github.ltprc.gamepal.task;
 
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -43,6 +47,9 @@ public class TimedEventTask {
     @Autowired
     private EventManager eventManager;
 
+    @Autowired
+    private SceneManager sceneManager;
+
     @Scheduled(fixedRate = 20)
     public void executeByHalfFrame() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
@@ -60,117 +67,111 @@ public class TimedEventTask {
             // Update events
             eventManager.updateEvents(world);
 
-            Map<String, Long> onlineMap = world.getOnlineMap();
+            Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
 
             onlineMap.keySet().stream()
-                    .filter(creatureMap::containsKey)
-                    .filter(userCode -> creatureMap.get(userCode).getPlayerInfo().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(userCode -> {
-                        buffManager.updateBuffTime(world, userCode);
-                        buffManager.changeBuff(world, userCode);
+                    .filter(blockInfo -> blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER)
+                    .filter(blockInfo -> creatureMap.containsKey(blockInfo.getId()))
+                    .filter(blockInfo -> creatureMap.get(blockInfo.getId()).getPlayerInfo().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .forEach(blockInfo -> {
+                        buffManager.updateBuffTime(world, blockInfo.getId());
+                        buffManager.changeBuff(world, blockInfo.getId());
+
+                        if (playerService.validateActiveness(world, blockInfo.getId())) {
+                            MovementInfo movementInfo = creatureMap.get(blockInfo.getId()).getMovementInfo();
+                            PlayerInfo playerInfo = creatureMap.get(blockInfo.getId()).getPlayerInfo();
+                            double randomNumber;
+
+                            // Change hp
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] != 0) {
+                                playerService.changeHp(blockInfo.getId(), -1, false);
+                            }
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] != 0) {
+                                playerService.changeHp(blockInfo.getId(), 1, false);
+                            }
+
+                            // Change vp
+                            int newVp = 10;
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
+                                newVp -= 5;
+                            }
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
+                                newVp -= 5;
+                            }
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+                                if (movementInfo.getSpeed().getX().doubleValue() > 0
+                                        || movementInfo.getSpeed().getY().doubleValue() > 0) {
+                                    newVp -= 15;
+                                }
+                            } else {
+                                if (Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
+                                        + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
+                                        > Math.pow(movementInfo.getMaxSpeed().doubleValue() / 2, 2)) {
+                                    newVp -= 15;
+                                }
+                            }
+                            playerService.changeVp(blockInfo.getId(), newVp, false);
+
+                            // Change hunger
+                            randomNumber = Math.random();
+                            if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
+                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
+                                randomNumber *= 10;
+                            }
+                            if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
+                                playerService.changeHunger(blockInfo.getId(), -1, false);
+                                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
+                                    playerService.changeHp(blockInfo.getId(), -1, false);
+                                }
+                            }
+
+                            // Change thirst
+                            randomNumber = Math.random();
+                            if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
+                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
+                                randomNumber *= 10;
+                            }
+                            if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
+                                playerService.changeThirst(blockInfo.getId(), -1, false);
+                                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
+                                    playerService.changeHp(blockInfo.getId(), -1, false);
+                                }
+                            }
+
+                            // Change precision
+                            playerService.changePrecision(blockInfo.getId(), 50 - 100
+                                    * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
+                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
+                                    / movementInfo.getMaxSpeed().doubleValue()), false);
+
+                            // Change view radius
+                            BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
+                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
+                                playerInfo.getPerceptionInfo().setDistinctVisionRadius(
+                                        playerInfo.getPerceptionInfo().getDistinctVisionRadius()
+                                                .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
+                                playerInfo.getPerceptionInfo().setIndistinctVisionRadius(
+                                        playerInfo.getPerceptionInfo().getIndistinctVisionRadius()
+                                                .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
+                            }
+
+                            // Change skill remaining time
+                            for (int i = 0; i < playerInfo.getSkills().size(); i++) {
+                                if (null != playerInfo.getSkills().get(i) && playerInfo.getSkills().get(i).getFrame() > 0) {
+                                    playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrame() - 1);
+                                }
+                            }
+
+                            // Check level-up
+                            playerService.checkLevelUp(blockInfo.getId());
+
+                            // Check floorCode
+                            BlockUtil.calculateMaxSpeed(movementInfo);
+                        }
+
+                        buffManager.changeBuff(world, blockInfo.getId());
                     });
-
-            onlineMap.keySet().stream()
-                    .filter(userCode -> playerService.validateActiveness(world, userCode))
-                    .forEach(userCode -> {
-                        Block player = creatureMap.get(userCode);
-                        MovementInfo movementInfo = player.getMovementInfo();
-                        PlayerInfo playerInfo = player.getPlayerInfo();
-                        double randomNumber;
-
-                        // Change hp
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] != 0) {
-                            playerService.changeHp(userCode, -1, false);
-                        }
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] != 0) {
-                            playerService.changeHp(userCode, 1, false);
-                        }
-
-                        // Change vp
-                        int newVp = 10;
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
-                            newVp -= 5;
-                        }
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
-                            newVp -= 5;
-                        }
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
-                            if (movementInfo.getSpeed().getX().doubleValue() > 0
-                                    || movementInfo.getSpeed().getY().doubleValue() > 0) {
-                                newVp -= 15;
-                            }
-                        } else {
-                            if (Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
-                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
-                                    > Math.pow(movementInfo.getMaxSpeed().doubleValue() / 2, 2)) {
-                                newVp -= 15;
-                            }
-                        }
-                        playerService.changeVp(userCode, newVp, false);
-
-                        // Change hunger
-                        randomNumber = Math.random();
-                        if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
-                                || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
-                            randomNumber *= 10;
-                        }
-                        if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
-                            playerService.changeHunger(userCode, -1, false);
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
-                                playerService.changeHp(userCode, -1, false);
-                            }
-                        }
-
-                        // Change thirst
-                        randomNumber = Math.random();
-                        if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
-                                || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
-                            randomNumber *= 10;
-                        }
-                        if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
-                            playerService.changeThirst(userCode, -1, false);
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
-                                playerService.changeHp(userCode, -1, false);
-                            }
-                        }
-
-                        // Change precision
-                        playerService.changePrecision(userCode, 50 - 100
-                                * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
-                                + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
-                                / movementInfo.getMaxSpeed().doubleValue()), false);
-
-                        // Change view radius
-                        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
-                        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
-                            playerInfo.getPerceptionInfo().setDistinctVisionRadius(
-                                    playerInfo.getPerceptionInfo().getDistinctVisionRadius()
-                                            .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
-                            playerInfo.getPerceptionInfo().setIndistinctVisionRadius(
-                                    playerInfo.getPerceptionInfo().getIndistinctVisionRadius()
-                                            .divide(BigDecimal.TEN, RoundingMode.HALF_UP));
-                        }
-
-                        // Change skill remaining time
-                        for (int i = 0; i < playerInfo.getSkills().size(); i++) {
-                            if (null != playerInfo.getSkills().get(i) && playerInfo.getSkills().get(i).getFrame() > 0) {
-                                playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrame() - 1);
-                            }
-                        }
-
-                        // Check level-up
-                        playerService.checkLevelUp(userCode);
-
-                        // Check floorCode
-                        BlockUtil.calculateMaxSpeed(movementInfo);
-                    });
-
-            // Buff changing
-            onlineMap.keySet().stream()
-                    .filter(creatureMap::containsKey)
-                    .filter(userCode -> creatureMap.get(userCode).getPlayerInfo().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(userCode -> buffManager.changeBuff(world, userCode));
         }
     }
 
@@ -185,38 +186,33 @@ public class TimedEventTask {
     public void executeBy1s() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
-            Map<String, Long> onlineMap = world.getOnlineMap();
+            Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
             onlineMap.keySet().stream()
-                    .filter(userCode -> playerService.validateActiveness(world, userCode))
-                    .forEach(userCode -> {
-                        Block player = creatureMap.get(userCode);
-
+                    .filter(blockInfo -> playerService.validateActiveness(world, blockInfo.getId()))
+                    .forEach(blockInfo -> {
+                        Block player = creatureMap.get(blockInfo.getId());
                         // Add footstep
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
-                            eventManager.addEvent(world, GamePalConstants.EVENT_CODE_NOISE, userCode,
-                                    player.getWorldCoordinate());
+                            eventManager.addEvent(world, GamePalConstants.EVENT_CODE_NOISE,
+                                    blockInfo.getId(), player.getWorldCoordinate());
                         }
                     });
-        }
-    }
-
-    /**
-     * This method is used for checking idle user which is not under anyone's control.
-     * All worlds are to be checked. 23/08/28
-     */
-    @Scheduled(cron = "* */2 * * * ?")
-    public void executeBy120s() {
-        long timestamp = Instant.now().getEpochSecond();
-        for (Map.Entry<String, GameWorld> entry1 : worldService.getWorldMap().entrySet()) {
-            GameWorld world = entry1.getValue();
-            world.getOnlineMap().forEach((key, value) -> {
-                Block player = world.getCreatureMap().get(key);
-                if (player.getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN
-                        && timestamp - value > GamePalConstants.ONLINE_TIMEOUT_SECOND) {
-                    userService.logoff(key, "", false);
+            // Check timeout
+            long timestamp = Instant.now().getEpochSecond();
+            onlineMap.forEach((blockInfo, oldTimestamp) -> {
+                long timeThreshold = BlockConstants.BLOCK_TYPE_TIMEOUT_MAP.getOrDefault(blockInfo.getType(), 0L);
+                if (timestamp - oldTimestamp > timeThreshold) {
+                    if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                            && creatureMap.containsKey(blockInfo.getId())
+                            && creatureMap.get(blockInfo.getId()).getPlayerInfo().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+                        // NPC is exempted 24/10/20
+                        userService.logoff(blockInfo.getId(), "", false);
+                    } else if (world.getBlockMap().containsKey(blockInfo.getId())) {
+                        sceneManager.removeBlock(world, world.getBlockMap().get(blockInfo.getId()));
+                    }
                 }
             });
         }

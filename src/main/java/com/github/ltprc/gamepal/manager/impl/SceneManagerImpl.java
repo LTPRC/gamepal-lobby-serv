@@ -14,6 +14,7 @@ import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
@@ -21,6 +22,7 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -33,6 +35,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -48,6 +51,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private WorldService worldService;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -1103,7 +1109,7 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, code, structure);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        addBlock(world, block);
+        registerBlock(world, block);
         return block;
     }
 
@@ -1112,15 +1118,15 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = BlockUtil.generateSceneObjectBlockInfo(blockCode);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        addBlock(world, block);
+        registerBlock(world, block);
         return block;
     }
 
     @Override
-    public Block addEventBlock(GameWorld world, int eventCode, WorldCoordinate worldCoordinate) {
+    public Block addEventBlock(final GameWorld world, final EventInfo eventInfo, final WorldCoordinate worldCoordinate) {
         String id = UUID.randomUUID().toString();
         int structureMaterial;
-        switch (eventCode) {
+        switch (eventInfo.getEventCode()) {
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
@@ -1143,14 +1149,14 @@ public class SceneManagerImpl implements SceneManager {
                 structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
                 break;
         }
-        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
+        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventInfo.getEventCode()),
                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, id, "", structure);
         MovementInfo movementInfo = new MovementInfo();
-        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        addBlock(world, block);
+        Block block = new Block(worldCoordinate, blockInfo, movementInfo, null, eventInfo);
+//        registerBlock(world, block);
         return block;
     }
 
@@ -1162,9 +1168,10 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, id, "3000", structure);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        addBlock(world, block);
+        registerBlock(world, block);
         if (null != drop) {
             world.getDropMap().put(block.getBlockInfo().getId(), drop);
+            worldService.registerOnline(world, blockInfo);
         }
         return block;
     }
@@ -1181,7 +1188,7 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, id, code, structure);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        addBlock(world, block);
+        registerBlock(world, block);
         if (null != to) {
             world.getTeleportMap().put(block.getBlockInfo().getId(), to);
         }
@@ -1209,7 +1216,7 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = new BlockInfo(type, id, code, structure);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        addBlock(world, block);
+        registerBlock(world, block);
         if (type == BlockConstants.BLOCK_TYPE_CONTAINER) {
             BagInfo bagInfo = new BagInfo();
             bagInfo.setId(block.getBlockInfo().getId());
@@ -1219,11 +1226,12 @@ public class SceneManagerImpl implements SceneManager {
         return block;
     }
 
-    private Block addBlock(GameWorld world, Block block) {
+    private Block registerBlock(GameWorld world, Block block) {
         Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         Scene scene = region.getScenes().get(block.getWorldCoordinate().getSceneCoordinate());
         scene.getBlocks().add(block);
-        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
+        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
+                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
             world.getBlockMap().put(block.getBlockInfo().getId(), block);
         }
         return block;
@@ -1238,5 +1246,44 @@ public class SceneManagerImpl implements SceneManager {
                 .filter(blocker -> BlockUtil.detectCollision(region, block, blocker))
                 .noneMatch(blocker -> BlockUtil.checkMaterialCollision(block.getBlockInfo().getStructure().getMaterial(),
                         blocker.getBlockInfo().getStructure().getMaterial()));
+    }
+
+    @Override
+    public void removeBlock(GameWorld world, Block block) {
+        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        scene.setBlocks(scene.getBlocks().stream()
+                .filter(block1 -> !block.getBlockInfo().getId().equals(block1.getBlockInfo().getId()))
+                .collect(Collectors.toList()));
+        world.getBlockMap().remove(block.getBlockInfo().getId());
+//        Iterator<Block> iterator = scene.getBlocks().iterator();
+//        while (iterator.hasNext()) {
+//            Block currentBlock = iterator.next();
+//            if (currentBlock.getBlockInfo().getId().equals(block.getBlockInfo().getId())) {
+//                iterator.remove();
+//                break;
+//            }
+//        }
+        worldService.registerOffline(world, block.getBlockInfo());
+        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
+            world.getBlockMap().remove(block.getBlockInfo().getId());
+        }
+        switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                playerService.destroyPlayer(block.getBlockInfo().getId());
+                break;
+            case BlockConstants.BLOCK_TYPE_DROP:
+                world.getDropMap().remove(block.getBlockInfo().getId());
+                break;
+            case BlockConstants.BLOCK_TYPE_TELEPORT:
+                world.getTeleportMap().remove(block.getBlockInfo().getId());
+                break;
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+                world.getBagInfoMap().remove(block.getBlockInfo().getId());
+                break;
+            default:
+                break;
+        }
     }
 }

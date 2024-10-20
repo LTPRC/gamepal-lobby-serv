@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -34,6 +35,9 @@ public class EventManagerImpl implements EventManager {
 
     @Autowired
     private WorldService worldService;
+
+    @Autowired
+    private SceneManager sceneManager;
 
     @Override
     public EventInfo createEventInfo(final int eventCode, final String eventId) {
@@ -73,44 +77,44 @@ public class EventManagerImpl implements EventManager {
         return eventInfo;
     }
 
-    @Override
-    public Block createEventBlock(WorldCoordinate worldCoordinate, EventInfo eventInfo) {
-        int structureMaterial;
-        switch (eventInfo.getEventCode()) {
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
-                break;
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
-                break;
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
-                break;
-            default:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
-                break;
-        }
-        return new Block(worldCoordinate, new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, "", "",
-                new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventInfo.getEventCode()),
-                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)))),
-                new MovementInfo(), new PlayerInfo(), eventInfo);
-    }
+//    @Override
+//    public Block createEventBlock(WorldCoordinate worldCoordinate, EventInfo eventInfo) {
+//        int structureMaterial;
+//        switch (eventInfo.getEventCode()) {
+//            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+//            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+//            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+//            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+//            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+//            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
+//                break;
+//            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+//            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+//            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+//            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
+//                break;
+//            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+//            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
+//                break;
+//            default:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
+//                break;
+//        }
+//        return new Block(worldCoordinate, new BlockInfo(BlockConstants.BLOCK_TYPE_EVENT, "", "",
+//                new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventInfo.getEventCode()),
+//                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+//                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+//                                new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)))),
+//                new MovementInfo(), new PlayerInfo(), eventInfo);
+//    }
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String eventId, WorldCoordinate worldCoordinate) {
         EventInfo eventInfo = createEventInfo(eventCode, eventId);
-        Block eventBlock = createEventBlock(worldCoordinate, eventInfo);
+        Block eventBlock = sceneManager.addEventBlock(world, eventInfo, worldCoordinate);
         correctTarget(world, eventBlock);
         List<Block> affectedBlockList = collectAffectedBlocks(world, eventBlock);
         activateEvent(world, eventBlock, affectedBlockList);

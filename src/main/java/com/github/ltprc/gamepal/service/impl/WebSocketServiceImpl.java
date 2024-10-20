@@ -98,12 +98,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (null == world) {
             return;
         }
+        Block player = world.getCreatureMap().get(userCode);
         // Update onlineMap
-        world.getOnlineMap().put(userCode, Instant.now().getEpochSecond());
+        worldService.registerOnline(world, player.getBlockInfo());
 
         // Check functions
         JSONObject functions = null;
-        Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = player.getPlayerInfo();
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
