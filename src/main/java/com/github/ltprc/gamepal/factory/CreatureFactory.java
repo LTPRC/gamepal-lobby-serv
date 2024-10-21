@@ -96,6 +96,7 @@ public class CreatureFactory {
             SkillUtil.updateAnimalSkills(playerInfo);
             randomlyPersonalizeAnimalInfo(playerInfo, NameUtil.generateGender());
         }
+        playerInfo.setRespawnPoint(GamePalConstants.DEFAULT_BIRTHPLACE);
 
         Block player = new Block(worldCoordinate, blockInfo, movementInfo, playerInfo, null);
         return player;

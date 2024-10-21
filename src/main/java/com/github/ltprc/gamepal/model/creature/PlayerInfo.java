@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.model.creature;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -56,4 +57,5 @@ public class PlayerInfo {
     private Set<String> outfits = new ConcurrentSkipListSet<>();
     private String bossId;
     private String topBossId;
+    private WorldCoordinate respawnPoint;
 }

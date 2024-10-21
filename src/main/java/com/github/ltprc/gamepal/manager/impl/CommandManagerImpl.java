@@ -189,9 +189,9 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwczion":
                 playerService.generateNotificationMessage(userCode, "欢迎回家。");
-                worldService.expandByCoordinate(world, player.getWorldCoordinate(), GamePalConstants.DEFAULT_BIRTHPLACE, 1);
-                movementManager.settleCoordinate(world, player, GamePalConstants.DEFAULT_BIRTHPLACE);
+                worldService.expandByCoordinate(world, player.getWorldCoordinate(), player.getPlayerInfo().getRespawnPoint(), 1);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
+                movementManager.settleCoordinate(world, player, player.getPlayerInfo().getRespawnPoint());
                 break;
         }
         return ResponseEntity.ok().body(rst.toString());

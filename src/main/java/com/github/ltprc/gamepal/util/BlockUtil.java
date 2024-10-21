@@ -864,46 +864,46 @@ public class BlockUtil {
         BlockInfo blockInfo = null;
         switch (itemNo) {
             case "t301":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001", null);
                 break;
             case "t302":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002", null);
                 break;
             case "t303":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003", null);
                 break;
             case "t304":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004", null);
                 break;
             case "t305":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005", null);
                 break;
             case "t306":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006", null);
                 break;
             case "t308":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006", null);
                 break;
             case "t309":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008", null);
                 break;
             case "t310":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010", null);
                 break;
             case "t311":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002", null);
                 break;
             case "t312":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004", null);
                 break;
             case "t313":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005", null);
                 break;
             case "t314":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001", null);
                 break;
             case "t315":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_RADIO, "", "1000", new Structure());
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_RADIO, "", "1000", null);
                 break;
             default:
                 break;

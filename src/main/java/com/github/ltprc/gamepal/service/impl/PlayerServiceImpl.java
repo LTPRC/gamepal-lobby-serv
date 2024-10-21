@@ -720,6 +720,7 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case GamePalConstants.INTERACTION_SLEEP:
                 playerInfo.setVp(playerInfo.getVpMax());
+                playerInfo.setRespawnPoint(block.getWorldCoordinate());
                 generateNotificationMessage(userCode, "你打了一个盹。");
                 break;
             case GamePalConstants.INTERACTION_DRINK:
@@ -1204,6 +1205,11 @@ public class PlayerServiceImpl implements PlayerService {
         changeHunger(userCode, playerInfo.getHungerMax(), true);
         changeThirst(userCode, playerInfo.getThirstMax(), true);
         changePrecision(userCode, playerInfo.getThirstMax(), true);
+
+        worldService.expandByCoordinate(world, player.getWorldCoordinate(), player.getPlayerInfo().getRespawnPoint(), 1);
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
+        movementManager.settleCoordinate(world, player, player.getPlayerInfo().getRespawnPoint());
+
         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_SACRIFICE, userCode, player.getWorldCoordinate());
 
         buffManager.resetBuff(playerInfo);
