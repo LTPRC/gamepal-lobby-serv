@@ -37,6 +37,7 @@ public class GamePalConstants {
     public static final int INTERACTION_SET = 8;
     public static final int INTERACTION_SUCCUMB = 9;
     public static final int INTERACTION_EXPEL = 10;
+    public static final int INTERACTION_PACK = 11;
 
     public static final int EVENT_CODE_HIT_FIRE = 102;
     public static final int EVENT_CODE_HIT_ICE = 103;

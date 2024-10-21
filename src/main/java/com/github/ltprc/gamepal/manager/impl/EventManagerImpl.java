@@ -269,7 +269,8 @@ public class EventManagerImpl implements EventManager {
                             if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != 0) {
                                 damageValue /= 2;
                             }
-                            playerService.damageHp(player.getBlockInfo().getId(), eventBlock.getEventInfo().getEventId(), damageValue, false);
+                            playerService.damageHp(player.getBlockInfo().getId(), eventBlock.getEventInfo().getEventId(),
+                                    damageValue, false);
                             WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                                     world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
                                     player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
@@ -284,11 +285,11 @@ public class EventManagerImpl implements EventManager {
                 affectedBlockList.stream()
                         .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                         .forEach(player -> {
-                            playerService.damageHp(player.getBlockInfo().getId(), eventBlock.getEventInfo().getEventId(), changedHp, false);
+                            playerService.damageHp(player.getBlockInfo().getId(), eventBlock.getEventInfo().getEventId(),
+                                    changedHp, false);
                             WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                                     world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
-                                    player.getWorldCoordinate(),
-                                    BigDecimal.valueOf(random.nextDouble() * 360),
+                                    player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                                     BigDecimal.valueOf(random.nextDouble() / 2));
                             addEvent(world, GamePalConstants.EVENT_CODE_BLEED, eventBlock.getEventInfo().getEventId(), bleedWc);
                 });

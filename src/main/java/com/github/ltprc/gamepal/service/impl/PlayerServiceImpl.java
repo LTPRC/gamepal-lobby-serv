@@ -731,6 +731,12 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.INTERACTION_SET:
                 generateNotificationMessage(userCode, "你捯饬了起来。");
                 break;
+            case GamePalConstants.INTERACTION_PACK:
+                // 加一个blockCode和打包blockItemNo的映射
+                sceneManager.addDropBlock(world, block.getWorldCoordinate(),new AbstractMap.SimpleEntry<>(
+                        BlockUtil.convertBlockType2ItemNo(block.getBlockInfo().getType()), 1));
+                sceneManager.removeBlock(world, block);
+                break;
             default:
                 break;
         }
@@ -923,83 +929,18 @@ public class PlayerServiceImpl implements PlayerService {
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
                 if (sceneManager.checkBlockSpace(world, fakeBuilding)) {
-                    int type;
-                    String code;
-                    if (player.getPlayerInfo().getTools().contains("t301")) {
-                        type = BlockConstants.BLOCK_TYPE_WORKSHOP;
-                        code = "4001";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
+                    BlockInfo blockInfo1 = player.getPlayerInfo().getTools().stream()
+                            .filter(tool -> null != BlockUtil.convertItemNo2BlockInfo(tool))
+                            .map(BlockUtil::convertItemNo2BlockInfo)
+                            .findFirst()
+                            .orElseGet(null);
+                    if (null != blockInfo1) {
+                        sceneManager.addOtherBlock(world, blockInfo1.getType(), blockInfo1.getCode(), buildingWorldCoordinate);
                         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t302")) {
-                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL;
-                        code = "4002";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t303")) {
-                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO;
-                        code = "4003";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t304")) {
-                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT;
-                        code = "4004";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t305")) {
-                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM;
-                        code = "4005";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t306")) {
-                        type = BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE;
-                        code = "4006";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t308")) {
-                        type = BlockConstants.BLOCK_TYPE_BED;
-                        code = "3006";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t309")) {
-                        type = BlockConstants.BLOCK_TYPE_TOILET;
-                        code = "3008";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t310")) {
-                        type = BlockConstants.BLOCK_TYPE_DRESSER;
-                        code = "3010";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t311")) {
-                        type = BlockConstants.BLOCK_TYPE_STORAGE;
-                        code = "3002";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t312")) {
-                        type = BlockConstants.BLOCK_TYPE_COOKER;
-                        code = "3004";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t313")) {
-                        type = BlockConstants.BLOCK_TYPE_SINK;
-                        code = "3005";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t314")) {
-                        type = BlockConstants.BLOCK_TYPE_CONTAINER;
-                        code = "3001";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                    } else if (player.getPlayerInfo().getTools().contains("t315")) {
-                        type = BlockConstants.BLOCK_TYPE_RADIO;
-                        code = "1000";
-                        sceneManager.addOtherBlock(world, type, code, buildingWorldCoordinate);
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                        return true;
                     }
-                } else {
-                    return false;
                 }
-                break;
+                return false;
             default:
                 break;
         }

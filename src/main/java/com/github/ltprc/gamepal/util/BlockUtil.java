@@ -859,4 +859,106 @@ public class BlockUtil {
         }
         return blockInfo;
     }
+
+    public static BlockInfo convertItemNo2BlockInfo(String itemNo) {
+        BlockInfo blockInfo = null;
+        switch (itemNo) {
+            case "t301":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001", new Structure());
+                break;
+            case "t302":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002", new Structure());
+                break;
+            case "t303":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003", new Structure());
+                break;
+            case "t304":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004", new Structure());
+                break;
+            case "t305":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005", new Structure());
+                break;
+            case "t306":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006", new Structure());
+                break;
+            case "t308":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006", new Structure());
+                break;
+            case "t309":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008", new Structure());
+                break;
+            case "t310":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010", new Structure());
+                break;
+            case "t311":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002", new Structure());
+                break;
+            case "t312":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004", new Structure());
+                break;
+            case "t313":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005", new Structure());
+                break;
+            case "t314":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001", new Structure());
+                break;
+            case "t315":
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_RADIO, "", "1000", new Structure());
+                break;
+            default:
+                break;
+        }
+        return blockInfo;
+    }
+
+    public static String convertBlockType2ItemNo(int type) {
+        String itemNo = null;
+        switch (type) {
+            case BlockConstants.BLOCK_TYPE_BED:
+                itemNo = "t308";
+                break;
+            case BlockConstants.BLOCK_TYPE_TOILET:
+                itemNo = "t309";
+                break;
+            case BlockConstants.BLOCK_TYPE_DRESSER:
+                itemNo = "t310";
+                break;
+            case BlockConstants.BLOCK_TYPE_STORAGE:
+                itemNo = "t311";
+                break;
+            case BlockConstants.BLOCK_TYPE_COOKER:
+                itemNo = "t312";
+                break;
+            case BlockConstants.BLOCK_TYPE_SINK:
+                itemNo = "t313";
+                break;
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+                itemNo = "t314";
+                break;
+            case BlockConstants.BLOCK_TYPE_RADIO:
+                itemNo = "t308";
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+                itemNo = "t301";
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+                itemNo = "t302";
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+                itemNo = "t303";
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+                itemNo = "t304";
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+                itemNo = "t305";
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                itemNo = "t306";
+                break;
+            default:
+                break;
+        }
+        return itemNo;
+    }
 }
