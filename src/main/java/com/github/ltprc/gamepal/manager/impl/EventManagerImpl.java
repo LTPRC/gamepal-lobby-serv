@@ -174,7 +174,9 @@ public class EventManagerImpl implements EventManager {
                         && BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                rst = distance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
+                BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
+                        blocker.getWorldCoordinate());
+                rst = eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
                 break;
             default:
                 break;

@@ -168,10 +168,11 @@ public class MovementManagerImpl implements MovementManager {
             worldService.expandScene(world, worldMovingBlock.getWorldCoordinate(), 1);
             return;
         }
-        IntegerCoordinate gridCoordinate = new IntegerCoordinate(
-                worldMovingBlock.getWorldCoordinate().getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
-                worldMovingBlock.getWorldCoordinate().getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
-        int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+//        IntegerCoordinate gridCoordinate = new IntegerCoordinate(
+//                worldMovingBlock.getWorldCoordinate().getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
+//                worldMovingBlock.getWorldCoordinate().getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
+//        int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+        int floorCode = sceneManager.getGridBlockCode(world, worldMovingBlock.getWorldCoordinate());
         worldMovingBlock.getMovementInfo().setFloorCode(floorCode);
     }
 }

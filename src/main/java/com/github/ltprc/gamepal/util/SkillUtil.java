@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
@@ -469,6 +470,16 @@ public class SkillUtil {
                 return -3;
             default:
                 return 0;
+        }
+    }
+
+    public static boolean blockCode2Build(int code) {
+        switch (code) {
+//            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_WATER:
+                return false;
+            default:
+                return true;
         }
     }
 }

@@ -9,8 +9,6 @@ import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.NameUtil;
@@ -56,13 +54,7 @@ public class CreatureFactory {
         WorldCoordinate worldCoordinate = new WorldCoordinate();
         BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
 
-        BlockInfo blockInfo = new BlockInfo();
-        blockInfo.setType(BlockConstants.BLOCK_TYPE_PLAYER);
-        blockInfo.setStructure(new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
-                BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
+        BlockInfo blockInfo = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_PLAYER);
 
         MovementInfo movementInfo = new MovementInfo();
         movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));

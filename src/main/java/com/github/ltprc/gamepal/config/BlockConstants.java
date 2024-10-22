@@ -43,6 +43,8 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_SINK = 12;
     public static final int BLOCK_TYPE_CONTAINER = 13;
     public static final int BLOCK_TYPE_RADIO = 14;
+    public static final int BLOCK_TYPE_BUILDING = 15;
+    public static final int BLOCK_TYPE_TREE = 16;
     public static final int BLOCK_TYPE_WORKSHOP = 20;
     public static final int BLOCK_TYPE_WORKSHOP_TOOL = 21;
     public static final int BLOCK_TYPE_WORKSHOP_AMMO = 22;
@@ -108,6 +110,8 @@ public class BlockConstants {
 
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
     public static Map<Integer, Long> BLOCK_TYPE_TIMEOUT_MAP = new HashMap<>();
+    public static Map<Integer, String> BLOCK_TYPE_ITEM_NO_MAP = new HashMap<>();
+    public static Map<String, Integer> ITEM_NO_BLOCK_TYPE_MAP = new HashMap<>();
 
     static {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_NOTHING, new Color(0, 0, 0));
@@ -124,6 +128,33 @@ public class BlockConstants {
         BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_PLAYER, 300L);
         BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_DROP, 60L);
         BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_CONTAINER, 300L);
+
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_BED, "t308");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t308", BlockConstants.BLOCK_TYPE_BED);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_TOILET, "t309");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t309", BlockConstants.BLOCK_TYPE_TOILET);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_DRESSER, "t310");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t310", BlockConstants.BLOCK_TYPE_DRESSER);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_STORAGE, "t311");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t311", BlockConstants.BLOCK_TYPE_STORAGE);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_COOKER, "t312");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t312", BlockConstants.BLOCK_TYPE_COOKER);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_SINK, "t313");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t313", BlockConstants.BLOCK_TYPE_SINK);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_RADIO, "t314");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t314", BlockConstants.BLOCK_TYPE_RADIO);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP, "t301");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t301", BlockConstants.BLOCK_TYPE_WORKSHOP);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "t302");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t302", BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "t303");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t303", BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "t304");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t304", BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "t305");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t305", BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "t306");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t306", BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE);
     }
 
     private BlockConstants() {

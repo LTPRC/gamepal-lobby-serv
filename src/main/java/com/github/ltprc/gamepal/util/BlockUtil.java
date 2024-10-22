@@ -465,6 +465,8 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_EVENT:
             case BlockConstants.BLOCK_TYPE_DROP:
             case BlockConstants.BLOCK_TYPE_TELEPORT:
+            case BlockConstants.BLOCK_TYPE_BUILDING:
+            case BlockConstants.BLOCK_TYPE_TREE:
                 return false;
             default:
                 return true;
@@ -640,7 +642,10 @@ public class BlockUtil {
             case BlockConstants.STRUCTURE_MATERIAL_PLASMA:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID;
             case BlockConstants.STRUCTURE_MATERIAL_SOLID:
-                return structureMaterial2 != BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_MAGNUM
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_PLASMA;
             case BlockConstants.STRUCTURE_MATERIAL_HOLLOW:
             default:
                 return false;
@@ -649,12 +654,13 @@ public class BlockUtil {
 
     public static BlockInfo generateSceneObjectBlockInfo(int blockCode) {
         BlockInfo blockInfo = null;
+        String id = UUID.randomUUID().toString();
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
         switch (blockCode) {
             case BlockConstants.PLANT_INDEX_BIG_PINE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -662,7 +668,7 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_OAK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -670,7 +676,7 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -678,7 +684,7 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_PINE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -686,7 +692,7 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_OAK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -694,7 +700,7 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_WITHERED_TREE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -702,7 +708,7 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_PALM:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -710,255 +716,256 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2))));
                 break;
             case BlockConstants.PLANT_INDEX_RAFFLESIA:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_STUMP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
             case BlockConstants.PLANT_INDEX_MOSSY_STUMP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
             case BlockConstants.PLANT_INDEX_HOLLOW_TRUNK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
             case BlockConstants.PLANT_INDEX_FLOWER_BUSH:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_BUSH:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_SMALL_FLOWER_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_SMALL_FLOWER_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_SMALL_FLOWER_3:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_FLOWER_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_FLOWER_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_BIG_FLOWER_3:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-5",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_MUSHROOM_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_MUSHROOM_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_3:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_GRASS_4:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-7",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
             case BlockConstants.PLANT_INDEX_CACTUS_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-8",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_CACTUS_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-8",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.PLANT_INDEX_CACTUS_3:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-8",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.ROCK_INDEX_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
             case BlockConstants.ROCK_INDEX_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM,
                                 roundShape));
                 break;
             default:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, null, "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
         }
         return blockInfo;
     }
 
-    public static BlockInfo convertItemNo2BlockInfo(String itemNo) {
+    public static String convertBlockType2ItemNo(int type) {
+        return BlockConstants.BLOCK_TYPE_ITEM_NO_MAP.get(type);
+    }
+
+    public static Integer convertItemNo2BlockType(String itemNo) {
+        return BlockConstants.ITEM_NO_BLOCK_TYPE_MAP.get(itemNo);
+    }
+
+    public static BlockInfo generateBlockInfo(int type) {
         BlockInfo blockInfo = null;
-        switch (itemNo) {
-            case "t301":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001", null);
+        switch (type) {
+            case BlockConstants.BLOCK_TYPE_NORMAL:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
                 break;
-            case "t302":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002", null);
+            case BlockConstants.BLOCK_TYPE_EVENT:
+                // TODO
                 break;
-            case "t303":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003", null);
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
                 break;
-            case "t304":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004", null);
+            case BlockConstants.BLOCK_TYPE_BED:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t305":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005", null);
+            case BlockConstants.BLOCK_TYPE_TOILET:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t306":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006", null);
+            case BlockConstants.BLOCK_TYPE_DRESSER:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t308":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006", null);
+            case BlockConstants.BLOCK_TYPE_GAME:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_GAME, "", "3021",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_MAGNUM, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t309":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008", null);
+            case BlockConstants.BLOCK_TYPE_STORAGE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t310":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010", null);
+            case BlockConstants.BLOCK_TYPE_COOKER:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t311":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002", null);
+            case BlockConstants.BLOCK_TYPE_SINK:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t312":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004", null);
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t313":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005", null);
+            case BlockConstants.BLOCK_TYPE_RADIO:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_RADIO, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_MAGNUM, BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
                 break;
-            case "t314":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001", null);
+            case BlockConstants.BLOCK_TYPE_BUILDING:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case "t315":
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_RADIO, "", "1000", null);
+            case BlockConstants.BLOCK_TYPE_TREE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             default:
                 break;
         }
         return blockInfo;
-    }
-
-    public static String convertBlockType2ItemNo(int type) {
-        String itemNo = null;
-        switch (type) {
-            case BlockConstants.BLOCK_TYPE_BED:
-                itemNo = "t308";
-                break;
-            case BlockConstants.BLOCK_TYPE_TOILET:
-                itemNo = "t309";
-                break;
-            case BlockConstants.BLOCK_TYPE_DRESSER:
-                itemNo = "t310";
-                break;
-            case BlockConstants.BLOCK_TYPE_STORAGE:
-                itemNo = "t311";
-                break;
-            case BlockConstants.BLOCK_TYPE_COOKER:
-                itemNo = "t312";
-                break;
-            case BlockConstants.BLOCK_TYPE_SINK:
-                itemNo = "t313";
-                break;
-            case BlockConstants.BLOCK_TYPE_CONTAINER:
-                itemNo = "t314";
-                break;
-            case BlockConstants.BLOCK_TYPE_RADIO:
-                itemNo = "t308";
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP:
-                itemNo = "t301";
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
-                itemNo = "t302";
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
-                itemNo = "t303";
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
-                itemNo = "t304";
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
-                itemNo = "t305";
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
-                itemNo = "t306";
-                break;
-            default:
-                break;
-        }
-        return itemNo;
     }
 }

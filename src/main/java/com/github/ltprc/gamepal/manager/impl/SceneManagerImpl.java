@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -373,229 +374,6 @@ public class SceneManagerImpl implements SceneManager {
             }
         }
     }
-
-//    @Deprecated
-//    private Scene fillSceneDirt(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_DIRT);
-//        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
-//        // 橡树
-//        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
-//        // 细橡树
-//        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneSand(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SAND);
-//        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
-//        // 棕榈树
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
-//        // 仙人掌
-//        for (int i = 0; i < 3; i++) {
-//            addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                    BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-8", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                    BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        }
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneGrass(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_GRASS);
-//        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
-//        // 松树
-//        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
-//        // 橡树
-//        addSceneObject(region, scene, 10, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
-//        // 死树
-//        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2)));
-//        // 细松树
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
-//        // 细橡树
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
-//        // 细死树
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-2", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2)));
-//        roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
-//                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
-//        // 大石头
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
-//        // 小石头
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
-//        // 树桩1
-//        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-4", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
-//        // 树桩2
-//        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-2-4", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
-//        // 空心树干
-//        addSceneObject(region, scene, 2, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-3-4", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
-//        // 灌木丛1
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        // 灌木丛2
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        // 鲜花
-//        for (int i = 0; i < 6; i++) {
-//            addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                    BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-5", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                    BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
-//        }
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneSnow(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SNOW);
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneSwamp(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SWAMP);
-//        // 霸王花
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
-//        // 杂草
-//        for (int i = 0; i < 4; i++) {
-//            addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                    BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-" + i + "-7", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                    BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
-//        }
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneRough(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_ROUGH);
-//        // 灌木丛1
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-4-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        // 灌木丛2
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-5-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneSubterranean(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_SUBTERRANEAN);
-//        // 霸王花
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-4", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_BOTTOM, null, null);
-//        // 蘑菇1
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-0-6", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        // 蘑菇2
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_PLANTS + "-1-6", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, null, null);
-//        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
-//                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
-//        // 大石头
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
-//        // 小石头
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneLava(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_LAVA);
-//        Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                new Coordinate(BigDecimal.ZERO, BigDecimal.valueOf(-0.25D)),
-//                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.25D)));
-//        // 大石头
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0", BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape, null);
-//        // 小石头
-//        addSceneObject(region, scene, 5, BlockConstants.BLOCK_TYPE_NORMAL,
-//                BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1", BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_BOTTOM, roundShape, null);
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneOcean(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_WATER);
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private Scene fillSceneNothing(final Region region, final Scene scene) {
-//        fillSceneTemplate(region, scene, BlockConstants.BLOCK_CODE_NOTHING);
-//        scene.getBlocks().forEach(block -> block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
-//        return scene;
-//    }
-//
-//    @Deprecated
-//    private void addSceneObject(RegionInfo regionInfo, Scene scene, int maxAmount, int blockType, String blockCode,
-//                                int material, int layer, Shape shape, Coordinate imageSize) {
-//        Random random = new Random();
-//        Structure structure;
-//        if (null != shape && null != imageSize) {
-//            structure = new Structure(material, layer, shape, imageSize);
-//        } else if (null != shape) {
-//            structure = new Structure(material, layer, shape);
-//        } else {
-//            structure = new Structure(material, layer);
-//        }
-//        for (int j = 0; j < random.nextInt(maxAmount); j++) {
-//            BlockInfo blockInfo = new BlockInfo(blockType, null, blockCode, structure);
-//            WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
-//                    new Coordinate(BigDecimal.valueOf(random.nextDouble() * regionInfo.getWidth()),
-//                            BigDecimal.valueOf(random.nextDouble() * regionInfo.getHeight())));
-//            Block block = new Block(worldCoordinate, blockInfo, new MovementInfo());
-//            scene.getBlocks().add(block);
-//        }
-//    }
 
     private void addSceneObjects(GameWorld world, RegionInfo regionInfo, Scene scene) {
         Random random = new Random();
@@ -1106,7 +884,7 @@ public class SceneManagerImpl implements SceneManager {
                         BlockConstants.STRUCTURE_LAYER_BOTTOM);
                 break;
         }
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, code, structure);
+        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id, code, structure);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
@@ -1196,28 +974,14 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addOtherBlock(final GameWorld world, final int type, final String code,
+    public Block addOtherBlock(final GameWorld world, final BlockInfo blockInfo,
                                final WorldCoordinate worldCoordinate) {
         String id = UUID.randomUUID().toString();
-        Structure structure;
-        switch (type) {
-            case BlockConstants.BLOCK_TYPE_RADIO:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_MAGNUM,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS)));
-                break;
-            default:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
-                break;
-        }
-        BlockInfo blockInfo = new BlockInfo(type, id, code, structure);
+        blockInfo.setId(id);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
-        if (type == BlockConstants.BLOCK_TYPE_CONTAINER) {
+        if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_CONTAINER) {
             BagInfo bagInfo = new BagInfo();
             bagInfo.setId(block.getBlockInfo().getId());
             world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
@@ -1242,6 +1006,9 @@ public class SceneManagerImpl implements SceneManager {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        if (!SkillUtil.blockCode2Build(getGridBlockCode(world, worldCoordinate))) {
+            return false;
+        }
         return scene.getBlocks().stream()
                 .filter(blocker -> BlockUtil.detectCollision(region, block, blocker))
                 .noneMatch(blocker -> BlockUtil.checkMaterialCollision(block.getBlockInfo().getStructure().getMaterial(),
@@ -1266,7 +1033,8 @@ public class SceneManagerImpl implements SceneManager {
 //            }
 //        }
         worldService.registerOffline(world, block.getBlockInfo());
-        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
+        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
+                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
             world.getBlockMap().remove(block.getBlockInfo().getId());
         }
         switch (block.getBlockInfo().getType()) {
@@ -1284,6 +1052,53 @@ public class SceneManagerImpl implements SceneManager {
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    public int getGridBlockCode(GameWorld world, WorldCoordinate worldCoordinate) {
+        int code = BlockConstants.BLOCK_CODE_NOTHING;
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        if (null != scene.getGird() && null != scene.getGird()[0]) {
+            IntegerCoordinate gridCoordinate = new IntegerCoordinate(
+                    worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
+                    worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
+            code = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+        }
+        return code;
+    }
+
+    @Override
+    public void setGridBlockCode(GameWorld world, WorldCoordinate worldCoordinate, int code) {
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        if (null != scene.getGird() && null != scene.getGird()[0]) {
+            IntegerCoordinate gridCoordinate = new IntegerCoordinate(
+                    worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
+                    worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
+            scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()] = code;
+            if (gridCoordinate.getX() == 0) {
+                scene = region.getScenes().get(new IntegerCoordinate(worldCoordinate.getSceneCoordinate().getX() - 1,
+                        worldCoordinate.getSceneCoordinate().getY()));
+                if (null != scene) {
+                    scene.getGird()[scene.getGird().length - 1][gridCoordinate.getY()] = code;
+                }
+            }
+            if (gridCoordinate.getY() == 0) {
+                scene = region.getScenes().get(new IntegerCoordinate(worldCoordinate.getSceneCoordinate().getX(),
+                        worldCoordinate.getSceneCoordinate().getY() - 1));
+                if (null != scene) {
+                    scene.getGird()[gridCoordinate.getX()][scene.getGird()[0].length - 1] = code;
+                }
+            }
+            if (gridCoordinate.getX() == 0 && gridCoordinate.getY() == 0) {
+                scene = region.getScenes().get(new IntegerCoordinate(worldCoordinate.getSceneCoordinate().getX() - 1,
+                        worldCoordinate.getSceneCoordinate().getY() - 1));
+                if (null != scene) {
+                    scene.getGird()[scene.getGird().length - 1][scene.getGird()[0].length - 1] = code;
+                }
+            }
         }
     }
 }

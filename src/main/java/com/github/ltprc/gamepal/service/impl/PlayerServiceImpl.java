@@ -32,10 +32,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -930,13 +930,13 @@ public class PlayerServiceImpl implements PlayerService {
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
                 if (sceneManager.checkBlockSpace(world, fakeBuilding)) {
-                    BlockInfo blockInfo1 = player.getPlayerInfo().getTools().stream()
-                            .filter(tool -> null != BlockUtil.convertItemNo2BlockInfo(tool))
-                            .map(BlockUtil::convertItemNo2BlockInfo)
-                            .findFirst()
-                            .orElseGet(null);
-                    if (null != blockInfo1) {
-                        sceneManager.addOtherBlock(world, blockInfo1.getType(), blockInfo1.getCode(), buildingWorldCoordinate);
+                    Optional<BlockInfo> blockInfo1 = player.getPlayerInfo().getTools().stream()
+                            .map(BlockUtil::convertItemNo2BlockType)
+                            .map(BlockUtil::generateBlockInfo)
+                            .findFirst();
+                    if (blockInfo1.isPresent()) {
+                        sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
+                        sceneManager.addOtherBlock(world, blockInfo1.get(), buildingWorldCoordinate);
                         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
                         return true;
                     }
@@ -1229,7 +1229,9 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = player.getPlayerInfo();
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        Block remainContainer = sceneManager.addOtherBlock(world, BlockConstants.BLOCK_TYPE_CONTAINER, "3101", player.getWorldCoordinate());
+        BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER);
+        blockInfo1.setCode("3101");
+        Block remainContainer = sceneManager.addOtherBlock(world, blockInfo1, player.getWorldCoordinate());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());
         remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_MAGNUM); // Special container 24/10/20

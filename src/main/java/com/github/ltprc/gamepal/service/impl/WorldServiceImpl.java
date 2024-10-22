@@ -16,6 +16,7 @@ import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /**
  * Do not put too many dynamic game logics into this class.
@@ -258,7 +258,11 @@ public class WorldServiceImpl implements WorldService {
 //                                world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
 //                                break;
                             default:
-                                block = sceneManager.addOtherBlock(world, type, String.valueOf(blockRow.getInteger(1)), worldCoordinate);
+                                BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(type);
+                                if (null != blockInfo1) {
+                                    blockInfo1.setCode(String.valueOf(blockRow.getInteger(1)));
+                                    block = sceneManager.addOtherBlock(world, blockInfo1, worldCoordinate);
+                                }
                                 break;
                         }
                     }
