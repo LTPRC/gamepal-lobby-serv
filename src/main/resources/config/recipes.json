@@ -12,14 +12,17 @@
   {"recipeNo": "2012", "type": 20, "cost": {"m_wood": 10, "m_steel": 10}, "value": {"t312": 1}},
   {"recipeNo": "2013", "type": 20, "cost": {"m_wood": 10, "m_steel": 10}, "value": {"t313": 1}},
   {"recipeNo": "2014", "type": 20, "cost": {"m_wood": 10, "m_steel": 10}, "value": {"t314": 1}},
+  {"recipeNo": "2015", "type": 20, "cost": {"m_circuitry": 1, "m_copper": 1}, "value": {"t315": 1}},
 
-  {"recipeNo": "2101", "type": 21, "cost": {"m_wood": 2, "m_cloth": 2}, "value": {"c014": 1}},
-  {"recipeNo": "2102", "type": 21, "cost": {"m_wood": 2, "m_rubber": 2}, "value": {"t007": 1}},
-  {"recipeNo": "2103", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t013": 1}},
-  {"recipeNo": "2104", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t014": 1}},
-  {"recipeNo": "2105", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t015": 1}},
-  {"recipeNo": "2106", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t103": 1}},
-  {"recipeNo": "2107", "type": 21, "cost": {"m_circuitry": 1, "m_copper": 1}, "value": {"t315": 1}},
+  {"recipeNo": "2101", "type": 21, "cost": {"m_steel": 20}, "value": {"t232": 1}},
+  {"recipeNo": "2102", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t233": 1}},
+  {"recipeNo": "2103", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t118": 1}},
+  {"recipeNo": "2104", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t022": 1}},
+  {"recipeNo": "2105", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t234": 1}},
+  {"recipeNo": "2106", "type": 21, "cost": {"m_wood": 2, "m_gear": 1}, "value": {"t119": 1}},
+  {"recipeNo": "2107", "type": 21, "cost": {"m_plastic": 10}, "value": {"t023": 1}},
+  {"recipeNo": "2108", "type": 21, "cost": {"m_wood": 2, "m_rubber": 2}, "value": {"t007": 1}},
+  {"recipeNo": "2109", "type": 21, "cost": {"m_wood": 2, "m_cloth": 2}, "value": {"c014": 1}},
 
   {"recipeNo": "2201", "type": 22, "cost": {"m_copper": 1, "m_lead": 1}, "value": {"a001": 30}},
   {"recipeNo": "2202", "type": 22, "cost": {"m_copper": 1, "m_lead": 1}, "value": {"a002": 20}},
@@ -49,6 +52,11 @@
   {"recipeNo": "2303", "type": 23, "cost": {"m_cloth": 5, "m_ballisticfiber": 1}, "value": {"o003": 1}},
 
   {"recipeNo": "2401", "type": 24, "cost": {"m_oil": 1}, "value": {"m_plastic": 5}},
+
+  {"recipeNo": "0601", "type": 6, "cost": {"j017": 1}, "value": {"c050": 1}},
+  {"recipeNo": "0602", "type": 6, "cost": {"j026": 1}, "value": {"c050": 1}},
+  {"recipeNo": "0603", "type": 6, "cost": {"j050": 1}, "value": {"c050": 1}},
+  {"recipeNo": "0604", "type": 6, "cost": {"j150": 1}, "value": {"c050": 1}},
 
   {"recipeNo": "1101", "type": 11, "cost": {"c050": 2}, "value": {"c004": 1}},
   {"recipeNo": "1102", "type": 11, "cost": {"c031": 1}, "value": {"c041": 1}},

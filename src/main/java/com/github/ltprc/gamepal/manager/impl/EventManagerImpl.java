@@ -226,6 +226,7 @@ public class EventManagerImpl implements EventManager {
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
+            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
                 affectedBlockList.stream()
                         .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                         .forEach(player -> {
@@ -242,6 +243,13 @@ public class EventManagerImpl implements EventManager {
                                     BigDecimal.valueOf(random.nextDouble() / 2));
                             addEvent(world, GamePalConstants.EVENT_CODE_BLEED, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), bleedWc);
                 });
+                if (Integer.parseInt(eventBlock.getBlockInfo().getCode()) == GamePalConstants.EVENT_CODE_MELEE_CHOP) {
+                    affectedBlockList.stream()
+                            .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TREE)
+                            .forEach(tree -> {
+                                // TODO chopping logics
+                            });
+                }
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_HIT:
             case GamePalConstants.EVENT_CODE_SHOOT_ARROW:

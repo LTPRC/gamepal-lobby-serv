@@ -1026,7 +1026,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public boolean checkBlockSpace(GameWorld world, Block block) {
+    public boolean checkBlockSpace2Build(GameWorld world, Block block) {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
@@ -1110,35 +1110,5 @@ public class SceneManagerImpl implements SceneManager {
                 scene.getGird()[scene.getGird().length - 1][gridCoordinate.getY()] = code;
             }
         }
-    }
-
-    /**
-     * Get average grid block code from 4 positions
-     * @param world
-     * @param worldCoordinate
-     * @return
-     */
-    @Override
-    public int getAvgGridBlockCode(GameWorld world, WorldCoordinate worldCoordinate) {
-        int code = BlockConstants.BLOCK_CODE_NOTHING;
-        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
-        if (null != scene.getGird() && null != scene.getGird()[0]) {
-            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
-            int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
-            int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
-            int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
-            int code4 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
-            if (code1 == BlockConstants.BLOCK_CODE_WATER && code2 == BlockConstants.BLOCK_CODE_WATER
-                    && code3 == BlockConstants.BLOCK_CODE_WATER && code4 == BlockConstants.BLOCK_CODE_WATER) {
-                return BlockConstants.BLOCK_CODE_WATER;
-            }
-            code = getGridBlockCode(world, worldCoordinate);
-            if (code != BlockConstants.BLOCK_CODE_WATER) {
-                return code;
-            }
-
-        }
-        return code;
     }
 }

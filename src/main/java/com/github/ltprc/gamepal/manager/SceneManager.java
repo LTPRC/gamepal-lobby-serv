@@ -44,13 +44,11 @@ public interface SceneManager {
 
     Block addOtherBlock(final GameWorld world, final BlockInfo blockInfo, final WorldCoordinate worldCoordinate);
 
-    boolean checkBlockSpace(final GameWorld world, final Block block);
+    boolean checkBlockSpace2Build(final GameWorld world, final Block block);
 
     void removeBlock(GameWorld world, Block block);
 
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
 
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
-
-    int getAvgGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
 }

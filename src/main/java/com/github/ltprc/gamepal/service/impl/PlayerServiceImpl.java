@@ -942,6 +942,11 @@ public class PlayerServiceImpl implements PlayerService {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
+            case SkillConstants.SKILL_CODE_MELEE_CHOP:
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CHOP, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                break;
             case SkillConstants.SKILL_CODE_MELEE_STAB:
                 eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_STAB, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
@@ -1018,7 +1023,7 @@ public class PlayerServiceImpl implements PlayerService {
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
-                if (sceneManager.checkBlockSpace(world, fakeBuilding)) {
+                if (sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
                     Optional<BlockInfo> blockInfo1 = playerInfo.getTools().stream()
                             .map(BlockUtil::convertItemNo2BlockType)
                             .map(BlockUtil::generateBlockInfo)
@@ -1033,6 +1038,33 @@ public class PlayerServiceImpl implements PlayerService {
                     }
                 }
                 return false;
+            case SkillConstants.SKILL_CODE_FISH:
+                buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
+                    // TODO fishing logics
+                }
+                break;
+            case SkillConstants.SKILL_CODE_SHOVEL:
+                generateEventBySkill(userCode, SkillConstants.SKILL_CODE_MELEE_HIT);
+                buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                // TODO shoveling logics
+                break;
+            case SkillConstants.SKILL_CODE_PICK:
+                generateEventBySkill(userCode, SkillConstants.SKILL_CODE_MELEE_STAB);
+                buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                // TODO picking logics
+                break;
+            case SkillConstants.SKILL_CODE_PLOW:
+                generateEventBySkill(userCode, SkillConstants.SKILL_CODE_MELEE_HIT);
+                buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
+                    // TODO plowing logics
+                }
+                break;
             default:
                 break;
         }
