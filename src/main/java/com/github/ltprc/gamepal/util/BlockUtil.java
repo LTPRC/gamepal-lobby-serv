@@ -354,71 +354,6 @@ public class BlockUtil {
         return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
     }
 
-    @Deprecated
-    public static boolean detectLineSquareCollision(RegionInfo regionInfo, Block block1,
-                                                    BigDecimal ballisticAngle, Block block2) {
-        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
-        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block1.getBlockInfo().getStructure().getShape().getShapeType()) {
-            block1.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block1.getBlockInfo().getStructure().getShape().getRadius().setY(block1.getBlockInfo().getStructure().getShape().getRadius().getX());
-        }
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
-            block2.getBlockInfo().getStructure().getShape().setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            block2.getBlockInfo().getStructure().getShape().getRadius().setY(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
-        }
-        if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
-                || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
-            return coordinate1.getX().subtract(coordinate2.getX()).abs().doubleValue()
-                    < block1.getBlockInfo().getStructure().getShape().getRadius().getX()
-                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue();
-        }
-        // Round vs. round
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block1.getBlockInfo().getStructure().getShape().getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getBlockInfo().getStructure().getShape().getShapeType()) {
-            return calculateBallisticDistance(coordinate1, ballisticAngle, coordinate2)
-                    .compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getX()
-                            .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX())) < 0;
-        }
-        double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
-        BigDecimal xLeft = coordinate2.getX().subtract(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
-        BigDecimal xRight = coordinate2.getX().add(block2.getBlockInfo().getStructure().getShape().getRadius().getX());
-        BigDecimal yLeft = xLeft.subtract(coordinate1.getX()).multiply(BigDecimal.valueOf(slope)).add(coordinate1.getY());
-        BigDecimal yRight = xRight.subtract(coordinate1.getX()).multiply(BigDecimal.valueOf(slope)).add(coordinate1.getY());
-        // Rectangle vs. rectangle
-//        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block1.getStructure().getShape().getShapeType()
-//                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == block2.getStructure().getShape().getShapeType()) {
-//        if ((yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-//                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0
-//                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-//                .add(block2.getStructure().getShape().getRadius().getY())) < 0)
-//                || (yLeft.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-//                .add(block2.getStructure().getShape().getRadius().getY())) < 0
-//                && yRight.subtract(block2.getY()).compareTo(block1.getStructure().getShape().getRadius().getY()
-//                .add(block2.getStructure().getShape().getRadius().getY()).negate()) > 0)) {
-//                return true;
-//            }
-//            return false;
-//        }
-        // Round vs. rectangle
-//        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == block2.getStructure().getShape().getShapeType()) {
-//            return detectLineSquareCollision(oldBlock2, ballisticAngle, oldBlock1);
-//        }
-        // TODO make round vs. rectangle specific
-        return (yLeft.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
-                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).negate()) > 0
-                && yRight.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
-                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY())) < 0)
-                || (yLeft.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
-                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY())) < 0
-                && yRight.subtract(coordinate2.getY()).compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getY()
-                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getY()).negate()) > 0);
-    }
-
     /**
      * No need to consider structure's center
      * @param c1
@@ -532,23 +467,6 @@ public class BlockUtil {
         return new Coordinate(coordinate.getX().add(BigDecimal.valueOf(distance.doubleValue() * Math.cos(angle))),
                 coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
     }
-
-//    public static WorldCoordinate locateBuildingCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate,
-//                                                           BigDecimal direction, BigDecimal distance) {
-//        WorldCoordinate rst = new WorldCoordinate(worldCoordinate);
-//        rst.setCoordinate(locateBuildingCoordinate(rst.getCoordinate(), direction, distance));
-//        BlockUtil.fixWorldCoordinateReal(regionInfo, rst);
-//        return rst;
-//    }
-//
-//    public static Coordinate locateBuildingCoordinate(Coordinate coordinate, BigDecimal direction, BigDecimal distance) {
-//        double angle = direction.doubleValue() / 180 * Math.PI;
-//        return new Coordinate(
-//                coordinate.getX().add(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(Math.cos(angle)).multiply(distance))
-//                        .setScale(0, RoundingMode.FLOOR),
-//                coordinate.getY().add(BigDecimal.valueOf(0.5)).subtract(BigDecimal.valueOf(Math.sin(angle)).multiply(distance))
-//                        .setScale(0, RoundingMode.FLOOR));
-//    }
 
     public static IntegerCoordinate convertCoordinate2BasicIntegerCoordinate(WorldCoordinate worldCoordinate) {
         return new IntegerCoordinate(

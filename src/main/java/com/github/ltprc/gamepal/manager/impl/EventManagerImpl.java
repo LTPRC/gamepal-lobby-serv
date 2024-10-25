@@ -98,11 +98,10 @@ public class EventManagerImpl implements EventManager {
                         .filter(blocker -> BlockUtil.compareAnglesInDegrees(
                                 BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
                                 BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate()).doubleValue()) < 135D)
-//                        .filter(blocker -> {
-//                            return BlockUtil.compareAnglesInDegrees(
-//                                BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
-//                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D;
-//                        })
+                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+                                BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
+                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D
+                        )
                         .forEach(blocker ->
                             BlockUtil.detectLineCollision(region, from, eventBlock, blocker, true)
                         ));

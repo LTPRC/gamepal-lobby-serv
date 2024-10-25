@@ -946,7 +946,19 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EFFECT, id, String.valueOf(eventCode), structure);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         world.getEffectMap().put(id, eventId);
-        registerBlock(world, block);
+        switch (eventCode) {
+            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+                break;
+            default:
+                registerBlock(world, block);
+                break;
+        }
         return block;
     }
 
