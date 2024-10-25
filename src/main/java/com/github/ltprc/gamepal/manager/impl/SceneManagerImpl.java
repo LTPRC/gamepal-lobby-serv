@@ -15,7 +15,6 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
@@ -34,11 +33,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -754,7 +750,9 @@ public class SceneManagerImpl implements SceneManager {
                 if (!CollectionUtils.isEmpty(scene.getBlocks())) {
                     scene.getBlocks().values().forEach(block -> {
                         if (BlockUtil.checkPerceptionCondition(region, player,
-                                world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo(), block)) {
+                                player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                                ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
+                                : null, block)) {
                             Block newBlock = new Block(block);
                             rankingQueue.add(newBlock);
                         }
@@ -787,7 +785,9 @@ public class SceneManagerImpl implements SceneManager {
                 .forEach(player1 -> {
                     Block newBlock = new Block(player1);
                     if (BlockUtil.checkPerceptionCondition(region, player,
-                            world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo(), newBlock)) {
+                            player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                                    ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
+                                    : null, newBlock)) {
 //                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
 //                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
 //                                        player.getWorldCoordinate().getSceneCoordinate()),
@@ -807,6 +807,22 @@ public class SceneManagerImpl implements SceneManager {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         int[][] grids = new int[region.getWidth() * (sceneScanRadius * 2 + 1) + 1]
                 [region.getHeight() * (sceneScanRadius * 2 + 1) + 1];
+//        for (int i = 0; i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
+//            for (int j = 0; j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
+//
+//                Scene scene = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - sceneScanRadius + i, sceneCoordinate.getY() - sceneScanRadius + j));
+//                for (int l = 0; l <= region.getWidth(); l++) {
+//                    for (int k = 0; k <= region.getHeight(); k++) {
+//                        int val = BlockConstants.BLOCK_CODE_NOTHING;
+//                        if (null != scene && null != scene.getGird()) {
+//                            val = scene.getGird()[l][k];
+//                        }
+//                        grids[l + (j - sceneCoordinate.getX() + sceneScanRadius) * region.getWidth()]
+//                                [k + (i - sceneCoordinate.getY() + sceneScanRadius) * region.getHeight()] = val;
+//                    }
+//                }
+//            }
+//        }
         for (int i = sceneCoordinate.getY() - sceneScanRadius; i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
             for (int j = sceneCoordinate.getX() - sceneScanRadius; j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
                 final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
@@ -927,7 +943,7 @@ public class SceneManagerImpl implements SceneManager {
                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, String.valueOf(eventCode), structure);
+        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EFFECT, id, String.valueOf(eventCode), structure);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         world.getEffectMap().put(id, eventId);
         registerBlock(world, block);
@@ -990,10 +1006,10 @@ public class SceneManagerImpl implements SceneManager {
         Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         Scene scene = region.getScenes().get(block.getWorldCoordinate().getSceneCoordinate());
         scene.getBlocks().put(block.getBlockInfo().getId(), block);
-        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
-                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
+//        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
+//                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
             world.getBlockMap().put(block.getBlockInfo().getId(), block);
-        }
+//        }
         return block;
     }
 
@@ -1019,10 +1035,10 @@ public class SceneManagerImpl implements SceneManager {
         scene.getBlocks().remove(block.getBlockInfo().getId());
         world.getBlockMap().remove(block.getBlockInfo().getId());
         worldService.registerOffline(world, block.getBlockInfo());
-        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
-                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
+//        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
+//                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
             world.getBlockMap().remove(block.getBlockInfo().getId());
-        }
+//        }
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 playerService.destroyPlayer(block.getBlockInfo().getId());
@@ -1047,9 +1063,7 @@ public class SceneManagerImpl implements SceneManager {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
         if (null != scene.getGird() && null != scene.getGird()[0]) {
-            IntegerCoordinate gridCoordinate = new IntegerCoordinate(
-                    worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
-                    worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
+            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
             code = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
         }
         return code;
@@ -1060,31 +1074,59 @@ public class SceneManagerImpl implements SceneManager {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
         if (null != scene.getGird() && null != scene.getGird()[0]) {
-            IntegerCoordinate gridCoordinate = new IntegerCoordinate(
-                    worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
-                    worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
+            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
             scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()] = code;
+            IntegerCoordinate nearbySceneCoordinate = new IntegerCoordinate(worldCoordinate.getSceneCoordinate());
             if (gridCoordinate.getX() == 0) {
-                scene = region.getScenes().get(new IntegerCoordinate(worldCoordinate.getSceneCoordinate().getX() - 1,
-                        worldCoordinate.getSceneCoordinate().getY()));
-                if (null != scene) {
-                    scene.getGird()[scene.getGird().length - 1][gridCoordinate.getY()] = code;
-                }
+                nearbySceneCoordinate.setX(nearbySceneCoordinate.getX() - 1);
+                gridCoordinate.setX(scene.getGird()[0].length - 1);
+            }
+            if (gridCoordinate.getX() == scene.getGird()[0].length - 1) {
+                nearbySceneCoordinate.setX(nearbySceneCoordinate.getX() + 1);
+                gridCoordinate.setX(0);
             }
             if (gridCoordinate.getY() == 0) {
-                scene = region.getScenes().get(new IntegerCoordinate(worldCoordinate.getSceneCoordinate().getX(),
-                        worldCoordinate.getSceneCoordinate().getY() - 1));
-                if (null != scene) {
-                    scene.getGird()[gridCoordinate.getX()][scene.getGird()[0].length - 1] = code;
-                }
+                nearbySceneCoordinate.setY(nearbySceneCoordinate.getY() - 1);
+                gridCoordinate.setY(scene.getGird().length - 1);
             }
-            if (gridCoordinate.getX() == 0 && gridCoordinate.getY() == 0) {
-                scene = region.getScenes().get(new IntegerCoordinate(worldCoordinate.getSceneCoordinate().getX() - 1,
-                        worldCoordinate.getSceneCoordinate().getY() - 1));
-                if (null != scene) {
-                    scene.getGird()[scene.getGird().length - 1][scene.getGird()[0].length - 1] = code;
-                }
+            if (gridCoordinate.getY() == scene.getGird().length - 1) {
+                nearbySceneCoordinate.setY(nearbySceneCoordinate.getY() + 1);
+                gridCoordinate.setY(0);
+            }
+            scene = region.getScenes().get(nearbySceneCoordinate);
+            if (null != scene && null != scene.getGird() && null != scene.getGird()[0]) {
+                scene.getGird()[scene.getGird().length - 1][gridCoordinate.getY()] = code;
             }
         }
+    }
+
+    /**
+     * Get average grid block code from 4 positions
+     * @param world
+     * @param worldCoordinate
+     * @return
+     */
+    @Override
+    public int getAvgGridBlockCode(GameWorld world, WorldCoordinate worldCoordinate) {
+        int code = BlockConstants.BLOCK_CODE_NOTHING;
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        if (null != scene.getGird() && null != scene.getGird()[0]) {
+            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
+            int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+            int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
+            int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
+            int code4 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
+            if (code1 == BlockConstants.BLOCK_CODE_WATER && code2 == BlockConstants.BLOCK_CODE_WATER
+                    && code3 == BlockConstants.BLOCK_CODE_WATER && code4 == BlockConstants.BLOCK_CODE_WATER) {
+                return BlockConstants.BLOCK_CODE_WATER;
+            }
+            code = getGridBlockCode(world, worldCoordinate);
+            if (code != BlockConstants.BLOCK_CODE_WATER) {
+                return code;
+            }
+
+        }
+        return code;
     }
 }

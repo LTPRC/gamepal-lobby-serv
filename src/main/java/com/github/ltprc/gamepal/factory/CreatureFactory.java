@@ -72,48 +72,4 @@ public class CreatureFactory {
         Random random = new Random();
         return random.nextInt(14) + 1;
     }
-
-//    public static Block createCreatureInstance(final int playerType) {
-//        WorldCoordinate worldCoordinate = new WorldCoordinate();
-//        BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
-//
-//        BlockInfo blockInfo = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_PLAYER);
-//
-//        MovementInfo movementInfo = new MovementInfo();
-//        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-//        movementInfo.setFaceDirection(BlockConstants.FACE_DIRECTION_DEFAULT);
-//        BlockUtil.calculateMaxSpeed(movementInfo);
-//        movementInfo.setAcceleration(BlockConstants.ACCELERATION_DEFAULT);
-//
-//        PlayerInfo playerInfo = new PlayerInfo();
-//        playerInfo.setPlayerType(playerType);
-//        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-//        playerInfo.setHpMax(1000);
-//        playerInfo.setHp(playerInfo.getHpMax() / 2);
-//        playerInfo.setVpMax(1000);
-//        playerInfo.setVp(playerInfo.getVpMax() / 2);
-//        playerInfo.setHungerMax(1000);
-//        playerInfo.setHunger(playerInfo.getHungerMax() / 2);
-//        playerInfo.setThirstMax(1000);
-//        playerInfo.setThirst(playerInfo.getThirstMax() / 2);
-//        playerInfo.setPrecisionMax(1000);
-//        playerInfo.setPrecision(playerInfo.getPrecisionMax());
-//        playerInfo.setLevel(1);
-//        playerInfo.setExp(0);
-//        SkillUtil.updateExpMax(playerInfo);
-//        playerInfo.setMoney(1);
-//        playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
-//        playerInfo.setPerceptionInfo(new PerceptionInfo());
-//        if (CreatureConstants.CREATURE_TYPE_ANIMAL != playerInfo.getCreatureType()) {
-//            SkillUtil.updateHumanSkills(playerInfo);
-//            randomlyPersonalizePlayerInfo(playerInfo, NameUtil.generateGender());
-//        } else {
-//            SkillUtil.updateAnimalSkills(playerInfo);
-//            randomlyPersonalizeAnimalInfo(playerInfo, NameUtil.generateGender());
-//        }
-//        playerInfo.setRespawnPoint(GamePalConstants.DEFAULT_BIRTHPLACE);
-//
-//        Block player = new Block(worldCoordinate, blockInfo, movementInfo, playerInfo, null);
-//        return player;
-//    }
 }

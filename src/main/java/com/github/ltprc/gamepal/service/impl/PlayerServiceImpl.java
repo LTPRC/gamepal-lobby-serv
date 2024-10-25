@@ -1012,7 +1012,7 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_BUILD:
-                WorldCoordinate buildingWorldCoordinate = BlockUtil.locateBuildingCoordinate(region,
+                WorldCoordinate buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
                 BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_BOTTOM));
@@ -1024,7 +1024,9 @@ public class PlayerServiceImpl implements PlayerService {
                             .map(BlockUtil::generateBlockInfo)
                             .findFirst();
                     if (blockInfo1.isPresent()) {
-                        sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
+                        IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
+                        buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
+                        sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_SUBTERRANEAN);
                         sceneManager.addOtherBlock(world, blockInfo1.get(), buildingWorldCoordinate);
                         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
                         return true;

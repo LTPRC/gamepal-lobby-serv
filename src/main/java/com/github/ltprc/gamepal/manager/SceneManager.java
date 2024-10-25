@@ -6,7 +6,6 @@ import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 
@@ -52,4 +51,6 @@ public interface SceneManager {
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
 
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
+
+    int getAvgGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
 }

@@ -8,7 +8,6 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.EventInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -37,44 +36,7 @@ public class EventManagerImpl implements EventManager {
     private SceneManager sceneManager;
 
     @Override
-    public EventInfo createEventInfo(final int eventCode, final String eventId) {
-        EventInfo eventInfo = new EventInfo();
-        eventInfo.setEventId(eventId);
-        eventInfo.setFrame(0);
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MINE:
-                // Infinite
-                eventInfo.setFrameMax(-1);
-                break;
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                eventInfo.setFrameMax(50);
-                break;
-            case GamePalConstants.EVENT_CODE_FIRE:
-                eventInfo.setFrameMax(250);
-                break;
-            default:
-                eventInfo.setFrameMax(25);
-                break;
-        }
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                eventInfo.setPeriod(50);
-                break;
-            default:
-                eventInfo.setPeriod(25);
-                break;
-        }
-        return eventInfo;
-    }
-
-    @Override
-    public MovementInfo createMovementInfo(final int eventCode) {
+    public MovementInfo createMovementInfoByEventCode(final int eventCode) {
         MovementInfo movementInfo = new MovementInfo();
         movementInfo.setFrame(0);
         switch (eventCode) {
@@ -111,7 +73,7 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String eventId, WorldCoordinate worldCoordinate) {
-        MovementInfo movementInfo = createMovementInfo(eventCode);
+        MovementInfo movementInfo = createMovementInfoByEventCode(eventCode);
         Block eventBlock = sceneManager.addEventBlock(world, eventCode, eventId, movementInfo, worldCoordinate);
         correctTarget(world, eventBlock);
         List<Block> affectedBlockList = collectAffectedBlocks(world, eventBlock);
@@ -249,6 +211,7 @@ public class EventManagerImpl implements EventManager {
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
                 addEvent(world, GamePalConstants.EVENT_CODE_EXPLODE, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), eventBlock.getWorldCoordinate());
+                sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_LAVA);
                 break;
             default:
                 world.getEventQueue().add(eventBlock);
@@ -422,7 +385,8 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void updateEvents(GameWorld world) {
-        world.getBlockMap().values()
+        world.getBlockMap().values().stream()
+                .filter(block -> block.getMovementInfo().getFrameMax() != -1)
                 .forEach(block -> {
                     updateEvent(world, block);
                     worldService.expandByCoordinate(world, null, block.getWorldCoordinate(), 0);
@@ -456,8 +420,7 @@ public class EventManagerImpl implements EventManager {
 //        eventQueue.poll();
 //    }
 
-    private Block updateEvent(GameWorld world, Block oldEvent) {
-        Block newEvent = new Block(oldEvent);
+    private void updateEvent(GameWorld world, Block newEvent) {
         newEvent.getMovementInfo().setFrame(newEvent.getMovementInfo().getFrame() + 1);
         updateEventLocation(world, newEvent);
         if (newEvent.getMovementInfo().getFrame() >= newEvent.getMovementInfo().getPeriod()) {
@@ -479,7 +442,8 @@ public class EventManagerImpl implements EventManager {
                             return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_MINE) < 0;
                         })) {
                     addEvent(world, GamePalConstants.EVENT_CODE_EXPLODE, fromId, newEvent.getWorldCoordinate());
-                    return null;
+                    sceneManager.setGridBlockCode(world, newEvent.getWorldCoordinate(), BlockConstants.BLOCK_CODE_LAVA);
+                    return;
                 }
                 break;
             case GamePalConstants.EVENT_CODE_FIRE:
@@ -491,7 +455,7 @@ public class EventManagerImpl implements EventManager {
                                     world.getRegionMap().get(newEvent.getWorldCoordinate().getRegionNo()), newEvent.getWorldCoordinate(), worldEvent.getWorldCoordinate());
                             return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
                         })) {
-                    return null;
+                    return;
                 }
                 // Burn players
                 world.getCreatureMap().values().stream()
@@ -510,23 +474,18 @@ public class EventManagerImpl implements EventManager {
             default:
                 break;
         }
-        return newEvent;
+        return;
     }
 
     private void updateEventLocation(GameWorld world, Block newEvent) {
         String fromId = world.getEffectMap().get(newEvent.getBlockInfo().getId());
-        switch (Integer.parseInt(newEvent.getBlockInfo().getCode())) {
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_SACRIFICE:
-            case GamePalConstants.EVENT_CODE_DISTURB:
+        if (newEvent.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_BLOCK))
+                || newEvent.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_HEAL))
+                || newEvent.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_SACRIFICE))
+                || newEvent.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_DISTURB))) {
                 // Stick with playerInfo
                 BlockUtil.copyWorldCoordinate(world.getCreatureMap().get(fromId).getWorldCoordinate(),
                         newEvent.getWorldCoordinate());
-                break;
-            default:
-                // Keep its position
-                break;
         }
     }
 }

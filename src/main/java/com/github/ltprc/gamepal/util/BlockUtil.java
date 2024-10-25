@@ -57,6 +57,29 @@ public class BlockUtil {
         }
     }
 
+    public static void fixWorldCoordinateReal(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
+        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.ZERO) < 0) {
+            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
+            worldCoordinate.getCoordinate()
+                    .setY(worldCoordinate.getCoordinate().getY().add(new BigDecimal(regionInfo.getHeight())));
+        }
+        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(regionInfo.getHeight())) >= 0) {
+            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
+            worldCoordinate.getCoordinate()
+                    .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(regionInfo.getHeight())));
+        }
+        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.ZERO) < 0) {
+            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
+            worldCoordinate.getCoordinate()
+                    .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(regionInfo.getWidth())));
+        }
+        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth())) >= 0) {
+            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
+            worldCoordinate.getCoordinate()
+                    .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(regionInfo.getWidth())));
+        }
+    }
+
     public static Coordinate convertWorldCoordinate2Coordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
         Coordinate coordinate = new Coordinate(worldCoordinate.getCoordinate());
         adjustCoordinate(coordinate, worldCoordinate.getSceneCoordinate(), regionInfo.getHeight(), regionInfo.getWidth());
@@ -462,6 +485,7 @@ public class BlockUtil {
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_NORMAL:
+            case BlockConstants.BLOCK_TYPE_EFFECT:
             case BlockConstants.BLOCK_TYPE_DROP:
             case BlockConstants.BLOCK_TYPE_TELEPORT:
             case BlockConstants.BLOCK_TYPE_BUILDING:
@@ -509,21 +533,33 @@ public class BlockUtil {
                 coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
     }
 
-    public static WorldCoordinate locateBuildingCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate,
-                                                           BigDecimal direction, BigDecimal distance) {
-        WorldCoordinate rst = new WorldCoordinate(worldCoordinate);
-        rst.setCoordinate(locateBuildingCoordinate(rst.getCoordinate(), direction, distance));
-        BlockUtil.fixWorldCoordinate(regionInfo, rst);
-        return rst;
+//    public static WorldCoordinate locateBuildingCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate,
+//                                                           BigDecimal direction, BigDecimal distance) {
+//        WorldCoordinate rst = new WorldCoordinate(worldCoordinate);
+//        rst.setCoordinate(locateBuildingCoordinate(rst.getCoordinate(), direction, distance));
+//        BlockUtil.fixWorldCoordinateReal(regionInfo, rst);
+//        return rst;
+//    }
+//
+//    public static Coordinate locateBuildingCoordinate(Coordinate coordinate, BigDecimal direction, BigDecimal distance) {
+//        double angle = direction.doubleValue() / 180 * Math.PI;
+//        return new Coordinate(
+//                coordinate.getX().add(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(Math.cos(angle)).multiply(distance))
+//                        .setScale(0, RoundingMode.FLOOR),
+//                coordinate.getY().add(BigDecimal.valueOf(0.5)).subtract(BigDecimal.valueOf(Math.sin(angle)).multiply(distance))
+//                        .setScale(0, RoundingMode.FLOOR));
+//    }
+
+    public static IntegerCoordinate convertCoordinate2BasicIntegerCoordinate(WorldCoordinate worldCoordinate) {
+        return new IntegerCoordinate(
+                worldCoordinate.getCoordinate().getX().intValue(),
+                worldCoordinate.getCoordinate().getY().intValue());
     }
 
-    public static Coordinate locateBuildingCoordinate(Coordinate coordinate, BigDecimal direction, BigDecimal distance) {
-        double angle = direction.doubleValue() / 180 * Math.PI;
-        return new Coordinate(
-                coordinate.getX().add(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(Math.cos(angle)).multiply(distance))
-                        .setScale(0, RoundingMode.FLOOR),
-                coordinate.getY().add(BigDecimal.valueOf(0.5)).subtract(BigDecimal.valueOf(Math.sin(angle)).multiply(distance))
-                        .setScale(0, RoundingMode.FLOOR));
+    public static IntegerCoordinate convertCoordinate2ClosestIntegerCoordinate(WorldCoordinate worldCoordinate) {
+        return new IntegerCoordinate(
+                worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
+                worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
     }
 
     public static int convertEventCode2Layer(int eventCode) {
@@ -842,14 +878,14 @@ public class BlockUtil {
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.ROCK_INDEX_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
             case BlockConstants.ROCK_INDEX_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM,

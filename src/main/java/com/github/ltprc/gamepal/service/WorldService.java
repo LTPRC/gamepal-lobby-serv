@@ -25,10 +25,6 @@ public interface WorldService {
 
     void loadRecipes();
 
-//    ResponseEntity<String> addEvent(String userCode, Block event);
-
-//    void updateEvents(GameWorld world);
-
     void expandByCoordinate(GameWorld world, WorldCoordinate fromWorldCoordinate, WorldCoordinate toWorldCoordinate,
                             int depth);
 

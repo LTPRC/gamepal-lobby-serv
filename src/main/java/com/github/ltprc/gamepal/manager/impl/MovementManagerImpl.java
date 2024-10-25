@@ -22,9 +22,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 @Component
 public class MovementManagerImpl implements MovementManager {
@@ -168,11 +166,21 @@ public class MovementManagerImpl implements MovementManager {
             worldService.expandScene(world, worldMovingBlock.getWorldCoordinate(), 1);
             return;
         }
-//        IntegerCoordinate gridCoordinate = new IntegerCoordinate(
-//                worldMovingBlock.getWorldCoordinate().getCoordinate().getX().add(BigDecimal.valueOf(0.5D)).intValue(),
-//                worldMovingBlock.getWorldCoordinate().getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
-//        int floorCode = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
-        int floorCode = sceneManager.getGridBlockCode(world, worldMovingBlock.getWorldCoordinate());
-        worldMovingBlock.getMovementInfo().setFloorCode(floorCode);
+        if (null != scene.getGird() && null != scene.getGird()[0]) {
+            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldMovingBlock.getWorldCoordinate());
+            int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+            int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
+            int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
+            int code4 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
+            if (code1 == BlockConstants.BLOCK_CODE_WATER && code2 == BlockConstants.BLOCK_CODE_WATER
+                    && code3 == BlockConstants.BLOCK_CODE_WATER && code4 == BlockConstants.BLOCK_CODE_WATER) {
+                worldMovingBlock.getMovementInfo().setFloorCode(BlockConstants.BLOCK_CODE_WATER);
+                return;
+            }
+            int code = sceneManager.getGridBlockCode(world, worldMovingBlock.getWorldCoordinate());
+            if (code != BlockConstants.BLOCK_CODE_WATER) {
+                worldMovingBlock.getMovementInfo().setFloorCode(code);
+            }
+        }
     }
 }

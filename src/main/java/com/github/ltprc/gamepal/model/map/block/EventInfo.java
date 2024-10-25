@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.model.map.block;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Deprecated
 @Data
 @NoArgsConstructor
 public class EventInfo {
