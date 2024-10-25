@@ -32,7 +32,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -83,8 +82,12 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Integer playerStatus = req.getInteger("playerStatus");
         if (null != playerStatus) {
             playerInfo.setPlayerStatus(playerStatus);
@@ -173,9 +176,14 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         // Only human can receive message 24/09/30
-        if (player.getPlayerInfo().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1039));
         }
         Message message = new Message();
@@ -211,12 +219,21 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
         if (!creatureMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         if (!creatureMap.containsKey(nextUserCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (!playerInfoMap.containsKey(nextUserCode)) {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
@@ -238,10 +255,10 @@ public class PlayerServiceImpl implements PlayerService {
         newRelation = Math.min(RELATION_MAX, Math.max(RELATION_MIN, newRelation));
         if (newRelation != relationMap.get(userCode).get(nextUserCode)) {
             generateNotificationMessage(userCode, "你将对"
-                    + creatureMap.get(nextUserCode).getPlayerInfo().getNickname() + "的关系"
+                    + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
                     + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
                     + "为" + newRelation);
-            generateNotificationMessage(nextUserCode, creatureMap.get(userCode).getPlayerInfo().getNickname()
+            generateNotificationMessage(nextUserCode, playerInfoMap.get(userCode).getNickname()
                     + "将对你的关系" + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
                     + "为" + newRelation);
             relationMap.get(userCode).put(nextUserCode, newRelation);
@@ -310,6 +327,10 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
         int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
@@ -320,11 +341,11 @@ public class PlayerServiceImpl implements PlayerService {
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
                 case ItemConstants.ITEM_CHARACTER_TOOL:
-                    creatureMap.get(userCode).getPlayerInfo().getTools().remove(itemNo);
+                    playerInfoMap.get(userCode).getTools().remove(itemNo);
                     updateSkillsByTool(userCode);
                     break;
                 case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                    creatureMap.get(userCode).getPlayerInfo().getOutfits().remove(itemNo);
+                    playerInfoMap.get(userCode).getOutfits().remove(itemNo);
                     updateSkillsByTool(userCode);
                     break;
                 default:
@@ -390,6 +411,10 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
         int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
@@ -428,10 +453,10 @@ public class PlayerServiceImpl implements PlayerService {
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
                 case ItemConstants.ITEM_CHARACTER_TOOL:
-                    creatureMap.get(userCode).getPlayerInfo().getTools().remove(itemNo);
+                    playerInfoMap.get(userCode).getTools().remove(itemNo);
                     break;
                 case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                    creatureMap.get(userCode).getPlayerInfo().getOutfits().remove(itemNo);
+                    playerInfoMap.get(userCode).getOutfits().remove(itemNo);
                     break;
                 default:
                     break;
@@ -487,7 +512,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        if (creatureMap.get(userCode).getPlayerInfo().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        if (playerInfoMap.get(userCode).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
         && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
             npcManager.prepare2Attack(world, userCode, fromUserCode);
         }
@@ -502,7 +534,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldHp = playerInfo.getHp();
         int newHp = isAbsolute ? value : oldHp + value;
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
@@ -520,7 +559,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldVp = playerInfo.getVp();
         int newVp = isAbsolute ? value : oldVp + value;
         playerInfo.setVp(Math.max(0, Math.min(newVp, playerInfo.getVpMax())));
@@ -535,7 +581,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldHunger = playerInfo.getHunger();
         int newHunger = isAbsolute ? value : oldHunger + value;
         playerInfo.setHunger(Math.max(0, Math.min(newHunger, playerInfo.getHungerMax())));
@@ -550,7 +603,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldThirst = playerInfo.getThirst();
         int newThirst = isAbsolute ? value : oldThirst + value;
         playerInfo.setThirst(Math.max(0, Math.min(newThirst, playerInfo.getThirstMax())));
@@ -565,7 +625,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int oldPrecision = playerInfo.getPrecision();
         int newPrecision = isAbsolute ? value : oldPrecision + value;
         playerInfo.setPrecision(Math.max(0, Math.min(newPrecision, playerInfo.getPrecisionMax())));
@@ -579,7 +646,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         for (int i = 0; i < itemAmount; i++) {
             ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet()
                     .forEach((Map.Entry<String, Integer> entry) -> {
@@ -663,7 +737,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
         if (null == interactionInfo) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
@@ -752,7 +833,14 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (null == playerInfo.getSkills() || playerInfo.getSkills().size() <= skillNo) {
             logger.error(ErrorUtil.ERROR_1028 + " skillNo: " + skillNo);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1028));
@@ -805,9 +893,10 @@ public class PlayerServiceImpl implements PlayerService {
             return false;
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Block player = creatureMap.get(userCode);
         WorldCoordinate worldCoordinate = player.getWorldCoordinate();
-        PlayerInfo playerInfo = player.getPlayerInfo();
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         Random random = new Random();
         double gaussianValue = random.nextGaussian();
@@ -930,7 +1019,7 @@ public class PlayerServiceImpl implements PlayerService {
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
                 if (sceneManager.checkBlockSpace(world, fakeBuilding)) {
-                    Optional<BlockInfo> blockInfo1 = player.getPlayerInfo().getTools().stream()
+                    Optional<BlockInfo> blockInfo1 = playerInfo.getTools().stream()
                             .map(BlockUtil::convertItemNo2BlockType)
                             .map(BlockUtil::generateBlockInfo)
                             .findFirst();
@@ -961,7 +1050,12 @@ public class PlayerServiceImpl implements PlayerService {
             return userCode;
         }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return userCode;
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         while (StringUtils.isNotBlank(playerInfo.getBossId())
                 && !playerInfo.getBossId().equals(player.getBlockInfo().getId())) {
             player = creatureMap.get(playerInfo.getBossId());
@@ -980,11 +1074,15 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         if (userCode.equals(userCode1)) {
             if (StringUtils.isBlank(userCode2)) {
                 generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
-                creatureMap.get(userCode).getPlayerInfo().setBossId(null);
-                creatureMap.get(userCode).getPlayerInfo().setTopBossId(findTopBossId(userCode));
+                playerInfoMap.get(userCode).setBossId(null);
+                playerInfoMap.get(userCode).setTopBossId(findTopBossId(userCode));
                 return ResponseEntity.ok().body(rst.toString());
             }
             if (!creatureMap.containsKey(userCode2)) {
@@ -993,18 +1091,18 @@ public class PlayerServiceImpl implements PlayerService {
             String nextUserCodeBossId = userCode2;
             while (StringUtils.isNotBlank(nextUserCodeBossId)) {
                 if (nextUserCodeBossId.equals(userCode)) {
-                    generateNotificationMessage(userCode, creatureMap.get(userCode2).getPlayerInfo().getNickname()
+                    generateNotificationMessage(userCode, playerInfoMap.get(userCode2).getNickname()
                             + "是你的下级，你不可以为其效忠。");
                     return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
                 }
-                nextUserCodeBossId = creatureMap.get(nextUserCodeBossId).getPlayerInfo().getBossId();
+                nextUserCodeBossId = playerInfoMap.get(nextUserCodeBossId).getBossId();
             }
-            generateNotificationMessage(userCode, "你向" + creatureMap.get(userCode2).getPlayerInfo().getNickname()
+            generateNotificationMessage(userCode, "你向" + playerInfoMap.get(userCode2).getNickname()
                     + "屈从了，自此为其效忠。");
-            creatureMap.get(userCode).getPlayerInfo().setBossId(userCode2);
-            creatureMap.get(userCode).getPlayerInfo().setTopBossId(findTopBossId(userCode));
+            playerInfoMap.get(userCode).setBossId(userCode2);
+            playerInfoMap.get(userCode).setTopBossId(findTopBossId(userCode));
         } else {
-            PlayerInfo playerInfo1 = creatureMap.get(userCode1).getPlayerInfo();
+            PlayerInfo playerInfo1 = playerInfoMap.get(userCode1);
             if (!playerInfo1.getBossId().equals(userCode)) {
                 generateNotificationMessage(userCode, "你无法驱逐" + playerInfo1.getNickname()
                         + "，这不是你的直属下级。");
@@ -1028,8 +1126,15 @@ public class PlayerServiceImpl implements PlayerService {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int toolIndex = ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex();
         Set<String> newTools = new ConcurrentSkipListSet<>();
         if (playerInfo.getTools().contains(itemNo)) {
@@ -1055,7 +1160,15 @@ public class PlayerServiceImpl implements PlayerService {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Map<String, Block> creatureMap = world.getCreatureMap();
-        PlayerInfo playerInfo = creatureMap.get(userCode).getPlayerInfo();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         int outfitIndex = ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex();
         Set<String> newOutfits = new ConcurrentSkipListSet<>();
         if (playerInfo.getOutfits().contains(itemNo)) {
@@ -1085,7 +1198,15 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Block drop = sceneManager.addDropBlock(world, player.getWorldCoordinate(),
                 new AbstractMap.SimpleEntry<>(itemNo, amount));
 //        BlockInfo dropBlockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
@@ -1157,8 +1278,15 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1036));
         }
@@ -1197,8 +1325,15 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
         changeHp(userCode, playerInfo.getHpMax(), true);
         changeVp(userCode, playerInfo.getVpMax(), true);
@@ -1206,9 +1341,9 @@ public class PlayerServiceImpl implements PlayerService {
         changeThirst(userCode, playerInfo.getThirstMax(), true);
         changePrecision(userCode, playerInfo.getThirstMax(), true);
 
-        worldService.expandByCoordinate(world, player.getWorldCoordinate(), player.getPlayerInfo().getRespawnPoint(), 1);
+        worldService.expandByCoordinate(world, player.getWorldCoordinate(), playerInfo.getRespawnPoint(), 1);
         world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
-        movementManager.settleCoordinate(world, player, player.getPlayerInfo().getRespawnPoint());
+        movementManager.settleCoordinate(world, player, playerInfo.getRespawnPoint());
 
         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_SACRIFICE, userCode, player.getWorldCoordinate());
 
@@ -1225,8 +1360,15 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
         BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER);
@@ -1391,8 +1533,15 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
             NpcBrain npcBrain = world.getNpcBrainMap().get(userCode);
             if (null != npcBrain) {
@@ -1414,12 +1563,12 @@ public class PlayerServiceImpl implements PlayerService {
             preservedBagInfo.setCapacity(BigDecimal.ZERO);
             bagInfo.setCapacityMax(BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX));
         }
-        player.getMovementInfo().setFaceDirection(CreatureConstants.FACE_DIRECTION_DEFAULT);
-        creatureMap.values().stream()
-                .filter(player1 -> !player1.getBlockInfo().getId().equals(userCode))
-                .filter(player1 -> StringUtils.isNotBlank(player1.getPlayerInfo().getBossId()))
-                .filter(player1 -> player1.getPlayerInfo().getBossId().equals(userCode))
-                .forEach(player1 -> setMember(player1.getBlockInfo().getId(), player1.getBlockInfo().getId(), ""));
+        player.getMovementInfo().setFaceDirection(BlockConstants.FACE_DIRECTION_DEFAULT);
+        playerInfoMap.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(userCode))
+                .filter(entry -> StringUtils.isNotBlank(entry.getValue().getBossId()))
+                .filter(entry -> entry.getValue().getBossId().equals(userCode))
+                .forEach(entry -> setMember(entry.getKey(), entry.getKey(), ""));
         // TODO Game-over display
         userService.logoff(userCode, "", false);
         return ResponseEntity.ok().body(rst.toString());
@@ -1432,7 +1581,16 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        PlayerInfo playerInfo = world.getCreatureMap().get(userCode).getPlayerInfo();
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (playerInfo.getExp() >= playerInfo.getExpMax()) {
             playerInfo.setExp(0);
             playerInfo.setLevel(playerInfo.getLevel() + 1);
@@ -1448,7 +1606,16 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        PlayerInfo playerInfo = world.getCreatureMap().get(userCode).getPlayerInfo();
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         SkillUtil.updateHumanSkills(playerInfo);
         Tool tool = playerInfo.getTools().stream()
                 .filter(toolStr -> worldService.getItemMap().containsKey(toolStr))
@@ -1474,7 +1641,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (block.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
             return false;
         }
-        PlayerInfo playerInfo = block.getPlayerInfo();
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(id);
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0
                 && world.getOnlineMap().containsKey(block.getBlockInfo());

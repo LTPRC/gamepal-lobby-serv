@@ -462,7 +462,6 @@ public class BlockUtil {
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_NORMAL:
-            case BlockConstants.BLOCK_TYPE_EVENT:
             case BlockConstants.BLOCK_TYPE_DROP:
             case BlockConstants.BLOCK_TYPE_TELEPORT:
             case BlockConstants.BLOCK_TYPE_BUILDING:
@@ -575,37 +574,35 @@ public class BlockUtil {
         perceptionInfo.setIndistinctHearingRadius(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
     }
 
-    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final Block playerInfo1,
-                                                   final Block block2) {
-        if (playerInfo1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
+    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final Block player1,
+                                                   final PerceptionInfo perceptionInfo1, final Block block2) {
+        if (player1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
             return true;
         }
-        if (playerInfo1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+        if (player1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
                 || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-//        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, playerInfo1.getWorldCoordinate());
-//        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        BigDecimal distance = BlockUtil.calculateDistance(regionInfo, playerInfo1.getWorldCoordinate(), block2.getWorldCoordinate());
-        BigDecimal angle = BlockUtil.calculateAngle(regionInfo, playerInfo1.getWorldCoordinate(), block2.getWorldCoordinate());
+        BigDecimal distance = BlockUtil.calculateDistance(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
+        BigDecimal angle = BlockUtil.calculateAngle(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
         if (null == distance || null == angle) {
             return false;
         }
-        if (distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctHearingRadius()) <= 0) {
+        if (distance.compareTo(perceptionInfo1.getDistinctHearingRadius()) <= 0) {
             return true;
         }
         if (block2.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
-            return distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctVisionRadius()) <= 0
+            return distance.compareTo(perceptionInfo1.getDistinctVisionRadius()) <= 0
                     && BlockUtil.compareAnglesInDegrees(angle.doubleValue(),
-                    playerInfo1.getMovementInfo().getFaceDirection().doubleValue())
-                    < playerInfo1.getPlayerInfo().getPerceptionInfo().getDistinctVisionAngle().doubleValue() / 2;
+                    player1.getMovementInfo().getFaceDirection().doubleValue())
+                    < perceptionInfo1.getDistinctVisionAngle().doubleValue() / 2;
         } else {
-            return distance.compareTo(playerInfo1.getPlayerInfo().getPerceptionInfo().getIndistinctVisionRadius()) <= 0;
+            return distance.compareTo(perceptionInfo1.getIndistinctVisionRadius()) <= 0;
         }
     }
 
     public static void calculateMaxSpeed(MovementInfo movementInfo) {
-        BigDecimal maxSpeed = CreatureConstants.MAX_SPEED_DEFAULT;
+        BigDecimal maxSpeed = BlockConstants.MAX_SPEED_DEFAULT;
         switch (movementInfo.getFloorCode()) {
             case BlockConstants.BLOCK_CODE_SWAMP:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.2));
@@ -881,9 +878,9 @@ public class BlockUtil {
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
                 break;
-            case BlockConstants.BLOCK_TYPE_EVENT:
-                // TODO
-                break;
+//            case BlockConstants.BLOCK_TYPE_EVENT:
+//                // TODO
+//                break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,

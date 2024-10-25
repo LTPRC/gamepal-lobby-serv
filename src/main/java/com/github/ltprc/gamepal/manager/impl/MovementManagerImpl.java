@@ -132,7 +132,7 @@ public class MovementManagerImpl implements MovementManager {
         if (!world.getCreatureMap().containsKey(worldMovingBlock.getBlockInfo().getId())) {
             return;
         }
-        PlayerInfo playerInfo = world.getCreatureMap().get(worldMovingBlock.getBlockInfo().getId()).getPlayerInfo();
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(worldMovingBlock.getBlockInfo().getId());
         if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
             // Check location change
             if (isSceneChanged) {

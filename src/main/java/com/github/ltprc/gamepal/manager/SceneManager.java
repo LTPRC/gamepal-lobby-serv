@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.EventInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 
 import java.util.Map;
@@ -34,7 +35,7 @@ public interface SceneManager {
 
     Block addSceneBlock(final GameWorld world, final int blockCode, final WorldCoordinate worldCoordinate);
 
-    Block addEventBlock(final GameWorld world, final EventInfo eventInfo, final WorldCoordinate worldCoordinate);
+    Block addEventBlock(final GameWorld world, final int eventCode, final String eventId, final MovementInfo movementInfo, final WorldCoordinate worldCoordinate);
 
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);

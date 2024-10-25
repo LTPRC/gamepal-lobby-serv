@@ -6,20 +6,18 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 public class Scene extends SceneInfo {
-    private List<Block> blocks;
-    private List<Block> events;
+    private Map<String, Block> blocks;
     private int[][] gird; // terrain grid
 
     public Scene(Scene scene) {
-        blocks = new CopyOnWriteArrayList<>(scene.blocks);
-        events = new CopyOnWriteArrayList<>(scene.events);
+        blocks = new ConcurrentHashMap<>(scene.blocks);
         gird = ArrayUtils.clone(scene.gird);
     }
 }

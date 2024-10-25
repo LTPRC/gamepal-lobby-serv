@@ -10,6 +10,7 @@ import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.CommandManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -67,7 +68,8 @@ public class CommandManagerImpl implements CommandManager {
                 for (int i = 0; i < 3; i++) {
                     Block agent = npcManager.putSpecificCreatureByRole(world,
                             userCode, player.getWorldCoordinate(), CreatureConstants.NPC_ROLE_MINION);
-                    CreatureFactory.randomlyPersonalizePlayerInfo(agent.getPlayerInfo(), CreatureConstants.GENDER_MALE);
+                    PlayerInfo playerInfo = world.getPlayerInfoMap().get(agent.getBlockInfo().getId());
+                    CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_MALE);
                     playerService.getItem(agent.getBlockInfo().getId(), "o005", 1);
                     playerService.useItem(agent.getBlockInfo().getId(), "o005", 1);
                     playerService.getItem(agent.getBlockInfo().getId(), "t002", 1);
@@ -93,13 +95,15 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwcneo":
                 playerService.generateNotificationMessage(userCode, "你要战胜的是你自己。");
-                player.getPlayerInfo().setExp(player.getPlayerInfo().getExpMax());
+                PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+                playerInfo.setExp(playerInfo.getExpMax());
                 break;
             case "nwctrinity":
                 playerService.generateNotificationMessage(userCode, "枪在手，跟我走。");
                 Block trinity = npcManager.putSpecificCreatureByRole(world, userCode, player.getWorldCoordinate(),
                         CreatureConstants.NPC_ROLE_PEER);
-                CreatureFactory.randomlyPersonalizePlayerInfo(trinity.getPlayerInfo(), CreatureConstants.GENDER_FEMALE);
+                playerInfo = world.getPlayerInfoMap().get(trinity.getBlockInfo().getId());
+                CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_FEMALE);
                 playerService.getItem(trinity.getBlockInfo().getId(), "o004", 1);
                 playerService.useItem(trinity.getBlockInfo().getId(), "o004", 1);
                 playerService.getItem(trinity.getBlockInfo().getId(), "t000", 1);
@@ -108,26 +112,30 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwcnebuchadnezzar":
                 playerService.generateNotificationMessage(userCode, "跑得快。");
-                playerService.changeVp(userCode, player.getPlayerInfo().getVpMax(), true);
+                playerInfo = world.getPlayerInfoMap().get(userCode);
+                playerService.changeVp(userCode, playerInfo.getVpMax(), true);
                 break;
             case "nwcmorpheus":
                 playerService.generateNotificationMessage(userCode, "自由的灯塔在照耀我前进。");
-                buffManager.resetBuff(player.getPlayerInfo());
+                playerInfo = world.getPlayerInfoMap().get(userCode);
+                buffManager.resetBuff(playerInfo);
                 break;
             case "nwcwhatisthematrix":
                 playerService.generateNotificationMessage(userCode, "认清现实吧。");
-                if (player.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] == 0) {
-                    player.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
+                playerInfo = world.getPlayerInfoMap().get(userCode);
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] == 0) {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
                 } else {
-                    player.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = 0;
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = 0;
                 }
             case "nwcoracle":
                 playerService.generateNotificationMessage(userCode, "先知带你看世界。");
                 String animalUserCode = UUID.randomUUID().toString();
                 Block animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
-                animal.getPlayerInfo().setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-                animal.getPlayerInfo().setSkinColor(CreatureConstants.SKIN_COLOR_TIGER);
+                playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
+                playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                playerInfo.setSkinColor(CreatureConstants.SKIN_COLOR_TIGER);
                 WorldCoordinate worldCoordinate = new WorldCoordinate(player.getWorldCoordinate().getRegionNo(),
                         player.getWorldCoordinate().getSceneCoordinate(),
                         new Coordinate(player.getWorldCoordinate().getCoordinate().getX().add(BigDecimal.valueOf(3)),
@@ -136,8 +144,9 @@ public class CommandManagerImpl implements CommandManager {
                 animalUserCode = UUID.randomUUID().toString();
                 animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
-                animal.getPlayerInfo().setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-                animal.getPlayerInfo().setSkinColor(CreatureConstants.SKIN_COLOR_FOX);
+                playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
+                playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                playerInfo.setSkinColor(CreatureConstants.SKIN_COLOR_FOX);
                 worldCoordinate = new WorldCoordinate(player.getWorldCoordinate().getRegionNo(),
                         player.getWorldCoordinate().getSceneCoordinate(),
                         new Coordinate(player.getWorldCoordinate().getCoordinate().getX(),
@@ -146,8 +155,9 @@ public class CommandManagerImpl implements CommandManager {
                 animalUserCode = UUID.randomUUID().toString();
                 animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
-                animal.getPlayerInfo().setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-                animal.getPlayerInfo().setSkinColor(CreatureConstants.SKIN_COLOR_RACOON);
+                playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
+                playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                playerInfo.setSkinColor(CreatureConstants.SKIN_COLOR_RACOON);
                 worldCoordinate = new WorldCoordinate(player.getWorldCoordinate().getRegionNo(),
                         player.getWorldCoordinate().getSceneCoordinate(),
                         new Coordinate(player.getWorldCoordinate().getCoordinate().getX().subtract(BigDecimal.valueOf(3)),
@@ -156,8 +166,9 @@ public class CommandManagerImpl implements CommandManager {
                 animalUserCode = UUID.randomUUID().toString();
                 animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
-                animal.getPlayerInfo().setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
-                animal.getPlayerInfo().setSkinColor(CreatureConstants.SKIN_COLOR_SHEEP);
+                playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
+                playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+                playerInfo.setSkinColor(CreatureConstants.SKIN_COLOR_SHEEP);
                 worldCoordinate = new WorldCoordinate(player.getWorldCoordinate().getRegionNo(),
                         player.getWorldCoordinate().getSceneCoordinate(),
                         new Coordinate(player.getWorldCoordinate().getCoordinate().getX(),
@@ -169,7 +180,8 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwctheconstruct":
                 playerService.generateNotificationMessage(userCode, "财源滚滚。");
-                player.getPlayerInfo().setMoney(player.getPlayerInfo().getMoney() + 100);
+                playerInfo = world.getPlayerInfoMap().get(userCode);
+                playerInfo.setMoney(playerInfo.getMoney() + 100);
                 break;
             case "nwcbluepill":
                 playerService.generateNotificationMessage(userCode, "真香，嗝。");
@@ -181,17 +193,19 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwcthereisnospoon":
                 playerService.generateNotificationMessage(userCode, "我无敌辣。");
-                if (player.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] == 0) {
-                    player.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] = -1;
+                playerInfo = world.getPlayerInfoMap().get(userCode);
+                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] == 0) {
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] = -1;
                 } else {
-                    player.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] = 0;
+                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] = 0;
                 }
                 break;
             case "nwczion":
                 playerService.generateNotificationMessage(userCode, "欢迎回家。");
-                worldService.expandByCoordinate(world, player.getWorldCoordinate(), player.getPlayerInfo().getRespawnPoint(), 1);
+                playerInfo = world.getPlayerInfoMap().get(userCode);
+                worldService.expandByCoordinate(world, player.getWorldCoordinate(), playerInfo.getRespawnPoint(), 1);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
-                movementManager.settleCoordinate(world, player, player.getPlayerInfo().getRespawnPoint());
+                movementManager.settleCoordinate(world, player, playerInfo.getRespawnPoint());
                 break;
         }
         return ResponseEntity.ok().body(rst.toString());

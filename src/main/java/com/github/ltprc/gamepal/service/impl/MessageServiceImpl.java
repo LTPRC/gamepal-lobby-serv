@@ -62,8 +62,8 @@ public class MessageServiceImpl implements MessageService {
         }
         GameWorld world = userService.getWorldByUserCode(fromUserCode);
         if (MessageConstants.SCOPE_GLOBAL == scope) {
-            world.getCreatureMap().entrySet().stream()
-                    .filter(entry -> entry.getValue().getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+            world.getPlayerInfoMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
                     .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
                     .forEach(entry -> {
                 if (!entry.getKey().equals(fromUserCode)) {
@@ -76,8 +76,8 @@ public class MessageServiceImpl implements MessageService {
                 }
             });
         } else if (MessageConstants.SCOPE_TEAMMATE == scope) {
-            world.getCreatureMap().entrySet().stream()
-                    .filter(entry -> entry.getValue().getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+            world.getPlayerInfoMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
                     .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
                     .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
                             playerService.findTopBossId(fromUserCode)))
@@ -121,7 +121,7 @@ public class MessageServiceImpl implements MessageService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
         }
         // These messages are shown back to the sender (human-only) 24/08/09
-        if (world.getCreatureMap().get(userCode).getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (world.getPlayerInfoMap().get(userCode).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             if (!messageMap.containsKey(userCode)) {
                 messageMap.put(userCode, new LinkedBlockingDeque<>());

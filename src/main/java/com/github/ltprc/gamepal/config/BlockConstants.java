@@ -30,7 +30,7 @@ public class BlockConstants {
     public static final char BLOCK_CODE_PREFIX_ROCKS = 'r';
 
     public static final int BLOCK_TYPE_NORMAL = 0;
-    public static final int BLOCK_TYPE_EVENT = 1;
+    public static final int BLOCK_TYPE_EFFECT = 1;
     public static final int BLOCK_TYPE_PLAYER = 2;
     public static final int BLOCK_TYPE_DROP = 3;
     public static final int BLOCK_TYPE_TELEPORT = 4;
@@ -107,6 +107,14 @@ public class BlockConstants {
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
     public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.1);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
+
+    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
+    public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.005);
+    public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
+    public static final int FLOOR_CODE_DEFAULT = 0;
+    public static final int FRAME_DEFAULT = 0;
+    public static final int FRAME_MAX_DEFAULT = -1;
+    public static final int PERIOD_DEFAULT = 1;
 
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
     public static Map<Integer, Long> BLOCK_TYPE_TIMEOUT_MAP = new HashMap<>();

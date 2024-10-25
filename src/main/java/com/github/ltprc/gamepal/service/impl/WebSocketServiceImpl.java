@@ -104,7 +104,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Check functions
         JSONObject functions = null;
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(player.getBlockInfo().getId());
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfoCharacter")) {
@@ -309,9 +309,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         Block player = creatureMap.get(userCode);
         JSONObject playerInfos = new JSONObject();
         creatureMap.values().stream()
-                .filter(player1 -> (player1.getPlayerInfo()).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                .filter(player1 -> world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
                 .filter(player1 -> StringUtils.equals(userCode, player1.getBlockInfo().getId())
-                        || (player1.getPlayerInfo()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                        || world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true)));
         creatureMap.values().stream()
@@ -392,8 +392,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONObject miniMap = new JSONObject();
         if (null != functions) {
             if (Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
-                functionsResponse.put("createPlayerInfoInstance", sceneManager.convertBlock2OldBlockInstance(world,
-                        userCode, CreatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN), true));
+                functionsResponse.put("createPlayerInfoInstance", CreatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN));
             }
             if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
                 JSONArray background = MiniMapManager.generateMiniMapBackground(region,

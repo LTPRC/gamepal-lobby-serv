@@ -2,18 +2,18 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.FlagConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
@@ -56,14 +56,28 @@ public class NpcManagerImpl implements NpcManager {
 
     @Override
     public Block createCreature(GameWorld world, final int playerType, final int creatureType, String userCode) {
-        Block player = CreatureFactory.createCreatureInstance(playerType);
+
+        WorldCoordinate worldCoordinate = new WorldCoordinate();
+        BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
+
+        BlockInfo blockInfo = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_PLAYER);
+
+        MovementInfo movementInfo = new MovementInfo();
+        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        movementInfo.setFaceDirection(BlockConstants.FACE_DIRECTION_DEFAULT);
+        BlockUtil.calculateMaxSpeed(movementInfo);
+        movementInfo.setAcceleration(BlockConstants.ACCELERATION_DEFAULT);
+
+        Block player = new Block(worldCoordinate, blockInfo, movementInfo);
         player.getBlockInfo().setId(userCode);
         player.getMovementInfo().setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
-        player.getPlayerInfo().setCreatureType(creatureType);
-        player.getPlayerInfo().setTopBossId(userCode);
-        BlockUtil.updatePerceptionInfo(player.getPlayerInfo().getPerceptionInfo(), world.getWorldTime());
-        buffManager.initializeBuff(player.getPlayerInfo());
+        PlayerInfo playerInfo = CreatureFactory.createCreatureInstance(playerType);
+        playerInfo.setCreatureType(creatureType);
+        playerInfo.setTopBossId(userCode);
+        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
+        buffManager.initializeBuff(playerInfo);
         world.getCreatureMap().put(userCode, player);
+        world.getPlayerInfoMap().put(userCode, playerInfo);
         BagInfo bagInfo = new BagInfo();
         bagInfo.setId(userCode);
         world.getBagInfoMap().put(userCode, bagInfo);
@@ -76,14 +90,15 @@ public class NpcManagerImpl implements NpcManager {
     @Override
     public Block putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate) {
         Block player = world.getCreatureMap().get(userCode);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         BlockUtil.copyWorldCoordinate(worldCoordinate, player.getWorldCoordinate());
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), player.getWorldCoordinate());
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
-                player.getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
+                playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
         worldService.registerOnline(world, player.getBlockInfo());
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         userService.addUserIntoWorldMap(userCode, world.getId());
-        if (CreatureConstants.PLAYER_TYPE_HUMAN != player.getPlayerInfo().getPlayerType()) {
+        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
             NpcBrain npcBrain = generateNpcBrain();
             world.getNpcBrainMap().put(userCode, npcBrain);
             JSONObject behaviorRequest = new JSONObject();
@@ -91,14 +106,14 @@ public class NpcManagerImpl implements NpcManager {
             behaviorRequest.put("targetUserCode", userCode);
             behaviorRequest.put("behavior", CreatureConstants.NPC_BEHAVIOR_IDLE);
             JSONArray exemptionJsonArray = new JSONArray();
-            if (CreatureConstants.CREATURE_TYPE_HUMAN == player.getPlayerInfo().getCreatureType()) {
+            if (CreatureConstants.CREATURE_TYPE_HUMAN == playerInfo.getCreatureType()) {
                 behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
                 exemptionJsonArray.add(false);
                 exemptionJsonArray.add(true);
                 exemptionJsonArray.add(true);
                 exemptionJsonArray.add(false);
             } else {
-                switch (player.getPlayerInfo().getSkinColor()) {
+                switch (playerInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_PAOFU:
                     case CreatureConstants.SKIN_COLOR_MONKEY:
                     case CreatureConstants.SKIN_COLOR_FOX:
@@ -123,7 +138,7 @@ public class NpcManagerImpl implements NpcManager {
                         behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
                         break;
                 }
-                switch (player.getPlayerInfo().getSkinColor()) {
+                switch (playerInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_SHEEP:
                     case CreatureConstants.SKIN_COLOR_HORSE:
                     case CreatureConstants.SKIN_COLOR_FROG:
@@ -221,7 +236,8 @@ public class NpcManagerImpl implements NpcManager {
                                           final int behavior, final int stance, final boolean[] exemption) {
         String npcUserCode = UUID.randomUUID().toString();
         Block player = createCreature(world, playerType, creatureType, npcUserCode);
-        player.getPlayerInfo().setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
         worldCoordinate.getCoordinate().setX(worldCoordinate.getCoordinate().getX()
                 .add(distance.multiply(BigDecimal.valueOf(
                         1 * Math.cos(player.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)))));
@@ -247,17 +263,18 @@ public class NpcManagerImpl implements NpcManager {
     public Block putSpecificCreatureByRole(GameWorld world, String userCode, WorldCoordinate worldCoordinate,
                                                 int role) {
         Block player;
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         switch (role) {
             case CreatureConstants.NPC_ROLE_PEER:
                 player = putSpecificCreature(world, userCode, worldCoordinate, BigDecimal.ONE,
                         CreatureConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
                         CreatureConstants.NPC_BEHAVIOR_MOVE, CreatureConstants.STANCE_DEFENSIVE,
                         new boolean[]{false, false, true, false});
-                if (StringUtils.isBlank(world.getCreatureMap().get(userCode).getPlayerInfo().getBossId())) {
+                if (StringUtils.isBlank(playerInfo.getBossId())) {
                     playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(), userCode);
                 } else {
                     playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(),
-                            world.getCreatureMap().get(userCode).getPlayerInfo().getBossId());
+                            playerInfo.getBossId());
                 }
                 break;
             case CreatureConstants.NPC_ROLE_MINION:
@@ -284,7 +301,7 @@ public class NpcManagerImpl implements NpcManager {
         npcBrainMap.entrySet().stream()
                 // Filtered NPCs not detected by human players 24/08/01
                 .filter(entry2 -> world.getCreatureMap().entrySet().stream()
-                        .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == entry3.getValue().getPlayerInfo().getPlayerType())
+                        .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == world.getPlayerInfoMap().get(entry3.getKey()).getPlayerType())
                         .anyMatch(entry3 -> SkillUtil.isSceneDetected(entry3.getValue(),
                                 world.getCreatureMap().get(entry3.getKey()).getWorldCoordinate(), 1)))
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
@@ -316,7 +333,8 @@ public class NpcManagerImpl implements NpcManager {
                             .filter(player1 -> !npcUserCode.equals(player1.getBlockInfo().getId()))
                             .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                             .filter(player1 -> BlockUtil.checkPerceptionCondition(
-                                    world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()), player, player1))
+                                    world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()), player,
+                                    world.getPlayerInfoMap().get(npcUserCode).getPerceptionInfo(), player1))
                             .min((player1, player2) -> {
                                 BigDecimal distance1 = BlockUtil.calculateDistance
                                         (world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
@@ -338,7 +356,7 @@ public class NpcManagerImpl implements NpcManager {
                     }
                     // Move & Destroy
                     if (!npcBrain.getRedQueue().isEmpty()
-                            && SkillUtil.checkSkillTypeAttack(world.getCreatureMap().get(npcUserCode).getPlayerInfo())) {
+                            && SkillUtil.checkSkillTypeAttack(world.getPlayerInfoMap().get(npcUserCode))) {
                         hunt(world, npcUserCode);
                     } else if (!npcBrain.getYellowQueue().isEmpty()) {
                         JSONObject moveReq = new JSONObject();
@@ -357,7 +375,7 @@ public class NpcManagerImpl implements NpcManager {
                 });
         // Settle NPC speed
         world.getCreatureMap().entrySet().stream()
-                .filter(entry2 -> entry2.getValue().getPlayerInfo().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
+                .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
                 .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue(), 1));
     }
@@ -374,16 +392,16 @@ public class NpcManagerImpl implements NpcManager {
         if (world.getNpcBrainMap().get(fromUserCode).getStance() == CreatureConstants.STANCE_NO_ATTACK) {
             return false;
         }
-        if (!SkillUtil.checkSkillTypeAttack(world.getCreatureMap().get(fromUserCode).getPlayerInfo())) {
+        if (!SkillUtil.checkSkillTypeAttack(world.getPlayerInfoMap().get(fromUserCode))) {
             return false;
         }
         if (world.getNpcBrainMap().get(fromUserCode).getExemption()[CreatureConstants.NPC_EXEMPTION_TEAMMATE]
-                && StringUtils.equals(world.getCreatureMap().get(fromUserCode).getPlayerInfo().getTopBossId(),
-                world.getCreatureMap().get(toUserCode).getPlayerInfo().getTopBossId())) {
+                && StringUtils.equals(world.getPlayerInfoMap().get(fromUserCode).getTopBossId(),
+                world.getPlayerInfoMap().get(toUserCode).getTopBossId())) {
             return false;
         } else if (world.getNpcBrainMap().get(fromUserCode).getExemption()[CreatureConstants.NPC_EXEMPTION_SAME_CREATURE]
-                && world.getCreatureMap().get(fromUserCode).getPlayerInfo().getCreatureType()
-                == world.getCreatureMap().get(toUserCode).getPlayerInfo().getCreatureType()) {
+                && world.getPlayerInfoMap().get(fromUserCode).getCreatureType()
+                == world.getPlayerInfoMap().get(toUserCode).getCreatureType()) {
             return false;
         }
         return true;
@@ -392,8 +410,9 @@ public class NpcManagerImpl implements NpcManager {
     @Override
     public boolean prepare2Attack(GameWorld world, final String fromUserCode, final String toUserCode) {
         Block fromPlayer = world.getCreatureMap().get(fromUserCode);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(fromUserCode);
         NpcBrain npcBrain = world.getNpcBrainMap().get(fromUserCode);
-        if (fromPlayer.getPlayerInfo().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN || null == npcBrain) {
+        if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN || null == npcBrain) {
             logger.warn(ErrorUtil.ERROR_1039);
             return false;
         }
@@ -407,6 +426,7 @@ public class NpcManagerImpl implements NpcManager {
 
     private void hunt(GameWorld world, String npcUserCode) {
         Block npcPlayer = world.getCreatureMap().get(npcUserCode);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
         NpcBrain npcBrain = world.getNpcBrainMap().get(npcUserCode);
         BigDecimal distance = BlockUtil.calculateDistance(
                 world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(),
@@ -414,7 +434,7 @@ public class NpcManagerImpl implements NpcManager {
         if (null == distance) {
             return;
         }
-        BigDecimal stopDistance = npcPlayer.getPlayerInfo().getSkills().stream()
+        BigDecimal stopDistance = playerInfo.getSkills().stream()
                 .map(Skill::getRange)
                 .max(BigDecimal::compareTo)
                 .get()
@@ -436,9 +456,9 @@ public class NpcManagerImpl implements NpcManager {
         moveReq.put("redBlock", npcBrain.getRedQueue().peek());
         moveReq.put("stopDistance", stopDistance);
         JSONObject moveResp = runNpcMoveTask(moveReq);
-        for (int i = 0; i < npcPlayer.getPlayerInfo().getSkills().size(); i++) {
-            if (npcPlayer.getPlayerInfo().getSkills().get(i).getSkillType() == SkillConstants.SKILL_TYPE_ATTACK
-                    && distance.compareTo(npcPlayer.getPlayerInfo().getSkills().get(i).getRange()) <= 0) {
+        for (int i = 0; i < playerInfo.getSkills().size(); i++) {
+            if (playerInfo.getSkills().get(i).getSkillType() == SkillConstants.SKILL_TYPE_ATTACK
+                    && distance.compareTo(playerInfo.getSkills().get(i).getRange()) <= 0) {
                 playerService.useSkill(npcPlayer.getBlockInfo().getId(), i, true);
                 playerService.useSkill(npcPlayer.getBlockInfo().getId(), i, false);
             }
@@ -468,6 +488,7 @@ public class NpcManagerImpl implements NpcManager {
         double stopDistance = request.getDouble("stopDistance");
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         Block npcPlayer = world.getCreatureMap().get(npcUserCode);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
         BigDecimal distanceBigDecimal = BlockUtil.calculateDistance(
                 world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(), wc);
         if (null == distanceBigDecimal) {
@@ -485,13 +506,13 @@ public class NpcManagerImpl implements NpcManager {
         double newSpeed = Math.sqrt(Math.pow(npcPlayer.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                 + Math.pow(npcPlayer.getMovementInfo().getSpeed().getY().doubleValue(), 2)) + npcPlayer.getMovementInfo().getAcceleration().doubleValue();
         newSpeed = Math.min(newSpeed, distance - stopDistance);
-        if (npcPlayer.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_STUNNED] != 0) {
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_STUNNED] != 0) {
             newSpeed = 0D;
-        } else if (npcPlayer.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
+        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
             newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
-        } else if (npcPlayer.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0) {
+        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0) {
             newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
-        } else if (npcPlayer.getPlayerInfo().getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
             newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
         } else {
             newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue(), newSpeed);

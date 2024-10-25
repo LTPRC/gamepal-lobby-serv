@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EventInfo {
 
-    private int eventCode;
     private String eventId;
     private int frame;
     private int frameMax;
@@ -17,15 +16,13 @@ public class EventInfo {
         if (null == eventInfo) {
             return;
         }
-        eventCode = eventInfo.eventCode;
         eventId = eventInfo.eventId;
         frame = eventInfo.frame;
         frameMax = eventInfo.frameMax;
         period = eventInfo.period;
     }
 
-    public EventInfo(int eventCode, String eventId, int frame, int frameMax, int period) {
-        this.eventCode = eventCode;
+    public EventInfo(String eventId, int frame, int frameMax, int period) {
         this.eventId = eventId;
         this.frame = frame;
         this.frameMax = frameMax;

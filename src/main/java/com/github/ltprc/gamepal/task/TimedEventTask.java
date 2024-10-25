@@ -16,7 +16,6 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -64,23 +63,24 @@ public class TimedEventTask {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
 
-            // Update events
+            // Update events TODO
             eventManager.updateEvents(world);
 
             Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
+            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
             onlineMap.keySet().stream()
                     .filter(blockInfo -> blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                     .filter(blockInfo -> creatureMap.containsKey(blockInfo.getId()))
-                    .filter(blockInfo -> creatureMap.get(blockInfo.getId()).getPlayerInfo().getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .filter(blockInfo -> playerInfoMap.get(blockInfo.getId()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(blockInfo -> {
                         buffManager.updateBuffTime(world, blockInfo.getId());
                         buffManager.changeBuff(world, blockInfo.getId());
 
                         if (playerService.validateActiveness(world, blockInfo.getId())) {
                             MovementInfo movementInfo = creatureMap.get(blockInfo.getId()).getMovementInfo();
-                            PlayerInfo playerInfo = creatureMap.get(blockInfo.getId()).getPlayerInfo();
+                            PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
                             double randomNumber;
 
                             // Change hp
@@ -188,6 +188,7 @@ public class TimedEventTask {
             GameWorld world = entry.getValue();
             Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
+            Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
             onlineMap.keySet().stream()
                     .filter(blockInfo -> playerService.validateActiveness(world, blockInfo.getId()))
                     .forEach(blockInfo -> {
@@ -207,7 +208,7 @@ public class TimedEventTask {
                 if (timestamp - oldTimestamp > timeThreshold) {
                     if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER
                             && creatureMap.containsKey(blockInfo.getId())
-                            && creatureMap.get(blockInfo.getId()).getPlayerInfo().getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+                            && playerInfoMap.get(blockInfo.getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
                         // NPC is exempted 24/10/20
                         userService.logoff(blockInfo.getId(), "", false);
                     } else if (world.getBlockMap().containsKey(blockInfo.getId())) {

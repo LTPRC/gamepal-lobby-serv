@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.model.map.world;
 
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.game.Game;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.Region;
@@ -28,7 +29,6 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, String> tokenMap; // userCode, token
     private Map<BlockInfo, Long> onlineMap; // blockInfo, timestamp
     private Map<Integer, Game> gameMap; // gameNo, game
-    private Queue<Block> eventQueue; // event
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
     private Map<String, boolean[]> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal
@@ -36,7 +36,10 @@ public class GameWorld extends GameWorldInfo {
 
     // Special block info maps
     private Map<String, Block> blockMap; // code, non-creature block
+    private Queue<Block> eventQueue; // event
+    private Map<String, String> effectMap; // id, sourceId
     private Map<String, Block> creatureMap; // code, creature block
+    private Map<String, PlayerInfo> playerInfoMap; // code, creature block
     private Map<String, BagInfo> bagInfoMap;
     private Map<String, BagInfo> preservedBagInfoMap;
     private Map<String, Map.Entry<String, Integer>> dropMap;

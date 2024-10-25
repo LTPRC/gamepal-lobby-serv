@@ -26,10 +26,9 @@ public class BuffManagerImpl implements BuffManager {
 
     @Override
     public void updateBuffTime(GameWorld world, String userCode) {
-        Block player = world.getCreatureMap().get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
-            if (player.getPlayerInfo().getBuff()[i] <= 0) {
+            if (playerInfo.getBuff()[i] <= 0) {
                 continue;
             }
             playerInfo.getBuff()[i] = playerInfo.getBuff()[i] - 1;
@@ -52,8 +51,7 @@ public class BuffManagerImpl implements BuffManager {
      */
     @Override
     public void changeBuff(GameWorld world, String userCode) {
-        Block player = world.getCreatureMap().get(userCode);
-        PlayerInfo playerInfo = player.getPlayerInfo();
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
 
         if (playerInfo.getHp() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
             playerService.killPlayer(userCode);
