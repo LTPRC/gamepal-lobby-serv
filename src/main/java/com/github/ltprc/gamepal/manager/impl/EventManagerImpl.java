@@ -45,7 +45,7 @@ public class EventManagerImpl implements EventManager {
                 // Infinite
                 movementInfo.setFrameMax(-1);
                 break;
-            case GamePalConstants.EVENT_CODE_SPARK:
+            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
                 movementInfo.setFrameMax(1);
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
@@ -203,22 +203,11 @@ public class EventManagerImpl implements EventManager {
     private void activateEvent(GameWorld world, Block eventBlock, List<Block> affectedBlockList) {
         Random random = new Random();
         Map<Integer, Region> regionMap = world.getRegionMap();
+        Region region = world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo());
         Map<String, Block> creatureMap = world.getCreatureMap();
         String fromId = world.getEffectMap().get(eventBlock.getBlockInfo().getId());
         Block fromPlayer = world.getCreatureMap().get(fromId);
         int changedHp = SkillUtil.calculateChangedHp(Integer.parseInt(eventBlock.getBlockInfo().getCode()));
-        // Show itself
-        switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-                break;
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                addEvent(world, GamePalConstants.EVENT_CODE_EXPLODE, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), eventBlock.getWorldCoordinate());
-                break;
-            default:
-//                world.getEventQueue().add(eventBlock);
-                break;
-        }
         // Effect after activation
         switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
             case GamePalConstants.EVENT_CODE_HEAL:
@@ -240,8 +229,7 @@ public class EventManagerImpl implements EventManager {
                             }
                             playerService.damageHp(player.getBlockInfo().getId(), world.getEffectMap().get(eventBlock.getBlockInfo().getId()),
                                     damageValue, false);
-                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                    world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
+                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                                     player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                                     BigDecimal.valueOf(random.nextDouble() / 2));
                             addEvent(world, GamePalConstants.EVENT_CODE_BLEED, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), bleedWc);
@@ -263,19 +251,19 @@ public class EventManagerImpl implements EventManager {
                         .forEach(player -> {
                             playerService.damageHp(player.getBlockInfo().getId(), world.getEffectMap().get(eventBlock.getBlockInfo().getId()),
                                     changedHp, false);
-                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                    world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
+                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                                     player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                                     BigDecimal.valueOf(random.nextDouble() / 2));
                             addEvent(world, GamePalConstants.EVENT_CODE_BLEED, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), bleedWc);
                 });
+                updateBullet(world, eventBlock, affectedBlockList);
                 WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                         world.getRegionMap().get(fromPlayer.getWorldCoordinate().getRegionNo()),
                         fromPlayer.getWorldCoordinate(),
                         fromPlayer.getMovementInfo().getFaceDirection().add(BigDecimal.valueOf(
                                 SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
                                         * (random.nextDouble() - 0.5D))), BigDecimal.ONE);
-                addEvent(world, GamePalConstants.EVENT_CODE_SPARK, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), sparkWc);
+                addEvent(world, GamePalConstants.EVENT_CODE_SPARK_SHORT, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), sparkWc);
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
                 BigDecimal tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
@@ -295,6 +283,8 @@ public class EventManagerImpl implements EventManager {
                                 addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), tailSmokeCoordinate);
                             });
                 }
+                updateBullet(world, eventBlock, affectedBlockList);
+                addEvent(world, GamePalConstants.EVENT_CODE_EXPLODE, world.getEffectMap().get(eventBlock.getBlockInfo().getId()), eventBlock.getWorldCoordinate());
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
                 BigDecimal flameLength = BlockUtil.calculateDistance(regionMap.get(
@@ -326,8 +316,7 @@ public class EventManagerImpl implements EventManager {
                         .forEach(player -> {
                             playerService.damageHp(player.getBlockInfo().getId(), world.getEffectMap().get(eventBlock.getBlockInfo().getId()),
                                     changedHp, false);
-                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                    world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
+                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                                     player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                                     BigDecimal.valueOf(random.nextDouble() / 2));
                             addEvent(world, GamePalConstants.EVENT_CODE_BLEED, player.getBlockInfo().getId(), bleedWc);
@@ -394,6 +383,72 @@ public class EventManagerImpl implements EventManager {
         }
     }
 
+    private void updateBullet(GameWorld world, Block bulletBlock, List<Block> affectedBlockList) {
+        Region region = world.getRegionMap().get(bulletBlock.getWorldCoordinate().getRegionNo());
+        Integer eventCode = null;
+        Optional<Block> targetBlock = affectedBlockList.stream()
+                .filter(block -> BlockUtil.detectCollision(region, bulletBlock, block))
+                .filter(block -> null != BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate()))
+                .min(Comparator.comparing(block -> BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate())));
+        switch (bulletBlock.getMovementInfo().getFloorCode()) {
+            case BlockConstants.BLOCK_CODE_DIRT:
+            case BlockConstants.BLOCK_CODE_GRASS:
+                eventCode = GamePalConstants.EVENT_CODE_ASH;
+            case BlockConstants.BLOCK_CODE_ROUGH:
+            case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
+                eventCode = GamePalConstants.EVENT_CODE_SPARK;
+                break;
+            case BlockConstants.BLOCK_CODE_LAVA:
+                eventCode = GamePalConstants.EVENT_CODE_TAIL_SMOKE;
+                break;
+            case BlockConstants.BLOCK_CODE_SWAMP:
+            case BlockConstants.BLOCK_CODE_WATER:
+                eventCode = GamePalConstants.EVENT_CODE_WATER;
+                break;
+            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_SAND:
+            case BlockConstants.BLOCK_CODE_SNOW:
+            default:
+                break;
+        }
+        if (targetBlock.isPresent()) {
+            switch (targetBlock.get().getBlockInfo().getType()) {
+                case BlockConstants.BLOCK_TYPE_PLAYER:
+                    eventCode = GamePalConstants.EVENT_CODE_BLEED;
+                    break;
+                case BlockConstants.BLOCK_TYPE_DROP:
+                case BlockConstants.BLOCK_TYPE_TELEPORT:
+                case BlockConstants.BLOCK_TYPE_TREE:
+                    eventCode = GamePalConstants.EVENT_CODE_ASH;
+                    break;
+                case BlockConstants.BLOCK_TYPE_BED:
+                case BlockConstants.BLOCK_TYPE_TOILET:
+                case BlockConstants.BLOCK_TYPE_DRESSER:
+                case BlockConstants.BLOCK_TYPE_STORAGE:
+                case BlockConstants.BLOCK_TYPE_COOKER:
+                case BlockConstants.BLOCK_TYPE_SINK:
+                case BlockConstants.BLOCK_TYPE_CONTAINER:
+                case BlockConstants.BLOCK_TYPE_RADIO:
+                case BlockConstants.BLOCK_TYPE_BUILDING:
+                case BlockConstants.BLOCK_TYPE_ROCK:
+                case BlockConstants.BLOCK_TYPE_WORKSHOP:
+                case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+                case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+                case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+                case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+                case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                    eventCode = GamePalConstants.EVENT_CODE_SPARK;
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (null != eventCode) {
+            addEvent(world, eventCode, world.getEffectMap().get(bulletBlock.getBlockInfo().getId()),
+                    bulletBlock.getWorldCoordinate());
+        }
+    }
+
     @Override
     public void updateEvents(GameWorld world) {
         world.getBlockMap().values().stream()
@@ -435,6 +490,7 @@ public class EventManagerImpl implements EventManager {
                 if (region.getScenes().values().stream()
                         .filter(scene -> SkillUtil.isSceneDetected(newEvent, scene.getSceneCoordinate(), 1))
                         .anyMatch(scene -> scene.getBlocks().values().stream()
+                                .filter(worldEvent -> worldEvent.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_EFFECT)
                                 .filter(worldEvent -> Integer.parseInt(worldEvent.getBlockInfo().getCode()) == GamePalConstants.EVENT_CODE_WATER)
                                 .anyMatch(worldEvent -> {
                                     BigDecimal distance = BlockUtil.calculateDistance(
