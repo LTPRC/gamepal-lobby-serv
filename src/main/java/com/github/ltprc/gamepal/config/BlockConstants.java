@@ -45,6 +45,7 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_RADIO = 14;
     public static final int BLOCK_TYPE_BUILDING = 15;
     public static final int BLOCK_TYPE_TREE = 16;
+    public static final int BLOCK_TYPE_ROCK = 17;
     public static final int BLOCK_TYPE_WORKSHOP = 20;
     public static final int BLOCK_TYPE_WORKSHOP_TOOL = 21;
     public static final int BLOCK_TYPE_WORKSHOP_AMMO = 22;

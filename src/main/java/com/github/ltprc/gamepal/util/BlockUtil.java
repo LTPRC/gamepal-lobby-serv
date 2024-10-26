@@ -425,6 +425,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_TELEPORT:
             case BlockConstants.BLOCK_TYPE_BUILDING:
             case BlockConstants.BLOCK_TYPE_TREE:
+            case BlockConstants.BLOCK_TYPE_ROCK:
                 return false;
             default:
                 return true;
@@ -796,14 +797,14 @@ public class BlockUtil {
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.ROCK_INDEX_1:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, id,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-0",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
             case BlockConstants.ROCK_INDEX_2:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id,
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, id,
                         BlockConstants.BLOCK_CODE_PREFIX_ROCKS + "-0-1",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM,
@@ -888,6 +889,10 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_ROCK:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, "", "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
