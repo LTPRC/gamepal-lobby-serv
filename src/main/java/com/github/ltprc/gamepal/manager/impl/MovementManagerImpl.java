@@ -147,7 +147,6 @@ public class MovementManagerImpl implements MovementManager {
                                             worldMovingBlock1.getWorldCoordinate())
                                     .compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0)
                     .forEach(drop -> playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), drop.getBlockInfo().getId()));
-            // TODO Check interaction
         }
         syncFloorCode(world, worldMovingBlock);
     }

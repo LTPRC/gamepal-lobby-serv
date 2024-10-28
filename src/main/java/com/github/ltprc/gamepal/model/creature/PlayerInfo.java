@@ -23,8 +23,8 @@ public class PlayerInfo {
     private int[] buff = new int[GamePalConstants.BUFF_CODE_LENGTH]; // buff code, remaining frame
     private List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
     private PerceptionInfo perceptionInfo;
-    private int hpMax;
-    private int hp;
+//    private int hpMax;
+//    private int hp;
     private int vpMax;
     private int vp;
     private int hunger;

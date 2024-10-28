@@ -51,9 +51,10 @@ public class BuffManagerImpl implements BuffManager {
      */
     @Override
     public void changeBuff(GameWorld world, String userCode) {
+        Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
 
-        if (playerInfo.getHp() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
+        if (player.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
             playerService.killPlayer(userCode);
         }
 

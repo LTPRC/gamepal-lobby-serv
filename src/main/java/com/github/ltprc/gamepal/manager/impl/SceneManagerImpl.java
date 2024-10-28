@@ -758,15 +758,6 @@ public class SceneManagerImpl implements SceneManager {
                         }
                     });
                 }
-                // Generate blocks from scene events 24/02/16
-//                if (!CollectionUtils.isEmpty(scene.getEvents())) {
-//                    new ArrayList<>(scene.getEvents()).forEach(event -> {
-//                        if (BlockUtil.checkPerceptionCondition(region, player, event)) {
-//                            Block newBlock = new Block(event);
-//                            rankingQueue.add(newBlock);
-//                        }
-//                    });
-//                }
             }
         }
         return rankingQueue;

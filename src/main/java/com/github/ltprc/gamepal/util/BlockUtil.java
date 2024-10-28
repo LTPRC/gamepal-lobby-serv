@@ -493,6 +493,9 @@ public class BlockUtil {
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
+            case GamePalConstants.EVENT_CODE_SPARK:
+            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
+            case GamePalConstants.EVENT_CODE_ASH:
                 layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
             default:
@@ -833,9 +836,6 @@ public class BlockUtil {
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
                 break;
-//            case BlockConstants.BLOCK_TYPE_EVENT:
-//                // TODO
-//                break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
@@ -919,9 +919,26 @@ public class BlockUtil {
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+            default:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EFFECT, "", "",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
+                break;
+        }
+        initializeBlockInfoHp(blockInfo);
+        return blockInfo;
+    }
+
+    public static void initializeBlockInfoHp(BlockInfo blockInfo) {
+        int hpMax = BlockConstants.HP_DEFAULT;
+        switch (blockInfo.getType()) {
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                hpMax = 1000;
+                break;
             default:
                 break;
         }
-        return blockInfo;
+        blockInfo.getHpMax().set(hpMax);
+        blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 }

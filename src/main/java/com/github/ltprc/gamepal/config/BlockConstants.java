@@ -109,6 +109,8 @@ public class BlockConstants {
     public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.1);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
 
+    public static final int HP_DEFAULT = 10000;
+
     public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
     public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.005);
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;

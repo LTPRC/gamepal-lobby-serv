@@ -506,7 +506,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute) {
+    public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
@@ -520,10 +520,10 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         if (playerInfoMap.get(userCode).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
-        && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
+                && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
             npcManager.prepare2Attack(world, userCode, fromUserCode);
         }
-        return changeHp(userCode, value, isAbsolute);
+        return changeHp(userCode, value, false);
     }
 
     @Override
@@ -537,17 +537,18 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        Block player = creatureMap.get(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int oldHp = playerInfo.getHp();
-        int newHp = isAbsolute ? value : oldHp + value;
+        int oldHp = player.getBlockInfo().getHp().get();
+        int newHp = isAbsolute ? value : oldHp + value; // TODO
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
             newHp = Math.max(oldHp, newHp);
         }
-        playerInfo.setHp(Math.max(0, Math.min(newHp, playerInfo.getHpMax())));
+        player.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, player.getBlockInfo().getHpMax().get())));
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1012,7 +1013,7 @@ public class PlayerServiceImpl implements PlayerService {
                 eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MINE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
-                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode,
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_ASH, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
@@ -1257,14 +1258,8 @@ public class PlayerServiceImpl implements PlayerService {
         Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
                 dropMovementInfo.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
         dropMovementInfo.setSpeed(newSpeed);
-//        Block drop = new Block(dropWorldCoordinate, dropBlockInfo, dropMovementInfo);
         movementManager.settleSpeedAndCoordinate(world, drop, 0);
         dropMovementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-//        Region region = world.getRegionMap().get(dropWorldCoordinate.getRegionNo());
-//        Scene scene = region.getScenes().get(dropWorldCoordinate.getSceneCoordinate());
-//        scene.getBlocks().add(drop);
-//        world.getBlockMap().put(dropBlockInfo.getId(), drop);
-//        world.getDropMap().put(dropBlockInfo.getId(), new AbstractMap.SimpleEntry<>(itemNo, amount));
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1369,7 +1364,7 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
-        changeHp(userCode, playerInfo.getHpMax(), true);
+        changeHp(userCode, player.getBlockInfo().getHpMax().get(), true);
         changeVp(userCode, playerInfo.getVpMax(), true);
         changeHunger(userCode, playerInfo.getHungerMax(), true);
         changeThirst(userCode, playerInfo.getThirstMax(), true);

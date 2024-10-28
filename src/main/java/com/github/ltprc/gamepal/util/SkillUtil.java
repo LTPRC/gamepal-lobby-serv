@@ -138,6 +138,7 @@ public class SkillUtil {
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
                 return -40 + random.nextInt(30);
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
                 return -75 + random.nextInt(50);
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
                 return -100 + random.nextInt(100);

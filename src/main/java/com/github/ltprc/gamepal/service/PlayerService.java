@@ -32,7 +32,7 @@ public interface PlayerService {
 
     ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount);
 
-    ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value, boolean isAbsolute);
+    ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value);
 
     ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute);
 

@@ -18,8 +18,8 @@ public class CreatureFactory {
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setPlayerType(playerType);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-        playerInfo.setHpMax(1000);
-        playerInfo.setHp(playerInfo.getHpMax() / 2);
+//        playerInfo.setHpMax(1000);
+//        playerInfo.setHp(playerInfo.getHpMax() / 2);
         playerInfo.setVpMax(1000);
         playerInfo.setVp(playerInfo.getVpMax() / 2);
         playerInfo.setHungerMax(1000);
