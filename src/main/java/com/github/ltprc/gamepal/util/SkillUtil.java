@@ -126,36 +126,77 @@ public class SkillUtil {
      * @param eventCode
      * @return changed hp amount
      */
-    public static int calculateChangedHp(final int eventCode) {
+    public static int calculateChangedHp(final int eventCode, final int targetType) {
+        int hp = 0;
         Random random = new Random();
         switch (eventCode) {
             case GamePalConstants.EVENT_CODE_HEAL:
-                return 100;
+                if (targetType == BlockConstants.BLOCK_TYPE_PLAYER) {
+                    hp = 100;
+                }
+                return hp;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
-                return -10 + random.nextInt(10);
+                hp = -10 + random.nextInt(10);
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
-                return -20 + random.nextInt(10);
+                hp = -20 + random.nextInt(10);
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-                return -40 + random.nextInt(30);
+                hp = -40 + random.nextInt(30);
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-                return -75 + random.nextInt(50);
+                hp = -75 + random.nextInt(50);
+                if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
+                    hp *= 10;
+                }
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
-                return -100 + random.nextInt(100);
+                hp = -100 + random.nextInt(100);
+                break;
             case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-                return -110 + random.nextInt(20);
+                hp = -110 + random.nextInt(20);
+                break;
             case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-                return -250 + random.nextInt(200);
+                hp = -250 + random.nextInt(200);
+                break;
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-                return -250 + random.nextInt(100);
+                hp = -250 + random.nextInt(100);
+                break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                return -600 + random.nextInt(400);
+                hp = -600 + random.nextInt(400);
+                break;
             case GamePalConstants.EVENT_CODE_FIRE:
-                return -3;
+                hp = -3;
+                break;
             default:
-                return 0;
+                break;
         }
+        if (targetType == BlockConstants.BLOCK_TYPE_PLAYER) {
+            hp /= 1;
+        } else if (targetType == BlockConstants.BLOCK_TYPE_BED
+                || targetType == BlockConstants.BLOCK_TYPE_TOILET
+                || targetType == BlockConstants.BLOCK_TYPE_DRESSER
+                || targetType == BlockConstants.BLOCK_TYPE_STORAGE
+                || targetType == BlockConstants.BLOCK_TYPE_COOKER
+                || targetType == BlockConstants.BLOCK_TYPE_SINK
+                || targetType == BlockConstants.BLOCK_TYPE_CONTAINER
+                || targetType == BlockConstants.BLOCK_TYPE_RADIO
+                || targetType == BlockConstants.BLOCK_TYPE_BUILDING
+                || targetType == BlockConstants.BLOCK_TYPE_TREE
+                || targetType == BlockConstants.BLOCK_TYPE_ROCK
+                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP
+                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL
+                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO
+                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT
+                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM
+                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE) {
+            hp /= 10;
+        } else {
+            hp = 0;
+        }
+        return hp;
     }
 
     public static boolean blockCode2Build(int code) {

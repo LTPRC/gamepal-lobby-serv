@@ -505,52 +505,51 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    @Override
-    public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value) {
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        if (playerInfoMap.get(userCode).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
-                && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
-            npcManager.prepare2Attack(world, userCode, fromUserCode);
-        }
-        return changeHp(userCode, value, false);
-    }
+//    public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value) {
+//        GameWorld world = userService.getWorldByUserCode(userCode);
+//        if (null == world) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+//        }
+//        Map<String, Block> creatureMap = world.getCreatureMap();
+//        if (!creatureMap.containsKey(userCode)) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+//        }
+//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+//        if (!playerInfoMap.containsKey(userCode)) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+//        }
+//        if (playerInfoMap.get(userCode).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
+//                && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
+//            npcManager.prepare2Attack(world, userCode, fromUserCode);
+//        }
+//        return changeHp(userCode, value, false);
+//    }
 
-    @Override
-    public ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Block player = creatureMap.get(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int oldHp = player.getBlockInfo().getHp().get();
-        int newHp = isAbsolute ? value : oldHp + value; // TODO
-        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
-            newHp = Math.max(oldHp, newHp);
-        }
-        player.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, player.getBlockInfo().getHpMax().get())));
-        return ResponseEntity.ok().body(rst.toString());
-    }
+//    @Override
+//    public ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute) {
+//        JSONObject rst = ContentUtil.generateRst();
+//        GameWorld world = userService.getWorldByUserCode(userCode);
+//        if (null == world) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+//        }
+//        Map<String, Block> creatureMap = world.getCreatureMap();
+//        if (!creatureMap.containsKey(userCode)) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+//        }
+//        Block player = creatureMap.get(userCode);
+//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+//        if (!playerInfoMap.containsKey(userCode)) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+//        }
+//        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+//        int oldHp = player.getBlockInfo().getHp().get();
+//        int newHp = isAbsolute ? value : oldHp + value;
+//        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
+//            newHp = Math.max(oldHp, newHp);
+//        }
+//        player.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, player.getBlockInfo().getHpMax().get())));
+//        return ResponseEntity.ok().body(rst.toString());
+//    }
 
     @Override
     public ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute) {
@@ -660,7 +659,7 @@ public class PlayerServiceImpl implements PlayerService {
                     .forEach((Map.Entry<String, Integer> entry) -> {
                         switch (entry.getKey()) {
                             case "hp":
-                                changeHp(userCode, entry.getValue(), false);
+                                eventManager.changeHp(world, creatureMap.get(userCode), entry.getValue(), false);
                                 break;
                             case "vp":
                                 changeVp(userCode, entry.getValue(), false);
@@ -1364,7 +1363,7 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = 0;
-        changeHp(userCode, player.getBlockInfo().getHpMax().get(), true);
+        eventManager.changeHp(world, player, player.getBlockInfo().getHpMax().get(), true);
         changeVp(userCode, playerInfo.getVpMax(), true);
         changeHunger(userCode, playerInfo.getHungerMax(), true);
         changeThirst(userCode, playerInfo.getThirstMax(), true);

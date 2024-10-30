@@ -54,9 +54,9 @@ public class BuffManagerImpl implements BuffManager {
         Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
 
-        if (player.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-            playerService.killPlayer(userCode);
-        }
+//        if (player.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
+//            playerService.killPlayer(userCode);
+//        }
 
         if (playerInfo.getHunger() < playerInfo.getHungerMax() / 10
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] == 0) {

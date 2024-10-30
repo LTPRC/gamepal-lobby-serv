@@ -79,16 +79,17 @@ public class TimedEventTask {
                         buffManager.changeBuff(world, blockInfo.getId());
 
                         if (playerService.validateActiveness(world, blockInfo.getId())) {
-                            MovementInfo movementInfo = creatureMap.get(blockInfo.getId()).getMovementInfo();
+                            Block player = creatureMap.get(blockInfo.getId());
+                            MovementInfo movementInfo = player.getMovementInfo();
                             PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
                             double randomNumber;
 
                             // Change hp
                             if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] != 0) {
-                                playerService.changeHp(blockInfo.getId(), -1, false);
+                                eventManager.changeHp(world, player, -1, false);
                             }
                             if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] != 0) {
-                                playerService.changeHp(blockInfo.getId(), 1, false);
+                                eventManager.changeHp(world, player, 1, false);
                             }
 
                             // Change vp
@@ -122,7 +123,7 @@ public class TimedEventTask {
                             if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                                 playerService.changeHunger(blockInfo.getId(), -1, false);
                                 if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
-                                    playerService.changeHp(blockInfo.getId(), -1, false);
+                                    eventManager.changeHp(world, player, -1, false);
                                 }
                             }
 
@@ -135,7 +136,7 @@ public class TimedEventTask {
                             if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                                 playerService.changeThirst(blockInfo.getId(), -1, false);
                                 if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
-                                    playerService.changeHp(blockInfo.getId(), -1, false);
+                                    eventManager.changeHp(world, player, -1, false);
                                 }
                             }
 
