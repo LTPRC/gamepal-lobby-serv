@@ -904,7 +904,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addEventBlock(final GameWorld world, final int eventCode, final String eventId, final MovementInfo movementInfo, final WorldCoordinate worldCoordinate) {
+    public Block addEventBlock(final GameWorld world, final int eventCode, final String sourceId, final MovementInfo movementInfo, final WorldCoordinate worldCoordinate) {
         String id = UUID.randomUUID().toString();
         int structureMaterial;
         switch (eventCode) {
@@ -936,7 +936,6 @@ public class SceneManagerImpl implements SceneManager {
                         new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EFFECT, id, String.valueOf(eventCode), structure);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        world.getEffectMap().put(id, eventId);
         switch (eventCode) {
             case GamePalConstants.EVENT_CODE_SHOOT_HIT:
             case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
@@ -1038,10 +1037,8 @@ public class SceneManagerImpl implements SceneManager {
         scene.getBlocks().remove(block.getBlockInfo().getId());
         world.getBlockMap().remove(block.getBlockInfo().getId());
         worldService.registerOffline(world, block.getBlockInfo());
-//        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
-//                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
-            world.getBlockMap().remove(block.getBlockInfo().getId());
-//        }
+        world.getBlockMap().remove(block.getBlockInfo().getId());
+        world.getSourceMap().remove(block.getBlockInfo().getId());
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 playerService.destroyPlayer(block.getBlockInfo().getId());

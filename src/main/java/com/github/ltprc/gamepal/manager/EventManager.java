@@ -8,7 +8,7 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 public interface EventManager {
 
     MovementInfo createMovementInfoByEventCode(final int eventCode);
-    void addEvent(GameWorld world, int eventCode, String eventId, WorldCoordinate worldCoordinate);
+    void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate);
     void updateEvents(GameWorld world);
     void affectBlock(GameWorld world, Block eventBlock, Block targetBlock);
     void changeHp(GameWorld world, Block block, int value, boolean isAbsolute);

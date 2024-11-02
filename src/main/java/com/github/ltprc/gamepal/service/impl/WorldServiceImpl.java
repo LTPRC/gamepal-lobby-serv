@@ -118,7 +118,7 @@ public class WorldServiceImpl implements WorldService {
         world.setTerminalMap(new ConcurrentHashMap<>());
         world.setNpcBrainMap(new ConcurrentHashMap<>());
         world.setBlockMap(new ConcurrentSkipListMap<>());
-        world.setEffectMap(new ConcurrentHashMap<>());
+        world.setSourceMap(new ConcurrentHashMap<>());
         world.setCreatureMap(new ConcurrentHashMap<>());
         world.setPlayerInfoMap(new ConcurrentHashMap<>());
         world.setBagInfoMap(new ConcurrentHashMap<>());
