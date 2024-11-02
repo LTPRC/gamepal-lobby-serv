@@ -904,55 +904,6 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addEventBlock(final GameWorld world, final int eventCode, final String sourceId, final MovementInfo movementInfo, final WorldCoordinate worldCoordinate) {
-        String id = UUID.randomUUID().toString();
-        int structureMaterial;
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
-                break;
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
-                break;
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
-                break;
-            default:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
-                break;
-        }
-        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
-                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_EFFECT, id, String.valueOf(eventCode), structure);
-        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-                break;
-            default:
-                registerBlock(world, block);
-                break;
-        }
-        return block;
-    }
-
-    @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
         String id = UUID.randomUUID().toString();
         Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_MAGNUM,
@@ -988,11 +939,10 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addOtherBlock(final GameWorld world, final BlockInfo blockInfo,
-                               final WorldCoordinate worldCoordinate) {
+    public Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final BlockInfo blockInfo,
+                               final MovementInfo movementInfo) {
         String id = UUID.randomUUID().toString();
         blockInfo.setId(id);
-        MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
         if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_CONTAINER) {
@@ -1005,13 +955,23 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private Block registerBlock(GameWorld world, Block block) {
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+//            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+//            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+//            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+//            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+//            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+//            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+//                break;
+//            default:
+//                registerBlock(world, block);
+//                break;
+//        }
         Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         Scene scene = region.getScenes().get(block.getWorldCoordinate().getSceneCoordinate());
         scene.getBlocks().put(block.getBlockInfo().getId(), block);
-//        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
-//                || block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP) {
-            world.getBlockMap().put(block.getBlockInfo().getId(), block);
-//        }
+        world.getBlockMap().put(block.getBlockInfo().getId(), block);
         return block;
     }
 

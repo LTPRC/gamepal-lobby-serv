@@ -34,15 +34,14 @@ public interface SceneManager {
 
     Block addSceneBlock(final GameWorld world, final int blockCode, final WorldCoordinate worldCoordinate);
 
-    Block addEventBlock(final GameWorld world, final int eventCode, final String sourceId, final MovementInfo movementInfo, final WorldCoordinate worldCoordinate);
-
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);
 
     Block addTeleportBlock(final GameWorld world, final String code, final WorldCoordinate worldCoordinate,
                            final WorldCoordinate to);
 
-    Block addOtherBlock(final GameWorld world, final BlockInfo blockInfo, final WorldCoordinate worldCoordinate);
+    Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final BlockInfo blockInfo,
+                        final MovementInfo movementInfo);
 
     boolean checkBlockSpace2Build(final GameWorld world, final Block block);
 

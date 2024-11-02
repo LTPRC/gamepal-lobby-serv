@@ -1032,7 +1032,7 @@ public class PlayerServiceImpl implements PlayerService {
                         IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
                         buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
                         sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_SUBTERRANEAN);
-                        sceneManager.addOtherBlock(world, blockInfo1.get(), buildingWorldCoordinate);
+                        sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get(), new MovementInfo());
                         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
                         return true;
                     }
@@ -1401,7 +1401,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER);
         blockInfo1.setCode("3101");
-        Block remainContainer = sceneManager.addOtherBlock(world, blockInfo1, player.getWorldCoordinate());
+        Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());
         remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_MAGNUM); // Special container 24/10/20

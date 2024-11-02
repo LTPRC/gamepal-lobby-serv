@@ -10,7 +10,10 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -46,6 +49,49 @@ public class EventManagerImpl implements EventManager {
     private NpcManager npcManager;
 
     @Override
+    public BlockInfo createBlockInfoByEventCode(final int eventCode) {
+        int blockType;
+        switch (eventCode) {
+            case GamePalConstants.EVENT_CODE_MINE:
+                blockType = BlockConstants.BLOCK_TYPE_BUILDING;
+                break;
+            default:
+                blockType = BlockConstants.BLOCK_TYPE_EFFECT;
+                break;
+        }
+        String id = UUID.randomUUID().toString();
+        int structureMaterial;
+        switch (eventCode) {
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
+                break;
+            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
+                break;
+            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
+                break;
+            default:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
+                break;
+        }
+        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
+                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
+        return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
+    }
+
+    @Override
     public MovementInfo createMovementInfoByEventCode(final int eventCode) {
         MovementInfo movementInfo = new MovementInfo();
         movementInfo.setFrame(0);
@@ -56,6 +102,21 @@ public class EventManagerImpl implements EventManager {
                 break;
             case GamePalConstants.EVENT_CODE_SPARK_SHORT:
                 movementInfo.setFrameMax(1);
+                break;
+            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+                movementInfo.setFrameMax(3);
                 break;
             case GamePalConstants.EVENT_CODE_HEAL:
             case GamePalConstants.EVENT_CODE_DISTURB:
@@ -86,8 +147,9 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
+        BlockInfo blockInfo = createBlockInfoByEventCode(eventCode);
         MovementInfo movementInfo = createMovementInfoByEventCode(eventCode);
-        Block eventBlock = sceneManager.addEventBlock(world, eventCode, sourceId, movementInfo, worldCoordinate);
+        Block eventBlock = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo, movementInfo);
         world.getSourceMap().put(eventBlock.getBlockInfo().getId(), sourceId);
         correctTarget(world, eventBlock);
         List<Block> affectedBlockList = collectAffectedBlocks(world, eventBlock);

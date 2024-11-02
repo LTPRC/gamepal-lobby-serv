@@ -12,6 +12,7 @@ import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -231,7 +232,7 @@ public class WorldServiceImpl implements WorldService {
                                 BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(type);
                                 if (null != blockInfo1) {
                                     blockInfo1.setCode(String.valueOf(blockRow.getInteger(1)));
-                                    block = sceneManager.addOtherBlock(world, blockInfo1, worldCoordinate);
+                                    block = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo1, new MovementInfo());
                                 }
                                 break;
                         }
