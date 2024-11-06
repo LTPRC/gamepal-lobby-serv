@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -14,6 +15,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +49,11 @@ public class MovementManagerImpl implements MovementManager {
         Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(world, worldMovingBlock, 1);
         WorldCoordinate teleportWc = null;
         List<Block> rankingQueueList = new ArrayList<>(rankingQueue);
-        for (int i = 0; i < rankingQueueList.size(); i ++) {
+        for (Block block : rankingQueueList) {
             if (worldMovingBlock.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)
                     && worldMovingBlock.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO)) {
                 break;
             }
-            Block block = rankingQueueList.get(i);
             if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                     && block.getBlockInfo().getId().equals(worldMovingBlock.getBlockInfo().getId())) {
                 continue;
@@ -69,13 +70,6 @@ public class MovementManagerImpl implements MovementManager {
                 teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                 break;
             }
-//            if (BlockConstants.STRUCTURE_MATERIAL_HOLLOW == block.getBlockInfo().getStructure().getMaterial()) {
-//                continue;
-//            }
-//            if (BlockUtil.checkMaterialCollision(worldMovingBlock.getBlockInfo().getStructure().getMaterial(),
-//                    block.getBlockInfo().getStructure().getMaterial())) {
-//                continue;
-//            }
             newMovingBlock = new Block(worldMovingBlock);
             newMovingBlock.getWorldCoordinate().getCoordinate().setX(
                     worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
@@ -111,12 +105,13 @@ public class MovementManagerImpl implements MovementManager {
             worldMovingBlock.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         }
         worldService.expandByCoordinate(world, worldMovingBlock.getWorldCoordinate(), teleportWc, sceneScanDepth);
-        settleCoordinate(world, worldMovingBlock, teleportWc);
+        settleCoordinate(world, worldMovingBlock, teleportWc, false);
     }
 
     @Override
-    public void settleCoordinate(GameWorld world, Block worldMovingBlock,
-                                 WorldCoordinate newWorldCoordinate) {
+    public void settleCoordinate(GameWorld world, Block worldMovingBlock, WorldCoordinate newWorldCoordinate,
+                                 boolean isTeleport) {
+        worldService.expandByCoordinate(world, worldMovingBlock.getWorldCoordinate(), newWorldCoordinate, 1);
         boolean isRegionChanged = worldMovingBlock.getWorldCoordinate().getRegionNo() != newWorldCoordinate.getRegionNo();
         boolean isSceneChanged = isRegionChanged
                 || !worldMovingBlock.getWorldCoordinate().getSceneCoordinate().getX()
@@ -127,28 +122,30 @@ public class MovementManagerImpl implements MovementManager {
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock.getWorldCoordinate());
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         BlockUtil.fixWorldCoordinate(region, worldMovingBlock.getWorldCoordinate());
-        if (!world.getCreatureMap().containsKey(worldMovingBlock.getBlockInfo().getId())) {
-            return;
-        }
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(worldMovingBlock.getBlockInfo().getId());
-        if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
-            // Check location change
-            if (isSceneChanged) {
-                Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
-                playerService.generateNotificationMessage(worldMovingBlock.getBlockInfo().getId(),
-                        "来到【" + region.getName() + "-" + scene.getName() + "】");
-            }
-            // Check drop
-            world.getBlockMap().values().stream()
-                    .filter(worldMovingBlock1 -> worldMovingBlock1.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP)
-                    .filter(worldMovingBlock1 -> worldMovingBlock1.getWorldCoordinate().getRegionNo() == region.getRegionNo())
-                    .filter(worldMovingBlock1 ->
-                            BlockUtil.calculateDistance(region, worldMovingBlock.getWorldCoordinate(),
-                                            worldMovingBlock1.getWorldCoordinate())
-                                    .compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0)
-                    .forEach(drop -> playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), drop.getBlockInfo().getId()));
-        }
         syncFloorCode(world, worldMovingBlock);
+        if (worldMovingBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
+            if (world.getPlayerInfoMap().get(worldMovingBlock.getBlockInfo().getId()).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                if (isTeleport) {
+                    world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
+                }
+                // Check location change
+                if (isSceneChanged) {
+                    Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
+                    playerService.generateNotificationMessage(worldMovingBlock.getBlockInfo().getId(),
+                            "来到【" + region.getName() + "-" + scene.getName() + "】");
+                }
+            }
+            region.getScenes().values().stream()
+                    .filter(scene -> SkillUtil.isSceneDetected(worldMovingBlock, scene.getSceneCoordinate(), 1))
+                    .forEach(scene -> scene.getBlocks().values().forEach(block -> {
+                BigDecimal distance = BlockUtil.calculateDistance(region, worldMovingBlock.getWorldCoordinate(),
+                        block.getWorldCoordinate());
+                if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP
+                        && null != distance && distance.compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0) {
+                    playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), block.getBlockInfo().getId());
+                }
+            }));
+        }
     }
 
     @Override

@@ -159,8 +159,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         Block player = creatureMap.get(userCode);
-        worldService.expandByCoordinate(world, player.getWorldCoordinate(), worldCoordinate, 1);
-        movementManager.settleCoordinate(world, player, worldCoordinate);
+        movementManager.settleCoordinate(world, player, worldCoordinate, false);
         player.getMovementInfo().setSpeed(movementInfo.getSpeed());
         player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
         return ResponseEntity.ok().body(rst.toString());
@@ -326,11 +325,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        Map<String, Block> creatureMap = world.getCreatureMap();
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
         int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
@@ -341,11 +336,15 @@ public class PlayerServiceImpl implements PlayerService {
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
                 case ItemConstants.ITEM_CHARACTER_TOOL:
-                    playerInfoMap.get(userCode).getTools().remove(itemNo);
+                    if (playerInfoMap.containsKey(userCode)) {
+                        playerInfoMap.get(userCode).getTools().remove(itemNo);
+                    }
                     updateSkillsByTool(userCode);
                     break;
                 case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                    playerInfoMap.get(userCode).getOutfits().remove(itemNo);
+                    if (playerInfoMap.containsKey(userCode)) {
+                        playerInfoMap.get(userCode).getOutfits().remove(itemNo);
+                    }
                     updateSkillsByTool(userCode);
                     break;
                 default:
@@ -410,11 +409,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        Map<String, Block> creatureMap = world.getCreatureMap();
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
         int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
@@ -453,10 +448,14 @@ public class PlayerServiceImpl implements PlayerService {
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
             switch (itemNo.charAt(0)) {
                 case ItemConstants.ITEM_CHARACTER_TOOL:
-                    playerInfoMap.get(userCode).getTools().remove(itemNo);
+                    if (playerInfoMap.containsKey(userCode)) {
+                        playerInfoMap.get(userCode).getTools().remove(itemNo);
+                    }
                     break;
                 case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                    playerInfoMap.get(userCode).getOutfits().remove(itemNo);
+                    if (playerInfoMap.containsKey(userCode)) {
+                        playerInfoMap.get(userCode).getOutfits().remove(itemNo);
+                    }
                     break;
                 default:
                     break;
@@ -1369,9 +1368,7 @@ public class PlayerServiceImpl implements PlayerService {
         changeThirst(userCode, playerInfo.getThirstMax(), true);
         changePrecision(userCode, playerInfo.getThirstMax(), true);
 
-        worldService.expandByCoordinate(world, player.getWorldCoordinate(), playerInfo.getRespawnPoint(), 1);
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
-        movementManager.settleCoordinate(world, player, playerInfo.getRespawnPoint());
+        movementManager.settleCoordinate(world, player, playerInfo.getRespawnPoint(), true);
 
         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_SACRIFICE, userCode, player.getWorldCoordinate());
 

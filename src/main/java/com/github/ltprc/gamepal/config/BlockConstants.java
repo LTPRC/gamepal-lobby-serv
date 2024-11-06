@@ -52,6 +52,7 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_WORKSHOP_OUTFIT = 23;
     public static final int BLOCK_TYPE_WORKSHOP_CHEM = 24;
     public static final int BLOCK_TYPE_WORKSHOP_RECYCLE = 25;
+    public static final int BLOCK_TYPE_TRAP = 30;
 
     // Backend constants
 
@@ -152,8 +153,10 @@ public class BlockConstants {
         ITEM_NO_BLOCK_TYPE_MAP.put("t312", BlockConstants.BLOCK_TYPE_COOKER);
         BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_SINK, "t313");
         ITEM_NO_BLOCK_TYPE_MAP.put("t313", BlockConstants.BLOCK_TYPE_SINK);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_RADIO, "t314");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t314", BlockConstants.BLOCK_TYPE_RADIO);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_CONTAINER, "t314");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t314", BlockConstants.BLOCK_TYPE_CONTAINER);
+        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_RADIO, "t315");
+        ITEM_NO_BLOCK_TYPE_MAP.put("t315", BlockConstants.BLOCK_TYPE_RADIO);
         BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP, "t301");
         ITEM_NO_BLOCK_TYPE_MAP.put("t301", BlockConstants.BLOCK_TYPE_WORKSHOP);
         BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "t302");

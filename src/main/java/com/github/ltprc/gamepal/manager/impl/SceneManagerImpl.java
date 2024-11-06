@@ -997,7 +997,6 @@ public class SceneManagerImpl implements SceneManager {
         scene.getBlocks().remove(block.getBlockInfo().getId());
         world.getBlockMap().remove(block.getBlockInfo().getId());
         worldService.registerOffline(world, block.getBlockInfo());
-        world.getBlockMap().remove(block.getBlockInfo().getId());
         world.getSourceMap().remove(block.getBlockInfo().getId());
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:

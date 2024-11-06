@@ -8,7 +8,7 @@ public interface MovementManager {
 
     void settleSpeedAndCoordinate(GameWorld world, Block block, int sceneScanDepth);
 
-    void settleCoordinate(GameWorld world, Block block, WorldCoordinate newWorldCoordinate);
+    void settleCoordinate(GameWorld world, Block block, WorldCoordinate newWorldCoordinate, boolean isTeleport);
 
     void syncFloorCode(GameWorld world, Block block);
 }

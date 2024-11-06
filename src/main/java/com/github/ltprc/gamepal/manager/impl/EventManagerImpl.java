@@ -52,8 +52,9 @@ public class EventManagerImpl implements EventManager {
     public BlockInfo createBlockInfoByEventCode(final int eventCode) {
         int blockType;
         switch (eventCode) {
+            case GamePalConstants.EVENT_CODE_FIRE:
             case GamePalConstants.EVENT_CODE_MINE:
-                blockType = BlockConstants.BLOCK_TYPE_BUILDING;
+                blockType = BlockConstants.BLOCK_TYPE_TRAP;
                 break;
             default:
                 blockType = BlockConstants.BLOCK_TYPE_EFFECT;
@@ -489,6 +490,7 @@ public class EventManagerImpl implements EventManager {
                 case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
                 case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
                 case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                case BlockConstants.BLOCK_TYPE_TRAP:
                     eventCode = GamePalConstants.EVENT_CODE_SPARK;
                     break;
                 default:
@@ -523,7 +525,7 @@ public class EventManagerImpl implements EventManager {
         String fromId = world.getSourceMap().containsKey(eventBlock.getBlockInfo().getId())
                 ? world.getSourceMap().get(eventBlock.getBlockInfo().getId())
                 : eventBlock.getBlockInfo().getId();
-        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_EFFECT) {
+        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TRAP) {
             switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
                 case GamePalConstants.EVENT_CODE_MINE:
                     if (world.getCreatureMap().values().stream()
@@ -545,7 +547,7 @@ public class EventManagerImpl implements EventManager {
                             || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
                         sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                     }
-                    // Burn players
+                    // Burn players only
                     world.getCreatureMap().values().stream()
                             .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
                             .filter(player -> {
@@ -580,7 +582,8 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
-        if (eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_EFFECT) {
+        if (eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_EFFECT
+                && eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_TRAP) {
             logger.error(ErrorUtil.ERROR_1013);
             return;
         }
@@ -593,7 +596,7 @@ public class EventManagerImpl implements EventManager {
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                 && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
                 && !world.getNpcBrainMap().get(targetBlock.getBlockInfo().getId()).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
-            npcManager.prepare2Attack(world, targetBlock.getBlockInfo().getId(), eventBlock.getBlockInfo().getCode());
+            npcManager.prepare2Attack(world, targetBlock.getBlockInfo().getId(), world.getSourceMap().get(eventBlock.getBlockInfo().getId()));
         }
         changeHp(world, targetBlock, changedHp, false);
     }

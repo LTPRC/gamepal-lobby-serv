@@ -202,10 +202,8 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwczion":
                 playerService.generateNotificationMessage(userCode, "欢迎回家。");
-                playerInfo = world.getPlayerInfoMap().get(userCode);
-                worldService.expandByCoordinate(world, player.getWorldCoordinate(), playerInfo.getRespawnPoint(), 1);
-                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
-                movementManager.settleCoordinate(world, player, playerInfo.getRespawnPoint());
+                movementManager.settleCoordinate(world, player,
+                        world.getPlayerInfoMap().get(userCode).getRespawnPoint(), true);
                 break;
         }
         return ResponseEntity.ok().body(rst.toString());

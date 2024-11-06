@@ -183,15 +183,17 @@ public class SkillUtil {
                 || targetType == BlockConstants.BLOCK_TYPE_SINK
                 || targetType == BlockConstants.BLOCK_TYPE_CONTAINER
                 || targetType == BlockConstants.BLOCK_TYPE_RADIO
-                || targetType == BlockConstants.BLOCK_TYPE_BUILDING
-                || targetType == BlockConstants.BLOCK_TYPE_TREE
-                || targetType == BlockConstants.BLOCK_TYPE_ROCK
+                || targetType == BlockConstants.BLOCK_TYPE_TRAP
                 || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP
                 || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL
                 || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO
                 || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT
                 || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM
                 || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE) {
+            hp /= 2;
+        } else if (targetType == BlockConstants.BLOCK_TYPE_BUILDING
+                || targetType == BlockConstants.BLOCK_TYPE_TREE
+                || targetType == BlockConstants.BLOCK_TYPE_ROCK) {
             hp /= 10;
         } else {
             hp = 0;

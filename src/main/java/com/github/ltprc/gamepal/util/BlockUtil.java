@@ -426,6 +426,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_BUILDING:
             case BlockConstants.BLOCK_TYPE_TREE:
             case BlockConstants.BLOCK_TYPE_ROCK:
+            case BlockConstants.BLOCK_TYPE_TRAP:
                 return false;
             default:
                 return true;
@@ -918,6 +919,10 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TRAP, "", "1000",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_EFFECT:
             default:
