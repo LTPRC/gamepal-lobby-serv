@@ -101,11 +101,12 @@ public class MovementManagerImpl implements MovementManager {
                             worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
                                     .add(worldMovingBlock.getMovementInfo().getSpeed().getY())));
             BlockUtil.fixWorldCoordinate(region, teleportWc);
+            settleCoordinate(world, worldMovingBlock, teleportWc, false);
         } else {
             worldMovingBlock.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+            worldService.expandByCoordinate(world, worldMovingBlock.getWorldCoordinate(), teleportWc, sceneScanDepth);
+            settleCoordinate(world, worldMovingBlock, teleportWc, true);
         }
-        worldService.expandByCoordinate(world, worldMovingBlock.getWorldCoordinate(), teleportWc, sceneScanDepth);
-        settleCoordinate(world, worldMovingBlock, teleportWc, false);
     }
 
     @Override

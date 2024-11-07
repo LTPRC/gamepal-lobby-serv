@@ -236,7 +236,7 @@ public class NpcManagerImpl implements NpcManager {
                                           final int behavior, final int stance, final boolean[] exemption) {
         String npcUserCode = UUID.randomUUID().toString();
         Block player = createCreature(world, playerType, creatureType, npcUserCode);
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
         worldCoordinate.getCoordinate().setX(worldCoordinate.getCoordinate().getX()
                 .add(distance.multiply(BigDecimal.valueOf(
@@ -261,15 +261,15 @@ public class NpcManagerImpl implements NpcManager {
 
     @Override
     public Block putSpecificCreatureByRole(GameWorld world, String userCode, WorldCoordinate worldCoordinate,
-                                                int role) {
+                                           int role) {
         Block player;
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         switch (role) {
             case CreatureConstants.NPC_ROLE_PEER:
                 player = putSpecificCreature(world, userCode, worldCoordinate, BigDecimal.ONE,
                         CreatureConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
                         CreatureConstants.NPC_BEHAVIOR_MOVE, CreatureConstants.STANCE_DEFENSIVE,
                         new boolean[]{false, false, true, false});
+                PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
                 if (StringUtils.isBlank(playerInfo.getBossId())) {
                     playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(), userCode);
                 } else {
@@ -481,10 +481,10 @@ public class NpcManagerImpl implements NpcManager {
         JSONObject rst = ContentUtil.generateRst();
         String npcUserCode = request.getString("userCode");
         Block redBlock = request.getObject("redBlock", Block.class);
-        WorldCoordinate wc = redBlock.getWorldCoordinate();
-        if (null == wc) {
+        if (null == redBlock) {
             return rst;
         }
+        WorldCoordinate wc = redBlock.getWorldCoordinate();
         double stopDistance = request.getDouble("stopDistance");
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         Block npcPlayer = world.getCreatureMap().get(npcUserCode);

@@ -46,9 +46,9 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_MELEE = BigDecimal.ONE;
     public static final BigDecimal SKILL_ANGLE_MELEE_MAX = BigDecimal.valueOf(120D);
     public static final BigDecimal SKILL_RANGE_SHOOT = BigDecimal.valueOf(10);
-    public static final BigDecimal SKILL_ANGLE_SHOOT_MAX = BigDecimal.valueOf(5D);
+    public static final BigDecimal SKILL_ANGLE_SHOOT_MAX = BigDecimal.valueOf(30D);
     public static final BigDecimal SKILL_RANGE_SHOOT_SHOTGUN = BigDecimal.valueOf(5);
-    public static final BigDecimal SKILL_ANGLE_SHOOT_SHOTGUN_MAX = BigDecimal.valueOf(10D);
+    public static final BigDecimal SKILL_ANGLE_SHOOT_SHOTGUN_MAX = BigDecimal.valueOf(60D);
     public static final BigDecimal SKILL_RANGE_SHOOT_FIRE_MIN = BigDecimal.valueOf(1);
     public static final BigDecimal SKILL_RANGE_SHOOT_FIRE_MAX = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_SHOOT_WATER = BigDecimal.ONE;

@@ -17,8 +17,8 @@ public interface NpcManager {
     JSONObject changeNpcBehavior(JSONObject request);
 
     Block putSpecificCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate,
-                                   final BigDecimal distance, final int playerType, final int creatureType,
-                                   final int behavior, final int stance, final boolean[] exemption);
+                              final BigDecimal distance, final int playerType, final int creatureType,
+                              final int behavior, final int stance, final boolean[] exemption);
 
     Block putSpecificCreatureByRole(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate,
                              final int role);

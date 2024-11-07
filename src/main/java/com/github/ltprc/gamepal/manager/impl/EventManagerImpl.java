@@ -332,7 +332,7 @@ public class EventManagerImpl implements EventManager {
                 BigDecimal flameLength = BlockUtil.calculateDistance(regionMap.get(
                         eventBlock.getWorldCoordinate().getRegionNo()), from, eventBlock.getWorldCoordinate());
                 if (null != flameLength) {
-                    int flameAmount = flameLength.subtract(SkillConstants.SKILL_RANGE_SHOOT_FIRE_MIN).max(BigDecimal.ZERO)
+                    int flameAmount = flameLength.subtract(SkillConstants.SKILL_RANGE_SHOOT_FIRE_MIN).max(BigDecimal.ONE)
                             .multiply(BigDecimal.valueOf(2)).intValue() + 1;
                     List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
                             regionMap.get(eventBlock.getWorldCoordinate().getRegionNo()), from,
