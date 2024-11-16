@@ -272,7 +272,7 @@
   {"itemNo": "j070", "name": "报废灭火器", "weight": 6.0, "description": "", "materials": {"m_steel": 4, "m_rubber": 2, "m_asbestos": 2}},
   {"itemNo": "j071", "name": "遥控汽车", "weight": 1.0, "description": "", "materials": {"m_circuitry": 2, "m_plastic": 1, "m_rubber": 1}},
   {"itemNo": "j072", "name": "遥控器", "weight": 0.1, "description": "", "materials": {"m_circuitry": 1, "m_plastic": 1}},
-  {"itemNo": "j073", "name": "鱼竿", "weight": 2.0, "description": "", "materials": {"m_plastic": 2, "m_gear": 2, "m_spring": 1}},
+  {"itemNo": "j073", "name": "废旧鱼竿", "weight": 2.0, "description": "", "materials": {"m_plastic": 2, "m_gear": 2, "m_spring": 1}},
   {"itemNo": "j074", "name": "保险丝", "weight": 0.1, "description": "", "materials": {"m_glass": 1, "m_copper": 1}},
   {"itemNo": "j075", "name": "水果盘", "weight": 0.2, "description": "", "materials": {"m_glass": 1}},
   {"itemNo": "j076", "name": "金条", "weight": 10.0, "description": "", "materials": {"m_gold": 5}},

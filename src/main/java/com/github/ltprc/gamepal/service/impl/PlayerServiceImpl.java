@@ -1032,8 +1032,15 @@ public class PlayerServiceImpl implements PlayerService {
             case SkillConstants.SKILL_CODE_FISH:
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                boolean fishingResult = false;
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
-                    // TODO fishing logics
+                    fishingResult = goFishing(userCode);
+                    eventManager.addEvent(world, GamePalConstants.EVENT_CODE_WATER, userCode, buildingWorldCoordinate);
+                } else {
+                    eventManager.addEvent(world, GamePalConstants.EVENT_CODE_ASH, userCode, buildingWorldCoordinate);
+                }
+                if (!fishingResult) {
+                    generateNotificationMessage(userCode, "垂钓一无所获。");
                 }
                 break;
             case SkillConstants.SKILL_CODE_SHOVEL:
@@ -1080,6 +1087,29 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             default:
                 break;
+        }
+        return true;
+    }
+
+    private boolean goFishing(final String userCode) {
+        Random random = new Random();
+        int randomValue = random.nextInt(100);
+        if (randomValue < 5) {
+            getItem(userCode, "c035", 1);
+        } else if (randomValue < 10) {
+            getItem(userCode, "m_bone", 1);
+        } else if (randomValue < 12) {
+            getItem(userCode, "j082", 1);
+        } else if (randomValue < 15) {
+            getItem(userCode, "j126", 1);
+        } else if (randomValue < 18) {
+            getItem(userCode, "j135", 1);
+        } else if (randomValue < 20) {
+            getItem(userCode, "j145", 1);
+        } else if (randomValue < 22) {
+            getItem(userCode, "j191", 1);
+        } else {
+            return false;
         }
         return true;
     }

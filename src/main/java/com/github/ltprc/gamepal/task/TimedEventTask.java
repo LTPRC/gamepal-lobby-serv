@@ -63,7 +63,7 @@ public class TimedEventTask {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
 
-            // Update events TODO
+            // Update events
             eventManager.updateEvents(world);
 
             Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
