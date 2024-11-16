@@ -106,9 +106,11 @@ public class BlockConstants {
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
-    public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1);
-    public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.1);
-    public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2);
+    public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2D);
+    public static final BigDecimal BARRIER_RADIUS = BigDecimal.valueOf(0.25D);
+    public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
 
     public static final int HP_DEFAULT = 10000;
 
@@ -122,8 +124,6 @@ public class BlockConstants {
 
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
     public static Map<Integer, Long> BLOCK_TYPE_TIMEOUT_MAP = new HashMap<>();
-    public static Map<Integer, String> BLOCK_TYPE_ITEM_NO_MAP = new HashMap<>();
-    public static Map<String, Integer> ITEM_NO_BLOCK_TYPE_MAP = new HashMap<>();
 
     static {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_NOTHING, new Color(0, 0, 0));
@@ -140,35 +140,6 @@ public class BlockConstants {
         BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_PLAYER, 300L);
         BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_DROP, 60L);
         BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_CONTAINER, 300L);
-
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_BED, "t308");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t308", BlockConstants.BLOCK_TYPE_BED);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_TOILET, "t309");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t309", BlockConstants.BLOCK_TYPE_TOILET);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_DRESSER, "t310");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t310", BlockConstants.BLOCK_TYPE_DRESSER);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_STORAGE, "t311");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t311", BlockConstants.BLOCK_TYPE_STORAGE);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_COOKER, "t312");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t312", BlockConstants.BLOCK_TYPE_COOKER);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_SINK, "t313");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t313", BlockConstants.BLOCK_TYPE_SINK);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_CONTAINER, "t314");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t314", BlockConstants.BLOCK_TYPE_CONTAINER);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_RADIO, "t315");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t315", BlockConstants.BLOCK_TYPE_RADIO);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP, "t301");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t301", BlockConstants.BLOCK_TYPE_WORKSHOP);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "t302");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t302", BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "t303");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t303", BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "t304");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t304", BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "t305");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t305", BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM);
-        BLOCK_TYPE_ITEM_NO_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "t306");
-        ITEM_NO_BLOCK_TYPE_MAP.put("t306", BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE);
     }
 
     private BlockConstants() {

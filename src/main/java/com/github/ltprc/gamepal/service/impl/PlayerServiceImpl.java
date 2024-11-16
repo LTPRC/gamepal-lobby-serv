@@ -12,6 +12,7 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
@@ -815,7 +816,7 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.INTERACTION_PACK:
                 // 加一个blockCode和打包blockItemNo的映射
                 sceneManager.addDropBlock(world, block.getWorldCoordinate(),new AbstractMap.SimpleEntry<>(
-                        BlockUtil.convertBlockType2ItemNo(block.getBlockInfo().getType()), 1));
+                        BlockUtil.convertBlockInfo2ItemNo(block.getBlockInfo()), 1));
                 sceneManager.removeBlock(world, block);
                 break;
             default:
@@ -1007,14 +1008,6 @@ public class PlayerServiceImpl implements PlayerService {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_SHOOT_WATER));
                 break;
-            case SkillConstants.SKILL_CODE_LAY:
-                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MINE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
-                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_ASH, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
-                break;
             case SkillConstants.SKILL_CODE_BUILD:
                 WorldCoordinate buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
@@ -1024,8 +1017,7 @@ public class PlayerServiceImpl implements PlayerService {
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
                 if (sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
                     Optional<BlockInfo> blockInfo1 = playerInfo.getTools().stream()
-                            .map(BlockUtil::convertItemNo2BlockType)
-                            .map(BlockUtil::generateBlockInfo)
+                            .map(BlockUtil::convertItemNo2BlockInfo)
                             .findFirst();
                     if (blockInfo1.isPresent()) {
                         IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
@@ -1063,6 +1055,28 @@ public class PlayerServiceImpl implements PlayerService {
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
                     // TODO plowing logics
                 }
+                break;
+            case SkillConstants.SKILL_CODE_LAY_MINE:
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MINE, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_ASH, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                break;
+            case SkillConstants.SKILL_CODE_LAY_BARRIER:
+                blockInfo = BlockUtil.generateBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
+                blockInfo.setCode("3102");
+                blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                        new Coordinate(BlockConstants.BARRIER_RADIUS, BlockConstants.BARRIER_RADIUS)));
+                sceneManager.addOtherBlock(world,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE), blockInfo,
+                        new MovementInfo());
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_ASH, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             default:
                 break;
@@ -1396,7 +1410,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER);
+        BlockInfo blockInfo1 = BlockUtil.generateBlockInfoByType(BlockConstants.BLOCK_TYPE_CONTAINER);
         blockInfo1.setCode("3101");
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();

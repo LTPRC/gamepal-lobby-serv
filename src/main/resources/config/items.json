@@ -20,7 +20,7 @@
   {"itemNo": "t018", "name": "P09手枪", "weight": 0.8, "description": "", "itemIndex": 1, "skills": [{"skillCode": 23, "skillMode": 0, "frame": 0, "frameMax": 5, "skillType": 1, "range": 10.0, "ammoCode": "a001"}]},
   {"itemNo": "t019", "name": "托卡列夫手枪", "weight": 0.9, "description": "", "itemIndex": 1, "skills": [{"skillCode": 23, "skillMode": 0, "frame": 0, "frameMax": 10, "skillType": 1, "range": 10.0, "ammoCode": "a006"}]},
   {"itemNo": "t020", "name": "刺刀", "weight": 0.4, "description": "", "itemIndex": 1, "skills": [{"skillCode": 15, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
-  {"itemNo": "t021", "name": "地雷", "weight": 2.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 31, "skillMode": 0, "frame": 0, "frameMax": 100, "skillType": 1, "range": 1.0, "ammoCode": "t021"}]},
+  {"itemNo": "t021", "name": "地雷", "weight": 2.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 41, "skillMode": 0, "frame": 0, "frameMax": 100, "skillType": 1, "range": 1.0, "ammoCode": "t021"}]},
   {"itemNo": "t022", "name": "斧子", "weight": 4.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 33, "skillMode": 0, "frame": 0, "frameMax": 50, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
   {"itemNo": "t023", "name": "渔网", "weight": 0.2, "description": "", "itemIndex": 1, "skills": [{"skillCode": 34, "skillMode": 1, "frame": 0, "frameMax": 100, "skillType": 0, "range": 1.0, "ammoCode": ""}]},
 
@@ -95,6 +95,7 @@
   {"itemNo": "t313", "name": "打包饮水台", "weight": 30.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t313"}]},
   {"itemNo": "t314", "name": "打包容器", "weight": 10.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t314"}]},
   {"itemNo": "t315", "name": "打包收音机", "weight": 0.5, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t315"}]},
+  {"itemNo": "t351", "name": "路障", "weight": 10.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 42, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t351"}]},
 
   {"itemNo": "o001", "name": "高中秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},
   {"itemNo": "o002", "name": "初中秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},

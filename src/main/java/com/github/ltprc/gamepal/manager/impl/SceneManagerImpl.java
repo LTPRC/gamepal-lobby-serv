@@ -923,10 +923,7 @@ public class SceneManagerImpl implements SceneManager {
     public Block addTeleportBlock(GameWorld world, final String code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
         String id = UUID.randomUUID().toString();
         Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION,
-                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
+                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION, new Shape(),
                 new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5)));
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, id, code, structure);
         MovementInfo movementInfo = new MovementInfo();

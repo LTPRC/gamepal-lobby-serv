@@ -32,7 +32,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
@@ -229,7 +228,7 @@ public class WorldServiceImpl implements WorldService {
                                                 BigDecimal.valueOf(blockRow.getInteger(8)))));
                                 break;
                             default:
-                                BlockInfo blockInfo1 = BlockUtil.generateBlockInfo(type);
+                                BlockInfo blockInfo1 = BlockUtil.generateBlockInfoByType(type);
                                 if (null != blockInfo1) {
                                     blockInfo1.setCode(String.valueOf(blockRow.getInteger(1)));
                                     block = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo1, new MovementInfo());

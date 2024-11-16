@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.util;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -560,7 +561,7 @@ public class BlockUtil {
         }
     }
 
-    public static void calculateMaxSpeed(MovementInfo movementInfo) {
+    public static void updateMaxSpeed(MovementInfo movementInfo) {
         BigDecimal maxSpeed = BlockConstants.MAX_SPEED_DEFAULT;
         switch (movementInfo.getFloorCode()) {
             case BlockConstants.BLOCK_CODE_SWAMP:
@@ -613,7 +614,7 @@ public class BlockUtil {
         String id = UUID.randomUUID().toString();
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D)));
+                new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS));
         switch (blockCode) {
             case BlockConstants.PLANT_INDEX_BIG_PINE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id,
@@ -822,23 +823,23 @@ public class BlockUtil {
         return blockInfo;
     }
 
-    public static String convertBlockType2ItemNo(int type) {
-        return BlockConstants.BLOCK_TYPE_ITEM_NO_MAP.get(type);
+    public static String convertBlockInfo2ItemNo(BlockInfo blockInfo) {
+        return ItemConstants.ITEM_PACK_MAP.get(blockInfo.getType());
     }
 
-    public static Integer convertItemNo2BlockType(String itemNo) {
-        return BlockConstants.ITEM_NO_BLOCK_TYPE_MAP.get(itemNo);
+    public static BlockInfo convertItemNo2BlockInfo(String itemNo) {
+        return generateBlockInfoByType(ItemConstants.ITEM_BUILD_MAP.get(itemNo));
     }
 
-    public static BlockInfo generateBlockInfo(int type) {
+    public static BlockInfo generateBlockInfoByType(int type) {
         BlockInfo blockInfo = null;
         switch (type) {
             case BlockConstants.BLOCK_TYPE_NORMAL:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
                 break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
@@ -882,18 +883,18 @@ public class BlockUtil {
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_MAGNUM, BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
+                                        new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS))));
                 break;
             case BlockConstants.BLOCK_TYPE_BUILDING:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, "", "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, "", "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_ROCK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, "", "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
@@ -921,7 +922,7 @@ public class BlockUtil {
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TRAP, "", "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TRAP, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_EFFECT:

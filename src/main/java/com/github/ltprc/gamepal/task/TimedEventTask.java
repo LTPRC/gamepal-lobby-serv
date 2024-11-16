@@ -168,7 +168,7 @@ public class TimedEventTask {
                             playerService.checkLevelUp(blockInfo.getId());
 
                             // Check floorCode
-                            BlockUtil.calculateMaxSpeed(movementInfo);
+                            BlockUtil.updateMaxSpeed(movementInfo);
                         }
 
                         buffManager.changeBuff(world, blockInfo.getId());
