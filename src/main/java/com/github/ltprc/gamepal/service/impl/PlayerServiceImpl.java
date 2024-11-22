@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -732,6 +733,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public ResponseEntity<String> interactBlocks(String userCode, int interactionCode) {
         JSONObject rst = ContentUtil.generateRst();
+        Random random = new Random();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
@@ -814,10 +816,12 @@ public class PlayerServiceImpl implements PlayerService {
                 generateNotificationMessage(userCode, "你捯饬了起来。");
                 break;
             case GamePalConstants.INTERACTION_PACK:
-                // 加一个blockCode和打包blockItemNo的映射
-                sceneManager.addDropBlock(world, block.getWorldCoordinate(),new AbstractMap.SimpleEntry<>(
-                        BlockUtil.convertBlockInfo2ItemNo(block.getBlockInfo()), 1));
-                sceneManager.removeBlock(world, block);
+                Block packedDrop = sceneManager.addDropBlock(world, block.getWorldCoordinate(),
+                        new AbstractMap.SimpleEntry<>(BlockUtil.convertBlockInfo2ItemNo(block.getBlockInfo()), 1));
+                movementManager.speedUpBlock(world, packedDrop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                        new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                        GamePalConstants.DROP_THROW_RADIUS));
+                sceneManager.removeBlock(world, block, false);
                 break;
             default:
                 break;
@@ -937,6 +941,11 @@ public class PlayerServiceImpl implements PlayerService {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
+            case SkillConstants.SKILL_CODE_MELEE_SMASH:
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_SMASH, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                break;
             case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
                 eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
@@ -1044,19 +1053,29 @@ public class PlayerServiceImpl implements PlayerService {
                 }
                 break;
             case SkillConstants.SKILL_CODE_SHOVEL:
-                generateEventBySkill(userCode, SkillConstants.SKILL_CODE_MELEE_HIT);
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_SMASH, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
-                // TODO shoveling logics
+                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) != BlockConstants.BLOCK_CODE_DIRT) {
+                    sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
+                } else {
+                    sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_WATER);
+                }
                 break;
             case SkillConstants.SKILL_CODE_PICK:
-                generateEventBySkill(userCode, SkillConstants.SKILL_CODE_MELEE_STAB);
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
                 // TODO picking logics
                 break;
             case SkillConstants.SKILL_CODE_PLOW:
-                generateEventBySkill(userCode, SkillConstants.SKILL_CODE_MELEE_HIT);
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
@@ -1283,25 +1302,17 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Block drop = sceneManager.addDropBlock(world, player.getWorldCoordinate(),
                 new AbstractMap.SimpleEntry<>(itemNo, amount));
-//        BlockInfo dropBlockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
-//                "3000", new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                BlockConstants.STRUCTURE_LAYER_MIDDLE,
-//                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D))),
-//                new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
-//        WorldCoordinate dropWorldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
-//        MovementInfo dropMovementInfo = new MovementInfo();
-        MovementInfo dropMovementInfo = drop.getMovementInfo();
-        dropMovementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
-        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
-                dropMovementInfo.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
-        dropMovementInfo.setSpeed(newSpeed);
-        movementManager.settleSpeedAndCoordinate(world, drop, 0);
-        dropMovementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
+                BigDecimal.valueOf(random.nextDouble() * 360), GamePalConstants.DROP_THROW_RADIUS));
+//        MovementInfo movementInfo = block.getMovementInfo();
+//        dropMovementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
+//        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
+//                dropMovementInfo.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
+//        dropMovementInfo.setSpeed(newSpeed);
+//        movementManager.settleSpeedAndCoordinate(world, drop, 0);
+//        dropMovementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1312,18 +1323,19 @@ public class PlayerServiceImpl implements PlayerService {
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
-        if (!world.getBlockMap().containsKey(dropId)) {
-            logger.warn(ErrorUtil.ERROR_1030);
-        } else {
+        if (world.getDropMap().containsKey(dropId)) {
             Map.Entry<String, Integer> drop = world.getDropMap().get(dropId);
             getItem(userCode, drop.getKey(), drop.getValue());
+        } else {
+            logger.warn(ErrorUtil.ERROR_1030);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
+        }
+        if (world.getBlockMap().containsKey(dropId)) {
             Block dropBlock = world.getBlockMap().get(dropId);
-//            Region region = world.getRegionMap().get(dropBlock.getWorldCoordinate().getRegionNo());
-//            Scene scene = region.getScenes().get(dropBlock.getWorldCoordinate().getSceneCoordinate());
-//            scene.setBlocks(scene.getBlocks().stream()
-//                    .filter(block -> !dropId.equals(block.getBlockInfo().getId())).collect(Collectors.toList()));
-//            world.getBlockMap().remove(dropId);
-            sceneManager.removeBlock(world, dropBlock);
+            sceneManager.removeBlock(world, dropBlock, false);
+        } else {
+            logger.warn(ErrorUtil.ERROR_1030);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
         }
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -1342,6 +1354,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> killPlayer(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -1389,6 +1402,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> revivePlayer(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -1446,6 +1460,9 @@ public class PlayerServiceImpl implements PlayerService {
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());
         remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_MAGNUM); // Special container 24/10/20
+        movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));
 //        WorldCoordinate worldCoordinate = remainContainer.getWorldCoordinate();
 //        MovementInfo movementInfo = remainContainer.getMovementInfo();
 //        movementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));

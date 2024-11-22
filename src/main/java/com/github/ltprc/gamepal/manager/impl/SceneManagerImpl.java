@@ -8,6 +8,7 @@ import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
@@ -30,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -53,6 +55,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private WorldService worldService;
+
+    @Autowired
+    private MovementManager movementManager;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -855,12 +860,19 @@ public class SceneManagerImpl implements SceneManager {
                 rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
+                if (!world.getDropMap().containsKey(block.getBlockInfo().getId())) {
+                    return new JSONObject();
+                }
                 Map.Entry<String, Integer> entry = world.getDropMap().get(block.getBlockInfo().getId());
                 rst.put("itemNo", entry.getKey());
                 rst.put("amount", entry.getValue());
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
-                rst.put("to", world.getTeleportMap().get(block.getBlockInfo().getId()));
+                if (!world.getTeleportMap().containsKey(block.getBlockInfo().getId())) {
+                    return new JSONObject();
+                }
+                WorldCoordinate to = world.getTeleportMap().get(block.getBlockInfo().getId());
+                rst.put("to", to);
                 break;
             default:
                 break;
@@ -903,10 +915,18 @@ public class SceneManagerImpl implements SceneManager {
         return block;
     }
 
+    /**
+     * Added a random direction and default distance
+     * @param world
+     * @param worldCoordinate
+     * @param drop
+     * @return
+     */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
+        Random random = new Random();
         String id = UUID.randomUUID().toString();
-        Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_MAGNUM,
+        Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PLASMA,
                 BlockConstants.STRUCTURE_LAYER_MIDDLE);
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, id, "3000", structure);
         MovementInfo movementInfo = new MovementInfo();
@@ -951,6 +971,7 @@ public class SceneManagerImpl implements SceneManager {
         return block;
     }
 
+    @Transactional
     private Block registerBlock(GameWorld world, Block block) {
 //        switch (eventCode) {
 //            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
@@ -987,7 +1008,15 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public void removeBlock(GameWorld world, Block block) {
+    public void removeBlock(GameWorld world, Block block, boolean isDestroyed) {
+        unregisterBlock(world, block);
+        if (isDestroyed) {
+            destroyBlock(world, block);
+        }
+    }
+
+    @Transactional
+    private void unregisterBlock(GameWorld world, Block block) {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
@@ -1007,6 +1036,108 @@ public class SceneManagerImpl implements SceneManager {
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
                 world.getBagInfoMap().remove(block.getBlockInfo().getId());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void destroyBlock(GameWorld world, Block block) {
+        Random random = new Random();
+        Block drop = null;
+        switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_BED:
+            case BlockConstants.BLOCK_TYPE_DRESSER:
+            case BlockConstants.BLOCK_TYPE_STORAGE:
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_wood", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_TOILET:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_ceramic", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_COOKER:
+            case BlockConstants.BLOCK_TYPE_BUILDING:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_concrete", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_SINK:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_steel", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_RADIO:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_plastic", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_TREE:
+                for (int i = 0; i < 10 + random.nextInt(10); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_wood", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_ROCK:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_concrete", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                int randomValue = random.nextInt(100);
+                if (randomValue < 2) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_gold", 1 + random.nextInt(2)));
+                } else if (randomValue < 5) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_silver", 1 + random.nextInt(2)));
+                } else if (randomValue < 8) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_lead", 1 + random.nextInt(2)));
+                } else if (randomValue < 12) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_asbestos", 1 + random.nextInt(2)));
+                } else if (randomValue < 16) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_oil", 1 + random.nextInt(2)));
+                } else if (randomValue < 20) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_crystal", 1 + random.nextInt(2)));
+                } else if (randomValue < 25) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_aluminum", 1 + random.nextInt(2)));
+                } else if (randomValue < 27) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_bone", 1 + random.nextInt(2)));
+                } else if (randomValue < 35) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_copper", 1 + random.nextInt(2)));
+                } else if (randomValue < 45) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_steel", 1 + random.nextInt(2)));
+                }
+                if (null != drop) {
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
                 break;
             default:
                 break;

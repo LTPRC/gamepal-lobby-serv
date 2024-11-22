@@ -38,10 +38,10 @@ public class SkillUtil {
 
     public static void updateAnimalSkills(PlayerInfo playerInfo) {
         List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
-        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
@@ -128,23 +128,38 @@ public class SkillUtil {
      */
     public static int calculateChangedHp(final int eventCode, final int targetType) {
         int hp = 0;
+        if (targetType == BlockConstants.BLOCK_TYPE_NORMAL
+                || targetType == BlockConstants.BLOCK_TYPE_EFFECT
+                || targetType == BlockConstants.BLOCK_TYPE_DROP
+                || targetType == BlockConstants.BLOCK_TYPE_TELEPORT) {
+            // No hp effect
+            return hp;
+        }
         Random random = new Random();
         switch (eventCode) {
             case GamePalConstants.EVENT_CODE_HEAL:
                 if (targetType == BlockConstants.BLOCK_TYPE_PLAYER) {
                     hp = 100;
                 }
-                return hp;
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
                 hp = -10 + random.nextInt(10);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
-                hp = -20 + random.nextInt(10);
+                hp = -10 + random.nextInt(20);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-                hp = -40 + random.nextInt(30);
+                hp = -20 + random.nextInt(60);
+                break;
+            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
+                hp = -50 + random.nextInt(100);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+                hp = -75 + random.nextInt(50);
+                if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
+                    hp *= 2;
+                }
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_CHOP:
                 hp = -75 + random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
@@ -172,31 +187,6 @@ public class SkillUtil {
                 break;
             default:
                 break;
-        }
-        if (targetType == BlockConstants.BLOCK_TYPE_PLAYER) {
-            hp /= 1;
-        } else if (targetType == BlockConstants.BLOCK_TYPE_BED
-                || targetType == BlockConstants.BLOCK_TYPE_TOILET
-                || targetType == BlockConstants.BLOCK_TYPE_DRESSER
-                || targetType == BlockConstants.BLOCK_TYPE_STORAGE
-                || targetType == BlockConstants.BLOCK_TYPE_COOKER
-                || targetType == BlockConstants.BLOCK_TYPE_SINK
-                || targetType == BlockConstants.BLOCK_TYPE_CONTAINER
-                || targetType == BlockConstants.BLOCK_TYPE_RADIO
-                || targetType == BlockConstants.BLOCK_TYPE_TRAP
-                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP
-                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL
-                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO
-                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT
-                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM
-                || targetType == BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE) {
-            hp /= 2;
-        } else if (targetType == BlockConstants.BLOCK_TYPE_BUILDING
-                || targetType == BlockConstants.BLOCK_TYPE_TREE
-                || targetType == BlockConstants.BLOCK_TYPE_ROCK) {
-            hp /= 10;
-        } else {
-            hp = 0;
         }
         return hp;
     }

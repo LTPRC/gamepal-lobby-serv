@@ -112,7 +112,7 @@ public class BlockConstants {
     public static final BigDecimal BARRIER_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
 
-    public static final int HP_DEFAULT = 10000;
+    public static final int HP_DEFAULT = 100;
 
     public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
     public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.005);

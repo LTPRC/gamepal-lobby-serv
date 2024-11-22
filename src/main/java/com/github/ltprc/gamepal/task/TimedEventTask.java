@@ -212,8 +212,9 @@ public class TimedEventTask {
                             && playerInfoMap.get(blockInfo.getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
                         // NPC is exempted 24/10/20
                         userService.logoff(blockInfo.getId(), "", false);
-                    } else if (world.getBlockMap().containsKey(blockInfo.getId())) {
-                        sceneManager.removeBlock(world, world.getBlockMap().get(blockInfo.getId()));
+                    }
+                    if (world.getBlockMap().containsKey(blockInfo.getId())) {
+                        sceneManager.removeBlock(world, world.getBlockMap().get(blockInfo.getId()), false);
                     }
                 }
             });

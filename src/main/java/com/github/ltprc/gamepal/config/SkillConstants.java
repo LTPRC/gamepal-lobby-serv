@@ -12,9 +12,10 @@ public class SkillConstants {
     public static final int SKILL_CODE_HEAL = 4;
     public static final int SKILL_CODE_CURSE = 5;
     public static final int SKILL_CODE_CHEER = 6;
-    public static final int SKILL_CODE_MELEE_HIT = 11;
+    public static final int SKILL_CODE_MELEE_HIT = 10;
     public static final int SKILL_CODE_MELEE_KICK = 12;
     public static final int SKILL_CODE_MELEE_SCRATCH = 13;
+    public static final int SKILL_CODE_MELEE_SMASH = 11;
     public static final int SKILL_CODE_MELEE_CLEAVE = 14;
     public static final int SKILL_CODE_MELEE_CHOP = 33;
     public static final int SKILL_CODE_MELEE_STAB = 15;

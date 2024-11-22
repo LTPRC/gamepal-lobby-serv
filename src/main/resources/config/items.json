@@ -3,7 +3,7 @@
   {"itemNo": "t001", "name": "匕首", "weight": 0.4, "description": "", "itemIndex": 1, "skills": [{"skillCode": 15, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
   {"itemNo": "t002", "name": "沙漠之鹰手枪", "weight": 2.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 25, "skillMode": 0, "frame": 0, "frameMax": 10, "skillType": 1, "range": 10.0, "ammoCode": "a002"}]},
   {"itemNo": "t003", "name": "USP手枪", "weight": 0.9, "description": "", "itemIndex": 1, "skills": [{"skillCode": 23, "skillMode": 0, "frame": 0, "frameMax": 5, "skillType": 1, "range": 10.0, "ammoCode": "a003"}]},
-  {"itemNo": "t004", "name": "爪刃", "weight": 1.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 13, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
+  {"itemNo": "t004", "name": "爪刃", "weight": 1.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 14, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
   {"itemNo": "t005", "name": "拳套", "weight": 1.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 11, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
   {"itemNo": "t006", "name": "水管", "weight": 1.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 11, "skillMode": 0, "frame": 0, "frameMax": 50, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
   {"itemNo": "t007", "name": "弹弓", "weight": 0.1, "description": "", "itemIndex": 1, "skills": [{"skillCode": 21, "skillMode": 0, "frame": 0, "frameMax": 50, "skillType": 1, "range": 10.0, "ammoCode": "a004"}]},

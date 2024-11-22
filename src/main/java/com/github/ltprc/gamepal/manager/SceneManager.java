@@ -45,7 +45,7 @@ public interface SceneManager {
 
     boolean checkBlockSpace2Build(final GameWorld world, final Block block);
 
-    void removeBlock(GameWorld world, Block block);
+    void removeBlock(GameWorld world, Block block, boolean isDestroyed);
 
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
 

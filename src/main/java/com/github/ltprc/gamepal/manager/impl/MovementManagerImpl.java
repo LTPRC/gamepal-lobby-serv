@@ -5,9 +5,9 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.*;
 
 @Component
@@ -42,6 +40,16 @@ public class MovementManagerImpl implements MovementManager {
 
     @Autowired
     private PlayerService playerService;
+
+    @Override
+    public void speedUpBlock(GameWorld world, Block block, Coordinate deltaSpeed) {
+        MovementInfo movementInfo = block.getMovementInfo();
+        movementInfo.getSpeed().setX(movementInfo.getSpeed().getX().add(deltaSpeed.getX()));
+        movementInfo.getSpeed().setY(movementInfo.getSpeed().getY().add(deltaSpeed.getY()));
+        movementInfo.setFaceDirection(BlockUtil.calculateAngle(new Coordinate(), movementInfo.getSpeed()));
+        settleSpeedAndCoordinate(world, block, 0);
+//        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+    }
 
     @Override
     public void settleSpeedAndCoordinate(GameWorld world, Block worldMovingBlock, int sceneScanDepth) {
@@ -110,14 +118,15 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     @Override
-    public void settleCoordinate(GameWorld world, Block worldMovingBlock, WorldCoordinate newWorldCoordinate,
+    public void settleCoordinate(GameWorld world, Block worldMovingBlock, final WorldCoordinate newWorldCoordinate,
                                  boolean isTeleport) {
-        worldService.expandByCoordinate(world, worldMovingBlock.getWorldCoordinate(), newWorldCoordinate, 1);
-        boolean isRegionChanged = worldMovingBlock.getWorldCoordinate().getRegionNo() != newWorldCoordinate.getRegionNo();
+        final WorldCoordinate oldWorldCoordinate = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
+        worldService.expandByCoordinate(world, oldWorldCoordinate, newWorldCoordinate, 1);
+        boolean isRegionChanged = oldWorldCoordinate.getRegionNo() != newWorldCoordinate.getRegionNo();
         boolean isSceneChanged = isRegionChanged
-                || !worldMovingBlock.getWorldCoordinate().getSceneCoordinate().getX()
+                || !oldWorldCoordinate.getSceneCoordinate().getX()
                 .equals(newWorldCoordinate.getSceneCoordinate().getX())
-                || !worldMovingBlock.getWorldCoordinate().getSceneCoordinate().getY()
+                || !oldWorldCoordinate.getSceneCoordinate().getY()
                 .equals(newWorldCoordinate.getSceneCoordinate().getY());
 
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock.getWorldCoordinate());
@@ -146,6 +155,11 @@ public class MovementManagerImpl implements MovementManager {
                     playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), block.getBlockInfo().getId());
                 }
             }));
+        } else if (isSceneChanged) {
+            region.getScenes().get(newWorldCoordinate.getSceneCoordinate()).getBlocks()
+                    .put(worldMovingBlock.getBlockInfo().getId(), worldMovingBlock);
+            region.getScenes().get(oldWorldCoordinate.getSceneCoordinate()).getBlocks()
+                    .remove(worldMovingBlock.getBlockInfo().getId());
         }
     }
 
@@ -164,7 +178,9 @@ public class MovementManagerImpl implements MovementManager {
             return;
         }
         if (null != scene.getGird() && null != scene.getGird()[0]) {
-            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldMovingBlock.getWorldCoordinate());
+            WorldCoordinate worldCoordinate = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
+            BlockUtil.fixWorldCoordinateReal(region, worldCoordinate);
+            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
             int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
             int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
             int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
