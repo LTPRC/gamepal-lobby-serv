@@ -13,7 +13,6 @@ import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.structure.Shape;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -1020,8 +1019,7 @@ public class PlayerServiceImpl implements PlayerService {
             case SkillConstants.SKILL_CODE_BUILD:
                 WorldCoordinate buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
-                BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_BOTTOM));
+                BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
                 if (sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
@@ -1091,7 +1089,7 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_LAY_BARRIER:
-                blockInfo = BlockUtil.generateBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
+                blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
                 blockInfo.setCode("3102");
                 blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
@@ -1454,12 +1452,12 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        BlockInfo blockInfo1 = BlockUtil.generateBlockInfoByType(BlockConstants.BLOCK_TYPE_CONTAINER);
+        BlockInfo blockInfo1 = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_CONTAINER);
         blockInfo1.setCode("3101");
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());
-        remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_MAGNUM); // Special container 24/10/20
+        remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_NONE); // Special container 24/10/20
         movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
                 new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                 GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));

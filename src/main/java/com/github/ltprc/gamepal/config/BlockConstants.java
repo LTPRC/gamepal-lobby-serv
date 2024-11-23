@@ -98,11 +98,12 @@ public class BlockConstants {
     public static final int STRUCTURE_LAYER_SKY = 50;
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 
-    public static final int STRUCTURE_MATERIAL_HOLLOW = 0; // Collide to none
-    public static final int STRUCTURE_MATERIAL_SOLID = 1; // Collide to 1, 2, 3, 4
-    public static final int STRUCTURE_MATERIAL_FLESH = 2; // Collide to 1, 2
-    public static final int STRUCTURE_MATERIAL_MAGNUM = 3; // Collide to 1, 3
-    public static final int STRUCTURE_MATERIAL_PLASMA = 4; // Collide to 1
+    public static final int STRUCTURE_MATERIAL_NONE = 0; // Collide to none positively
+    public static final int STRUCTURE_MATERIAL_ALL = 1; // Collide to all positively
+    public static final int STRUCTURE_MATERIAL_FLESH = 2; // Collide to 1, 2 positively
+    public static final int STRUCTURE_MATERIAL_PARTICLE = 3; // Collide to 1, 2 positively
+    public static final int STRUCTURE_MATERIAL_PARTICLE_NO_FLESH = 4; // Collide to 1 positively
+
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;

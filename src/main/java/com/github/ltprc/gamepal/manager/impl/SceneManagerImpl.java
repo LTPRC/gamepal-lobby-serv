@@ -232,12 +232,11 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1031);
             return;
         }
-        int regionIndex = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
+        int terrainCode = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
         region.getScenes().put(sceneCoordinate, scene);
-        fillSceneTemplate(world, region, scene, regionIndex);
-        if (regionIndex == BlockConstants.BLOCK_CODE_NOTHING) {
-            scene.getBlocks().values().forEach(block ->
-                    block.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_SOLID));
+        fillSceneTemplate(world, region, scene, terrainCode);
+        if (terrainCode == BlockConstants.BLOCK_CODE_NOTHING) {
+            scene.getBlocks().values().forEach(block -> removeBlock(world, block, false));
         } else {
             addSceneAnimals(world, region, scene);
         }
@@ -886,16 +885,16 @@ public class SceneManagerImpl implements SceneManager {
         Structure structure;
         switch (normalBlockType) {
             case 2:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case 3:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_TOP);
                 break;
             case 1:
             default:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_BOTTOM);
                 break;
         }
@@ -924,11 +923,7 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        Random random = new Random();
-        String id = UUID.randomUUID().toString();
-        Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PLASMA,
-                BlockConstants.STRUCTURE_LAYER_MIDDLE);
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, id, "3000", structure);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_DROP);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
@@ -941,11 +936,8 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Block addTeleportBlock(GameWorld world, final String code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
-        String id = UUID.randomUUID().toString();
-        Structure structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION, new Shape(),
-                new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5)));
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, id, code, structure);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_TELEPORT);
+        blockInfo.setCode(code);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);

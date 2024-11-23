@@ -48,111 +48,111 @@ public class EventManagerImpl implements EventManager {
     @Autowired
     private NpcManager npcManager;
 
-    @Override
-    public BlockInfo createBlockInfoByEventCode(final int eventCode) {
-        int blockType;
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_FIRE:
-            case GamePalConstants.EVENT_CODE_MINE:
-                blockType = BlockConstants.BLOCK_TYPE_TRAP;
-                break;
-            default:
-                blockType = BlockConstants.BLOCK_TYPE_EFFECT;
-                break;
-        }
-        String id = UUID.randomUUID().toString();
-        int structureMaterial;
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
-                break;
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
-                break;
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
-                break;
-            default:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
-                break;
-        }
-        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
-                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
-        return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
-    }
+//    @Override
+//    public BlockInfo createBlockInfoByEventCode(final int eventCode) {
+//        int blockType;
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_FIRE:
+//            case GamePalConstants.EVENT_CODE_MINE:
+//                blockType = BlockConstants.BLOCK_TYPE_TRAP;
+//                break;
+//            default:
+//                blockType = BlockConstants.BLOCK_TYPE_EFFECT;
+//                break;
+//        }
+//        String id = UUID.randomUUID().toString();
+//        int structureMaterial;
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+//            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+//            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+//            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
+//            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+//            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+//            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
+//                break;
+//            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+//            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+//            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+//            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+//            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
+//                break;
+//            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+//            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
+//                break;
+//            default:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
+//                break;
+//        }
+//        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
+//                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+//                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
+//        return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
+//    }
 
-    @Override
-    public MovementInfo createMovementInfoByEventCode(final int eventCode) {
-        MovementInfo movementInfo = new MovementInfo();
-        movementInfo.setFrame(0);
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MINE:
-                // Infinite
-                movementInfo.setFrameMax(-1);
-                break;
-            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
-                movementInfo.setFrameMax(1);
-                break;
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-                movementInfo.setFrameMax(3);
-                break;
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                movementInfo.setFrameMax(50);
-                break;
-            case GamePalConstants.EVENT_CODE_FIRE:
-                movementInfo.setFrameMax(250);
-                break;
-            default:
-                movementInfo.setFrameMax(25);
-                break;
-        }
-        switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-                movementInfo.setPeriod(50);
-                break;
-            default:
-                movementInfo.setPeriod(25);
-                break;
-        }
-        return movementInfo;
-    }
+//    @Override
+//    public MovementInfo createMovementInfoByEventCode(final int eventCode) {
+//        MovementInfo movementInfo = new MovementInfo();
+//        movementInfo.setFrame(0);
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_MINE:
+//                // Infinite
+//                movementInfo.setFrameMax(-1);
+//                break;
+//            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
+//                movementInfo.setFrameMax(1);
+//                break;
+////            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+////            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+////            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+////            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
+////            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+////            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+////            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+////            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+////            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+////            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+////            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+////            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
+////            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
+////            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+////                movementInfo.setFrameMax(3);
+////                break;
+//            case GamePalConstants.EVENT_CODE_HEAL:
+//            case GamePalConstants.EVENT_CODE_DISTURB:
+//            case GamePalConstants.EVENT_CODE_CHEER:
+//            case GamePalConstants.EVENT_CODE_CURSE:
+//                movementInfo.setFrameMax(50);
+//                break;
+//            case GamePalConstants.EVENT_CODE_FIRE:
+//                movementInfo.setFrameMax(250);
+//                break;
+//            default:
+//                movementInfo.setFrameMax(25);
+//                break;
+//        }
+//        switch (eventCode) {
+//            case GamePalConstants.EVENT_CODE_HEAL:
+//            case GamePalConstants.EVENT_CODE_DISTURB:
+//            case GamePalConstants.EVENT_CODE_CHEER:
+//            case GamePalConstants.EVENT_CODE_CURSE:
+//                movementInfo.setPeriod(50);
+//                break;
+//            default:
+//                movementInfo.setPeriod(25);
+//                break;
+//        }
+//        return movementInfo;
+//    }
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
-        BlockInfo blockInfo = createBlockInfoByEventCode(eventCode);
-        MovementInfo movementInfo = createMovementInfoByEventCode(eventCode);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndEventCode(BlockConstants.BLOCK_TYPE_EFFECT, eventCode);
+        MovementInfo movementInfo = BlockUtil.createMovementInfoByEventCode(eventCode);
         Block eventBlock = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo, movementInfo);
         if (StringUtils.isNotBlank(sourceId)) {
             world.getSourceMap().put(eventBlock.getBlockInfo().getId(), sourceId);
