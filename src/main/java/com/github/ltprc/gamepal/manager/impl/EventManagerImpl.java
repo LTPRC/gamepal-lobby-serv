@@ -5,6 +5,7 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -47,6 +48,9 @@ public class EventManagerImpl implements EventManager {
 
     @Autowired
     private NpcManager npcManager;
+
+    @Autowired
+    private MovementManager movementManager;
 
 //    @Override
 //    public BlockInfo createBlockInfoByEventCode(final int eventCode) {
@@ -241,6 +245,7 @@ public class EventManagerImpl implements EventManager {
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+            case GamePalConstants.EVENT_CODE_MELEE_PICK:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
                 rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
                         && distance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
@@ -304,6 +309,7 @@ public class EventManagerImpl implements EventManager {
             case GamePalConstants.EVENT_CODE_MELEE_SMASH:
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+            case GamePalConstants.EVENT_CODE_MELEE_PICK:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
                 affectedBlockList.forEach(target -> affectBlock(world, eventBlock, target));
                 break;
@@ -506,7 +512,7 @@ public class EventManagerImpl implements EventManager {
     public void updateEvents(GameWorld world) {
         world.getBlockMap().values()
                 .forEach(block -> {
-                    worldService.expandByCoordinate(world, null, block.getWorldCoordinate(), 0);
+//                    worldService.expandByCoordinate(world, null, block.getWorldCoordinate(), 0);
                     updateEvent(world, block);
                 });
     }
@@ -538,7 +544,6 @@ public class EventManagerImpl implements EventManager {
                             })) {
                         addEvent(world, GamePalConstants.EVENT_CODE_EXPLODE, fromId, eventBlock.getWorldCoordinate());
                         sceneManager.removeBlock(world, eventBlock, true);
-                        return;
                     }
                     break;
                 case GamePalConstants.EVENT_CODE_FIRE:
@@ -574,9 +579,8 @@ public class EventManagerImpl implements EventManager {
                 || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_HEAL))
                 || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_SACRIFICE))
                 || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_DISTURB))) {
-                // Stick with playerInfo
-                BlockUtil.copyWorldCoordinate(world.getCreatureMap().get(fromId).getWorldCoordinate(),
-                        eventBlock.getWorldCoordinate());
+            // Stick with playerInfo
+            movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(), false);
         }
     }
 

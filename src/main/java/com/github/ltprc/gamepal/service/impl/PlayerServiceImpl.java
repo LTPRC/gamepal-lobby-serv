@@ -955,6 +955,11 @@ public class PlayerServiceImpl implements PlayerService {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
+            case SkillConstants.SKILL_CODE_MELEE_PICK:
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_PICK, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                break;
             case SkillConstants.SKILL_CODE_MELEE_STAB:
                 eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_STAB, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
@@ -1061,14 +1066,6 @@ public class PlayerServiceImpl implements PlayerService {
                 } else {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_WATER);
                 }
-                break;
-            case SkillConstants.SKILL_CODE_PICK:
-                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
-                buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
-                // TODO picking logics
                 break;
             case SkillConstants.SKILL_CODE_PLOW:
                 eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode,

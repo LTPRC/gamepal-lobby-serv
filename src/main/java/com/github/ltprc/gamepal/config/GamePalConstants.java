@@ -58,6 +58,7 @@ public class GamePalConstants {
     public static final int EVENT_CODE_MELEE_SMASH = 133;
     public static final int EVENT_CODE_MELEE_CLEAVE = 118;
     public static final int EVENT_CODE_MELEE_CHOP = 130;
+    public static final int EVENT_CODE_MELEE_PICK = 134;
     public static final int EVENT_CODE_MELEE_STAB = 119;
     public static final int EVENT_CODE_SHOOT_HIT = 122;
     public static final int EVENT_CODE_SHOOT_ARROW = 123;
@@ -72,7 +73,7 @@ public class GamePalConstants {
     public static final int EVENT_CODE_FIRE = 106;
     public static final int EVENT_CODE_WATER = 131;
     public static final int EVENT_CODE_SPARK_SHORT = 132;
-    public static final int EVENT_CODE_ASH = 134;
+    public static final int EVENT_CODE_ASH = 135;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;

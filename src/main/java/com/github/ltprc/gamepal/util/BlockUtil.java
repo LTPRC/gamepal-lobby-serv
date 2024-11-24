@@ -987,6 +987,7 @@ public class BlockUtil {
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
             case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+            case GamePalConstants.EVENT_CODE_MELEE_PICK:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:

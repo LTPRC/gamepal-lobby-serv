@@ -18,6 +18,7 @@ public class SkillConstants {
     public static final int SKILL_CODE_MELEE_SMASH = 11;
     public static final int SKILL_CODE_MELEE_CLEAVE = 14;
     public static final int SKILL_CODE_MELEE_CHOP = 33;
+    public static final int SKILL_CODE_MELEE_PICK = 36;
     public static final int SKILL_CODE_MELEE_STAB = 15;
     public static final int SKILL_CODE_SHOOT_HIT = 21;
     public static final int SKILL_CODE_SHOOT_ARROW = 22;
@@ -30,7 +31,6 @@ public class SkillConstants {
     public static final int SKILL_CODE_BUILD = 32;
     public static final int SKILL_CODE_FISH = 34;
     public static final int SKILL_CODE_SHOVEL = 35;
-    public static final int SKILL_CODE_PICK = 36;
     public static final int SKILL_CODE_PLOW = 37;
     public static final int SKILL_CODE_LAY_MINE = 41;
     public static final int SKILL_CODE_LAY_BARRIER = 42;

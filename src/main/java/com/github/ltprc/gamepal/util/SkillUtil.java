@@ -166,6 +166,12 @@ public class SkillUtil {
                     hp *= 10;
                 }
                 break;
+            case GamePalConstants.EVENT_CODE_MELEE_PICK:
+                hp = -75 + random.nextInt(50);
+                if (targetType == BlockConstants.BLOCK_TYPE_ROCK) {
+                    hp *= 10;
+                }
+                break;
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
                 hp = -100 + random.nextInt(100);
                 break;
