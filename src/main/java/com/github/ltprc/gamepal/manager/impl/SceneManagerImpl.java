@@ -1001,10 +1001,10 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public void removeBlock(GameWorld world, Block block, boolean isDestroyed) {
-        unregisterBlock(world, block);
         if (isDestroyed) {
             destroyBlock(world, block);
         }
+        unregisterBlock(world, block);
     }
 
     @Transactional
@@ -1041,6 +1041,13 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_BED:
             case BlockConstants.BLOCK_TYPE_DRESSER:
             case BlockConstants.BLOCK_TYPE_STORAGE:
+                for (int i = 0; i < 3 + random.nextInt(3); i++) {
+                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_wood", 1));
+                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                            GamePalConstants.DROP_THROW_RADIUS));
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
                 for (int i = 0; i < 3 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_wood", 1));
@@ -1048,6 +1055,14 @@ public class SceneManagerImpl implements SceneManager {
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                             GamePalConstants.DROP_THROW_RADIUS));
                 }
+                world.getBagInfoMap().get(block.getBlockInfo().getId()).getItems().entrySet()
+                        .forEach(entry -> {
+                            Block dropFromContainer = addDropBlock(world, block.getWorldCoordinate(), entry);
+                            movementManager.speedUpBlock(world, dropFromContainer,
+                                    BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
+                                            BigDecimal.valueOf(random.nextDouble() * 360),
+                                            GamePalConstants.DROP_THROW_RADIUS));
+                        });
                 break;
             case BlockConstants.BLOCK_TYPE_TOILET:
                 for (int i = 0; i < 3 + random.nextInt(3); i++) {

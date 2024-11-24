@@ -13,8 +13,6 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -26,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -51,107 +50,6 @@ public class EventManagerImpl implements EventManager {
 
     @Autowired
     private MovementManager movementManager;
-
-//    @Override
-//    public BlockInfo createBlockInfoByEventCode(final int eventCode) {
-//        int blockType;
-//        switch (eventCode) {
-//            case GamePalConstants.EVENT_CODE_FIRE:
-//            case GamePalConstants.EVENT_CODE_MINE:
-//                blockType = BlockConstants.BLOCK_TYPE_TRAP;
-//                break;
-//            default:
-//                blockType = BlockConstants.BLOCK_TYPE_EFFECT;
-//                break;
-//        }
-//        String id = UUID.randomUUID().toString();
-//        int structureMaterial;
-//        switch (eventCode) {
-//            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-//            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-//            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-//            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
-//            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-//            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-//            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_SOLID;
-//                break;
-//            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-//            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-//            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-//            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-//            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_MAGNUM;
-//                break;
-//            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-//            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PLASMA;
-//                break;
-//            default:
-//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_HOLLOW;
-//                break;
-//        }
-//        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
-//                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
-//        return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
-//    }
-
-//    @Override
-//    public MovementInfo createMovementInfoByEventCode(final int eventCode) {
-//        MovementInfo movementInfo = new MovementInfo();
-//        movementInfo.setFrame(0);
-//        switch (eventCode) {
-//            case GamePalConstants.EVENT_CODE_MINE:
-//                // Infinite
-//                movementInfo.setFrameMax(-1);
-//                break;
-//            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
-//                movementInfo.setFrameMax(1);
-//                break;
-////            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-////            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-////            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-////            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
-////            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-////            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-////            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-////            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-////            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-////            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-////            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-////            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-////            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-////            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
-////                movementInfo.setFrameMax(3);
-////                break;
-//            case GamePalConstants.EVENT_CODE_HEAL:
-//            case GamePalConstants.EVENT_CODE_DISTURB:
-//            case GamePalConstants.EVENT_CODE_CHEER:
-//            case GamePalConstants.EVENT_CODE_CURSE:
-//                movementInfo.setFrameMax(50);
-//                break;
-//            case GamePalConstants.EVENT_CODE_FIRE:
-//                movementInfo.setFrameMax(250);
-//                break;
-//            default:
-//                movementInfo.setFrameMax(25);
-//                break;
-//        }
-//        switch (eventCode) {
-//            case GamePalConstants.EVENT_CODE_HEAL:
-//            case GamePalConstants.EVENT_CODE_DISTURB:
-//            case GamePalConstants.EVENT_CODE_CHEER:
-//            case GamePalConstants.EVENT_CODE_CURSE:
-//                movementInfo.setPeriod(50);
-//                break;
-//            default:
-//                movementInfo.setPeriod(25);
-//                break;
-//        }
-//        return movementInfo;
-//    }
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
@@ -224,20 +122,19 @@ public class EventManagerImpl implements EventManager {
 //                                BlockUtil.calculateAngle(region, from, worldCoordinate).doubleValue()) < 135D)
                         .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
                         .forEach(preSelectedBlocks::add));
-        return shortenPreSelectedBlocks(region, fromWorldCoordinate, eventBlock, preSelectedBlocks);
+//        return shortenPreSelectedBlocks(region, fromWorldCoordinate, eventBlock, preSelectedBlocks);
+        return preSelectedBlocks;
     }
 
     private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
+        boolean rst = false;
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(from.getRegionNo());
-        BigDecimal distance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
-        if (null == distance) {
-            return false;
-        }
-        boolean rst = false;
-        double angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate()).doubleValue();
-        double angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue();
-        double deltaAngle = BlockUtil.compareAnglesInDegrees(angle1, angle2);
+        BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
+                blocker.getWorldCoordinate());
+        BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
+        BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
+        BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
         switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
@@ -248,8 +145,12 @@ public class EventManagerImpl implements EventManager {
             case GamePalConstants.EVENT_CODE_MELEE_PICK:
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
                 rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && distance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
-                        && deltaAngle < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
+                        && null != eventDistance
+                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
+                        && null != angle1
+                        && null != angle2
+                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+                        < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_HIT:
             case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
@@ -257,14 +158,17 @@ public class EventManagerImpl implements EventManager {
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
             case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
                 rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && distance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
-                        && deltaAngle < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                        && null != fromDistance
+                        && fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
+                        && null != angle1
+                        && null != angle2
+                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
                         && BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
-                        blocker.getWorldCoordinate());
-                rst = null != eventDistance && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
+                rst = null != eventDistance
+                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
                 break;
             default:
                 break;
@@ -276,14 +180,14 @@ public class EventManagerImpl implements EventManager {
                                                  List<Block> preSelectedBlocks) {
         Optional<Block> collidedBlock = preSelectedBlocks.stream()
                 .filter(preSelectedBlock -> BlockUtil.checkMaterialCollision(
-                        preSelectedBlock.getBlockInfo().getStructure().getMaterial(),
-                        eventBlock.getBlockInfo().getStructure().getMaterial()))
+                        eventBlock.getBlockInfo().getStructure().getMaterial(),
+                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
                 .filter(block -> null != BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate()))
                 .min(Comparator.comparing(block -> BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate())));
         List<Block> shortenedBlocks = preSelectedBlocks.stream()
                 .filter(preSelectedBlock -> !BlockUtil.checkMaterialCollision(
-                        preSelectedBlock.getBlockInfo().getStructure().getMaterial(),
-                        eventBlock.getBlockInfo().getStructure().getMaterial()))
+                        eventBlock.getBlockInfo().getStructure().getMaterial(),
+                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
                 .collect(Collectors.toList());
         collidedBlock.ifPresent(shortenedBlocks::add);
         return shortenedBlocks;
@@ -378,8 +282,8 @@ public class EventManagerImpl implements EventManager {
                 sceneManager.setGridBlockCode(world, worldCoordinate, BlockConstants.BLOCK_CODE_LAVA);
                 affectedBlockList.stream()
 //                        .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
-                        .forEach(player -> {
-                            affectBlock(world, eventBlock, player);
+                        .forEach(block -> {
+                            affectBlock(world, eventBlock, block);
 //                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
 //                                    player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
 //                                    BigDecimal.valueOf(random.nextDouble() / 2));
@@ -606,6 +510,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
+    @Transactional
     public void changeHp(GameWorld world, Block block, int value, boolean isAbsolute) {
         Random random = new Random();
         Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());

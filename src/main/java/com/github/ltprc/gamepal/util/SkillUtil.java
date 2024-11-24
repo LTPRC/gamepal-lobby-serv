@@ -143,50 +143,50 @@ public class SkillUtil {
                 }
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_HIT:
-                hp = -10 + random.nextInt(10);
+                hp = -10 - random.nextInt(10);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_KICK:
-                hp = -10 + random.nextInt(20);
+                hp = -10 - random.nextInt(20);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-                hp = -20 + random.nextInt(60);
+                hp = -20 - random.nextInt(60);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SMASH:
-                hp = -50 + random.nextInt(100);
+                hp = -50 - random.nextInt(100);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-                hp = -75 + random.nextInt(50);
+                hp = -75 - random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
                     hp *= 2;
                 }
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-                hp = -75 + random.nextInt(50);
+                hp = -75 - random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
                     hp *= 10;
                 }
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_PICK:
-                hp = -75 + random.nextInt(50);
+                hp = -75 - random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_ROCK) {
                     hp *= 10;
                 }
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_STAB:
-                hp = -100 + random.nextInt(100);
+                hp = -100 - random.nextInt(100);
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-                hp = -110 + random.nextInt(20);
+                hp = -110 - random.nextInt(20);
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-                hp = -250 + random.nextInt(200);
+                hp = -250 - random.nextInt(200);
                 break;
             case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
             case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-                hp = -250 + random.nextInt(100);
+                hp = -250 - random.nextInt(100);
                 break;
             case GamePalConstants.EVENT_CODE_EXPLODE:
-                hp = -600 + random.nextInt(400);
+                hp = -600 - random.nextInt(400);
                 break;
             case GamePalConstants.EVENT_CODE_FIRE:
                 hp = -3;

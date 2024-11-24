@@ -15,4 +15,9 @@ public class MessageConstants {
 
     public static final String COMMAND_PREFIX = "/";
     public static final String MESSAGE_PRINTED_CONTENT_VOICE = "[Voice]";
+
+    public static final String TRANSACTION_TYPE_UPDATE_HP = "UPDATE_HP";
+    public static final String TRANSACTION_TYPE_UPDATE_VP = "UPDATE_VP";
+    public static final String TRANSACTION_TYPE_UPDATE_HUNGER = "UPDATE_HUNGER";
+    public static final String TRANSACTION_TYPE_UPDATE_THIRST = "UPDATE_THIRST";
 }

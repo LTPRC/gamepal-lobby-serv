@@ -36,8 +36,6 @@ public class GameWorld extends GameWorldInfo {
 
     // Special block info maps
     private Map<String, Block> blockMap; // code, non-creature block
-//    private Queue<Block> eventQueue; // event
-//    private Map<String, String> effectMap; // id, sourceId
     private Map<String, String> sourceMap; // id, sourceId
     private Map<String, Block> creatureMap; // code, creature block
     private Map<String, PlayerInfo> playerInfoMap; // code, creature block

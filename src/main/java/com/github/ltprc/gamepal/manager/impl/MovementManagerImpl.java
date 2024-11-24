@@ -48,7 +48,6 @@ public class MovementManagerImpl implements MovementManager {
         movementInfo.getSpeed().setY(movementInfo.getSpeed().getY().add(deltaSpeed.getY()));
         movementInfo.setFaceDirection(BlockUtil.calculateAngle(new Coordinate(), movementInfo.getSpeed()));
         settleSpeedAndCoordinate(world, block, 0);
-//        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
     }
 
     @Override

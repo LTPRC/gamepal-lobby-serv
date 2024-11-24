@@ -250,8 +250,8 @@ public class BlockUtil {
         int x2 = Math.max(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
         int y1 = Math.min(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
         int y2 = Math.max(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
-        for (int i = x1; i <= x2; i++) {
-            for (int j = y1; j <= y2; j++) {
+        for (int i = x1 - 1; i <= x2 + 1; i++) {
+            for (int j = y1 - 1; j <= y2 + 1; j++) {
                 IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, j);
                 if (region.getScenes().containsKey(sceneCoordinate)) {
                     rst.add(sceneCoordinate);

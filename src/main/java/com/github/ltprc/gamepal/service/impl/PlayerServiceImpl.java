@@ -505,53 +505,8 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-//    public ResponseEntity<String> damageHp(String userCode, String fromUserCode, int value) {
-//        GameWorld world = userService.getWorldByUserCode(userCode);
-//        if (null == world) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-//        }
-//        Map<String, Block> creatureMap = world.getCreatureMap();
-//        if (!creatureMap.containsKey(userCode)) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-//        }
-//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-//        if (!playerInfoMap.containsKey(userCode)) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-//        }
-//        if (playerInfoMap.get(userCode).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
-//                && !world.getNpcBrainMap().get(userCode).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
-//            npcManager.prepare2Attack(world, userCode, fromUserCode);
-//        }
-//        return changeHp(userCode, value, false);
-//    }
-
-//    @Override
-//    public ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute) {
-//        JSONObject rst = ContentUtil.generateRst();
-//        GameWorld world = userService.getWorldByUserCode(userCode);
-//        if (null == world) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-//        }
-//        Map<String, Block> creatureMap = world.getCreatureMap();
-//        if (!creatureMap.containsKey(userCode)) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-//        }
-//        Block player = creatureMap.get(userCode);
-//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-//        if (!playerInfoMap.containsKey(userCode)) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-//        }
-//        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-//        int oldHp = player.getBlockInfo().getHp().get();
-//        int newHp = isAbsolute ? value : oldHp + value;
-//        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
-//            newHp = Math.max(oldHp, newHp);
-//        }
-//        player.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, player.getBlockInfo().getHpMax().get())));
-//        return ResponseEntity.ok().body(rst.toString());
-//    }
-
     @Override
+    @Transactional
     public ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -574,6 +529,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> changeHunger(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -596,6 +552,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> changeThirst(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -618,6 +575,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> changePrecision(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -1454,19 +1412,9 @@ public class PlayerServiceImpl implements PlayerService {
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());
-        remainContainer.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_NONE); // Special container 24/10/20
         movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
                 new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                 GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));
-//        WorldCoordinate worldCoordinate = remainContainer.getWorldCoordinate();
-//        MovementInfo movementInfo = remainContainer.getMovementInfo();
-//        movementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
-//        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(worldCoordinate.getCoordinate(),
-//                movementInfo.getFaceDirection(), GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS);
-//        movementInfo.getSpeed().setX(newSpeed.getX().subtract(worldCoordinate.getCoordinate().getX()));
-//        movementInfo.getSpeed().setY(newSpeed.getY().subtract(worldCoordinate.getCoordinate().getY()));
-//        movementManager.settleSpeedAndCoordinate(world, remainContainer, 0);
-//        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());

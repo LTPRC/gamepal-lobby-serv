@@ -2,7 +2,6 @@ package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
-import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
@@ -32,8 +31,6 @@ public interface PlayerService {
     ResponseEntity<String> getInteractedItem(String userCode, String itemNo, int itemAmount);
 
     ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount);
-
-//    ResponseEntity<String> changeHp(String userCode, int value, boolean isAbsolute);
 
     ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute);
 
