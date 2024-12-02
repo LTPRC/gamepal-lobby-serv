@@ -1095,7 +1095,7 @@ public class SceneManagerImpl implements SceneManager {
                             GamePalConstants.DROP_THROW_RADIUS));
                 }
                 break;
-            case BlockConstants.BLOCK_TYPE_RADIO:
+            case BlockConstants.BLOCK_TYPE_SPEAKER:
                 for (int i = 0; i < 3 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m_plastic", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(

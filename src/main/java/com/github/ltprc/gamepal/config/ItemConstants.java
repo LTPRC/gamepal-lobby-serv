@@ -44,8 +44,8 @@ public class ItemConstants {
         ITEM_BUILD_MAP.put("t313", BlockConstants.BLOCK_TYPE_SINK);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_CONTAINER, "t314");
         ITEM_BUILD_MAP.put("t314", BlockConstants.BLOCK_TYPE_CONTAINER);
-        ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_RADIO, "t315");
-        ITEM_BUILD_MAP.put("t315", BlockConstants.BLOCK_TYPE_RADIO);
+        ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_SPEAKER, "t315");
+        ITEM_BUILD_MAP.put("t315", BlockConstants.BLOCK_TYPE_SPEAKER);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_BUILDING, "t351");
         ITEM_BUILD_MAP.put("t351", BlockConstants.BLOCK_TYPE_BUILDING);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP, "t301");

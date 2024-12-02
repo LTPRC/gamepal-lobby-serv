@@ -892,8 +892,8 @@ public class BlockUtil {
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case BlockConstants.BLOCK_TYPE_RADIO:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_RADIO, "", "1000",
+            case BlockConstants.BLOCK_TYPE_SPEAKER:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SPEAKER, "", "4010",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),

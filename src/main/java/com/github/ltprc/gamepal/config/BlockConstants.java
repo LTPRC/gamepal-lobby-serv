@@ -42,7 +42,7 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_COOKER = 11;
     public static final int BLOCK_TYPE_SINK = 12;
     public static final int BLOCK_TYPE_CONTAINER = 13;
-    public static final int BLOCK_TYPE_RADIO = 14;
+    public static final int BLOCK_TYPE_SPEAKER = 14;
     public static final int BLOCK_TYPE_BUILDING = 15;
     public static final int BLOCK_TYPE_TREE = 16;
     public static final int BLOCK_TYPE_ROCK = 17;
