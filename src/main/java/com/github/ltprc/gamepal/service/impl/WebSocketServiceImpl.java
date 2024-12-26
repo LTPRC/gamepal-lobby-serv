@@ -330,9 +330,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         }
 
-        rst.put("drops", world.getDropMap());
+//        rst.put("drops", world.getDropMap());
 
-        rst.put("teleports", world.getTeleportMap());
+//        rst.put("teleports", world.getTeleportMap());
 
         // Return relations
         JSONObject relations = new JSONObject();
@@ -383,7 +383,10 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
-            blocks.add(sceneManager.convertBlock2OldBlockInstance(world, userCode, blockQueue.poll(), false));
+            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, blockQueue.poll(), false);
+            if (null != convertedBlock) {
+                blocks.add(convertedBlock);
+            }
         }
         rst.put("blocks", blocks);
 

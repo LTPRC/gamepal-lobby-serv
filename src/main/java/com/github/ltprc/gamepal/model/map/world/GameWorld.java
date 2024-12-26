@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.model.map.world;
 
+import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -33,6 +34,7 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, boolean[]> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal
     private Map<String, NpcBrain> npcBrainMap; // userCode, npcBrain
+    private Map<String, Long> eventMap; // id, frame length
 
     // Special block info maps
     private Map<String, Block> blockMap; // code, non-creature block
@@ -43,4 +45,5 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, BagInfo> preservedBagInfoMap;
     private Map<String, Map.Entry<String, Integer>> dropMap;
     private Map<String, WorldCoordinate> teleportMap;
+    private Map<String, FarmInfo> farmMap;
 }

@@ -393,6 +393,7 @@ public class EventManagerImpl implements EventManager {
                 case BlockConstants.BLOCK_TYPE_CONTAINER:
                 case BlockConstants.BLOCK_TYPE_SPEAKER:
                 case BlockConstants.BLOCK_TYPE_BUILDING:
+                case BlockConstants.BLOCK_TYPE_FARM:
                 case BlockConstants.BLOCK_TYPE_ROCK:
                 case BlockConstants.BLOCK_TYPE_WORKSHOP:
                 case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:

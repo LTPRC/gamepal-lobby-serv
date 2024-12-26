@@ -127,7 +127,7 @@
   {"itemNo": "c021", "name": "胡萝卜", "weight": 0.1, "description": "", "effects": {"hunger": 5}},
   {"itemNo": "c022", "name": "黄瓜", "weight": 0.1, "description": "", "effects": {"hunger": 3, "thirst": 5}},
   {"itemNo": "c023", "name": "卷心菜", "weight": 0.2, "description": "", "effects": {"hunger": 3}},
-  {"itemNo": "c024", "name": "谷物", "weight": 0.5, "description": "", "effects": {"hunger": 5}},
+  {"itemNo": "c024", "name": "小麦", "weight": 0.5, "description": "", "effects": {"hunger": 5}},
   {"itemNo": "c025", "name": "面粉", "weight": 0.5, "description": "", "effects": {"hunger": 10}},
   {"itemNo": "c026", "name": "食用油", "weight": 0.1, "description": "", "effects": {"hunger": 1}},
   {"itemNo": "c027", "name": "苹果", "weight": 0.1, "description": "", "effects": {"hunger": 5, "thirst": 5}},
@@ -167,6 +167,7 @@
   {"itemNo": "c061", "name": "面包", "weight": 0.2, "description": "", "effects": {"hunger": 30}},
   {"itemNo": "c062", "name": "大饼", "weight": 0.5, "description": "", "effects": {"hunger": 40}},
   {"itemNo": "c063", "name": "维生素片", "weight": 0.1, "description": ""},
+  {"itemNo": "c064", "name": "小麦种子", "weight": 0.1, "description": "", "effects": {"hunger": 1}},
 
   {"itemNo": "m_wood", "name": "木材", "weight": 0.0, "description": ""},
   {"itemNo": "m_steel", "name": "钢铁", "weight": 0.0, "description": ""},

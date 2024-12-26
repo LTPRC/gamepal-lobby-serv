@@ -83,6 +83,7 @@
   {"recipeNo": "1122", "type": 11, "cost": {"m_oil": 1}, "value": {"c026": 1}},
   {"recipeNo": "1123", "type": 11, "cost": {"c025": 1}, "value": {"c061": 1}},
   {"recipeNo": "1124", "type": 11, "cost": {"c025": 1}, "value": {"c062": 1}},
+  {"recipeNo": "1125", "type": 11, "cost": {"c024": 1}, "value": {"c064": 10}},
 
   {"recipeNo": "1201", "type": 12, "cost": {"j017": 1}, "value": {"c050": 1}},
   {"recipeNo": "1202", "type": 12, "cost": {"j026": 1}, "value": {"c050": 1}},

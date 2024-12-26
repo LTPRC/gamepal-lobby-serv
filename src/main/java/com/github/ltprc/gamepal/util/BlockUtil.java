@@ -911,6 +911,10 @@ public class BlockUtil {
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
+            case BlockConstants.BLOCK_TYPE_FARM:
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FARM, "", "1019",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));

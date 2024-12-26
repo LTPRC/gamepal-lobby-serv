@@ -721,9 +721,6 @@ public class PlayerServiceImpl implements PlayerService {
                     case BlockConstants.BLOCK_TYPE_TOILET:
                         generateNotificationMessage(userCode, "你正在使用马桶。");
                         break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP:
-                        generateNotificationMessage(userCode, "你正在使用工作台。");
-                        break;
                     case BlockConstants.BLOCK_TYPE_GAME:
                         generateNotificationMessage(userCode, "你开启了桌游。");
                         if (!world.getTerminalMap().containsKey(id)) {
@@ -742,6 +739,24 @@ public class PlayerServiceImpl implements PlayerService {
                     case BlockConstants.BLOCK_TYPE_SINK:
                         generateNotificationMessage(userCode, "你正在使用饮水台。");
                         break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP:
+                        generateNotificationMessage(userCode, "你正在使用工作台。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+                        generateNotificationMessage(userCode, "你正在使用工具工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+                        generateNotificationMessage(userCode, "你正在使用弹药工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+                        generateNotificationMessage(userCode, "你正在使用服装工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+                        generateNotificationMessage(userCode, "你正在使用化学工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                        generateNotificationMessage(userCode, "你正在使用回收站。");
+                        break;
                     default:
                         break;
                 }
@@ -749,10 +764,10 @@ public class PlayerServiceImpl implements PlayerService {
             case GamePalConstants.INTERACTION_EXCHANGE:
                 switch (block.getBlockInfo().getType()) {
                     case BlockConstants.BLOCK_TYPE_STORAGE:
-                        generateNotificationMessage(userCode, "你正在交换个人物品。");
+                        generateNotificationMessage(userCode, "你正在整理个人物品。");
                         break;
                     case BlockConstants.BLOCK_TYPE_CONTAINER:
-                        generateNotificationMessage(userCode, "你正在使用容器。");
+                        generateNotificationMessage(userCode, "你正在整理容器。");
                         break;
                     default:
                         break;
@@ -1031,8 +1046,10 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
-                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
-                    // TODO plowing logics
+                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) != BlockConstants.BLOCK_CODE_WATER) {
+                    sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
+                    sceneManager.addOtherBlock(world, player.getWorldCoordinate(),
+                            BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_FARM), new MovementInfo());
                 }
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:
