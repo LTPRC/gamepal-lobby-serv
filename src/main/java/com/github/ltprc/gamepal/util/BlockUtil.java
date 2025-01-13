@@ -527,7 +527,7 @@ public class BlockUtil {
         }
         perceptionInfo.setDistinctVisionRadius(visionRadius);
         perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius()
-                .multiply(BigDecimal.valueOf(1.2)));
+                .multiply(BigDecimal.valueOf(2)));
         perceptionInfo.setDistinctVisionAngle(CreatureConstants.DEFAULT_DISTINCT_VISION_ANGLE);
         perceptionInfo.setIndistinctVisionAngle(CreatureConstants.DEFAULT_INDISTINCT_VISION_ANGLE);
         perceptionInfo.setDistinctHearingRadius(CreatureConstants.DEFAULT_DISTINCT_HEARING_RADIUS);
@@ -599,11 +599,16 @@ public class BlockUtil {
             case BlockConstants.STRUCTURE_MATERIAL_ALL:
                 return true;
             case BlockConstants.STRUCTURE_MATERIAL_FLESH:
-            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_FLESH;
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
             case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
-                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL;
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
+            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE:
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
             case BlockConstants.STRUCTURE_MATERIAL_NONE:
             default:
                 return false;
@@ -912,8 +917,11 @@ public class BlockUtil {
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FARM, "", "1019",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FARM, "", "4100",
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION,
+                                new Shape(),
+                                new Coordinate(BigDecimal.valueOf(0.5), BigDecimal.valueOf(0.5))));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001",

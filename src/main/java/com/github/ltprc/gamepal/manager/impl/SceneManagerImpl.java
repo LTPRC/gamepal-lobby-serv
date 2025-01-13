@@ -8,6 +8,7 @@ import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -28,6 +29,7 @@ import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private MovementManager movementManager;
+
+    @Autowired
+    private FarmManager farmManager;
 
     @Override
     public Region generateRegion(int regionNo) {
@@ -729,7 +734,7 @@ public class SceneManagerImpl implements SceneManager {
     @Override
     public Queue<Block> collectBlocksByUserCode(final GameWorld world, final Block player, final int sceneScanRadius) {
         Queue<Block> rankingQueue = collectBlocksFromScenes(world, player, sceneScanRadius);
-        rankingQueue.addAll(collectBlocksFromPlayerInfoMap(world, player, sceneScanRadius));
+        rankingQueue.addAll(collectBlocksFromCreatureMap(world, player, sceneScanRadius));
         return rankingQueue;
     }
 
@@ -760,6 +765,10 @@ public class SceneManagerImpl implements SceneManager {
                                 : null, block)) {
                             Block newBlock = new Block(block);
                             rankingQueue.add(newBlock);
+                            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_FARM) {
+                                Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
+                                cropBlock.ifPresent(rankingQueue::add);
+                            }
                         }
                     });
                 }
@@ -769,7 +778,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksFromPlayerInfoMap(final GameWorld world, final Block player, final int sceneScanRadius) {
+    public Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius) {
         Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
         Map<String, Block> creatureMap = world.getCreatureMap();
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
@@ -860,7 +869,7 @@ public class SceneManagerImpl implements SceneManager {
                 rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
-                if (world.getDropMap().containsKey(block.getBlockInfo().getId())) {
+                if (!world.getDropMap().containsKey(block.getBlockInfo().getId())) {
                     return null;
                 }
                 Map.Entry<String, Integer> entry = world.getDropMap().get(block.getBlockInfo().getId());
@@ -868,7 +877,7 @@ public class SceneManagerImpl implements SceneManager {
                 rst.put("amount", entry.getValue());
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
-                if (world.getTeleportMap().containsKey(block.getBlockInfo().getId())) {
+                if (!world.getTeleportMap().containsKey(block.getBlockInfo().getId())) {
                     return null;
                 }
                 WorldCoordinate to = world.getTeleportMap().get(block.getBlockInfo().getId());
@@ -1004,6 +1013,7 @@ public class SceneManagerImpl implements SceneManager {
             return false;
         }
         return scene.getBlocks().values().stream()
+                .filter(blocker -> !StringUtils.equals(block.getBlockInfo().getId(), blocker.getBlockInfo().getId()))
                 .filter(blocker -> BlockUtil.detectCollision(region, block, blocker))
                 .noneMatch(blocker -> BlockUtil.checkMaterialCollision(block.getBlockInfo().getStructure().getMaterial(),
                         blocker.getBlockInfo().getStructure().getMaterial()));

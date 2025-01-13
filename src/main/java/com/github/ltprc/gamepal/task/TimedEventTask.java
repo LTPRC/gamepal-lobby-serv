@@ -3,10 +3,7 @@ package com.github.ltprc.gamepal.task;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.manager.BuffManager;
-import com.github.ltprc.gamepal.manager.EventManager;
-import com.github.ltprc.gamepal.manager.NpcManager;
-import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
@@ -48,6 +45,9 @@ public class TimedEventTask {
 
     @Autowired
     private SceneManager sceneManager;
+
+    @Autowired
+    private FarmManager farmManager;
 
     @Scheduled(fixedRate = 20)
     public void executeByHalfFrame() {
@@ -173,6 +173,9 @@ public class TimedEventTask {
 
                         buffManager.changeBuff(world, blockInfo.getId());
                     });
+
+            // Update farms
+            farmManager.updateFarmStatus(world);
         }
     }
 

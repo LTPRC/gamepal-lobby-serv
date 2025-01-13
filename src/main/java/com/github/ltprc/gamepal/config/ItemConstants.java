@@ -28,6 +28,7 @@ public class ItemConstants {
 
     public static Map<Integer, String> ITEM_PACK_MAP = new HashMap<>();
     public static Map<String, Integer> ITEM_BUILD_MAP = new HashMap<>();
+    public static Map<String, String> ITEM_PLANT_MAP = new HashMap<>();
 
     static {
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_BED, "t308");
@@ -49,6 +50,8 @@ public class ItemConstants {
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_BUILDING, "t351");
         ITEM_BUILD_MAP.put("t351", BlockConstants.BLOCK_TYPE_BUILDING);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP, "t301");
+        ITEM_BUILD_MAP.put("t234", BlockConstants.BLOCK_TYPE_FARM);
+        ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_FARM, "t234");
         ITEM_BUILD_MAP.put("t301", BlockConstants.BLOCK_TYPE_WORKSHOP);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "t302");
         ITEM_BUILD_MAP.put("t302", BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL);
@@ -60,5 +63,7 @@ public class ItemConstants {
         ITEM_BUILD_MAP.put("t305", BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "t306");
         ITEM_BUILD_MAP.put("t306", BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE);
+
+        ITEM_PLANT_MAP.put("c064", "c024");
     }
 }

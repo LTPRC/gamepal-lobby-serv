@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FarmInfo {
     private String cropCode;
-    private int cropStatus; // -1 no crop 0 dead 1 growing 2 mature
+    private int cropStatus;
     private int cropAmount;
+    private int cropFrame;
 }

@@ -63,8 +63,8 @@ public class CreatureConstants {
     public static final int NPC_EXEMPTION_SAME_CREATURE = 3;
     public static final int NPC_EXEMPTION_LENGTH = 4;
 
-    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(8);
-    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(4);
+    public static final BigDecimal DEFAULT_DAYTIME_VISION_RADIUS = BigDecimal.valueOf(5);
+    public static final BigDecimal DEFAULT_NIGHT_VISION_RADIUS = BigDecimal.valueOf(2);
     public static final BigDecimal DEFAULT_DISTINCT_VISION_ANGLE = BigDecimal.valueOf(120);
     public static final BigDecimal DEFAULT_INDISTINCT_VISION_ANGLE = BigDecimal.valueOf(180);
     public static final BigDecimal DEFAULT_DISTINCT_HEARING_RADIUS = BigDecimal.valueOf(2);

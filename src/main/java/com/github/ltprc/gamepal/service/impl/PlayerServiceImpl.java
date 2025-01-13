@@ -72,6 +72,9 @@ public class PlayerServiceImpl implements PlayerService {
     @Autowired
     private EventManager eventManager;
 
+    @Autowired
+    private FarmManager farmManager;
+
     @Override
     public ResponseEntity<String> updatePlayerInfoCharacter(String userCode, JSONObject req) {
         JSONObject rst = ContentUtil.generateRst();
@@ -795,6 +798,12 @@ public class PlayerServiceImpl implements PlayerService {
                         GamePalConstants.DROP_THROW_RADIUS));
                 sceneManager.removeBlock(world, block, false);
                 break;
+            case GamePalConstants.INTERACTION_PLANT:
+                farmManager.plant(world, userCode, block.getBlockInfo().getId(), "c064");
+                break;
+            case GamePalConstants.INTERACTION_GATHER:
+                farmManager.gather(world, userCode, block.getBlockInfo().getId());
+                break;
             default:
                 break;
         }
@@ -995,25 +1004,37 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_SHOOT_WATER));
                 break;
             case SkillConstants.SKILL_CODE_BUILD:
+            case SkillConstants.SKILL_CODE_PLOW:
+                Optional<BlockInfo> blockInfo1 = playerInfo.getTools().stream()
+                        .map(BlockUtil::convertItemNo2BlockInfo)
+                        .findFirst();
+                if (!blockInfo1.isPresent()) {
+                    return false;
+                }
+                int blockType, gridBlockCode;
+                if (playerInfo.getSkills().get(skillNo).getSkillCode() == SkillConstants.SKILL_CODE_BUILD) {
+                    blockType = BlockConstants.BLOCK_TYPE_BUILDING;
+                    gridBlockCode = BlockConstants.BLOCK_CODE_SUBTERRANEAN;
+                } else if (playerInfo.getSkills().get(skillNo).getSkillCode() == SkillConstants.SKILL_CODE_PLOW) {
+                    blockType = BlockConstants.BLOCK_TYPE_FARM;
+                    gridBlockCode = BlockConstants.BLOCK_CODE_ROUGH;
+                } else {
+                    return false;
+                }
                 WorldCoordinate buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
-                BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
+                IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
+                buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
+                BlockInfo blockInfo = BlockUtil.createBlockInfoByType(blockType);
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
-                if (sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
-                    Optional<BlockInfo> blockInfo1 = playerInfo.getTools().stream()
-                            .map(BlockUtil::convertItemNo2BlockInfo)
-                            .findFirst();
-                    if (blockInfo1.isPresent()) {
-                        IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
-                        buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
-                        sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_SUBTERRANEAN);
-                        sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get(), new MovementInfo());
-                        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
-                        return true;
-                    }
+                if (!sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
+                    return false;
                 }
-                return false;
+                sceneManager.setGridBlockCode(world, buildingWorldCoordinate, gridBlockCode);
+                sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get(), new MovementInfo());
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                break;
             case SkillConstants.SKILL_CODE_FISH:
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
@@ -1038,18 +1059,6 @@ public class PlayerServiceImpl implements PlayerService {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
                 } else {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_WATER);
-                }
-                break;
-            case SkillConstants.SKILL_CODE_PLOW:
-                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_MELEE_CLEAVE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
-                buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
-                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) != BlockConstants.BLOCK_CODE_WATER) {
-                    sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
-                    sceneManager.addOtherBlock(world, player.getWorldCoordinate(),
-                            BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_FARM), new MovementInfo());
                 }
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:
@@ -1267,10 +1276,10 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
+//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+//        if (!playerInfoMap.containsKey(userCode)) {
+//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+//        }
         Block player = creatureMap.get(userCode);
         Block drop = sceneManager.addDropBlock(world, player.getWorldCoordinate(),
                 new AbstractMap.SimpleEntry<>(itemNo, amount));

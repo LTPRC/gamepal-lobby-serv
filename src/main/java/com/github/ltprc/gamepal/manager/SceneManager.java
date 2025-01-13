@@ -22,7 +22,7 @@ public interface SceneManager {
 
     Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius);
 
-    Queue<Block> collectBlocksFromPlayerInfoMap(final GameWorld world, final Block player, final int sceneScanRadius);
+    Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius);
 
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
 

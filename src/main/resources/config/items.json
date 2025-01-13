@@ -79,7 +79,7 @@
   {"itemNo": "t231", "name": "Auto-5霰弹枪", "weight": 3.2, "description": "", "itemIndex": 1, "skills": [{"skillCode": 24, "skillMode": 1, "frame": 0, "frameMax": 5, "skillType": 1, "range": 5.0, "ammoCode": "a012"}]},
   {"itemNo": "t232", "name": "钻子", "weight": 5.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 36, "skillMode": 1, "frame": 0, "frameMax": 5, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
   {"itemNo": "t233", "name": "镐子", "weight": 4.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 36, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
-  {"itemNo": "t234", "name": "锄头", "weight": 2.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 37, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 1, "range": 1.0, "ammoCode": ""}]},
+  {"itemNo": "t234", "name": "锄头", "weight": 2.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 37, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": ""}]},
 
   {"itemNo": "t301", "name": "打包工作台", "weight": 30.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t301"}]},
   {"itemNo": "t302", "name": "打包工具工坊", "weight": 30.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t302"}]},
