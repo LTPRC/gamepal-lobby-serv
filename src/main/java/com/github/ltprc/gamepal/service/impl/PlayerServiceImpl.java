@@ -1434,7 +1434,7 @@ public class PlayerServiceImpl implements PlayerService {
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
         BlockInfo blockInfo1 = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_CONTAINER);
-        blockInfo1.setCode("3101");
+        blockInfo1.setCode("3100");
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());

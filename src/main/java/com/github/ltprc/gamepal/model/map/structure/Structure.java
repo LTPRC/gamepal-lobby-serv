@@ -12,7 +12,7 @@ public class Structure {
     private Integer material; // 0-hollow 1-solid 2-flesh
     private Integer layer; // 10-bottom 20-bottom-decoration 30-middle 40-middle-decoration 50-top 60-top-decoration
     private Shape shape = new Shape();
-    private Coordinate imageSize = new Coordinate(BigDecimal.ONE, BigDecimal.ONE);
+    private Coordinate imageSize = new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
 
     public Structure(Integer material, Integer layer) {
         this.material = material;

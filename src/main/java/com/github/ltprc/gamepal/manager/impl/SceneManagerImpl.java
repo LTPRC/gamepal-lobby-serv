@@ -631,7 +631,9 @@ public class SceneManagerImpl implements SceneManager {
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()
                     && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_NOTHING) {
-                addSceneBlock(world, weightList.get(i).getKey(), worldCoordinate);
+//                addSceneBlock(world, weightList.get(i).getKey(), worldCoordinate);
+                addOtherBlock(world, worldCoordinate, BlockUtil.generateSceneObjectBlockInfo(blockCode),
+                        new MovementInfo());
                 break;
             }
             randomInt -= weightList.get(i).getValue();
@@ -903,16 +905,22 @@ public class SceneManagerImpl implements SceneManager {
         switch (normalBlockType) {
             case 2:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case 3:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_TOP);
+                        BlockConstants.STRUCTURE_LAYER_TOP,
+                        new Shape(),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case 1:
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM,
+                        new Shape(),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
         }
         BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id, code, structure);
@@ -922,14 +930,14 @@ public class SceneManagerImpl implements SceneManager {
         return block;
     }
 
-    @Override
-    public Block addSceneBlock(GameWorld world, int blockCode, WorldCoordinate worldCoordinate) {
-        BlockInfo blockInfo = BlockUtil.generateSceneObjectBlockInfo(blockCode);
-        MovementInfo movementInfo = new MovementInfo();
-        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        registerBlock(world, block);
-        return block;
-    }
+//    @Override
+//    public Block addSceneBlock(GameWorld world, int blockCode, WorldCoordinate worldCoordinate) {
+//        BlockInfo blockInfo = BlockUtil.generateSceneObjectBlockInfo(blockCode);
+//        MovementInfo movementInfo = new MovementInfo();
+//        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
+//        registerBlock(world, block);
+//        return block;
+//    }
 
     /**
      * Added a random direction and default distance
