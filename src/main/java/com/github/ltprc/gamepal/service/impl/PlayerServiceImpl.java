@@ -1083,6 +1083,20 @@ public class PlayerServiceImpl implements PlayerService {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
+            case SkillConstants.SKILL_CODE_LAY_WIRE_NETTING:
+                blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_TRAP);
+                blockInfo.setCode("3103");
+                blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                        new Coordinate(BlockConstants.WIRE_NETTING_RADIUS, BlockConstants.WIRE_NETTING_RADIUS)));
+                sceneManager.addOtherBlock(world,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE), blockInfo,
+                        new MovementInfo());
+                eventManager.addEvent(world, GamePalConstants.EVENT_CODE_ASH, userCode,
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                break;
             default:
                 break;
         }
@@ -1650,6 +1664,7 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfo.setExp(0);
             playerInfo.setLevel(playerInfo.getLevel() + 1);
             SkillUtil.updateExpMax(playerInfo);
+            eventManager.addEvent(world, GamePalConstants.EVENT_CODE_UPGRADE, userCode, player.getWorldCoordinate());
         }
         return ResponseEntity.ok().body(rst.toString());
     }

@@ -833,7 +833,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_TELEPORT:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, UUID.randomUUID().toString(), "1000",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION));
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_BED:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006",

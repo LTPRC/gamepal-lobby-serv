@@ -384,22 +384,23 @@ public class SceneManagerImpl implements SceneManager {
 
     private void addSceneObjects(GameWorld world, RegionInfo regionInfo, Scene scene) {
         Random random = new Random();
-        for (int i = 0; i < regionInfo.getWidth(); i++) {
-            for (int j = 0; j < regionInfo.getHeight(); j++) {
+        for (int i = 0; i < regionInfo.getWidth() - 1; i++) {
+            for (int j = 0; j < regionInfo.getHeight() - 1; j++) {
+                // TODO Last row/column may cause overlap issue with player 25/01/19
                 switch (random.nextInt(4)) {
                     case 0:
                         int upleftBlockCode = scene.getGird()[i][j];
-                        addSceneObject(world, regionInfo, scene, upleftBlockCode, BigDecimal.valueOf(i),
-                                BigDecimal.valueOf(j));
+                        addSceneObject(world, regionInfo, scene, upleftBlockCode, BigDecimal.valueOf(i + 0.5D),
+                                BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 1:
                         int uprightBlockCode = scene.getGird()[i + 1][j];
                         addSceneObject(world, regionInfo, scene, uprightBlockCode, BigDecimal.valueOf(i + 0.5D),
-                                BigDecimal.valueOf(j));
+                                BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 2:
                         int downleftBlockCode = scene.getGird()[i][j + 1];
-                        addSceneObject(world, regionInfo, scene, downleftBlockCode, BigDecimal.valueOf(i),
+                        addSceneObject(world, regionInfo, scene, downleftBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 3:
@@ -417,8 +418,8 @@ public class SceneManagerImpl implements SceneManager {
     private void addSceneObject(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
                                 BigDecimal y) {
         Random random = new Random();
-        Coordinate coordinate = new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
-                y.add(BigDecimal.valueOf(random.nextDouble() / 2)));
+        Coordinate coordinate = new Coordinate(x.subtract(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(random.nextDouble())),
+                y.subtract(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(random.nextDouble())));
         WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                 coordinate);
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
@@ -632,8 +633,8 @@ public class SceneManagerImpl implements SceneManager {
             if (randomInt < weightList.get(i).getValue()
                     && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_NOTHING) {
 //                addSceneBlock(world, weightList.get(i).getKey(), worldCoordinate);
-                addOtherBlock(world, worldCoordinate, BlockUtil.generateSceneObjectBlockInfo(blockCode),
-                        new MovementInfo());
+                addOtherBlock(world, worldCoordinate,
+                        BlockUtil.generateSceneObjectBlockInfo(weightList.get(i).getKey()), new MovementInfo());
                 break;
             }
             randomInt -= weightList.get(i).getValue();

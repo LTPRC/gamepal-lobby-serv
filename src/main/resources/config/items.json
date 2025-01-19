@@ -96,6 +96,7 @@
   {"itemNo": "t314", "name": "打包容器", "weight": 10.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t314"}]},
   {"itemNo": "t315", "name": "打包收音机", "weight": 0.5, "description": "", "itemIndex": 1, "skills": [{"skillCode": 32, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t315"}]},
   {"itemNo": "t351", "name": "路障", "weight": 10.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 42, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t351"}]},
+  {"itemNo": "t352", "name": "铁丝网", "weight": 5.0, "description": "", "itemIndex": 1, "skills": [{"skillCode": 43, "skillMode": 0, "frame": 0, "frameMax": 25, "skillType": 0, "range": 1.0, "ammoCode": "t352"}]},
 
   {"itemNo": "o001", "name": "高中秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},
   {"itemNo": "o002", "name": "初中秋季校服", "weight": 1.0, "description": "", "itemIndex": 1},

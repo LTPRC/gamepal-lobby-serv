@@ -149,6 +149,7 @@ public class SkillUtil {
                 hp = -10 - random.nextInt(20);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+            case 3103:
                 hp = -20 - random.nextInt(60);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SMASH:

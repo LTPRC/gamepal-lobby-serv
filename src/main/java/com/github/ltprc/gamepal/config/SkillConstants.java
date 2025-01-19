@@ -34,6 +34,7 @@ public class SkillConstants {
     public static final int SKILL_CODE_PLOW = 37;
     public static final int SKILL_CODE_LAY_MINE = 41;
     public static final int SKILL_CODE_LAY_BARRIER = 42;
+    public static final int SKILL_CODE_LAY_WIRE_NETTING = 43;
 
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;

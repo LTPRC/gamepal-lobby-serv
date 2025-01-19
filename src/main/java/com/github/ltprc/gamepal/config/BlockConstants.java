@@ -120,6 +120,7 @@ public class BlockConstants {
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2D);
     public static final BigDecimal BARRIER_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal WIRE_NETTING_RADIUS = BigDecimal.valueOf(0.4D);
 
     public static final int HP_DEFAULT = 100;
 

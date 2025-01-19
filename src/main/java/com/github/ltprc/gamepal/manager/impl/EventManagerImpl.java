@@ -423,6 +423,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     private void updateEvent(GameWorld world, Block eventBlock) {
+        Random random = new Random();
         eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() + 1);
         updateEventLocation(world, eventBlock);
         if (eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getPeriod()) {
@@ -468,6 +469,25 @@ public class EventManagerImpl implements EventManager {
                             .forEach(player -> {
                                 affectBlock(world, eventBlock, player);
 //                                addEvent(world, GamePalConstants.EVENT_CODE_BLEED, player.getBlockInfo().getId(), player.getWorldCoordinate());
+                            });
+                    break;
+                case 3103:
+                    // Wire netting
+                    world.getCreatureMap().values().stream()
+                            .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
+                            .filter(player -> {
+                                BigDecimal distance = BlockUtil.calculateDistance(
+                                        world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()), eventBlock.getWorldCoordinate(), player.getWorldCoordinate());
+                                return null != distance && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0;
+                            })
+                            .forEach(player -> {
+                                if (random.nextDouble()
+                                        < Math.sqrt(Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
+                                        + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2))
+                                        / player.getMovementInfo().getMaxSpeed().doubleValue()) {
+                                    affectBlock(world, eventBlock, player);
+//                                    addEvent(world, GamePalConstants.EVENT_CODE_BLEED, player.getBlockInfo().getId(), player.getWorldCoordinate());
+                                }
                             });
                     break;
                 default:
