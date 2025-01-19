@@ -598,16 +598,20 @@ public class BlockUtil {
         switch (structureMaterial1) {
             case BlockConstants.STRUCTURE_MATERIAL_ALL:
                 return true;
-            case BlockConstants.STRUCTURE_MATERIAL_FLESH:
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID:
+            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_FLESH;
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH:
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH;
             case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
             case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
-            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE:
-                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
             case BlockConstants.STRUCTURE_MATERIAL_NONE:
             default:
@@ -819,7 +823,7 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_FLESH,
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
@@ -837,15 +841,15 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_BED:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TOILET:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_DRESSER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_GAME:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_GAME, "", "3021",
@@ -853,30 +857,30 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_STORAGE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_COOKER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_SINK:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SPEAKER, "", "4010",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                                         new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS))));
                 break;
             case BlockConstants.BLOCK_TYPE_BUILDING:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, "", "",
@@ -893,27 +897,27 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TRAP, "", "",

@@ -107,10 +107,11 @@ public class BlockConstants {
 
     public static final int STRUCTURE_MATERIAL_NONE = 0; // Collide to none positively
     public static final int STRUCTURE_MATERIAL_ALL = 1; // Collide to all positively
-    public static final int STRUCTURE_MATERIAL_FLESH = 2; // Collide to 1, 2 positively
-    public static final int STRUCTURE_MATERIAL_SOLID_NO_FLESH = 3; // Collide to 1, 3 positively
-    public static final int STRUCTURE_MATERIAL_PARTICLE = 10; // Collide to 1, 2, 3 positively
-    public static final int STRUCTURE_MATERIAL_PARTICLE_NO_FLESH = 11; // Collide to 1, 3 positively
+    public static final int STRUCTURE_MATERIAL_SOLID = 2; // Collide to 1, 2, 3, 4 positively
+    public static final int STRUCTURE_MATERIAL_SOLID_FLESH = 3; // Collide to 1, 2, 3 positively
+    public static final int STRUCTURE_MATERIAL_SOLID_NO_FLESH = 4; // Collide to 1, 2, 4 positively
+    public static final int STRUCTURE_MATERIAL_PARTICLE = 10; // Collide to 1, 2, 3, 4 positively
+    public static final int STRUCTURE_MATERIAL_PARTICLE_NO_FLESH = 11; // Collide to 1, 2, 4 positively
 
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
