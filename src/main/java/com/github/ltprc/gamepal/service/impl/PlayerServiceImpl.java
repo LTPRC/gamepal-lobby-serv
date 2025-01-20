@@ -299,18 +299,10 @@ public class PlayerServiceImpl implements PlayerService {
                 useConsumable(userCode, itemNo, itemAmount);
                 break;
             case ItemConstants.ITEM_CHARACTER_MATERIAL:
-                break;
             case ItemConstants.ITEM_CHARACTER_JUNK:
-                getItem(userCode, itemNo, -1);
-                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials().entrySet()
-                        .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue()));
-                break;
             case ItemConstants.ITEM_CHARACTER_AMMO:
-                break;
             case ItemConstants.ITEM_CHARACTER_NOTE:
-                break;
             case ItemConstants.ITEM_CHARACTER_RECORDING:
-                break;
             default:
                 break;
         }
@@ -479,6 +471,42 @@ public class PlayerServiceImpl implements PlayerService {
             world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
             world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    public ResponseEntity<String> recycleItem(String userCode, String itemNo, int itemAmount) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        if (StringUtils.isBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
+        }
+        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0 || itemAmount <= 0) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
+        }
+        switch (itemNo.charAt(0)) {
+            case ItemConstants.ITEM_CHARACTER_JUNK:
+                getItem(userCode, itemNo, -1);
+                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials()
+                        .forEach((key, value) -> getItem(userCode, key, value));
+                break;
+            case ItemConstants.ITEM_CHARACTER_TOOL:
+            case ItemConstants.ITEM_CHARACTER_OUTFIT:
+            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
+            case ItemConstants.ITEM_CHARACTER_MATERIAL:
+            case ItemConstants.ITEM_CHARACTER_AMMO:
+            case ItemConstants.ITEM_CHARACTER_NOTE:
+            case ItemConstants.ITEM_CHARACTER_RECORDING:
+            default:
+                break;
+        }
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
         return ResponseEntity.ok().body(rst.toString());
     }
 

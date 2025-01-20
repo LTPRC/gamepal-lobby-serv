@@ -30,6 +30,8 @@ public interface PlayerService {
 
     ResponseEntity<String> getInteractedItem(String userCode, String itemNo, int itemAmount);
 
+    ResponseEntity<String> recycleItem(String userCode, String itemNo, int itemAmount);
+
     ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount);
 
     ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute);

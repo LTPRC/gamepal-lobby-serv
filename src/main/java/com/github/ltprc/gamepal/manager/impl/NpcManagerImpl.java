@@ -10,6 +10,8 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
+import com.github.ltprc.gamepal.model.item.Item;
+import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
@@ -297,18 +299,34 @@ public class NpcManagerImpl implements NpcManager {
 
     @Override
     public void updateNpcBrains(GameWorld world) {
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         Map<String, NpcBrain> npcBrainMap = world.getNpcBrainMap();
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        Map<String, Item> itemMap = worldService.getItemMap();
         npcBrainMap.entrySet().stream()
                 // Filtered NPCs not detected by human players 24/08/01
-                .filter(entry2 -> world.getCreatureMap().entrySet().stream()
+                .filter(entry2 -> creatureMap.entrySet().stream()
                         .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == world.getPlayerInfoMap().get(entry3.getKey()).getPlayerType())
                         .anyMatch(entry3 -> SkillUtil.isSceneDetected(entry3.getValue(),
-                                world.getCreatureMap().get(entry3.getKey()).getWorldCoordinate(), 1)))
+                                creatureMap.get(entry3.getKey()).getWorldCoordinate(), 1)))
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
                 .forEach(entry2 -> {
                     String npcUserCode = entry2.getKey();
-                    Block player = world.getCreatureMap().get(npcUserCode);
+                    Block player = creatureMap.get(npcUserCode);
+                    PlayerInfo playerInfo = playerInfoMap.get(npcUserCode);
                     NpcBrain npcBrain = entry2.getValue();
+                    // Abandon unloaded weapon 25/01/21
+                    BagInfo bagInfo = bagInfoMap.get(npcUserCode);
+                    playerInfo.getTools().stream()
+                            .filter(itemMap::containsKey)
+                            .forEach(toolStr -> {
+                                Tool tool = (Tool) itemMap.get(toolStr);
+                                if (tool.getSkills().stream().noneMatch(skill ->
+                                        bagInfo.getItems().getOrDefault(skill.getAmmoCode(), 0) > 0)) {
+                                    playerService.useItem(npcUserCode, toolStr, 1);
+                                }
+                            });
                     // Old targets
                     WorldCoordinate oldWc = npcBrain.getGreenQueue().peek();
                     if (null != oldWc) {
@@ -329,7 +347,7 @@ public class NpcManagerImpl implements NpcManager {
                             npcBrain.getYellowQueue().pop();
                         }
                     }
-                    Optional<Block> red = world.getCreatureMap().values().stream()
+                    Optional<Block> red = creatureMap.values().stream()
                             .filter(player1 -> !npcUserCode.equals(player1.getBlockInfo().getId()))
                             .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                             .filter(player1 -> BlockUtil.checkPerceptionCondition(
@@ -374,7 +392,7 @@ public class NpcManagerImpl implements NpcManager {
                     }
                 });
         // Settle NPC speed
-        world.getCreatureMap().entrySet().stream()
+        creatureMap.entrySet().stream()
                 .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
                 .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue(), 1));

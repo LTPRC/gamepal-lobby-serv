@@ -119,7 +119,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                         .getJSONObject("movementInfo"), MovementInfo.class);
                 playerService.updatePlayerMovement(userCode, worldCoordinate, movementInfo);
             }
-            // Detect and expand scenes after updating player's location
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
                 useItems.forEach(useItem -> {
@@ -150,6 +149,14 @@ public class WebSocketServiceImpl implements WebSocketService {
                     String itemNo = ((JSONObject) getInteractedItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getInteractedItem).getInteger("itemAmount");
                     playerService.getInteractedItem(userCode, itemNo, itemAmount);
+                });
+            }
+            if (functions.containsKey("recycleItems")) {
+                JSONArray recycleItems = functions.getJSONArray("recycleItems");
+                recycleItems.forEach(recycleItem -> {
+                    String itemNo = ((JSONObject) recycleItem).getString("itemNo");
+                    int itemAmount = ((JSONObject) recycleItem).getInteger("itemAmount");
+                    playerService.recycleItem(userCode, itemNo, itemAmount);
                 });
             }
             if (functions.containsKey("useRecipes")) {
