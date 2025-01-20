@@ -32,8 +32,6 @@ public interface SceneManager {
     Block addLoadedBlock(final GameWorld world, final String code, final Integer normalBlockType,
                          final WorldCoordinate worldCoordinate);
 
-//    Block addSceneBlock(final GameWorld world, final int blockCode, final WorldCoordinate worldCoordinate);
-
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);
 

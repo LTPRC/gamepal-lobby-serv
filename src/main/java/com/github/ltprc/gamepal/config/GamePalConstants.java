@@ -49,7 +49,7 @@ public class GamePalConstants {
     public static final int EVENT_CODE_BLEED = 109;
     public static final int EVENT_CODE_BLOCK = 110;
     public static final int EVENT_CODE_HEAL = 111;
-    public static final int EVENT_CODE_DISTURB = 112;
+    public static final int EVENT_CODE_DECAY = 112;
     public static final int EVENT_CODE_SACRIFICE = 113;
     public static final int EVENT_CODE_TAIL_SMOKE = 114;
     public static final int EVENT_CODE_CHEER = 115;
@@ -76,6 +76,7 @@ public class GamePalConstants {
     public static final int EVENT_CODE_WATER = 131;
     public static final int EVENT_CODE_SPARK_SHORT = 132;
     public static final int EVENT_CODE_ASH = 135;
+    public static final int EVENT_CODE_WIRE_NETTING = 3103;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;
@@ -99,6 +100,7 @@ public class GamePalConstants {
 
     // Backend constants
 
+    public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1);
     public static final int REGION_RADIUS_DEFAULT = 50;
     public static final int SCENE_DEFAULT_WIDTH = 10;
     public static final int SCENE_DEFAULT_HEIGHT = 10;

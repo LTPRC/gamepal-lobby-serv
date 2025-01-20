@@ -471,8 +471,7 @@ public class EventManagerImpl implements EventManager {
 //                                addEvent(world, GamePalConstants.EVENT_CODE_BLEED, player.getBlockInfo().getId(), player.getWorldCoordinate());
                             });
                     break;
-                case 3103:
-                    // Wire netting
+                case GamePalConstants.EVENT_CODE_WIRE_NETTING:
                     world.getCreatureMap().values().stream()
                             .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
                             .filter(player -> {
@@ -503,7 +502,7 @@ public class EventManagerImpl implements EventManager {
         if (eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_BLOCK))
                 || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_HEAL))
                 || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_SACRIFICE))
-                || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_DISTURB))) {
+                || eventBlock.getBlockInfo().getCode().equals(String.valueOf(GamePalConstants.EVENT_CODE_DECAY))) {
             // Stick with playerInfo
             movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(), false);
         }

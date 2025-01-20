@@ -26,9 +26,6 @@ public class BlockConstants {
     public static final int BLOCK_CODE_EDGE_SAND_RIGHT = 1026;
     public static final int BLOCK_CODE_EDGE_SAND_DOWN = 1027;
 
-    public static final char BLOCK_CODE_PREFIX_PLANTS = 'p';
-    public static final char BLOCK_CODE_PREFIX_ROCKS = 'r';
-
     public static final int BLOCK_TYPE_NORMAL = 0;
     public static final int BLOCK_TYPE_EFFECT = 1;
     public static final int BLOCK_TYPE_PLAYER = 2;

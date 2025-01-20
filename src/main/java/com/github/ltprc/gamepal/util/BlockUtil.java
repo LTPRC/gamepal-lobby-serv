@@ -491,7 +491,7 @@ public class BlockUtil {
             case GamePalConstants.EVENT_CODE_BLEED:
             case GamePalConstants.EVENT_CODE_UPGRADE:
             case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_DECAY:
             case GamePalConstants.EVENT_CODE_SACRIFICE:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
@@ -827,7 +827,8 @@ public class BlockUtil {
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS))));
+                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS)),
+                                new Coordinate(BigDecimal.ONE, BigDecimal.ONE)));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(), "3101",
@@ -927,7 +928,8 @@ public class BlockUtil {
             default:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION));
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION, new Shape(),
+                                new Coordinate(BigDecimal.ONE, BigDecimal.ONE)));
                 break;
         }
         initializeBlockInfoHp(blockInfo);
@@ -987,7 +989,8 @@ public class BlockUtil {
         Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)));
+                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)),
+                new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
         return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
     }
 
@@ -1002,8 +1005,7 @@ public class BlockUtil {
             case GamePalConstants.EVENT_CODE_SPARK_SHORT:
                 movementInfo.setFrameMax(5);
                 break;
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_DECAY:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
                 movementInfo.setFrameMax(50);
@@ -1016,8 +1018,7 @@ public class BlockUtil {
                 break;
         }
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DISTURB:
+            case GamePalConstants.EVENT_CODE_DECAY:
             case GamePalConstants.EVENT_CODE_CHEER:
             case GamePalConstants.EVENT_CODE_CURSE:
                 movementInfo.setPeriod(50);

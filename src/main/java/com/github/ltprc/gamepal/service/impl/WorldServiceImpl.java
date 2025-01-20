@@ -105,7 +105,7 @@ public class WorldServiceImpl implements WorldService {
         world.setName("默认世界");
         world.setWorldTime(random.nextInt(GamePalConstants.MAX_WORLD_TIME));
         world.setWindDirection(BigDecimal.valueOf(random.nextDouble() * 360));
-        world.setWindSpeed(BigDecimal.valueOf(random.nextDouble()));
+        world.setWindSpeed(BigDecimal.valueOf(random.nextDouble()).multiply(GamePalConstants.MAX_WIND_SPEED));
         world.setRegionMap(new ConcurrentHashMap<>());
         world.setInteractionInfoMap(new ConcurrentHashMap<>());
         world.setRelationMap(new ConcurrentHashMap<>());

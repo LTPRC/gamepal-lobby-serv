@@ -632,7 +632,6 @@ public class SceneManagerImpl implements SceneManager {
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()
                     && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_NOTHING) {
-//                addSceneBlock(world, weightList.get(i).getKey(), worldCoordinate);
                 addOtherBlock(world, worldCoordinate,
                         BlockUtil.generateSceneObjectBlockInfo(weightList.get(i).getKey()), new MovementInfo());
                 break;
@@ -866,7 +865,8 @@ public class SceneManagerImpl implements SceneManager {
             rst.putAll(JSON.parseObject(JSON.toJSONString(coordinate)));
         }
         rst.putAll(JSON.parseObject(JSON.toJSONString(block.getMovementInfo())));
-        rst.put("code", block.getBlockInfo().getCode() + "-" + block.getMovementInfo().getFrame());
+        rst.put("frame", block.getMovementInfo().getFrame());
+        rst.put("period", block.getMovementInfo().getPeriod());
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
@@ -930,15 +930,6 @@ public class SceneManagerImpl implements SceneManager {
         registerBlock(world, block);
         return block;
     }
-
-//    @Override
-//    public Block addSceneBlock(GameWorld world, int blockCode, WorldCoordinate worldCoordinate) {
-//        BlockInfo blockInfo = BlockUtil.generateSceneObjectBlockInfo(blockCode);
-//        MovementInfo movementInfo = new MovementInfo();
-//        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-//        registerBlock(world, block);
-//        return block;
-//    }
 
     /**
      * Added a random direction and default distance

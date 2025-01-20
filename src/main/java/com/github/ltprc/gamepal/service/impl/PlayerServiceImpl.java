@@ -1085,7 +1085,7 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_LAY_WIRE_NETTING:
                 blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_TRAP);
-                blockInfo.setCode("3103");
+                blockInfo.setCode(String.valueOf(GamePalConstants.EVENT_CODE_WIRE_NETTING));
                 blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BlockConstants.WIRE_NETTING_RADIUS, BlockConstants.WIRE_NETTING_RADIUS)));
@@ -1382,7 +1382,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
             npcManager.resetNpcBrainQueues(userCode);
         }
-        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_DISTURB, userCode, player.getWorldCoordinate());
+        eventManager.addEvent(world, GamePalConstants.EVENT_CODE_DECAY, userCode, player.getWorldCoordinate());
         buffManager.resetBuff(playerInfo);
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] != 0) {
             destroyPlayer(userCode);
