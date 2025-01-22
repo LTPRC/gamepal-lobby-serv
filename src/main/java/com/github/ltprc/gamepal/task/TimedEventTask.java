@@ -78,10 +78,11 @@ public class TimedEventTask {
                         buffManager.updateBuffTime(world, blockInfo.getId());
                         buffManager.changeBuff(world, blockInfo.getId());
 
-                        if (playerService.validateActiveness(world, blockInfo.getId())) {
+                        PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
+                        if (playerService.validateActiveness(world, blockInfo.getId())
+                                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] == 0) {
                             Block player = creatureMap.get(blockInfo.getId());
                             MovementInfo movementInfo = player.getMovementInfo();
-                            PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
                             double randomNumber;
 
                             // Change hp

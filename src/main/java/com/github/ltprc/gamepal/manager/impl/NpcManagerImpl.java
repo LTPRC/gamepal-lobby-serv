@@ -526,11 +526,10 @@ public class NpcManagerImpl implements NpcManager {
         newSpeed = Math.min(newSpeed, distance - stopDistance);
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_STUNNED] != 0) {
             newSpeed = 0D;
-        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
-            newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
-        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0) {
-            newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
-        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0
+                || playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] != 0
+                || playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0
+                || playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] != 0) {
             newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
         } else {
             newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue(), newSpeed);

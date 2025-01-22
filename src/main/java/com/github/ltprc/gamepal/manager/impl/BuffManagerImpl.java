@@ -40,6 +40,13 @@ public class BuffManagerImpl implements BuffManager {
                     playerService.generateNotificationMessage(userCode, "距离复活还有"
                             + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
                 }
+            } else if (i == GamePalConstants.BUFF_CODE_KNOCKED) {
+                if (playerInfo.getBuff()[i] == 0) {
+                    playerService.generateNotificationMessage(userCode, "濒死结束。");
+                } else if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
+                    playerService.generateNotificationMessage(userCode, "距离濒死结束还有"
+                            + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
+                }
             }
         }
     }
@@ -54,9 +61,11 @@ public class BuffManagerImpl implements BuffManager {
         Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
 
-//        if (player.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-//            playerService.killPlayer(userCode);
-//        }
+        if (player.getBlockInfo().getHp().get() <= 0
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] == 0
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
+            playerService.killPlayer(userCode);
+        }
 
         if (playerInfo.getHunger() < playerInfo.getHungerMax() / 10
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] == 0) {
@@ -109,19 +118,19 @@ public class BuffManagerImpl implements BuffManager {
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] = 0;
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] = 0;
         playerInfo.getBuff()[GamePalConstants.BUFF_CODE_OVERWEIGHTED] = 0;
+        playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] = 0;
     }
 
     @Override
     public void initializeBuff(PlayerInfo playerInfo) {
         validateBuffArray(playerInfo);
         resetBuff(playerInfo);
-        if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
-            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REVIVED] = -1;
-            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_ANTI_TROPHY] = -1;
-        } else if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_NPC) {
+        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_ONE_HIT] = -1;
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_TROPHY] = -1;
             playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
         } else {
-            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REVIVED] = -1; // Game testing 25/01/21
         }
     }
 
@@ -131,9 +140,7 @@ public class BuffManagerImpl implements BuffManager {
         }
         if (playerInfo.getBuff().length < GamePalConstants.BUFF_CODE_LENGTH) {
             int[] newBuff = new int[GamePalConstants.BUFF_CODE_LENGTH];
-            for (int i = 0; i < playerInfo.getBuff().length; i++) {
-                newBuff[i] = playerInfo.getBuff()[i];
-            }
+            System.arraycopy(playerInfo.getBuff(), 0, newBuff, 0, playerInfo.getBuff().length);
             playerInfo.setBuff(newBuff);
         }
     }

@@ -60,6 +60,8 @@ public interface PlayerService {
 
     ResponseEntity<String> updateInteractionInfo(String userCode, InteractionInfo interactionInfo);
 
+    ResponseEntity<String> knockPlayer(String userCode);
+
     ResponseEntity<String> killPlayer(String userCode);
 
     ResponseEntity<String> revivePlayer(String userCode);

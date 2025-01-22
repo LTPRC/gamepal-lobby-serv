@@ -282,6 +282,14 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
         BagInfo bagInfo = bagInfoMap.get(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] != 0) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
+        }
         if (StringUtils.isBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
         }
@@ -666,7 +674,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         switch (worldService.getItemMap().get(itemNo).getItemNo()) {
             case "c005":
-                killPlayer(userCode);
+                knockPlayer(userCode);
                 break;
             case "c006":
                 revivePlayer(userCode);
@@ -735,6 +743,10 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] != 0) {
+            generateNotificationMessage(userCode, "濒死状态无法进行交互！");
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
+        }
         InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
         if (null == interactionInfo) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
@@ -854,6 +866,9 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] != 0) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
+        }
         if (null == playerInfo.getSkills() || playerInfo.getSkills().size() <= skillNo) {
             logger.error(ErrorUtil.ERROR_1028 + " skillNo: " + skillNo);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1028));
@@ -1376,7 +1391,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     @Transactional
-    public ResponseEntity<String> killPlayer(String userCode) {
+    public ResponseEntity<String> knockPlayer(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -1386,16 +1401,19 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        Block player = creatureMap.get(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1036));
         }
-        addPlayerTrophy(userCode, playerInfo.getBuff()[GamePalConstants.BUFF_CODE_ANTI_TROPHY] == 0);
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] != 0) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
+        }
+
         player.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
         changeVp(userCode, 0, true);
         changeHunger(userCode, 0, true);
@@ -1410,9 +1428,38 @@ public class PlayerServiceImpl implements PlayerService {
         if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
             npcManager.resetNpcBrainQueues(userCode);
         }
+        if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_ONE_HIT] != 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] = 0;
+        } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] == 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] = GamePalConstants.BUFF_DEFAULT_FRAME_KNOCKED;
+        }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<String> killPlayer(String userCode) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Block player = creatureMap.get(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+
+        addPlayerTrophy(userCode, playerInfo.getBuff()[GamePalConstants.BUFF_CODE_TROPHY] != 0);
         eventManager.addEvent(world, GamePalConstants.EVENT_CODE_DECAY, userCode, player.getWorldCoordinate());
         buffManager.resetBuff(playerInfo);
         if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] != 0) {
+            playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = -1;
             destroyPlayer(userCode);
         } else if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REVIVED] != 0) {
             playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] = GamePalConstants.BUFF_DEFAULT_FRAME_DEAD;
@@ -1658,7 +1705,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != preservedBagInfo) {
             preservedBagInfo.getItems().clear();
             preservedBagInfo.setCapacity(BigDecimal.ZERO);
-            bagInfo.setCapacityMax(BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX));
+            preservedBagInfo.setCapacityMax(BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX));
         }
         player.getMovementInfo().setFaceDirection(BlockConstants.FACE_DIRECTION_DEFAULT);
         playerInfoMap.entrySet().stream()
@@ -1668,6 +1715,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .forEach(entry -> setMember(entry.getKey(), entry.getKey(), ""));
         // TODO Game-over display
         userService.logoff(userCode, "", false);
+        world.getCreatureMap().remove(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 

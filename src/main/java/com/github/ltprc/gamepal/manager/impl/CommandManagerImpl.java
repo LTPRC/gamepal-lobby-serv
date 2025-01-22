@@ -185,7 +185,7 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwcbluepill":
                 playerService.generateNotificationMessage(userCode, "真香，嗝。");
-                playerService.killPlayer(userCode);
+                playerService.knockPlayer(userCode);
                 break;
             case "nwcredpill":
                 playerService.generateNotificationMessage(userCode, "我复活辣。");

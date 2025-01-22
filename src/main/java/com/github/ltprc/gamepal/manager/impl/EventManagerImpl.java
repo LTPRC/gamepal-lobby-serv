@@ -550,7 +550,7 @@ public class EventManagerImpl implements EventManager {
             }
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
             if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
-                playerService.killPlayer(block.getBlockInfo().getId());
+                playerService.knockPlayer(block.getBlockInfo().getId());
             }
         } else {
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));

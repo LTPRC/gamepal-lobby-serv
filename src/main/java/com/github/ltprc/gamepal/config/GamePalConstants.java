@@ -88,15 +88,17 @@ public class GamePalConstants {
     public static final int BUFF_CODE_FATIGUED = 8;
     public static final int BUFF_CODE_BLIND = 9;
     public static final int BUFF_CODE_INVINCIBLE = 10;
-    public static final int BUFF_CODE_REVIVED = 11;
+    public static final int BUFF_CODE_ONE_HIT = 11;
     public static final int BUFF_CODE_REALISTIC = 12;
-    public static final int BUFF_CODE_ANTI_TROPHY = 13;
+    public static final int BUFF_CODE_TROPHY = 13;
     public static final int BUFF_CODE_BLOCKED = 14;
     public static final int BUFF_CODE_HAPPY = 15;
     public static final int BUFF_CODE_SAD = 16;
     public static final int BUFF_CODE_RECOVERING = 17;
     public static final int BUFF_CODE_OVERWEIGHTED = 18;
-    public static final int BUFF_CODE_LENGTH = 19;
+    public static final int BUFF_CODE_KNOCKED = 19;
+    public static final int BUFF_CODE_REVIVED = 20;
+    public static final int BUFF_CODE_LENGTH = 21;
 
     // Backend constants
 
@@ -111,6 +113,7 @@ public class GamePalConstants {
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.25D);
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;
+    public static final int BUFF_DEFAULT_FRAME_KNOCKED = 10 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_BLOCKED = 1 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_HAPPY = 10 * FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_SAD = 10 * FRAME_PER_SECOND;
