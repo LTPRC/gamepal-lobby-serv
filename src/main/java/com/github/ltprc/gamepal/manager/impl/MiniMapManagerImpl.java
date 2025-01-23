@@ -22,7 +22,7 @@ public class MiniMapManagerImpl implements MiniMapManager {
                         region.getTerrainMap().getOrDefault(new IntegerCoordinate(
                                 -region.getRadius() + (region.getRadius() * 2 + 1) * i / miniMapSize.getX(),
                                 -region.getRadius() + (region.getRadius() * 2 + 1) * j / miniMapSize.getY()),
-                                BlockConstants.BLOCK_CODE_NOTHING));
+                                BlockConstants.BLOCK_CODE_BLACK));
                 rst.add(color);
             }
         }

@@ -107,13 +107,13 @@ public class SceneManagerImpl implements SceneManager {
         Map<IntegerCoordinate, Integer> terrainMap = region.getTerrainMap();
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius());
-            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
             sceneCoordinate = new IntegerCoordinate(i, -region.getRadius());
-            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
             sceneCoordinate = new IntegerCoordinate(region.getRadius(), i);
-            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
             sceneCoordinate = new IntegerCoordinate(-region.getRadius(), i);
-            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
+            region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
         }
         for (int i = - region.getRadius() + 1; i < region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius() - 1);
@@ -238,10 +238,10 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1031);
             return;
         }
-        int terrainCode = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_NOTHING);
+        int terrainCode = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
         region.getScenes().put(sceneCoordinate, scene);
         fillSceneTemplate(world, region, scene, terrainCode);
-        if (terrainCode == BlockConstants.BLOCK_CODE_NOTHING) {
+        if (terrainCode == BlockConstants.BLOCK_CODE_BLACK) {
             scene.getBlocks().values().forEach(block -> removeBlock(world, block, false));
         } else {
             addSceneAnimals(world, region, scene);
@@ -423,7 +423,7 @@ public class SceneManagerImpl implements SceneManager {
         WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                 coordinate);
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockConstants.BLOCK_CODE_NOTHING, 2000);
+        weightMap.put(BlockConstants.BLOCK_CODE_BLACK, 2000);
         switch (blockCode) {
             case BlockConstants.BLOCK_CODE_DIRT:
                 weightMap.put(BlockConstants.PLANT_INDEX_BIG_PINE, 10);
@@ -623,7 +623,7 @@ public class SceneManagerImpl implements SceneManager {
                 break;
             case BlockConstants.BLOCK_CODE_SNOW:
             case BlockConstants.BLOCK_CODE_WATER:
-            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_BLACK:
             default:
                 break;
         }
@@ -631,7 +631,7 @@ public class SceneManagerImpl implements SceneManager {
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()
-                    && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_NOTHING) {
+                    && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_BLACK) {
                 addOtherBlock(world, worldCoordinate,
                         BlockUtil.generateSceneObjectBlockInfo(weightList.get(i).getKey()), new MovementInfo());
                 break;
@@ -676,7 +676,7 @@ public class SceneManagerImpl implements SceneManager {
                                 BigDecimal y) {
         Random random = new Random();
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockConstants.BLOCK_CODE_NOTHING, 10000);
+        weightMap.put(BlockConstants.BLOCK_CODE_BLACK, 10000);
         switch (blockCode) {
             case BlockConstants.BLOCK_CODE_DIRT:
                 weightMap.put(CreatureConstants.SKIN_COLOR_DOG, 10);
@@ -707,7 +707,7 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_CODE_SAND:
             case BlockConstants.BLOCK_CODE_LAVA:
             case BlockConstants.BLOCK_CODE_WATER:
-            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_BLACK:
             default:
                 break;
         }
@@ -715,7 +715,7 @@ public class SceneManagerImpl implements SceneManager {
         List<Map.Entry<Integer, Integer>> weightList = new ArrayList<>(weightMap.entrySet());
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()
-                    && BlockConstants.BLOCK_CODE_NOTHING != weightList.get(i).getKey()) {
+                    && BlockConstants.BLOCK_CODE_BLACK != weightList.get(i).getKey()) {
                 String animalUserCode = UUID.randomUUID().toString();
                 Block animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
@@ -820,7 +820,7 @@ public class SceneManagerImpl implements SceneManager {
 //                Scene scene = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - sceneScanRadius + i, sceneCoordinate.getY() - sceneScanRadius + j));
 //                for (int l = 0; l <= region.getWidth(); l++) {
 //                    for (int k = 0; k <= region.getHeight(); k++) {
-//                        int val = BlockConstants.BLOCK_CODE_NOTHING;
+//                        int val = BlockConstants.BLOCK_CODE_BLACK;
 //                        if (null != scene && null != scene.getGird()) {
 //                            val = scene.getGird()[l][k];
 //                        }
@@ -836,7 +836,7 @@ public class SceneManagerImpl implements SceneManager {
                 Scene scene = region.getScenes().get(newSceneCoordinate);
                 for (int l = 0; l <= region.getWidth(); l++) {
                     for (int k = 0; k <= region.getHeight(); k++) {
-                        int val = BlockConstants.BLOCK_CODE_NOTHING;
+                        int val = BlockConstants.BLOCK_CODE_BLACK;
                         if (null != scene && null != scene.getGird()) {
                             val = scene.getGird()[l][k];
                         }
@@ -1184,7 +1184,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public int getGridBlockCode(GameWorld world, WorldCoordinate worldCoordinate) {
-        int code = BlockConstants.BLOCK_CODE_NOTHING;
+        int code = BlockConstants.BLOCK_CODE_BLACK;
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
         if (null != scene.getGird() && null != scene.getGird()[0]) {

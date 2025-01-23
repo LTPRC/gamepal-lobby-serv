@@ -76,7 +76,6 @@ public class GamePalConstants {
     public static final int EVENT_CODE_WATER = 131;
     public static final int EVENT_CODE_SPARK_SHORT = 132;
     public static final int EVENT_CODE_ASH = 135;
-    public static final int EVENT_CODE_WIRE_NETTING = 3103;
 
     public static final int BUFF_CODE_DEAD = 1;
     public static final int BUFF_CODE_STUNNED = 2;

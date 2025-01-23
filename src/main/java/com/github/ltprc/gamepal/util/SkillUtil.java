@@ -149,7 +149,7 @@ public class SkillUtil {
                 hp = -10 - random.nextInt(20);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_WIRE_NETTING:
+            case BlockConstants.BLOCK_CODE_WIRE_NETTING:
                 hp = -20 - random.nextInt(60);
                 break;
             case GamePalConstants.EVENT_CODE_MELEE_SMASH:
@@ -200,7 +200,7 @@ public class SkillUtil {
 
     public static boolean blockCode2Build(int code) {
         switch (code) {
-//            case BlockConstants.BLOCK_CODE_NOTHING:
+//            case BlockConstants.BLOCK_CODE_BLACK:
             case BlockConstants.BLOCK_CODE_WATER:
                 return false;
             default:

@@ -1114,7 +1114,7 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_LAY_BARRIER:
                 blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
-                blockInfo.setCode("3102");
+                blockInfo.setCode(String.valueOf(BlockConstants.BLOCK_CODE_ASH));
                 blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BlockConstants.BARRIER_RADIUS, BlockConstants.BARRIER_RADIUS)));
@@ -1128,7 +1128,7 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_LAY_WIRE_NETTING:
                 blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_TRAP);
-                blockInfo.setCode(String.valueOf(GamePalConstants.EVENT_CODE_WIRE_NETTING));
+                blockInfo.setCode(String.valueOf(BlockConstants.BLOCK_CODE_WIRE_NETTING));
                 blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                         new Coordinate(BlockConstants.WIRE_NETTING_RADIUS, BlockConstants.WIRE_NETTING_RADIUS)));
@@ -1523,7 +1523,7 @@ public class PlayerServiceImpl implements PlayerService {
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
         BlockInfo blockInfo1 = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_CONTAINER);
-        blockInfo1.setCode("3100");
+        blockInfo1.setCode(String.valueOf(BlockConstants.BLOCK_CODE_BOX));
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());

@@ -368,7 +368,7 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_WATER:
                 eventCode = GamePalConstants.EVENT_CODE_WATER;
                 break;
-            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_BLACK:
             case BlockConstants.BLOCK_CODE_SAND:
             case BlockConstants.BLOCK_CODE_SNOW:
             default:
@@ -471,7 +471,7 @@ public class EventManagerImpl implements EventManager {
 //                                addEvent(world, GamePalConstants.EVENT_CODE_BLEED, player.getBlockInfo().getId(), player.getWorldCoordinate());
                             });
                     break;
-                case GamePalConstants.EVENT_CODE_WIRE_NETTING:
+                case BlockConstants.BLOCK_CODE_WIRE_NETTING:
                     world.getCreatureMap().values().stream()
                             .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
                             .filter(player -> {

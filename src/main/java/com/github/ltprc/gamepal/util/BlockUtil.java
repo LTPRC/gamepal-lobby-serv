@@ -579,7 +579,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_CODE_WATER:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.8));
                 break;
-            case BlockConstants.BLOCK_CODE_NOTHING:
+            case BlockConstants.BLOCK_CODE_BLACK:
             case BlockConstants.BLOCK_CODE_GRASS:
             case BlockConstants.BLOCK_CODE_DIRT:
             default:
@@ -831,49 +831,59 @@ public class BlockUtil {
                                 new Coordinate(BigDecimal.ONE, BigDecimal.ONE)));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(), "3101",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
+                        String.valueOf(BlockConstants.BLOCK_CODE_PACK),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, UUID.randomUUID().toString(), "1000",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, UUID.randomUUID().toString(), "",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_BED:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "", "3006",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_SINGLE_BED),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TOILET:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "", "3008",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_TOILET),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_DRESSER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "", "3010",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_DRESSER_1),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_GAME:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_GAME, "", "3021",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_GAME, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_DOCUMENT),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_STORAGE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "", "3002",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_CHEST_OPEN),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_COOKER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "", "3004",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_COOKER),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_SINK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "", "3005",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_SINK),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "", "3001",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_CHEST_CLOSE),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SPEAKER, "", "4010",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SPEAKER, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_SPEAKER),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
@@ -892,32 +902,39 @@ public class BlockUtil {
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FARM, "", "4100",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FARM, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_FARM),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "", "4001",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_CONSTRUCTION),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "", "4002",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_TOOL),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "", "4003",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_AMMO),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "", "4004",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_OUTFIT),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "", "4005",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_CHEM),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "", "4006",
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "",
+                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_RECYCLE),
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
