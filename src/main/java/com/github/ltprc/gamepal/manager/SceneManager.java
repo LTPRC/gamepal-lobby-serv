@@ -35,7 +35,7 @@ public interface SceneManager {
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);
 
-    Block addTeleportBlock(final GameWorld world, final String code, final WorldCoordinate worldCoordinate,
+    Block addTeleportBlock(final GameWorld world, final int code, final WorldCoordinate worldCoordinate,
                            final WorldCoordinate to);
 
     Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final BlockInfo blockInfo,

@@ -13,7 +13,7 @@
   {"recipeNo": "2013", "type": 20, "cost": {"m_wood": 10, "m_steel": 10}, "value": {"t313": 1}},
   {"recipeNo": "2014", "type": 20, "cost": {"m_wood": 10, "m_steel": 10}, "value": {"t314": 1}},
   {"recipeNo": "2015", "type": 20, "cost": {"m_circuitry": 1, "m_copper": 1}, "value": {"t315": 1}},
-  {"recipeNo": "2015", "type": 20, "cost": {"m_cloth": 1, "m_concrete": 5}, "value": {"t351": 1}},
+  {"recipeNo": "2016", "type": 20, "cost": {"m_cloth": 1, "m_concrete": 5}, "value": {"t351": 1}},
 
   {"recipeNo": "2101", "type": 21, "cost": {"m_steel": 20}, "value": {"t232": 1}},
   {"recipeNo": "2102", "type": 21, "cost": {"m_wood": 5, "m_steel": 5}, "value": {"t233": 1}},

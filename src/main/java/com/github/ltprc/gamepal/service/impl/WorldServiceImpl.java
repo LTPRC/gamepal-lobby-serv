@@ -222,16 +222,16 @@ public class WorldServiceImpl implements WorldService {
                                 block = sceneManager.addDropBlock(world, worldCoordinate, new AbstractMap.SimpleEntry<>(blockRow.getString(4), blockRow.getInteger(5)));
                                 break;
                             case BlockConstants.BLOCK_TYPE_TELEPORT:
-                                block = sceneManager.addTeleportBlock(world, String.valueOf(blockRow.getInteger(1)), worldCoordinate, new WorldCoordinate(blockRow.getInteger(4),
+                                block = sceneManager.addTeleportBlock(world, blockRow.getInteger(1), worldCoordinate, new WorldCoordinate(blockRow.getInteger(4),
                                         new IntegerCoordinate(blockRow.getInteger(5),
                                                 blockRow.getInteger(6)),
                                         new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
                                                 BigDecimal.valueOf(blockRow.getInteger(8)))));
                                 break;
                             default:
-                                BlockInfo blockInfo1 = BlockUtil.createBlockInfoByType(type);
+                                BlockInfo blockInfo1 = BlockUtil.createBlockInfoByTypeAndCode(type,
+                                        blockRow.getInteger(1));
                                 if (null != blockInfo1) {
-                                    blockInfo1.setCode(String.valueOf(blockRow.getInteger(1)));
                                     block = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo1, new MovementInfo());
                                 }
                                 break;

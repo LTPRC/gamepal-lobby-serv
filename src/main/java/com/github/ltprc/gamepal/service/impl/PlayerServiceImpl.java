@@ -1068,7 +1068,8 @@ public class PlayerServiceImpl implements PlayerService {
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
                 IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
                 buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
-                BlockInfo blockInfo = BlockUtil.createBlockInfoByType(blockType);
+                BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndCode(blockType,
+                        BlockConstants.BLOCK_CODE_NO_RESOURCE);
                 MovementInfo movementInfo = new MovementInfo();
                 Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
                 if (!sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
@@ -1113,7 +1114,8 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_LAY_BARRIER:
-                blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_BUILDING);
+                blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_BUILDING,
+                        BlockConstants.BLOCK_CODE_ASH);
                 blockInfo.setCode(String.valueOf(BlockConstants.BLOCK_CODE_ASH));
                 blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
@@ -1127,7 +1129,8 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_LAY_WIRE_NETTING:
-                blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_TRAP);
+                blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_TRAP,
+                        BlockConstants.BLOCK_CODE_WIRE_NETTING);
                 blockInfo.setCode(String.valueOf(BlockConstants.BLOCK_CODE_WIRE_NETTING));
                 blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
@@ -1522,8 +1525,8 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        BlockInfo blockInfo1 = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_CONTAINER);
-        blockInfo1.setCode(String.valueOf(BlockConstants.BLOCK_CODE_BOX));
+        BlockInfo blockInfo1 = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_CONTAINER,
+                BlockConstants.BLOCK_CODE_BOX);
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());

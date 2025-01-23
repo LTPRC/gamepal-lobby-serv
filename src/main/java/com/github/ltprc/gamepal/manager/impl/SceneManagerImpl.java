@@ -940,7 +940,8 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_DROP);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_DROP,
+                BlockConstants.BLOCK_CODE_PACK);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
@@ -952,9 +953,8 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addTeleportBlock(GameWorld world, final String code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_TELEPORT);
-        blockInfo.setCode(code);
+    public Block addTeleportBlock(GameWorld world, final int code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_TELEPORT, code);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);

@@ -804,153 +804,129 @@ public class BlockUtil {
     }
 
     public static String convertBlockInfo2ItemNo(BlockInfo blockInfo) {
-        return ItemConstants.ITEM_PACK_MAP.get(blockInfo.getType());
+        return ItemConstants.ITEM_PACK_MAP.get(Integer.valueOf(blockInfo.getCode()));
     }
 
     public static BlockInfo convertItemNo2BlockInfo(String itemNo) {
-        return createBlockInfoByType(ItemConstants.ITEM_BUILD_MAP.get(itemNo));
+        return createBlockInfoByCode(ItemConstants.ITEM_BUILD_MAP.get(itemNo));
     }
 
-    public static BlockInfo createBlockInfoByType(int type) {
-        return createBlockInfoByTypeAndEventCode(type, 0);
+    public static BlockInfo createBlockInfoByCode(int blockCode) {
+        return createBlockInfoByTypeAndCode(convertBlockCode2Type(blockCode), blockCode);
     }
 
-    public static BlockInfo createBlockInfoByTypeAndEventCode(int type, int eventCode) {
+    public static BlockInfo createBlockInfoByTypeAndCode(int blockType, int blockCode) {
         BlockInfo blockInfo = null;
-        switch (type) {
+        String id = "";
+        switch (blockType) {
+            case BlockConstants.BLOCK_TYPE_NORMAL:
             case BlockConstants.BLOCK_TYPE_EFFECT:
-                blockInfo = createBlockInfoByEventCode(eventCode);
+            case BlockConstants.BLOCK_TYPE_BUILDING:
+            case BlockConstants.BLOCK_TYPE_TREE:
+            case BlockConstants.BLOCK_TYPE_ROCK:
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                break;
+            default:
+                id = UUID.randomUUID().toString();
+                break;
+        }
+        Structure structure = new Structure();
+        int structureMaterial;
+        switch (blockType) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_MELEE_HIT:
+                    case BlockConstants.BLOCK_CODE_MELEE_KICK:
+                    case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
+                    case BlockConstants.BLOCK_CODE_MELEE_SMASH:
+                    case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+                    case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
+                    case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+                        structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
+                        break;
+                    case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
+                    case BlockConstants.BLOCK_CODE_MELEE_CHOP:
+                    case BlockConstants.BLOCK_CODE_MELEE_PICK:
+                    case BlockConstants.BLOCK_CODE_MELEE_STAB:
+                    case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+                    case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+                    case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
+                    case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
+                        structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH;
+                        break;
+                    default:
+                        structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
+                        break;
+                }
+                structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(blockCode),
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_PLAYER, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS)),
-                                new Coordinate(BigDecimal.ONE, BigDecimal.ONE)));
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS)),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DROP, UUID.randomUUID().toString(),
-                        String.valueOf(BlockConstants.BLOCK_CODE_PACK),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TELEPORT, UUID.randomUUID().toString(), "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE));
+            case BlockConstants.BLOCK_TYPE_GAME:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_BED:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BED, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_SINGLE_BED),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
             case BlockConstants.BLOCK_TYPE_TOILET:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TOILET, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_TOILET),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
             case BlockConstants.BLOCK_TYPE_DRESSER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_DRESSER, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_DRESSER_1),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_GAME:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_GAME, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_DOCUMENT),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
             case BlockConstants.BLOCK_TYPE_STORAGE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_STORAGE, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_CHEST_OPEN),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
             case BlockConstants.BLOCK_TYPE_COOKER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_COOKER, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_COOKER),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
             case BlockConstants.BLOCK_TYPE_SINK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SINK, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_SINK),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CONTAINER, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_CHEST_CLOSE),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+            case BlockConstants.BLOCK_TYPE_BUILDING:
+            case BlockConstants.BLOCK_TYPE_TREE:
+            case BlockConstants.BLOCK_TYPE_ROCK:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_SPEAKER, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_SPEAKER),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS))));
-                break;
-            case BlockConstants.BLOCK_TYPE_BUILDING:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_TREE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_ROCK:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
+                                        BlockConstants.ROUND_SCENE_OBJECT_RADIUS)));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FARM, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_FARM),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
-                                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION));
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_CONSTRUCTION),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_TOOL),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_AMMO),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_OUTFIT),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_CHEM),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE, "",
-                        String.valueOf(BlockConstants.BLOCK_CODE_WORKSHOP_RECYCLE),
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID, BlockConstants.STRUCTURE_LAYER_MIDDLE));
-                break;
-            case BlockConstants.BLOCK_TYPE_TRAP:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TRAP, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
                 break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
             default:
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION, new Shape(),
-                                new Coordinate(BigDecimal.ONE, BigDecimal.ONE)));
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION, new Shape(),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
         }
+        blockInfo = new BlockInfo(blockType, id, String.valueOf(blockCode), structure);
         initializeBlockInfoHp(blockInfo);
         return blockInfo;
+    }
+
+    public static int convertBlockCode2Type(int blockCode) {
+        return BlockConstants.BLOCK_CODE_TYPE_MAP.getOrDefault(blockCode, BlockConstants.BLOCK_TYPE_NORMAL);
     }
 
     public static void initializeBlockInfoHp(BlockInfo blockInfo) {
@@ -966,50 +942,50 @@ public class BlockUtil {
         blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 
-    private static BlockInfo createBlockInfoByEventCode(final int eventCode) {
-        int blockType;
-        switch (eventCode) {
-            case BlockConstants.BLOCK_CODE_FIRE:
-            case BlockConstants.BLOCK_CODE_MINE:
-                blockType = BlockConstants.BLOCK_TYPE_TRAP;
-                break;
-            default:
-                blockType = BlockConstants.BLOCK_TYPE_EFFECT;
-                break;
-        }
-        String id = UUID.randomUUID().toString();
-        int structureMaterial;
-        switch (eventCode) {
-            case BlockConstants.BLOCK_CODE_MELEE_HIT:
-            case BlockConstants.BLOCK_CODE_MELEE_KICK:
-            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
-            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
-            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
-            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
-            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
-                break;
-            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
-            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
-            case BlockConstants.BLOCK_CODE_MELEE_PICK:
-            case BlockConstants.BLOCK_CODE_MELEE_STAB:
-            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-            case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
-            case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH;
-                break;
-            default:
-                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
-                break;
-        }
-        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
-                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)),
-                new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-        return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
-    }
+//    private static BlockInfo createBlockInfoByEventCode(final int eventCode) {
+//        int blockType;
+//        switch (eventCode) {
+//            case BlockConstants.BLOCK_CODE_FIRE:
+//            case BlockConstants.BLOCK_CODE_MINE:
+//                blockType = BlockConstants.BLOCK_TYPE_TRAP;
+//                break;
+//            default:
+//                blockType = BlockConstants.BLOCK_TYPE_EFFECT;
+//                break;
+//        }
+//        String id = UUID.randomUUID().toString();
+//        int structureMaterial;
+//        switch (eventCode) {
+//            case BlockConstants.BLOCK_CODE_MELEE_HIT:
+//            case BlockConstants.BLOCK_CODE_MELEE_KICK:
+//            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
+//            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
+//            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+//            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
+//            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
+//                break;
+//            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
+//            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
+//            case BlockConstants.BLOCK_CODE_MELEE_PICK:
+//            case BlockConstants.BLOCK_CODE_MELEE_STAB:
+//            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+//            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+//            case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
+//            case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH;
+//                break;
+//            default:
+//                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
+//                break;
+//        }
+//        Structure structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(eventCode),
+//                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+//                        new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)),
+//                new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+//        return new BlockInfo(blockType, id, String.valueOf(eventCode), structure);
+//    }
 
     public static MovementInfo createMovementInfoByEventCode(final int eventCode) {
         MovementInfo movementInfo = new MovementInfo();
