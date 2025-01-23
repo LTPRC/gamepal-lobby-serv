@@ -486,18 +486,18 @@ public class BlockUtil {
     public static int convertEventCode2Layer(int eventCode) {
         int layer;
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_EXPLODE:
-            case GamePalConstants.EVENT_CODE_BLOCK:
-            case GamePalConstants.EVENT_CODE_BLEED:
-            case GamePalConstants.EVENT_CODE_UPGRADE:
-            case GamePalConstants.EVENT_CODE_HEAL:
-            case GamePalConstants.EVENT_CODE_DECAY:
-            case GamePalConstants.EVENT_CODE_SACRIFICE:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
-            case GamePalConstants.EVENT_CODE_SPARK:
-            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
-            case GamePalConstants.EVENT_CODE_ASH:
+            case BlockConstants.BLOCK_CODE_EXPLODE:
+            case BlockConstants.BLOCK_CODE_BLOCK:
+            case BlockConstants.BLOCK_CODE_BLEED:
+            case BlockConstants.BLOCK_CODE_UPGRADE:
+            case BlockConstants.BLOCK_CODE_HEAL:
+            case BlockConstants.BLOCK_CODE_DECAY:
+            case BlockConstants.BLOCK_CODE_SACRIFICE:
+            case BlockConstants.BLOCK_CODE_CHEER:
+            case BlockConstants.BLOCK_CODE_CURSE:
+            case BlockConstants.BLOCK_CODE_SPARK:
+            case BlockConstants.BLOCK_CODE_SPARK_SHORT:
+            case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
                 layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
             default:
@@ -626,170 +626,170 @@ public class BlockUtil {
                 new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                 new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS));
         switch (blockCode) {
-            case BlockConstants.PLANT_INDEX_BIG_PINE:
+            case BlockConstants.BLOCK_CODE_BIG_PINE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6100",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_BIG_OAK:
+            case BlockConstants.BLOCK_CODE_BIG_OAK:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6101",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_BIG_WITHERED_TREE:
+            case BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6102",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_PINE:
+            case BlockConstants.BLOCK_CODE_PINE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6103",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_OAK:
+            case BlockConstants.BLOCK_CODE_OAK:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6104",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_WITHERED_TREE:
+            case BlockConstants.BLOCK_CODE_WITHERED_TREE:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6105",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_PALM:
+            case BlockConstants.BLOCK_CODE_PALM:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TREE, id, "6106",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape,
                                 new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3))));
                 break;
-            case BlockConstants.PLANT_INDEX_RAFFLESIA:
+            case BlockConstants.BLOCK_CODE_RAFFLESIA:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5102",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_STUMP:
+            case BlockConstants.BLOCK_CODE_STUMP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5103",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
-            case BlockConstants.PLANT_INDEX_MOSSY_STUMP:
+            case BlockConstants.BLOCK_CODE_MOSSY_STUMP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5104",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
-            case BlockConstants.PLANT_INDEX_HOLLOW_TRUNK:
+            case BlockConstants.BLOCK_CODE_HOLLOW_TRUNK:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5105",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
-            case BlockConstants.PLANT_INDEX_FLOWER_BUSH:
+            case BlockConstants.BLOCK_CODE_FLOWER_BUSH:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5106",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case BlockConstants.PLANT_INDEX_BUSH:
+            case BlockConstants.BLOCK_CODE_BUSH:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5107",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_1:
+            case BlockConstants.BLOCK_CODE_SMALL_FLOWER_1:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5108",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_2:
+            case BlockConstants.BLOCK_CODE_SMALL_FLOWER_2:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5109",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_SMALL_FLOWER_3:
+            case BlockConstants.BLOCK_CODE_SMALL_FLOWER_3:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5110",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_BIG_FLOWER_1:
+            case BlockConstants.BLOCK_CODE_BIG_FLOWER_1:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5111",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_BIG_FLOWER_2:
+            case BlockConstants.BLOCK_CODE_BIG_FLOWER_2:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5112",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_BIG_FLOWER_3:
+            case BlockConstants.BLOCK_CODE_BIG_FLOWER_3:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5113",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_MUSHROOM_1:
+            case BlockConstants.BLOCK_CODE_MUSHROOM_1:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5114",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_MUSHROOM_2:
+            case BlockConstants.BLOCK_CODE_MUSHROOM_2:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5115",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_GRASS_1:
+            case BlockConstants.BLOCK_CODE_GRASS_1:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5116",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_GRASS_2:
+            case BlockConstants.BLOCK_CODE_GRASS_2:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5117",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_GRASS_3:
+            case BlockConstants.BLOCK_CODE_GRASS_3:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5118",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_GRASS_4:
+            case BlockConstants.BLOCK_CODE_GRASS_4:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5119",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM));
                 break;
-            case BlockConstants.PLANT_INDEX_CACTUS_1:
+            case BlockConstants.BLOCK_CODE_CACTUS_1:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5120",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case BlockConstants.PLANT_INDEX_CACTUS_2:
+            case BlockConstants.BLOCK_CODE_CACTUS_2:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5121",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case BlockConstants.PLANT_INDEX_CACTUS_3:
+            case BlockConstants.BLOCK_CODE_CACTUS_3:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, id, "5122",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
-            case BlockConstants.ROCK_INDEX_1:
+            case BlockConstants.BLOCK_CODE_ROCK_1:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, id, "5100",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 roundShape));
                 break;
-            case BlockConstants.ROCK_INDEX_2:
+            case BlockConstants.BLOCK_CODE_ROCK_2:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_ROCK, id, "5101",
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM,
@@ -939,7 +939,7 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_TRAP, "", "",
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE, BlockConstants.STRUCTURE_LAYER_MIDDLE));
+                        new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH, BlockConstants.STRUCTURE_LAYER_MIDDLE));
                 break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
             default:
@@ -969,8 +969,8 @@ public class BlockUtil {
     private static BlockInfo createBlockInfoByEventCode(final int eventCode) {
         int blockType;
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_FIRE:
-            case GamePalConstants.EVENT_CODE_MINE:
+            case BlockConstants.BLOCK_CODE_FIRE:
+            case BlockConstants.BLOCK_CODE_MINE:
                 blockType = BlockConstants.BLOCK_TYPE_TRAP;
                 break;
             default:
@@ -980,23 +980,23 @@ public class BlockUtil {
         String id = UUID.randomUUID().toString();
         int structureMaterial;
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
-            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
+            case BlockConstants.BLOCK_CODE_MELEE_HIT:
+            case BlockConstants.BLOCK_CODE_MELEE_KICK:
+            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
+            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
+            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
+            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
                 structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
-            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
-            case GamePalConstants.EVENT_CODE_MELEE_PICK:
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
-            case GamePalConstants.EVENT_CODE_SHOOT_ROCKET:
-            case GamePalConstants.EVENT_CODE_SHOOT_FIRE:
-            case GamePalConstants.EVENT_CODE_SHOOT_WATER:
+            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
+            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
+            case BlockConstants.BLOCK_CODE_MELEE_PICK:
+            case BlockConstants.BLOCK_CODE_MELEE_STAB:
+            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+            case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
+            case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
                 structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH;
                 break;
             default:
@@ -1015,19 +1015,19 @@ public class BlockUtil {
         MovementInfo movementInfo = new MovementInfo();
         movementInfo.setFrame(0);
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_MINE:
+            case BlockConstants.BLOCK_CODE_MINE:
                 // Infinite
                 movementInfo.setFrameMax(-1);
                 break;
-            case GamePalConstants.EVENT_CODE_SPARK_SHORT:
+            case BlockConstants.BLOCK_CODE_SPARK_SHORT:
                 movementInfo.setFrameMax(5);
                 break;
-            case GamePalConstants.EVENT_CODE_DECAY:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
+            case BlockConstants.BLOCK_CODE_DECAY:
+            case BlockConstants.BLOCK_CODE_CHEER:
+            case BlockConstants.BLOCK_CODE_CURSE:
                 movementInfo.setFrameMax(50);
                 break;
-            case GamePalConstants.EVENT_CODE_FIRE:
+            case BlockConstants.BLOCK_CODE_FIRE:
                 movementInfo.setFrameMax(250);
                 break;
             default:
@@ -1035,9 +1035,9 @@ public class BlockUtil {
                 break;
         }
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_DECAY:
-            case GamePalConstants.EVENT_CODE_CHEER:
-            case GamePalConstants.EVENT_CODE_CURSE:
+            case BlockConstants.BLOCK_CODE_DECAY:
+            case BlockConstants.BLOCK_CODE_CHEER:
+            case BlockConstants.BLOCK_CODE_CURSE:
                 movementInfo.setPeriod(50);
                 break;
             default:

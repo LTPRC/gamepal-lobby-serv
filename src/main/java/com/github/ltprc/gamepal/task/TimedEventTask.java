@@ -202,7 +202,7 @@ public class TimedEventTask {
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
-                            eventManager.addEvent(world, GamePalConstants.EVENT_CODE_NOISE,
+                            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_NOISE,
                                     blockInfo.getId(), player.getWorldCoordinate());
                         }
                     });

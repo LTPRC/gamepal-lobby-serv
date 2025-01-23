@@ -137,59 +137,59 @@ public class SkillUtil {
         }
         Random random = new Random();
         switch (eventCode) {
-            case GamePalConstants.EVENT_CODE_HEAL:
+            case BlockConstants.BLOCK_CODE_HEAL:
                 if (targetType == BlockConstants.BLOCK_TYPE_PLAYER) {
                     hp = 100;
                 }
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_HIT:
+            case BlockConstants.BLOCK_CODE_MELEE_HIT:
                 hp = -10 - random.nextInt(10);
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_KICK:
+            case BlockConstants.BLOCK_CODE_MELEE_KICK:
                 hp = -10 - random.nextInt(20);
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_SCRATCH:
+            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
             case BlockConstants.BLOCK_CODE_WIRE_NETTING:
                 hp = -20 - random.nextInt(60);
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_SMASH:
+            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
                 hp = -50 - random.nextInt(100);
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_CLEAVE:
+            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
                 hp = -75 - random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
                     hp *= 2;
                 }
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_CHOP:
+            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
                 hp = -75 - random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_TREE) {
                     hp *= 10;
                 }
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_PICK:
+            case BlockConstants.BLOCK_CODE_MELEE_PICK:
                 hp = -75 - random.nextInt(50);
                 if (targetType == BlockConstants.BLOCK_TYPE_ROCK) {
                     hp *= 10;
                 }
                 break;
-            case GamePalConstants.EVENT_CODE_MELEE_STAB:
+            case BlockConstants.BLOCK_CODE_MELEE_STAB:
                 hp = -100 - random.nextInt(100);
                 break;
-            case GamePalConstants.EVENT_CODE_SHOOT_HIT:
+            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
                 hp = -110 - random.nextInt(20);
                 break;
-            case GamePalConstants.EVENT_CODE_SHOOT_ARROW:
+            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
                 hp = -250 - random.nextInt(200);
                 break;
-            case GamePalConstants.EVENT_CODE_SHOOT_SLUG:
-            case GamePalConstants.EVENT_CODE_SHOOT_MAGNUM:
+            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
                 hp = -250 - random.nextInt(100);
                 break;
-            case GamePalConstants.EVENT_CODE_EXPLODE:
+            case BlockConstants.BLOCK_CODE_EXPLODE:
                 hp = -600 - random.nextInt(400);
                 break;
-            case GamePalConstants.EVENT_CODE_FIRE:
+            case BlockConstants.BLOCK_CODE_FIRE:
                 hp = -3;
                 break;
             default:
