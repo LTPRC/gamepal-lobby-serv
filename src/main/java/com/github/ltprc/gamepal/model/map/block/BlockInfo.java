@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BlockInfo {
     int type;
     String id;
-    String code;
+    int code;
     Structure structure;
     AtomicInteger hpMax = new AtomicInteger(BlockConstants.HP_DEFAULT);
     AtomicInteger hp = new AtomicInteger(BlockConstants.HP_DEFAULT);
@@ -29,7 +29,7 @@ public class BlockInfo {
         hp = blockInfo.hp;
     }
 
-    public BlockInfo(Integer type, String id, String code, Structure structure) {
+    public BlockInfo(Integer type, String id, int code, Structure structure) {
         this.type = type;
         this.id = id;
         this.code = code;

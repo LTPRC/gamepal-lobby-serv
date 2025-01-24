@@ -62,8 +62,7 @@ public class NpcManagerImpl implements NpcManager {
         WorldCoordinate worldCoordinate = new WorldCoordinate();
         BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
 
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_PLAYER,
-                BlockConstants.BLOCK_CODE_NO_RESOURCE);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_PLAYER);
 
         MovementInfo movementInfo = new MovementInfo();
         movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));

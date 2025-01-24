@@ -131,7 +131,7 @@ public class EventManagerImpl implements EventManager {
         BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
         BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
         BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
-        switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
+        switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_MELEE_HIT:
             case BlockConstants.BLOCK_CODE_MELEE_KICK:
             case BlockConstants.BLOCK_CODE_MELEE_SMASH:
@@ -199,7 +199,7 @@ public class EventManagerImpl implements EventManager {
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         // Effect after activation
-        switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
+        switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
                 affectBlock(world, eventBlock, fromCreature);
                 break;
@@ -265,7 +265,7 @@ public class EventManagerImpl implements EventManager {
                         .filter(scene -> SkillUtil.isSceneDetected(eventBlock, scene.getSceneCoordinate(), 1))
                         .forEach(scene -> scene.getBlocks().values().stream()
                                 .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_EFFECT)
-                                .filter(block -> Integer.parseInt(block.getBlockInfo().getCode()) == BlockConstants.BLOCK_CODE_FIRE)
+                                .filter(block -> block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE)
                                 .filter(block -> {
                                     BigDecimal distance = BlockUtil.calculateDistance(
                                             world.getRegionMap().get(worldCoordinate.getRegionNo()),
@@ -325,7 +325,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     private void addEventNoise(GameWorld world, Block eventBlock, Block fromCreature) {
-        switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
+        switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
@@ -434,7 +434,7 @@ public class EventManagerImpl implements EventManager {
                 ? world.getSourceMap().get(eventBlock.getBlockInfo().getId())
                 : eventBlock.getBlockInfo().getId();
         if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TRAP) {
-            switch (Integer.parseInt(eventBlock.getBlockInfo().getCode())) {
+            switch (eventBlock.getBlockInfo().getCode()) {
                 case BlockConstants.BLOCK_CODE_MINE:
                     if (world.getCreatureMap().values().stream()
                             .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
@@ -495,10 +495,10 @@ public class EventManagerImpl implements EventManager {
         String fromId = world.getSourceMap().containsKey(eventBlock.getBlockInfo().getId())
                 ? world.getSourceMap().get(eventBlock.getBlockInfo().getId())
                 : eventBlock.getBlockInfo().getId();
-        if (eventBlock.getBlockInfo().getCode().equals(String.valueOf(BlockConstants.BLOCK_CODE_BLOCK))
-                || eventBlock.getBlockInfo().getCode().equals(String.valueOf(BlockConstants.BLOCK_CODE_HEAL))
-                || eventBlock.getBlockInfo().getCode().equals(String.valueOf(BlockConstants.BLOCK_CODE_SACRIFICE))
-                || eventBlock.getBlockInfo().getCode().equals(String.valueOf(BlockConstants.BLOCK_CODE_DECAY))) {
+        if (eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_BLOCK
+                || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_HEAL
+                || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_SACRIFICE
+                || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_DECAY) {
             // Stick with playerInfo
             movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(), false);
         }
@@ -511,7 +511,7 @@ public class EventManagerImpl implements EventManager {
             logger.error(ErrorUtil.ERROR_1013);
             return;
         }
-        int changedHp = SkillUtil.calculateChangedHp(Integer.parseInt(eventBlock.getBlockInfo().getCode()),
+        int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                 && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != 0) {

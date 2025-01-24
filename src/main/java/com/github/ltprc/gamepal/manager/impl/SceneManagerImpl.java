@@ -633,7 +633,7 @@ public class SceneManagerImpl implements SceneManager {
             if (randomInt < weightList.get(i).getValue()
                     && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_BLACK) {
                 addOtherBlock(world, worldCoordinate,
-                        BlockUtil.generateSceneObjectBlockInfo(weightList.get(i).getKey()), new MovementInfo());
+                        BlockUtil.createBlockInfoByCode(weightList.get(i).getKey()), new MovementInfo());
                 break;
             }
             randomInt -= weightList.get(i).getValue();
@@ -900,12 +900,12 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addLoadedBlock(GameWorld world, String code, Integer normalBlockType, WorldCoordinate worldCoordinate) {
+    public Block addLoadedBlock(GameWorld world, int code, Integer normalBlockType, WorldCoordinate worldCoordinate) {
         String id = UUID.randomUUID().toString();
         Structure structure;
         switch (normalBlockType) {
             case 2:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
@@ -940,8 +940,7 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_DROP,
-                BlockConstants.BLOCK_CODE_PACK);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_PACK);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
@@ -954,7 +953,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Block addTeleportBlock(GameWorld world, final int code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByTypeAndCode(BlockConstants.BLOCK_TYPE_TELEPORT, code);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(code);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);

@@ -4,6 +4,7 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
@@ -96,17 +97,17 @@ public class FarmManagerImpl implements FarmManager {
             return Optional.empty();
         }
         FarmInfo farmInfo = world.getFarmMap().get(farmId);
-        String cropCode = "";
+        Integer cropCode = null;
         if (farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_PLANTED) {
             cropCode = farmInfo.getCropFrame() * 2 < BlockConstants.CROP_PERIOD
-                    ? String.valueOf(BlockConstants.BLOCK_CODE_CROP_1)
-                    : String.valueOf(BlockConstants.BLOCK_CODE_CROP_2);
+                    ? BlockConstants.BLOCK_CODE_CROP_1
+                    : BlockConstants.BLOCK_CODE_CROP_2;
         } else if (farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_MATURE) {
-            cropCode = String.valueOf(BlockConstants.BLOCK_CODE_CROP_3);
+            cropCode = BlockConstants.BLOCK_CODE_CROP_3;
         } else if (farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_GATHERED) {
-            cropCode = String.valueOf(BlockConstants.BLOCK_CODE_CROP_0);
+            cropCode = BlockConstants.BLOCK_CODE_CROP_0;
         }
-        return StringUtils.isNotBlank(cropCode) ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
+        return null == cropCode ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
                 new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", cropCode,
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE)), new MovementInfo()))

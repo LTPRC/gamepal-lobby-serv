@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
@@ -9,7 +10,11 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.util.ErrorUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -17,6 +22,8 @@ import java.util.Map;
 
 @Component
 public class BuffManagerImpl implements BuffManager {
+
+    private static final Log logger = LogFactory.getLog(BuffManagerImpl.class);
 
     @Autowired
     private PlayerService playerService;
@@ -58,8 +65,18 @@ public class BuffManagerImpl implements BuffManager {
      */
     @Override
     public void changeBuff(GameWorld world, String userCode) {
-        Block player = world.getCreatureMap().get(userCode);
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
 
         if (player.getBlockInfo().getHp().get() <= 0
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] == 0

@@ -174,35 +174,10 @@ public class WorldServiceImpl implements WorldService {
                         JSONArray blockRow = map.getJSONArray(i);
                         for (int j = 0; j < Math.min(width, blockRow.size()); j++) {
                             Integer value = blockRow.getInteger(j);
-//                            int blockType = BlockConstants.BLOCK_TYPE_NORMAL;
-//                            Structure structure;
-//                            switch (value / 10000) {
-//                                case 2:
-//                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                                            BlockConstants.STRUCTURE_LAYER_MIDDLE);
-//                                    break;
-//                                case 3:
-//                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                                            BlockConstants.STRUCTURE_LAYER_TOP);
-//                                    break;
-//                                case 1:
-//                                default:
-//                                    structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_HOLLOW,
-//                                            BlockConstants.STRUCTURE_LAYER_BOTTOM);
-//                                    break;
-//                            }
                             WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                     newScene.getSceneCoordinate(),
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
-                            Block block = sceneManager.addLoadedBlock(world, String.valueOf(value % 10000), value / 10000, worldCoordinate);
-//                            String id = UUID.randomUUID().toString();
-//                            BlockInfo blockInfo = new BlockInfo(blockType, id, String.valueOf(value % 10000), structure);
-//                            MovementInfo movementInfo = new MovementInfo();
-//                            Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-//                            newScene.getBlocks().add(block);
-//                            if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
-//                                world.getBlockMap().put(id, block);
-//                            }
+                            Block block = sceneManager.addLoadedBlock(world, value % 10000, value / 10000, worldCoordinate);
                         }
                     }
                 }
@@ -229,8 +204,7 @@ public class WorldServiceImpl implements WorldService {
                                                 BigDecimal.valueOf(blockRow.getInteger(8)))));
                                 break;
                             default:
-                                BlockInfo blockInfo1 = BlockUtil.createBlockInfoByTypeAndCode(type,
-                                        blockRow.getInteger(1));
+                                BlockInfo blockInfo1 = BlockUtil.createBlockInfoByCode(blockRow.getInteger(1));
                                 if (null != blockInfo1) {
                                     block = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo1, new MovementInfo());
                                 }
