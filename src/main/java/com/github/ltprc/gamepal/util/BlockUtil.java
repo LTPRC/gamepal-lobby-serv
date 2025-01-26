@@ -488,7 +488,6 @@ public class BlockUtil {
         switch (eventCode) {
             case BlockConstants.BLOCK_CODE_EXPLODE:
             case BlockConstants.BLOCK_CODE_BLOCK:
-            case BlockConstants.BLOCK_CODE_BLEED:
             case BlockConstants.BLOCK_CODE_UPGRADE:
             case BlockConstants.BLOCK_CODE_HEAL:
             case BlockConstants.BLOCK_CODE_DECAY:
@@ -498,7 +497,11 @@ public class BlockUtil {
             case BlockConstants.BLOCK_CODE_SPARK:
             case BlockConstants.BLOCK_CODE_SPARK_SHORT:
             case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
+            case BlockConstants.BLOCK_CODE_SMOKE_LIFT:
                 layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
+                break;
+            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                layer = BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
                 break;
             default:
                 layer = BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
@@ -700,8 +703,22 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
             case BlockConstants.BLOCK_TYPE_TRAP:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_FIRE:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS)),
+                                new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        break;
+                    case BlockConstants.BLOCK_CODE_MINE:
+                    case BlockConstants.BLOCK_CODE_WIRE_NETTING:
+                    default:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                        break;
+                }
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
             case BlockConstants.BLOCK_TYPE_GAME:
@@ -716,7 +733,6 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_SINK:
             case BlockConstants.BLOCK_TYPE_CONTAINER:
             case BlockConstants.BLOCK_TYPE_BUILDING:
-            case BlockConstants.BLOCK_TYPE_ROCK:
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
             case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
             case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
@@ -809,6 +825,20 @@ public class BlockUtil {
                         break;
                 }
                 break;
+            case BlockConstants.BLOCK_TYPE_ROCK:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_ROCK_2:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM);
+                        break;
+                    case BlockConstants.BLOCK_CODE_ROCK_1:
+                    default:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                roundShape);
+                        break;
+                }
+                break;
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION, new Shape(),
@@ -854,6 +884,8 @@ public class BlockUtil {
                 movementInfo.setFrameMax(50);
                 break;
             case BlockConstants.BLOCK_CODE_FIRE:
+            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+            case BlockConstants.BLOCK_CODE_SMOKE_LIFT:
                 movementInfo.setFrameMax(250);
                 break;
             default:
@@ -865,6 +897,9 @@ public class BlockUtil {
             case BlockConstants.BLOCK_CODE_CHEER:
             case BlockConstants.BLOCK_CODE_CURSE:
                 movementInfo.setPeriod(50);
+                break;
+            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                movementInfo.setPeriod(250);
                 break;
             default:
                 movementInfo.setPeriod(25);

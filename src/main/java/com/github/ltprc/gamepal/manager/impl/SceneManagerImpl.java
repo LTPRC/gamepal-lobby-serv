@@ -767,16 +767,24 @@ public class SceneManagerImpl implements SceneManager {
                                 : null, block)) {
                             Block newBlock = new Block(block);
                             rankingQueue.add(newBlock);
-                            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_FARM) {
-                                Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
-                                cropBlock.ifPresent(rankingQueue::add);
-                            }
+                            collectTransformedBlocks(world, rankingQueue, block);
                         }
                     });
                 }
             }
         }
         return rankingQueue;
+    }
+
+    private void collectTransformedBlocks(final GameWorld world, Queue<Block> rankingQueue, Block block) {
+        switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_FARM:
+                Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
+                cropBlock.ifPresent(rankingQueue::add);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

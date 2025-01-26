@@ -1,12 +1,14 @@
 package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
-import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 
@@ -29,11 +32,22 @@ public class BuffManagerImpl implements BuffManager {
     private PlayerService playerService;
 
     @Autowired
-    private NpcManager npcManager;
+    private EventManager eventManager;
 
     @Override
     public void updateBuffTime(GameWorld world, String userCode) {
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
             if (playerInfo.getBuff()[i] <= 0) {
                 continue;
@@ -50,9 +64,13 @@ public class BuffManagerImpl implements BuffManager {
             } else if (i == GamePalConstants.BUFF_CODE_KNOCKED) {
                 if (playerInfo.getBuff()[i] == 0) {
                     playerService.generateNotificationMessage(userCode, "濒死结束。");
-                } else if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
-                    playerService.generateNotificationMessage(userCode, "距离濒死结束还有"
-                            + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
+                } else {
+                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED_SEVERE, userCode, player.getWorldCoordinate());
+                    if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
+                        eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED, userCode, player.getWorldCoordinate());
+                        playerService.generateNotificationMessage(userCode, "距离濒死结束还有"
+                                + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
+                    }
                 }
             }
         }

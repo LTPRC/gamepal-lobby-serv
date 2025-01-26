@@ -39,6 +39,8 @@ public class BlockConstants {
     public static final int BLOCK_CODE_SPRAY = 131;
     public static final int BLOCK_CODE_SPARK_SHORT = 132;
     public static final int BLOCK_CODE_LIGHT_SMOKE = 135;
+    public static final int BLOCK_CODE_BLEED_SEVERE = 136;
+    public static final int BLOCK_CODE_SMOKE_LIFT = 137;
     public static final int BLOCK_CODE_NO_RESOURCE = 1000;
     public static final int BLOCK_CODE_BLACK = 1001;
     public static final int BLOCK_CODE_WHITE = 1002;
@@ -104,6 +106,9 @@ public class BlockConstants {
     public static final int BLOCK_CODE_WINDOW_4 = 2303;
     public static final int BLOCK_CODE_WINDOW_5 = 2304;
     public static final int BLOCK_CODE_WINDOW_6 = 2305;
+    public static final int BLOCK_CODE_CRACK_1 = 2400;
+    public static final int BLOCK_CODE_CRACK_2 = 2401;
+    public static final int BLOCK_CODE_CRACK_3 = 2402;
     public static final int BLOCK_CODE_CHEST_CLOSE = 3001;
     public static final int BLOCK_CODE_CHEST_OPEN = 3002;
     public static final int BLOCK_CODE_SIGN = 3003;
@@ -280,6 +285,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPRAY, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPARK_SHORT, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LIGHT_SMOKE, BLOCK_TYPE_EFFECT);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED_SEVERE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NO_RESOURCE, BLOCK_TYPE_NORMAL);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLACK, BLOCK_TYPE_NORMAL);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WHITE, BLOCK_TYPE_NORMAL);

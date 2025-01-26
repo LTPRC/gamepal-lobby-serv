@@ -280,10 +280,6 @@ public class EventManagerImpl implements EventManager {
 //                        .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                         .forEach(block -> {
                             affectBlock(world, eventBlock, block);
-//                            WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-//                                    player.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-//                                    BigDecimal.valueOf(random.nextDouble() / 2));
-//                            addEvent(world, BlockConstants.BLOCK_CODE_BLEED, player.getBlockInfo().getId(), bleedWc);
                 });
                 break;
             case BlockConstants.BLOCK_CODE_CURSE:
@@ -464,7 +460,6 @@ public class EventManagerImpl implements EventManager {
                             })
                             .forEach(player -> {
                                 affectBlock(world, eventBlock, player);
-//                                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, player.getBlockInfo().getId(), player.getWorldCoordinate());
                             });
                     break;
                 case BlockConstants.BLOCK_CODE_WIRE_NETTING:
@@ -481,7 +476,6 @@ public class EventManagerImpl implements EventManager {
                                         + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2))
                                         / player.getMovementInfo().getMaxSpeed().doubleValue()) {
                                     affectBlock(world, eventBlock, player);
-//                                    addEvent(world, BlockConstants.BLOCK_CODE_BLEED, player.getBlockInfo().getId(), player.getWorldCoordinate());
                                 }
                             });
                     break;
@@ -505,6 +499,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
+    @Transactional
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
         if (eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_EFFECT
                 && eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_TRAP) {
@@ -528,8 +523,6 @@ public class EventManagerImpl implements EventManager {
     @Override
     @Transactional
     public void changeHp(GameWorld world, Block block, int value, boolean isAbsolute) {
-        Random random = new Random();
-        Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         int oldHp = block.getBlockInfo().getHp().get();
         int newHp = isAbsolute ? value : oldHp + value;
         if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
@@ -539,10 +532,7 @@ public class EventManagerImpl implements EventManager {
                 newHp = Math.max(oldHp, newHp);
             }
             if (newHp < oldHp) {
-                WorldCoordinate bleedWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        block.getWorldCoordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                        BigDecimal.valueOf(random.nextDouble() / 2));
-                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(), bleedWc);
+                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(), block.getWorldCoordinate());
             }
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
             if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
