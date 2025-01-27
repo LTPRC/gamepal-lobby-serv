@@ -782,6 +782,22 @@ public class SceneManagerImpl implements SceneManager {
                 Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
                 cropBlock.ifPresent(rankingQueue::add);
                 break;
+            case BlockConstants.BLOCK_TYPE_WALL:
+                Integer crackCode = null;
+                if (block.getBlockInfo().getHp().get() < block.getBlockInfo().getHpMax().get() * 0.25) {
+                    crackCode = BlockConstants.BLOCK_CODE_CRACK_3;
+                } else if (block.getBlockInfo().getHp().get() < block.getBlockInfo().getHpMax().get() * 0.5) {
+                    crackCode = BlockConstants.BLOCK_CODE_CRACK_2;
+                } else if (block.getBlockInfo().getHp().get() < block.getBlockInfo().getHpMax().get() * 0.75) {
+                    crackCode = BlockConstants.BLOCK_CODE_CRACK_1;
+                }
+                if (null != crackCode) {
+                    rankingQueue.add(new Block(block.getWorldCoordinate(),
+                            new BlockInfo(BlockConstants.BLOCK_TYPE_WALL_DECORATION, "", crackCode,
+                                    new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                                            BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION)), new MovementInfo()));
+                }
+                break;
             default:
                 break;
         }
@@ -911,18 +927,21 @@ public class SceneManagerImpl implements SceneManager {
     public Block addLoadedBlock(GameWorld world, int code, Integer normalBlockType, WorldCoordinate worldCoordinate) {
         String id = UUID.randomUUID().toString();
         Structure structure;
+        BlockInfo blockInfo;
         switch (normalBlockType) {
             case 2:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WALL, id, code, structure);
                 break;
             case 3:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_TOP,
                         new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CEILING, id, code, structure);
                 break;
             case 1:
             default:
@@ -930,9 +949,9 @@ public class SceneManagerImpl implements SceneManager {
                         BlockConstants.STRUCTURE_LAYER_BOTTOM,
                         new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FLOOR, id, code, structure);
                 break;
         }
-        BlockInfo blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_BUILDING, id, code, structure);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);

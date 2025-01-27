@@ -8,10 +8,12 @@ import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +50,8 @@ public class BuffManagerImpl implements BuffManager {
         }
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        Map<Integer, Region> regionMap = world.getRegionMap();
+        Region region = regionMap.get(player.getWorldCoordinate().getRegionNo());
         for (int i = 0; i < GamePalConstants.BUFF_CODE_LENGTH; i++) {
             if (playerInfo.getBuff()[i] <= 0) {
                 continue;
@@ -65,7 +69,10 @@ public class BuffManagerImpl implements BuffManager {
                 if (playerInfo.getBuff()[i] == 0) {
                     playerService.generateNotificationMessage(userCode, "濒死结束。");
                 } else {
-                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED_SEVERE, userCode, player.getWorldCoordinate());
+                    WorldCoordinate bleedSevereWc = new WorldCoordinate(player.getWorldCoordinate());
+                    bleedSevereWc.getCoordinate().setY(bleedSevereWc.getCoordinate().getY().add(BigDecimal.valueOf(0.7)));
+                    BlockUtil.fixWorldCoordinate(region, bleedSevereWc);
+                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED_SEVERE, userCode, bleedSevereWc);
                     if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
                         eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED, userCode, player.getWorldCoordinate());
                         playerService.generateNotificationMessage(userCode, "距离濒死结束还有"

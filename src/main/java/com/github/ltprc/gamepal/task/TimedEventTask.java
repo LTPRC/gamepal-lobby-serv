@@ -64,7 +64,7 @@ public class TimedEventTask {
             GameWorld world = entry.getValue();
 
             // Update events
-            eventManager.updateEvents(world);
+            world.getBlockMap().values().forEach(block -> eventManager.updateEvent(world, block));
 
             Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();

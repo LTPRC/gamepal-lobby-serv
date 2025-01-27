@@ -108,7 +108,7 @@ public class FarmManagerImpl implements FarmManager {
             cropCode = BlockConstants.BLOCK_CODE_CROP_0;
         }
         return null == cropCode ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
-                new BlockInfo(BlockConstants.BLOCK_TYPE_NORMAL, "", cropCode,
+                new BlockInfo(BlockConstants.BLOCK_TYPE_WALL_DECORATION, "", cropCode,
                         new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE)), new MovementInfo()))
                 : Optional.empty();

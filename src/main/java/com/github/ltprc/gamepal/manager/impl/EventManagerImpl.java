@@ -345,10 +345,6 @@ public class EventManagerImpl implements EventManager {
                 .filter(block -> null != BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate()))
                 .min(Comparator.comparing(block -> BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate())));
         switch (bulletBlock.getMovementInfo().getFloorCode()) {
-            case BlockConstants.BLOCK_CODE_DIRT:
-            case BlockConstants.BLOCK_CODE_GRASS:
-                eventCode = BlockConstants.BLOCK_CODE_LIGHT_SMOKE;
-                break;
             case BlockConstants.BLOCK_CODE_ROUGH:
             case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
                 eventCode = BlockConstants.BLOCK_CODE_SPARK;
@@ -360,10 +356,8 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_WATER:
                 eventCode = BlockConstants.BLOCK_CODE_SPRAY;
                 break;
-            case BlockConstants.BLOCK_CODE_BLACK:
-            case BlockConstants.BLOCK_CODE_SAND:
-            case BlockConstants.BLOCK_CODE_SNOW:
             default:
+                eventCode = BlockConstants.BLOCK_CODE_LIGHT_SMOKE;
                 break;
         }
         if (targetBlock.isPresent()) {
@@ -374,29 +368,13 @@ public class EventManagerImpl implements EventManager {
                 case BlockConstants.BLOCK_TYPE_DROP:
                 case BlockConstants.BLOCK_TYPE_TELEPORT:
                 case BlockConstants.BLOCK_TYPE_TREE:
+                case BlockConstants.BLOCK_TYPE_WALL:
+                case BlockConstants.BLOCK_TYPE_FLOOR:
+                case BlockConstants.BLOCK_TYPE_CEILING:
                     eventCode = BlockConstants.BLOCK_CODE_LIGHT_SMOKE;
                     break;
-                case BlockConstants.BLOCK_TYPE_BED:
-                case BlockConstants.BLOCK_TYPE_TOILET:
-                case BlockConstants.BLOCK_TYPE_DRESSER:
-                case BlockConstants.BLOCK_TYPE_STORAGE:
-                case BlockConstants.BLOCK_TYPE_COOKER:
-                case BlockConstants.BLOCK_TYPE_SINK:
-                case BlockConstants.BLOCK_TYPE_CONTAINER:
-                case BlockConstants.BLOCK_TYPE_SPEAKER:
-                case BlockConstants.BLOCK_TYPE_BUILDING:
-                case BlockConstants.BLOCK_TYPE_FARM:
-                case BlockConstants.BLOCK_TYPE_ROCK:
-                case BlockConstants.BLOCK_TYPE_WORKSHOP:
-                case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
-                case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
-                case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
-                case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
-                case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
-                case BlockConstants.BLOCK_TYPE_TRAP:
-                    eventCode = BlockConstants.BLOCK_CODE_SPARK;
-                    break;
                 default:
+                    eventCode = BlockConstants.BLOCK_CODE_SPARK;
                     break;
             }
         }
@@ -406,16 +384,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
-    public void updateEvents(GameWorld world) {
-        world.getBlockMap().values()
-                .forEach(block -> {
-//                    worldService.expandByCoordinate(world, null, block.getWorldCoordinate(), 0);
-                    updateEvent(world, block);
-                });
-    }
-
-    private void updateEvent(GameWorld world, Block eventBlock) {
-        Random random = new Random();
+    public void updateEvent(GameWorld world, Block eventBlock) {
         eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() + 1);
         updateEventLocation(world, eventBlock);
         if (eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getPeriod()) {
@@ -426,62 +395,8 @@ public class EventManagerImpl implements EventManager {
                 return;
             }
         }
-        String fromId = world.getSourceMap().containsKey(eventBlock.getBlockInfo().getId())
-                ? world.getSourceMap().get(eventBlock.getBlockInfo().getId())
-                : eventBlock.getBlockInfo().getId();
         if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TRAP) {
-            switch (eventBlock.getBlockInfo().getCode()) {
-                case BlockConstants.BLOCK_CODE_MINE:
-                    if (world.getCreatureMap().values().stream()
-                            .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
-                            .filter(player -> !StringUtils.equals(fromId, player.getBlockInfo().getId()))
-                            .anyMatch(player -> {
-                                BigDecimal distance = BlockUtil.calculateDistance(
-                                        world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()), eventBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                                return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_MINE) < 0;
-                            })) {
-                        addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, eventBlock.getWorldCoordinate());
-                        sceneManager.removeBlock(world, eventBlock, true);
-                    }
-                    break;
-                case BlockConstants.BLOCK_CODE_FIRE:
-                    // Burn grid
-                    if (sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
-                            || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
-                        sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
-                    }
-                    // Burn players only
-                    world.getCreatureMap().values().stream()
-                            .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
-                            .filter(player -> {
-                                BigDecimal distance = BlockUtil.calculateDistance(
-                                        world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()), eventBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                                return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
-                            })
-                            .forEach(player -> {
-                                affectBlock(world, eventBlock, player);
-                            });
-                    break;
-                case BlockConstants.BLOCK_CODE_WIRE_NETTING:
-                    world.getCreatureMap().values().stream()
-                            .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
-                            .filter(player -> {
-                                BigDecimal distance = BlockUtil.calculateDistance(
-                                        world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()), eventBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                                return null != distance && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0;
-                            })
-                            .forEach(player -> {
-                                if (random.nextDouble()
-                                        < Math.sqrt(Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
-                                        + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-                                        / player.getMovementInfo().getMaxSpeed().doubleValue()) {
-                                    affectBlock(world, eventBlock, player);
-                                }
-                            });
-                    break;
-                default:
-                    break;
-            }
+            triggerTrap(world, eventBlock);
         }
     }
 
@@ -544,6 +459,66 @@ public class EventManagerImpl implements EventManager {
                 addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, block.getBlockInfo().getId(), block.getWorldCoordinate());
                 sceneManager.removeBlock(world, block, true);
             }
+        }
+    }
+
+    @Override
+    public void triggerTrap(GameWorld world, Block trapBlock) {
+        Random random = new Random();
+        String fromId = world.getSourceMap().containsKey(trapBlock.getBlockInfo().getId())
+                ? world.getSourceMap().get(trapBlock.getBlockInfo().getId())
+                : trapBlock.getBlockInfo().getId();
+        switch (trapBlock.getBlockInfo().getCode()) {
+            case BlockConstants.BLOCK_CODE_MINE:
+                if (world.getCreatureMap().values().stream()
+                        .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
+                        .filter(player -> !StringUtils.equals(fromId, player.getBlockInfo().getId()))
+                        .anyMatch(player -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
+                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_MINE) < 0;
+                        })) {
+                    addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, trapBlock.getWorldCoordinate());
+                    sceneManager.removeBlock(world, trapBlock, true);
+                }
+                break;
+            case BlockConstants.BLOCK_CODE_FIRE:
+                // Burn grid
+                if (sceneManager.getGridBlockCode(world, trapBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
+                        || sceneManager.getGridBlockCode(world, trapBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
+                    sceneManager.setGridBlockCode(world, trapBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
+                }
+                // Burn players only
+                world.getCreatureMap().values().stream()
+                        .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
+                        .filter(player -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
+                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
+                        })
+                        .forEach(player -> {
+                            affectBlock(world, trapBlock, player);
+                        });
+                break;
+            case BlockConstants.BLOCK_CODE_WIRE_NETTING:
+                world.getCreatureMap().values().stream()
+                        .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
+                        .filter(player -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
+                            return null != distance && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0;
+                        })
+                        .forEach(player -> {
+                            if (random.nextDouble()
+                                    < Math.sqrt(Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
+                                    + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2))
+                                    / player.getMovementInfo().getMaxSpeed().doubleValue()) {
+                                affectBlock(world, trapBlock, player);
+                            }
+                        });
+                break;
+            default:
+                break;
         }
     }
 }
