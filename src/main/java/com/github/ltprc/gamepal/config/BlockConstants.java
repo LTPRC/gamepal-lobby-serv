@@ -128,7 +128,6 @@ public class BlockConstants {
     public static final int BLOCK_CODE_TABLE_3 = 3017;
     public static final int BLOCK_CODE_DOCUMENT = 3021;
     public static final int BLOCK_CODE_BOX = 3100;
-    public static final int BLOCK_CODE_PACK = 3101;
     public static final int BLOCK_CODE_ASH = 3102;
     public static final int BLOCK_CODE_WIRE_NETTING = 3103;
     public static final int BLOCK_CODE_WORKSHOP_EMPTY = 4000;
@@ -239,7 +238,7 @@ public class BlockConstants {
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.1D);
-    public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.2D);
+    public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.3D);
     public static final BigDecimal BARRIER_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal WIRE_NETTING_RADIUS = BigDecimal.valueOf(0.4D);
@@ -379,7 +378,6 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_TABLE_3, BLOCK_TYPE_BUILDING);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_DOCUMENT, BLOCK_TYPE_FLOOR_DECORATION);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BOX, BLOCK_TYPE_CONTAINER);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_PACK, BLOCK_TYPE_DROP);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_ASH, BLOCK_TYPE_BUILDING);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WIRE_NETTING, BLOCK_TYPE_TRAP);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WORKSHOP_EMPTY, BLOCK_TYPE_BUILDING);

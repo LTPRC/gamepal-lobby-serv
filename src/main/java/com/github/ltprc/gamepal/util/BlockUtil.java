@@ -716,6 +716,10 @@ public class BlockUtil {
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
+                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
+                break;
             case BlockConstants.BLOCK_TYPE_TRAP:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);

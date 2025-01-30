@@ -25,7 +25,7 @@
   {"recipeNo": "2108", "type": 21, "cost": {"m_wood": 2, "m_rubber": 2}, "value": {"t007": 1}},
   {"recipeNo": "2109", "type": 21, "cost": {"m_wood": 2, "m_cloth": 2}, "value": {"c014": 1}},
 
-  {"recipeNo": "2201", "type": 22, "cost": {"m_copper": 1, "m_lead": 1}, "value": {"a001": 30}},
+  {"recipeNo": "2201", "type": 22, "cost": {"m_copper": 1, "m_lead": 1}, "value": {"a024": 30}},
   {"recipeNo": "2202", "type": 22, "cost": {"m_copper": 1, "m_lead": 1}, "value": {"a002": 20}},
   {"recipeNo": "2203", "type": 22, "cost": {"m_copper": 1, "m_lead": 1}, "value": {"a003": 27}},
   {"recipeNo": "2204", "type": 22, "cost": {"m_steel": 1}, "value": {"a004": 10}},

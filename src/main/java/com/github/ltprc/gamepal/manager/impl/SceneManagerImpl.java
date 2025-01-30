@@ -967,7 +967,7 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_PACK);
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_DROP);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
