@@ -108,7 +108,7 @@ public class CommandManagerImpl implements CommandManager {
                 playerService.useItem(trinity.getBlockInfo().getId(), "o004", 1);
                 playerService.getItem(trinity.getBlockInfo().getId(), "t000", 1);
                 playerService.useItem(trinity.getBlockInfo().getId(), "t000", 1);
-                playerService.getItem(trinity.getBlockInfo().getId(), "a024", 20);
+                playerService.getItem(trinity.getBlockInfo().getId(), "a001", 20);
                 break;
             case "nwcnebuchadnezzar":
                 playerService.generateNotificationMessage(userCode, "跑得快。");

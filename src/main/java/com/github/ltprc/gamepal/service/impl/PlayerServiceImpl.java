@@ -1150,7 +1150,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (randomValue < 5) {
             getItem(userCode, "c035", 1);
         } else if (randomValue < 10) {
-            getItem(userCode, "m_bone", 1);
+            getItem(userCode, "m006", 1);
         } else if (randomValue < 12) {
             getItem(userCode, "j082", 1);
         } else if (randomValue < 15) {
@@ -1547,7 +1547,7 @@ public class PlayerServiceImpl implements PlayerService {
                     case CreatureConstants.SKIN_COLOR_FROG:
                     case CreatureConstants.SKIN_COLOR_MONKEY:
                     case CreatureConstants.SKIN_COLOR_RACOON:
-                        getItem(id, "m_leather", 1);
+                        getItem(id, "m004", 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_CHICKEN:
                         if (random.nextDouble() < 0.25D) {
@@ -1560,19 +1560,19 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j037", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_leather", random.nextInt(3) + 1);
+                            getItem(id, "m004", random.nextInt(3) + 1);
                         }
                         getItem(id, "c032", random.nextInt(4) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FOX:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2) + 1);
+                            getItem(id, "m004", random.nextInt(2) + 1);
                         }
                         getItem(id, "c037", random.nextInt(2) + 1);
                         break;
@@ -1581,15 +1581,15 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2) + 1);
+                            getItem(id, "m004", random.nextInt(2) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_SHEEP:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         getItem(id, "c034", random.nextInt(2) + 1);
                         break;
@@ -1598,10 +1598,10 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_leather", random.nextInt(3) + 1);
+                            getItem(id, "m004", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_DOG:
@@ -1615,10 +1615,10 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2) + 1);
+                            getItem(id, "m004", random.nextInt(2) + 1);
                         }
                         getItem(id, "c037", random.nextInt(2) + 1);
                         break;
@@ -1627,10 +1627,10 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m_leather", random.nextInt(2) + 1);
+                            getItem(id, "m004", random.nextInt(2) + 1);
                         }
                         getItem(id, "c037", random.nextInt(3) + 1);
                         break;
@@ -1639,18 +1639,18 @@ public class PlayerServiceImpl implements PlayerService {
                             getItem(id, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m_leather", random.nextInt(3) + 1);
+                            getItem(id, "m004", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_HORSE:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_bone", random.nextInt(2) + 1);
+                            getItem(id, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m_leather", random.nextInt(2) + 1);
+                            getItem(id, "m004", random.nextInt(2) + 1);
                         }
                         getItem(id, "c036", random.nextInt(2) + 1);
                         break;

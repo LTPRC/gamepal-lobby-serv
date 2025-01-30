@@ -227,7 +227,6 @@ public class WorldServiceImpl implements WorldService {
             switch (((JSONObject) itemObj).getString("itemNo").charAt(0)) {
                 case ItemConstants.ITEM_CHARACTER_TOOL:
                     Tool tool = JSON.parseObject(String.valueOf(itemObj), Tool.class);
-//                    SkillUtil.defineToolProps(tool);
                     itemMap.put(tool.getItemNo(), tool);
                     break;
                 case ItemConstants.ITEM_CHARACTER_OUTFIT:
