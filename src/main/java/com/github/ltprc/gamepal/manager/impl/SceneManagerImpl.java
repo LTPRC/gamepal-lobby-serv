@@ -975,7 +975,7 @@ public class SceneManagerImpl implements SceneManager {
         registerBlock(world, block);
         if (null != drop) {
             world.getDropMap().put(block.getBlockInfo().getId(), drop);
-            worldService.registerOnline(world, blockInfo);
+//            worldService.registerOnline(world, blockInfo.getId());
         }
         return block;
     }
@@ -1063,7 +1063,7 @@ public class SceneManagerImpl implements SceneManager {
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
         scene.getBlocks().remove(block.getBlockInfo().getId());
         world.getBlockMap().remove(block.getBlockInfo().getId());
-        worldService.registerOffline(world, block.getBlockInfo());
+//        worldService.registerOffline(world, block.getBlockInfo().getId());
         world.getSourceMap().remove(block.getBlockInfo().getId());
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:

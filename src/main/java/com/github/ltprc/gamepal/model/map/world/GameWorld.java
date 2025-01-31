@@ -28,7 +28,7 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, Map<String, Integer>> relationMap;
     private Map<String, Session> sessionMap; // userCode, session
     private Map<String, String> tokenMap; // userCode, token
-    private Map<BlockInfo, Long> onlineMap; // blockInfo, timestamp
+    private Map<String, Long> onlineMap; // userCode, timestamp, for Player only 25/02/01
     private Map<Integer, Game> gameMap; // gameNo, game
     private Map<String, Queue<Message>> messageMap; // userCode, message queue
     private Map<String, boolean[]> flagMap; // userCode, token

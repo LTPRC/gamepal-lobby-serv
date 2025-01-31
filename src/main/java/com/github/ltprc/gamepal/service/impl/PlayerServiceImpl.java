@@ -1517,7 +1517,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), BlockConstants.BLOCK_CODE_BOX);
         String id = remainContainer.getBlockInfo().getId();
-        worldService.registerOnline(world, remainContainer.getBlockInfo());
+//        worldService.registerOnline(world, id);
         movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
                 new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
                 GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));
@@ -1781,6 +1781,6 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(id);
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0
-                && world.getOnlineMap().containsKey(block.getBlockInfo());
+                && world.getOnlineMap().containsKey(block.getBlockInfo().getId());
     }
 }

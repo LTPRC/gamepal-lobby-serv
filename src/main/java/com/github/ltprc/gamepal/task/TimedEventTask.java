@@ -66,22 +66,22 @@ public class TimedEventTask {
             // Update events
             world.getBlockMap().values().forEach(block -> eventManager.updateEvent(world, block));
 
-            Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
+            Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
             onlineMap.keySet().stream()
-                    .filter(blockInfo -> blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER)
-                    .filter(blockInfo -> creatureMap.containsKey(blockInfo.getId()))
-                    .filter(blockInfo -> playerInfoMap.get(blockInfo.getId()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(blockInfo -> {
-                        buffManager.updateBuffTime(world, blockInfo.getId());
-                        buffManager.changeBuff(world, blockInfo.getId());
+//                    .filter(blockInfo -> blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER)
+                    .filter(creatureMap::containsKey)
+                    .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .forEach(id -> {
+                        buffManager.updateBuffTime(world, id);
+                        buffManager.changeBuff(world, id);
 
-                        PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
-                        if (playerService.validateActiveness(world, blockInfo.getId())
+                        PlayerInfo playerInfo = playerInfoMap.get(id);
+                        if (playerService.validateActiveness(world, id)
                                 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] == 0) {
-                            Block player = creatureMap.get(blockInfo.getId());
+                            Block player = creatureMap.get(id);
                             MovementInfo movementInfo = player.getMovementInfo();
                             double randomNumber;
 
@@ -113,7 +113,7 @@ public class TimedEventTask {
                                     newVp -= 15;
                                 }
                             }
-                            playerService.changeVp(blockInfo.getId(), newVp, false);
+                            playerService.changeVp(id, newVp, false);
 
                             // Change hunger
                             randomNumber = Math.random();
@@ -122,7 +122,7 @@ public class TimedEventTask {
                                 randomNumber *= 10;
                             }
                             if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
-                                playerService.changeHunger(blockInfo.getId(), -1, false);
+                                playerService.changeHunger(id, -1, false);
                                 if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
                                     eventManager.changeHp(world, player, -1, false);
                                 }
@@ -135,14 +135,14 @@ public class TimedEventTask {
                                 randomNumber *= 10;
                             }
                             if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
-                                playerService.changeThirst(blockInfo.getId(), -1, false);
+                                playerService.changeThirst(id, -1, false);
                                 if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
                                     eventManager.changeHp(world, player, -1, false);
                                 }
                             }
 
                             // Change precision
-                            playerService.changePrecision(blockInfo.getId(), 50 - 100
+                            playerService.changePrecision(id, 50 - 100
                                     * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
                                     + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
                                     / movementInfo.getMaxSpeed().doubleValue()), false);
@@ -166,13 +166,13 @@ public class TimedEventTask {
                             }
 
                             // Check level-up
-                            playerService.checkLevelUp(blockInfo.getId());
+                            playerService.checkLevelUp(id);
 
                             // Check floorCode
                             BlockUtil.updateMaxSpeed(movementInfo);
                         }
 
-                        buffManager.changeBuff(world, blockInfo.getId());
+                        buffManager.changeBuff(world, id);
                     });
 
             // Update farms
@@ -191,35 +191,42 @@ public class TimedEventTask {
     public void executeBy1s() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
-            Map<BlockInfo, Long> onlineMap = world.getOnlineMap();
+            Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
             onlineMap.keySet().stream()
-                    .filter(blockInfo -> playerService.validateActiveness(world, blockInfo.getId()))
-                    .forEach(blockInfo -> {
-                        Block player = creatureMap.get(blockInfo.getId());
+                    .filter(id -> playerService.validateActiveness(world, id))
+                    .forEach(id -> {
+                        Block player = creatureMap.get(id);
                         // Add footstep
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
-                            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_NOISE,
-                                    blockInfo.getId(), player.getWorldCoordinate());
+                            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_NOISE, id,
+                                    player.getWorldCoordinate());
                         }
                     });
             // Check timeout
             long timestamp = Instant.now().getEpochSecond();
-            onlineMap.forEach((blockInfo, oldTimestamp) -> {
-                long timeThreshold = BlockConstants.BLOCK_TYPE_TIMEOUT_MAP.getOrDefault(blockInfo.getType(), 0L);
-                if (timestamp - oldTimestamp > timeThreshold) {
-                    if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                            && creatureMap.containsKey(blockInfo.getId())
-                            && playerInfoMap.get(blockInfo.getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
-                        // NPC is exempted 24/10/20
-                        userService.logoff(blockInfo.getId(), "", false);
-                    }
-                    if (world.getBlockMap().containsKey(blockInfo.getId())) {
-                        sceneManager.removeBlock(world, world.getBlockMap().get(blockInfo.getId()), false);
-                    }
+//            onlineMap.forEach((blockInfo, oldTimestamp) -> {
+//                long timeThreshold = BlockConstants.BLOCK_TYPE_TIMEOUT_MAP.getOrDefault(blockInfo.getType(), 0L);
+//                if (timestamp - oldTimestamp > timeThreshold) {
+//                    if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER
+//                            && creatureMap.containsKey(blockInfo.getId())
+//                            && playerInfoMap.get(blockInfo.getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+//                        // NPC is exempted 24/10/20
+//                        userService.logoff(blockInfo.getId(), "", false);
+//                    }
+//                    if (world.getBlockMap().containsKey(blockInfo.getId())) {
+//                        sceneManager.removeBlock(world, world.getBlockMap().get(blockInfo.getId()), false);
+//                    }
+//                }
+//            });
+            onlineMap.forEach((id, oldTimestamp) -> {
+                if (timestamp - oldTimestamp > GamePalConstants.PLAYER_LOGOFF_THRESHOLD_IN_SECOND
+                        && (playerInfoMap.get(id).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)) {
+                    // NPC is exempted 25/02/01
+                    userService.logoff(id, "", false);
                 }
             });
         }

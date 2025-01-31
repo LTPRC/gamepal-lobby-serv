@@ -40,7 +40,7 @@ public class BlockConstants {
     public static final int BLOCK_CODE_SPARK_SHORT = 132;
     public static final int BLOCK_CODE_LIGHT_SMOKE = 135;
     public static final int BLOCK_CODE_BLEED_SEVERE = 136;
-    public static final int BLOCK_CODE_SMOKE_LIFT = 137;
+    public static final int BLOCK_CODE_DISINTEGRATE = 137;
     public static final int BLOCK_CODE_NO_RESOURCE = 1000;
     public static final int BLOCK_CODE_BLACK = 1001;
     public static final int BLOCK_CODE_WHITE = 1002;
@@ -253,12 +253,11 @@ public class BlockConstants {
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
     public static final int FLOOR_CODE_DEFAULT = BLOCK_CODE_BLACK;
     public static final int FRAME_DEFAULT = 0;
-    public static final int FRAME_MAX_DEFAULT = -1;
+    public static final int FRAME_MAX_DEFAULT = -1; // Infinite
     public static final int PERIOD_DEFAULT = 25;
 
     public static Map<Integer, Integer> BLOCK_CODE_TYPE_MAP = new HashMap<>();
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
-    public static Map<Integer, Long> BLOCK_TYPE_TIMEOUT_MAP = new HashMap<>();
 
     static {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_UPGRADE, BLOCK_TYPE_EFFECT);
@@ -294,6 +293,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPARK_SHORT, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LIGHT_SMOKE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED_SEVERE, BLOCK_TYPE_EFFECT);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_DISINTEGRATE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NO_RESOURCE, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLACK, BLOCK_TYPE_CEILING);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WHITE, BLOCK_TYPE_CEILING);
@@ -440,10 +440,6 @@ public class BlockConstants {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SUBTERRANEAN, new Color(128, 128, 128));
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_LAVA, new Color(96, 16, 16));
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER, new Color(64, 192, 255));
-
-        BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_PLAYER, 300L);
-        BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_DROP, 60L);
-        BLOCK_TYPE_TIMEOUT_MAP.put(BLOCK_TYPE_CONTAINER, 300L);
     }
 
     private BlockConstants() {

@@ -523,7 +523,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_CODE_SPARK:
             case BlockConstants.BLOCK_CODE_SPARK_SHORT:
             case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
-            case BlockConstants.BLOCK_CODE_SMOKE_LIFT:
+            case BlockConstants.BLOCK_CODE_DISINTEGRATE:
             case BlockConstants.BLOCK_CODE_BLEED:
                 layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
@@ -905,7 +905,6 @@ public class BlockUtil {
                         period = 50;
                         break;
                     case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-                    case BlockConstants.BLOCK_CODE_SMOKE_LIFT:
                         period = 250;
                         break;
                     default:
@@ -922,16 +921,21 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_EFFECT:
                 frameMax = period;
                 break;
-            default:
+            case BlockConstants.BLOCK_TYPE_DROP:
+                frameMax = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+                break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_FIRE:
                         frameMax = 250;
                         break;
                     default:
-                        // Infinite
                         frameMax = BlockConstants.FRAME_MAX_DEFAULT;
                         break;
                 }
+                break;
+            default:
+                frameMax = BlockConstants.FRAME_MAX_DEFAULT;
                 break;
         }
         return new MovementInfo(new Coordinate(),
@@ -939,7 +943,7 @@ public class BlockUtil {
                 BlockConstants.FACE_DIRECTION_DEFAULT,
                 BlockConstants.FLOOR_CODE_DEFAULT,
                 BlockConstants.FRAME_DEFAULT,
-                frameMax,
-                period);
+                period,
+                frameMax);
     }
 }

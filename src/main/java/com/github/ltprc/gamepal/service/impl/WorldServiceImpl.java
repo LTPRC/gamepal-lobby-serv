@@ -82,9 +82,7 @@ public class WorldServiceImpl implements WorldService {
         if (null == world) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1019));
         }
-        world.getOnlineMap().entrySet().forEach(entry ->
-            userService.logoff(entry.getKey().getId(), "", false)
-        );
+        world.getOnlineMap().forEach((key, value) -> userService.logoff(key, "", false));
         worldMap.remove(worldId);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -319,13 +317,13 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public void registerOnline(GameWorld world, BlockInfo blockInfo) {
+    public void registerOnline(GameWorld world, String id) {
         long timestamp = Instant.now().getEpochSecond();
-        world.getOnlineMap().put(blockInfo, timestamp);
+        world.getOnlineMap().put(id, timestamp);
     }
 
     @Override
-    public void registerOffline(GameWorld world, BlockInfo blockInfo) {
-        world.getOnlineMap().remove(blockInfo);
+    public void registerOffline(GameWorld world, String id) {
+        world.getOnlineMap().remove(id);
     }
 }

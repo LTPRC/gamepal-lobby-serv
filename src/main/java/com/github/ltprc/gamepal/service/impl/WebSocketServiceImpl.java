@@ -100,7 +100,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         Block player = world.getCreatureMap().get(userCode);
         // Update onlineMap
-        worldService.registerOnline(world, player.getBlockInfo());
+        worldService.registerOnline(world, userCode);
 
         // Check functions
         JSONObject functions = null;

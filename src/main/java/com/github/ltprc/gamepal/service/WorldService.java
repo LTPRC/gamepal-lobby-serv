@@ -34,7 +34,7 @@ public interface WorldService {
 
     void updateWorldTime(GameWorld world, int increment);
 
-    void registerOnline(GameWorld world, BlockInfo blockInfo);
+    void registerOnline(GameWorld world, String id);
 
-    void registerOffline(GameWorld world, BlockInfo blockInfo);
+    void registerOffline(GameWorld world, String id);
 }

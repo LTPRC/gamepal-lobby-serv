@@ -376,9 +376,7 @@ public class EventManagerImpl implements EventManager {
                     break;
             }
         }
-        if (null != eventCode) {
-            addEvent(world, eventCode, fromCreature.getBlockInfo().getId(), bulletBlock.getWorldCoordinate());
-        }
+        addEvent(world, eventCode, fromCreature.getBlockInfo().getId(), bulletBlock.getWorldCoordinate());
     }
 
     @Override
@@ -402,11 +400,13 @@ public class EventManagerImpl implements EventManager {
         String fromId = world.getSourceMap().containsKey(eventBlock.getBlockInfo().getId())
                 ? world.getSourceMap().get(eventBlock.getBlockInfo().getId())
                 : eventBlock.getBlockInfo().getId();
+        if (!world.getCreatureMap().containsKey(fromId)) {
+            return;
+        }
         if (eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_BLOCK
                 || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_HEAL
                 || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_SACRIFICE
                 || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_DECAY) {
-            // Stick with playerInfo
             movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(), false);
         }
     }
@@ -452,6 +452,9 @@ public class EventManagerImpl implements EventManager {
                 playerService.knockPlayer(block.getBlockInfo().getId());
             }
         } else {
+            if (newHp < oldHp) {
+                addEvent(world, BlockConstants.BLOCK_CODE_DISINTEGRATE, block.getBlockInfo().getId(), block.getWorldCoordinate());
+            }
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
             if (block.getBlockInfo().getHp().get() <= 0) {
                 addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, block.getBlockInfo().getId(), block.getWorldCoordinate());

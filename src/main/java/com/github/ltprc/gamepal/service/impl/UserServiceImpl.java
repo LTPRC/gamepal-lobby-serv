@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService {
         if (needToken && !token.equals(world.getTokenMap().get(userCode))) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1006));
         }
-        worldService.registerOffline(world, world.getCreatureMap().get(userCode).getBlockInfo());
+        worldService.registerOffline(world, userCode);
         world.getMessageMap().remove(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
