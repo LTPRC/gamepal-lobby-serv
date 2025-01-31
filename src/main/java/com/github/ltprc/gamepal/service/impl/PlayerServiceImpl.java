@@ -1068,14 +1068,14 @@ public class PlayerServiceImpl implements PlayerService {
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
                 IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
                 buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
-                BlockInfo blockInfo = BlockUtil.createBlockInfoByType(blockType);
-                MovementInfo movementInfo = new MovementInfo();
-                Block fakeBuilding = new Block(buildingWorldCoordinate, blockInfo, movementInfo);
+                Block fakeBuilding = new Block(buildingWorldCoordinate,
+                        BlockUtil.createBlockInfoByCode(blockInfo1.get().getCode()),
+                        BlockUtil.createMovementInfoByCode(blockInfo1.get().getCode()));
                 if (!sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
                     return false;
                 }
                 sceneManager.setGridBlockCode(world, buildingWorldCoordinate, gridBlockCode);
-                sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get(), new MovementInfo());
+                sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get().getCode());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
                 break;
             case SkillConstants.SKILL_CODE_FISH:
@@ -1113,27 +1113,22 @@ public class PlayerServiceImpl implements PlayerService {
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_LAY_BARRIER:
-                blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_ASH);
-                blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.BARRIER_RADIUS, BlockConstants.BARRIER_RADIUS)));
                 sceneManager.addOtherBlock(world,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE), blockInfo,
-                        new MovementInfo());
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE),
+                        BlockConstants.BLOCK_CODE_ASH_PILE);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_LAY_WIRE_NETTING:
-                blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_WIRE_NETTING);
-                blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                        new Coordinate(BlockConstants.WIRE_NETTING_RADIUS, BlockConstants.WIRE_NETTING_RADIUS)));
+//                blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+//                        new Coordinate(BlockConstants.WIRE_NETTING_RADIUS, BlockConstants.WIRE_NETTING_RADIUS)));
                 sceneManager.addOtherBlock(world,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE), blockInfo,
-                        new MovementInfo());
+                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE),
+                        BlockConstants.BLOCK_CODE_WIRE_NETTING);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
@@ -1520,8 +1515,7 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        BlockInfo blockInfo1 = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_BOX);
-        Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), blockInfo1, new MovementInfo());
+        Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), BlockConstants.BLOCK_CODE_BOX);
         String id = remainContainer.getBlockInfo().getId();
         worldService.registerOnline(world, remainContainer.getBlockInfo());
         movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(

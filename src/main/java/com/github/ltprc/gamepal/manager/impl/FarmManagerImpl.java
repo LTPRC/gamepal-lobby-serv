@@ -4,15 +4,11 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,10 +103,9 @@ public class FarmManagerImpl implements FarmManager {
         } else if (farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_GATHERED) {
             cropCode = BlockConstants.BLOCK_CODE_CROP_0;
         }
-        return null == cropCode ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
-                new BlockInfo(BlockConstants.BLOCK_TYPE_WALL_DECORATION, "", cropCode,
-                        new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE)), new MovementInfo()))
+        return null != cropCode ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
+                BlockUtil.createBlockInfoByCode(cropCode),
+                BlockUtil.createMovementInfoByCode(cropCode)))
                 : Optional.empty();
     }
 }

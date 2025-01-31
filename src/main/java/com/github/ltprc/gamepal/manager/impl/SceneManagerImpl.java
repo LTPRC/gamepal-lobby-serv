@@ -632,8 +632,7 @@ public class SceneManagerImpl implements SceneManager {
         for (int i = 0; i < weightList.size() && randomInt >= 0; i++) {
             if (randomInt < weightList.get(i).getValue()
                     && weightList.get(i).getKey() != BlockConstants.BLOCK_CODE_BLACK) {
-                addOtherBlock(world, worldCoordinate,
-                        BlockUtil.createBlockInfoByCode(weightList.get(i).getKey()), new MovementInfo());
+                addOtherBlock(world, worldCoordinate, weightList.get(i).getKey());
                 break;
             }
             randomInt -= weightList.get(i).getValue();
@@ -742,13 +741,13 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
-        IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
-            return rankingQueue;
+            return new LinkedList<>();
         }
+        Queue<Block> rankingQueue = BlockUtil.createRankingQueue(region);
+        IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
              i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
@@ -793,9 +792,8 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 if (null != crackCode) {
                     rankingQueue.add(new Block(block.getWorldCoordinate(),
-                            new BlockInfo(BlockConstants.BLOCK_TYPE_WALL_DECORATION, "", crackCode,
-                                    new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                                            BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION)), new MovementInfo()));
+                            BlockUtil.createBlockInfoByCode(crackCode),
+                            BlockUtil.createMovementInfoByCode(crackCode)));
                 }
                 break;
             default:
@@ -805,12 +803,16 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = BlockUtil.createRankingQueue();
-        Map<String, Block> creatureMap = world.getCreatureMap();
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-        // Collect detected playerInfos
+        if (null == region) {
+            logger.error(ErrorUtil.ERROR_1027);
+            return new LinkedList<>();
+        }
+        Queue<Block> rankingQueue = BlockUtil.createRankingQueue(region);
+        // Collect detected creature blocks
+        Map<String, Block> creatureMap = world.getCreatureMap();
         creatureMap.values().stream()
-                // playerInfos contains running players or NPC 24/03/25
+                // Creature blocks contain running player or NPC 24/03/25
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
                 .forEach(player1 -> {
@@ -883,9 +885,9 @@ public class SceneManagerImpl implements SceneManager {
         } else {
             Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
             Block from = world.getCreatureMap().get(userCode);
-            Coordinate coordinate = new Coordinate(block.getWorldCoordinate().getCoordinate());
-            BlockUtil.adjustCoordinate(coordinate, BlockUtil.getCoordinateRelation(from.getWorldCoordinate().getSceneCoordinate(),
-                    block.getWorldCoordinate().getSceneCoordinate()), region.getHeight(), region.getWidth());
+            Coordinate coordinate = BlockUtil.adjustCoordinate(block.getWorldCoordinate().getCoordinate(),
+                    BlockUtil.getCoordinateRelation(from.getWorldCoordinate().getSceneCoordinate(),
+                            block.getWorldCoordinate().getSceneCoordinate()), region.getHeight(), region.getWidth());
             rst.putAll(JSON.parseObject(JSON.toJSONString(coordinate)));
         }
         rst.putAll(JSON.parseObject(JSON.toJSONString(block.getMovementInfo())));
@@ -952,7 +954,7 @@ public class SceneManagerImpl implements SceneManager {
                 blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FLOOR, id, code, structure);
                 break;
         }
-        MovementInfo movementInfo = new MovementInfo();
+        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(code);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
         return block;
@@ -967,8 +969,8 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByType(BlockConstants.BLOCK_TYPE_DROP);
-        MovementInfo movementInfo = new MovementInfo();
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_DEFAULT);
+        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(BlockConstants.BLOCK_CODE_DROP_DEFAULT);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
         if (null != drop) {
@@ -981,7 +983,7 @@ public class SceneManagerImpl implements SceneManager {
     @Override
     public Block addTeleportBlock(GameWorld world, final int code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(code);
-        MovementInfo movementInfo = new MovementInfo();
+        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(code);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
         if (null != to) {
@@ -991,10 +993,11 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final BlockInfo blockInfo,
-                               final MovementInfo movementInfo) {
+    public Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode) {
+        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(blockCode);
         String id = UUID.randomUUID().toString();
         blockInfo.setId(id);
+        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(blockCode);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
         if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_CONTAINER) {

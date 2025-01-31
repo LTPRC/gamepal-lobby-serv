@@ -49,9 +49,7 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(eventCode);
-        MovementInfo movementInfo = BlockUtil.createMovementInfoByEventCode(eventCode);
-        Block eventBlock = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo, movementInfo);
+        Block eventBlock = sceneManager.addOtherBlock(world, worldCoordinate, eventCode);
         if (StringUtils.isNotBlank(sourceId)) {
             world.getSourceMap().put(eventBlock.getBlockInfo().getId(), sourceId);
         }

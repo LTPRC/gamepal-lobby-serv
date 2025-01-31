@@ -12,7 +12,6 @@ import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -177,7 +176,8 @@ public class WorldServiceImpl implements WorldService {
                             WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                     newScene.getSceneCoordinate(),
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
-                            Block block = sceneManager.addLoadedBlock(world, value % 10000, value / 10000, worldCoordinate);
+//                            Block block = sceneManager.addLoadedBlock(world, value % 10000, value / 10000, worldCoordinate);
+                            sceneManager.addOtherBlock(world, worldCoordinate, value % 10000);
                         }
                     }
                 }
@@ -204,10 +204,7 @@ public class WorldServiceImpl implements WorldService {
                                                 BigDecimal.valueOf(blockRow.getInteger(8)))));
                                 break;
                             default:
-                                BlockInfo blockInfo1 = BlockUtil.createBlockInfoByCode(blockRow.getInteger(1));
-                                if (null != blockInfo1) {
-                                    block = sceneManager.addOtherBlock(world, worldCoordinate, blockInfo1, new MovementInfo());
-                                }
+                                block = sceneManager.addOtherBlock(world, worldCoordinate, blockRow.getInteger(1));
                                 break;
                         }
                     }

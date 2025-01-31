@@ -24,10 +24,13 @@ public class BlockUtil {
         return new IntegerCoordinate(to.getX() - from.getX(), to.getY() - from.getY());
     }
 
-    public static void adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, int height, int width) {
+    public static Coordinate adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, int height,
+                                              int width) {
         // Pos-y is south, neg-y is north
-        coordinate.setX(coordinate.getX().add(BigDecimal.valueOf(integerCoordinate.getX() * width)));
-        coordinate.setY(coordinate.getY().add(BigDecimal.valueOf(integerCoordinate.getY() * height)));
+        return new Coordinate(coordinate.getX().add(BigDecimal.valueOf(
+                integerCoordinate.getX()).multiply(BigDecimal.valueOf(width))),
+                coordinate.getY().add(BigDecimal.valueOf(
+                        integerCoordinate.getY()).multiply(BigDecimal.valueOf(height))));
     }
 
     /**
@@ -82,9 +85,8 @@ public class BlockUtil {
     }
 
     public static Coordinate convertWorldCoordinate2Coordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
-        Coordinate coordinate = new Coordinate(worldCoordinate.getCoordinate());
-        adjustCoordinate(coordinate, worldCoordinate.getSceneCoordinate(), regionInfo.getHeight(), regionInfo.getWidth());
-        return coordinate;
+        return adjustCoordinate(worldCoordinate.getCoordinate(), worldCoordinate.getSceneCoordinate(),
+                regionInfo.getHeight(), regionInfo.getWidth());
     }
 
     public static void copyWorldCoordinate(final WorldCoordinate from, WorldCoordinate to) {
@@ -103,7 +105,8 @@ public class BlockUtil {
         }
     }
 
-    public static BigDecimal calculateHorizontalDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+    public static BigDecimal calculateHorizontalDistance(RegionInfo regionInfo, WorldCoordinate wc1,
+                                                         WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
@@ -117,7 +120,8 @@ public class BlockUtil {
         return c2.getX().subtract(c1.getX());
     }
 
-    public static BigDecimal calculateVerticalDistance(RegionInfo regionInfo, WorldCoordinate wc1, WorldCoordinate wc2) {
+    public static BigDecimal calculateVerticalDistance(RegionInfo regionInfo, WorldCoordinate wc1,
+                                                       WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
@@ -446,22 +450,32 @@ public class BlockUtil {
         }
     }
 
-    public static Queue<Block> createRankingQueue() {
+    public static Queue<Block> createRankingQueue(final RegionInfo regionInfo) {
         return new PriorityQueue<>((o1, o2) -> {
             if (!Objects.equals(o1.getBlockInfo().getStructure().getLayer() / 10,
                     o2.getBlockInfo().getStructure().getLayer() / 10)) {
                 return o1.getBlockInfo().getStructure().getLayer() / 10
                         - o2.getBlockInfo().getStructure().getLayer() / 10;
             }
-            if (!Objects.equals(o1.getWorldCoordinate().getSceneCoordinate().getY(),
-                    o2.getWorldCoordinate().getSceneCoordinate().getY())) {
-                return o1.getWorldCoordinate().getSceneCoordinate().getY()
-                        .compareTo(o2.getWorldCoordinate().getSceneCoordinate().getY());
+//            if (!Objects.equals(o1.getWorldCoordinate().getSceneCoordinate().getY(),
+//                    o2.getWorldCoordinate().getSceneCoordinate().getY())) {
+//                return o1.getWorldCoordinate().getSceneCoordinate().getY()
+//                        .compareTo(o2.getWorldCoordinate().getSceneCoordinate().getY());
+//            }
+//            if (!Objects.equals(o1.getWorldCoordinate().getCoordinate().getY(),
+//                    o2.getWorldCoordinate().getCoordinate().getY())) {
+//                return o1.getWorldCoordinate().getCoordinate().getY()
+//                        .compareTo(o2.getWorldCoordinate().getCoordinate().getY());
+//            }
+            BigDecimal verticalDistance = calculateVerticalDistance(regionInfo, o1.getWorldCoordinate(),
+                    o2.getWorldCoordinate());
+            if (null != verticalDistance && !verticalDistance.equals(BigDecimal.ZERO)) {
+                return BigDecimal.ZERO.compareTo(verticalDistance);
             }
-            if (!Objects.equals(o1.getWorldCoordinate().getCoordinate().getY(),
-                    o2.getWorldCoordinate().getCoordinate().getY())) {
-                return o1.getWorldCoordinate().getCoordinate().getY()
-                        .compareTo(o2.getWorldCoordinate().getCoordinate().getY());
+            BigDecimal horizontalDistance = calculateHorizontalDistance(regionInfo, o1.getWorldCoordinate(),
+                    o2.getWorldCoordinate());
+            if (null != horizontalDistance && !horizontalDistance.equals(BigDecimal.ZERO)) {
+                return BigDecimal.ZERO.compareTo(horizontalDistance);
             }
             return o1.getBlockInfo().getStructure().getLayer() % 10 - o2.getBlockInfo().getStructure().getLayer() % 10;
         });
@@ -641,24 +655,15 @@ public class BlockUtil {
 
     public static BlockInfo convertItemNo2BlockInfo(String itemNo) {
         int blockCode = ItemConstants.ITEM_BUILD_MAP.get(itemNo);
-        return createBlockInfoByTypeAndCode(convertBlockCode2Type(blockCode), blockCode);
-    }
-
-    public static BlockInfo createBlockInfoByType(int blockType) {
-        int blockCode = BlockConstants.BLOCK_CODE_NO_RESOURCE;
-        return createBlockInfoByTypeAndCode(blockType, blockCode);
-    }
-
-    public static BlockInfo createBlockInfoByCode(int blockCode) {
-        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
-        return createBlockInfoByTypeAndCode(blockType, blockCode);
+        return createBlockInfoByCode(blockCode);
     }
 
     public static int convertBlockCode2Type(int blockCode) {
         return BlockConstants.BLOCK_CODE_TYPE_MAP.getOrDefault(blockCode, BlockConstants.BLOCK_TYPE_NORMAL);
     }
 
-    private static BlockInfo createBlockInfoByTypeAndCode(int blockType, int blockCode) {
+    public static BlockInfo createBlockInfoByCode(int blockCode) {
+        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
         String id = BlockUtil.checkBlockTypeRegistrable(blockType) ? UUID.randomUUID().toString() : "";
         Structure structure;
         int structureMaterial;
@@ -885,44 +890,56 @@ public class BlockUtil {
         blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 
-    public static MovementInfo createMovementInfoByEventCode(final int eventCode) {
-        MovementInfo movementInfo = new MovementInfo();
-        movementInfo.setFrame(0);
-        switch (eventCode) {
-            case BlockConstants.BLOCK_CODE_MINE:
-                // Infinite
-                movementInfo.setFrameMax(-1);
-                break;
-            case BlockConstants.BLOCK_CODE_SPARK_SHORT:
-                movementInfo.setFrameMax(5);
-                break;
-            case BlockConstants.BLOCK_CODE_DECAY:
-            case BlockConstants.BLOCK_CODE_CHEER:
-            case BlockConstants.BLOCK_CODE_CURSE:
-                movementInfo.setFrameMax(50);
-                break;
-            case BlockConstants.BLOCK_CODE_FIRE:
-            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-            case BlockConstants.BLOCK_CODE_SMOKE_LIFT:
-                movementInfo.setFrameMax(250);
-                break;
-            default:
-                movementInfo.setFrameMax(25);
-                break;
-        }
-        switch (eventCode) {
-            case BlockConstants.BLOCK_CODE_DECAY:
-            case BlockConstants.BLOCK_CODE_CHEER:
-            case BlockConstants.BLOCK_CODE_CURSE:
-                movementInfo.setPeriod(50);
-                break;
-            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-                movementInfo.setPeriod(250);
+    public static MovementInfo createMovementInfoByCode(final int blockCode) {
+        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
+        int period;
+        switch (blockType) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_SPARK_SHORT:
+                        period = 5;
+                        break;
+                    case BlockConstants.BLOCK_CODE_DECAY:
+                    case BlockConstants.BLOCK_CODE_CHEER:
+                    case BlockConstants.BLOCK_CODE_CURSE:
+                        period = 50;
+                        break;
+                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                    case BlockConstants.BLOCK_CODE_SMOKE_LIFT:
+                        period = 250;
+                        break;
+                    default:
+                        period = BlockConstants.PERIOD_DEFAULT;
+                        break;
+                }
                 break;
             default:
-                movementInfo.setPeriod(25);
+                period = -1;
                 break;
         }
-        return movementInfo;
+        int frameMax;
+        switch (blockType) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                frameMax = period;
+                break;
+            default:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_FIRE:
+                        frameMax = 250;
+                        break;
+                    default:
+                        // Infinite
+                        frameMax = BlockConstants.FRAME_MAX_DEFAULT;
+                        break;
+                }
+                break;
+        }
+        return new MovementInfo(new Coordinate(),
+                BlockConstants.MAX_SPEED_DEFAULT, BlockConstants.ACCELERATION_DEFAULT,
+                BlockConstants.FACE_DIRECTION_DEFAULT,
+                BlockConstants.FLOOR_CODE_DEFAULT,
+                BlockConstants.FRAME_DEFAULT,
+                frameMax,
+                period);
     }
 }

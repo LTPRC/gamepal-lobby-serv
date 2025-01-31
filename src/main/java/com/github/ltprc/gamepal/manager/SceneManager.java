@@ -38,8 +38,7 @@ public interface SceneManager {
     Block addTeleportBlock(final GameWorld world, final int code, final WorldCoordinate worldCoordinate,
                            final WorldCoordinate to);
 
-    Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final BlockInfo blockInfo,
-                        final MovementInfo movementInfo);
+    Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode);
 
     boolean checkBlockSpace2Build(final GameWorld world, final Block block);
 

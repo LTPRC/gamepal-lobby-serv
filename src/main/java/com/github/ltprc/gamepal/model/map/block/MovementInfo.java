@@ -1,12 +1,13 @@
 package com.github.ltprc.gamepal.model.map.block;
 
-import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
+@NoArgsConstructor
 public class MovementInfo {
     private Coordinate speed;
     private BigDecimal maxSpeed; // block per frame
@@ -17,16 +18,16 @@ public class MovementInfo {
     private int frameMax;
     private int period;
 
-    public MovementInfo() {
-        speed = new Coordinate();
-        maxSpeed = BlockConstants.MAX_SPEED_DEFAULT;
-        acceleration = BlockConstants.ACCELERATION_DEFAULT;
-        faceDirection = BlockConstants.FACE_DIRECTION_DEFAULT;
-        floorCode = BlockConstants.FLOOR_CODE_DEFAULT;
-        frame = BlockConstants.FRAME_DEFAULT;
-        frameMax = BlockConstants.FRAME_MAX_DEFAULT;
-        period = BlockConstants.PERIOD_DEFAULT;
-    }
+//    public MovementInfo() {
+//        speed = new Coordinate();
+//        maxSpeed = BlockConstants.MAX_SPEED_DEFAULT;
+//        acceleration = BlockConstants.ACCELERATION_DEFAULT;
+//        faceDirection = BlockConstants.FACE_DIRECTION_DEFAULT;
+//        floorCode = BlockConstants.FLOOR_CODE_DEFAULT;
+//        frame = BlockConstants.FRAME_DEFAULT;
+//        frameMax = BlockConstants.FRAME_MAX_DEFAULT;
+//        period = BlockConstants.PERIOD_DEFAULT;
+//    }
 
     public MovementInfo(Coordinate speed, BigDecimal maxSpeed, BigDecimal acceleration, BigDecimal faceDirection,
                         int floorCode, int frame, int frameMax, int period) {

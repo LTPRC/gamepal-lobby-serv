@@ -54,8 +54,8 @@ public class ItemConstants {
         ITEM_BUILD_MAP.put("t314", BlockConstants.BLOCK_CODE_CHEST_CLOSE);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_CODE_SPEAKER, "t315");
         ITEM_BUILD_MAP.put("t315", BlockConstants.BLOCK_CODE_SPEAKER);
-        ITEM_PACK_MAP.put(BlockConstants.BLOCK_CODE_ASH, "t351");
-        ITEM_BUILD_MAP.put("t351", BlockConstants.BLOCK_CODE_ASH);
+        ITEM_PACK_MAP.put(BlockConstants.BLOCK_CODE_ASH_PILE, "t351");
+        ITEM_BUILD_MAP.put("t351", BlockConstants.BLOCK_CODE_ASH_PILE);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_CODE_FARM, "t234");
         ITEM_BUILD_MAP.put("t234", BlockConstants.BLOCK_CODE_FARM);
         ITEM_PACK_MAP.put(BlockConstants.BLOCK_CODE_WORKSHOP_CONSTRUCTION, "t301");
