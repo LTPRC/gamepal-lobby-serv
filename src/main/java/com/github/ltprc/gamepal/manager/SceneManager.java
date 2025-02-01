@@ -29,8 +29,8 @@ public interface SceneManager {
     JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
                                              final boolean useWorldCoordinate);
 
-    Block addLoadedBlock(final GameWorld world, final int code, final Integer normalBlockType,
-                         final WorldCoordinate worldCoordinate);
+//    Block addLoadedBlock(final GameWorld world, final int code, final Integer normalBlockType,
+//                         final WorldCoordinate worldCoordinate);
 
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);

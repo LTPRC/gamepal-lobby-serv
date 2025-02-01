@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 public class Structure {
-    private Integer material; // 0-hollow 1-solid 2-flesh
-    private Integer layer; // 10-bottom 20-bottom-decoration 30-middle 40-middle-decoration 50-top 60-top-decoration
+    private Integer material;
+    private Integer layer;
     private Shape shape = new Shape();
     private Coordinate imageSize = new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
 

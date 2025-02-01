@@ -457,16 +457,6 @@ public class BlockUtil {
                 return o1.getBlockInfo().getStructure().getLayer() / 10
                         - o2.getBlockInfo().getStructure().getLayer() / 10;
             }
-//            if (!Objects.equals(o1.getWorldCoordinate().getSceneCoordinate().getY(),
-//                    o2.getWorldCoordinate().getSceneCoordinate().getY())) {
-//                return o1.getWorldCoordinate().getSceneCoordinate().getY()
-//                        .compareTo(o2.getWorldCoordinate().getSceneCoordinate().getY());
-//            }
-//            if (!Objects.equals(o1.getWorldCoordinate().getCoordinate().getY(),
-//                    o2.getWorldCoordinate().getCoordinate().getY())) {
-//                return o1.getWorldCoordinate().getCoordinate().getY()
-//                        .compareTo(o2.getWorldCoordinate().getCoordinate().getY());
-//            }
             BigDecimal verticalDistance = calculateVerticalDistance(regionInfo, o1.getWorldCoordinate(),
                     o2.getWorldCoordinate());
             if (null != verticalDistance && !verticalDistance.equals(BigDecimal.ZERO)) {
@@ -477,7 +467,12 @@ public class BlockUtil {
             if (null != horizontalDistance && !horizontalDistance.equals(BigDecimal.ZERO)) {
                 return BigDecimal.ZERO.compareTo(horizontalDistance);
             }
-            return o1.getBlockInfo().getStructure().getLayer() % 10 - o2.getBlockInfo().getStructure().getLayer() % 10;
+            int layerDiff = o1.getBlockInfo().getStructure().getLayer() % 10
+                    - o2.getBlockInfo().getStructure().getLayer() % 10;
+            if (layerDiff != 0) {
+                return layerDiff;
+            }
+            return o1.getBlockInfo().getCode() - o2.getBlockInfo().getCode();
         });
     }
 
@@ -528,6 +523,7 @@ public class BlockUtil {
                 layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
             case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+            case BlockConstants.BLOCK_CODE_WAVE:
                 layer = BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
                 break;
             default:
@@ -732,16 +728,95 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_TELEPORT:
             case BlockConstants.BLOCK_TYPE_GAME:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
                 break;
             case BlockConstants.BLOCK_TYPE_BED:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_SINGLE_BED:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.5D))));
+                        break;
+                    default:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                        break;
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_TOILET:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.5D))));
+                break;
             case BlockConstants.BLOCK_TYPE_DRESSER:
             case BlockConstants.BLOCK_TYPE_STORAGE:
             case BlockConstants.BLOCK_TYPE_COOKER:
             case BlockConstants.BLOCK_TYPE_SINK:
             case BlockConstants.BLOCK_TYPE_CONTAINER:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                break;
             case BlockConstants.BLOCK_TYPE_BUILDING:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_SIGN:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape);
+                        break;
+                    case BlockConstants.BLOCK_CODE_STOVE:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.5D))));
+                        break;
+                    case BlockConstants.BLOCK_CODE_BENCH:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.2D))));
+                        break;
+                    case BlockConstants.BLOCK_CODE_DESK_1:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BigDecimal.valueOf(0.3D), BigDecimal.valueOf(0.2D))));
+                        break;
+                    case BlockConstants.BLOCK_CODE_DESK_2:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BigDecimal.valueOf(0.2D), BigDecimal.valueOf(0.3D))));
+                        break;
+                    case BlockConstants.BLOCK_CODE_ASH_PILE:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.4D))));
+                        break;
+                    case BlockConstants.BLOCK_CODE_WORKSHOP_EMPTY:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                                new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.2D))));
+                        break;
+                    case BlockConstants.BLOCK_CODE_TABLE_1:
+                    case BlockConstants.BLOCK_CODE_TABLE_2:
+                    case BlockConstants.BLOCK_CODE_TABLE_3:
+                    default:
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                        break;
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_WORKSHOP:
             case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
             case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
@@ -749,7 +824,10 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
             case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
+                                new Coordinate(BigDecimal.valueOf(0.2D), BigDecimal.valueOf(0.4D))));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
@@ -767,73 +845,8 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
                 break;
-//            case BlockConstants.BLOCK_TYPE_NORMAL:
-//                switch (blockCode) {
-//                    case BlockConstants.BLOCK_CODE_RAFFLESIA:
-//                    case BlockConstants.BLOCK_CODE_SMALL_FLOWER_1:
-//                    case BlockConstants.BLOCK_CODE_SMALL_FLOWER_2:
-//                    case BlockConstants.BLOCK_CODE_SMALL_FLOWER_3:
-//                    case BlockConstants.BLOCK_CODE_BIG_FLOWER_1:
-//                    case BlockConstants.BLOCK_CODE_BIG_FLOWER_2:
-//                    case BlockConstants.BLOCK_CODE_BIG_FLOWER_3:
-//                    case BlockConstants.BLOCK_CODE_MUSHROOM_1:
-//                    case BlockConstants.BLOCK_CODE_MUSHROOM_2:
-//                    case BlockConstants.BLOCK_CODE_GRASS_1:
-//                    case BlockConstants.BLOCK_CODE_GRASS_2:
-//                    case BlockConstants.BLOCK_CODE_GRASS_3:
-//                    case BlockConstants.BLOCK_CODE_GRASS_4:
-//                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                                BlockConstants.STRUCTURE_LAYER_BOTTOM);
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_STUMP:
-//                    case BlockConstants.BLOCK_CODE_MOSSY_STUMP:
-//                    case BlockConstants.BLOCK_CODE_HOLLOW_TRUNK:
-//                    case BlockConstants.BLOCK_CODE_ROCK_1:
-//                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                                BlockConstants.STRUCTURE_LAYER_MIDDLE,
-//                                roundShape);
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_FLOWER_BUSH:
-//                    case BlockConstants.BLOCK_CODE_BUSH:
-//                    case BlockConstants.BLOCK_CODE_CACTUS_1:
-//                    case BlockConstants.BLOCK_CODE_CACTUS_2:
-//                    case BlockConstants.BLOCK_CODE_CACTUS_3:
-//                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_WINDOW_1:
-//                    case BlockConstants.BLOCK_CODE_WINDOW_2:
-//                    case BlockConstants.BLOCK_CODE_WINDOW_3:
-//                    case BlockConstants.BLOCK_CODE_WINDOW_4:
-//                    case BlockConstants.BLOCK_CODE_WINDOW_5:
-//                    case BlockConstants.BLOCK_CODE_WINDOW_6:
-//                    case BlockConstants.BLOCK_CODE_DOOR_1:
-//                    case BlockConstants.BLOCK_CODE_DOOR_2:
-//                    case BlockConstants.BLOCK_CODE_DOOR_3:
-//                    case BlockConstants.BLOCK_CODE_DOOR_4:
-//                    case BlockConstants.BLOCK_CODE_DOOR_5:
-//                    case BlockConstants.BLOCK_CODE_DOOR_6:
-//                    case BlockConstants.BLOCK_CODE_DOOR_7:
-//                    case BlockConstants.BLOCK_CODE_DOOR_8:
-//                    case BlockConstants.BLOCK_CODE_DOOR_9:
-//                    case BlockConstants.BLOCK_CODE_DOOR_10:
-//                    case BlockConstants.BLOCK_CODE_DOOR_11:
-//                    case BlockConstants.BLOCK_CODE_DOOR_12:
-//                    case BlockConstants.BLOCK_CODE_DOOR_13:
-//                    case BlockConstants.BLOCK_CODE_DOOR_14:
-//                    case BlockConstants.BLOCK_CODE_DOOR_15:
-//                    case BlockConstants.BLOCK_CODE_DOOR_16:
-//                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                                BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
-//                        break;
-//                    default:
-//                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
-//                        break;
-//                }
-//                break;
             case BlockConstants.BLOCK_TYPE_ROCK:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
@@ -841,12 +854,13 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM, new Shape(),
+                        BlockConstants.STRUCTURE_LAYER_GROUND, new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION);
+                        BlockConstants.STRUCTURE_LAYER_GROUND_DECORATION, new Shape(),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_WALL:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -855,7 +869,8 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION, new Shape(),
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_CEILING:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
@@ -865,8 +880,8 @@ public class BlockUtil {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
                 break;
+            case BlockConstants.BLOCK_TYPE_NORMAL:
             default:
-                // Normal type 25/01/28
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
@@ -908,21 +923,22 @@ public class BlockUtil {
                         period = 250;
                         break;
                     default:
-                        period = BlockConstants.PERIOD_DEFAULT;
+                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                         break;
                 }
                 break;
+            case BlockConstants.BLOCK_TYPE_DROP:
+                period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+                break;
             default:
-                period = -1;
+                period = BlockConstants.PERIOD_STATIC_DEFAULT;
                 break;
         }
         int frameMax;
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
-                frameMax = period;
-                break;
             case BlockConstants.BLOCK_TYPE_DROP:
-                frameMax = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+                frameMax = period;
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
                 switch (blockCode) {
@@ -930,12 +946,12 @@ public class BlockUtil {
                         frameMax = 250;
                         break;
                     default:
-                        frameMax = BlockConstants.FRAME_MAX_DEFAULT;
+                        frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                         break;
                 }
                 break;
             default:
-                frameMax = BlockConstants.FRAME_MAX_DEFAULT;
+                frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                 break;
         }
         return new MovementInfo(new Coordinate(),

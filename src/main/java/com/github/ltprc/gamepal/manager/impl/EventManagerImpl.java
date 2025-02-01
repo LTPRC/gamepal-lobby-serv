@@ -381,10 +381,13 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void updateEvent(GameWorld world, Block eventBlock) {
+        if (eventBlock.getMovementInfo().getPeriod() == BlockConstants.PERIOD_STATIC_DEFAULT) {
+            return;
+        }
         eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() + 1);
         updateEventLocation(world, eventBlock);
         if (eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getPeriod()) {
-            if (eventBlock.getMovementInfo().getFrameMax() == -1) {
+            if (eventBlock.getMovementInfo().getFrameMax() == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
                 eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() - eventBlock.getMovementInfo().getPeriod());
             } else {
                 sceneManager.removeBlock(world, eventBlock, false);

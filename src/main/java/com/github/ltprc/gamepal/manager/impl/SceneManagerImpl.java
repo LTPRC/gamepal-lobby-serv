@@ -777,6 +777,11 @@ public class SceneManagerImpl implements SceneManager {
 
     private void collectTransformedBlocks(final GameWorld world, Queue<Block> rankingQueue, Block block) {
         switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_DROP:
+                rankingQueue.add(new Block(block.getWorldCoordinate(),
+                    BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_WAVE),
+                    BlockUtil.createMovementInfoByCode(BlockConstants.BLOCK_CODE_WAVE)));
+                break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
                 cropBlock.ifPresent(rankingQueue::add);
@@ -925,40 +930,40 @@ public class SceneManagerImpl implements SceneManager {
         return rst;
     }
 
-    @Override
-    public Block addLoadedBlock(GameWorld world, int code, Integer normalBlockType, WorldCoordinate worldCoordinate) {
-        String id = UUID.randomUUID().toString();
-        Structure structure;
-        BlockInfo blockInfo;
-        switch (normalBlockType) {
-            case 2:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                        new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WALL, id, code, structure);
-                break;
-            case 3:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_TOP,
-                        new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CEILING, id, code, structure);
-                break;
-            case 1:
-            default:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM,
-                        new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FLOOR, id, code, structure);
-                break;
-        }
-        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(code);
-        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        registerBlock(world, block);
-        return block;
-    }
+//    @Override
+//    public Block addLoadedBlock(GameWorld world, int code, Integer normalBlockType, WorldCoordinate worldCoordinate) {
+//        String id = UUID.randomUUID().toString();
+//        Structure structure;
+//        BlockInfo blockInfo;
+//        switch (normalBlockType) {
+//            case 2:
+//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+//                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+//                        new Shape(),
+//                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+//                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WALL, id, code, structure);
+//                break;
+//            case 3:
+//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+//                        BlockConstants.STRUCTURE_LAYER_TOP,
+//                        new Shape(),
+//                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+//                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CEILING, id, code, structure);
+//                break;
+//            case 1:
+//            default:
+//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+//                        BlockConstants.STRUCTURE_LAYER_BOTTOM,
+//                        new Shape(),
+//                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+//                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FLOOR, id, code, structure);
+//                break;
+//        }
+//        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(code);
+//        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
+//        registerBlock(world, block);
+//        return block;
+//    }
 
     /**
      * Added a random direction and default distance

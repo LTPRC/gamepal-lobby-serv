@@ -41,6 +41,7 @@ public class BlockConstants {
     public static final int BLOCK_CODE_LIGHT_SMOKE = 135;
     public static final int BLOCK_CODE_BLEED_SEVERE = 136;
     public static final int BLOCK_CODE_DISINTEGRATE = 137;
+    public static final int BLOCK_CODE_WAVE = 138;
     public static final int BLOCK_CODE_NO_RESOURCE = 1000;
     public static final int BLOCK_CODE_BLACK = 1001;
     public static final int BLOCK_CODE_WHITE = 1002;
@@ -217,15 +218,15 @@ public class BlockConstants {
 
     // Backend constants
 
-    public static final int STRUCTURE_LAYER_GROUND = 10;
+    public static final int STRUCTURE_LAYER_GROUND = 10; // Infrastructure objects including floor block
     public static final int STRUCTURE_LAYER_GROUND_DECORATION = 15;
-    public static final int STRUCTURE_LAYER_BOTTOM = 20;
+    public static final int STRUCTURE_LAYER_BOTTOM = 20; // Low-level objects including ash pile, bloodstain
     public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 25;
-    public static final int STRUCTURE_LAYER_MIDDLE = 30;
+    public static final int STRUCTURE_LAYER_MIDDLE = 30; // Active objects including creature, building
     public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 35;
-    public static final int STRUCTURE_LAYER_TOP = 40;
+    public static final int STRUCTURE_LAYER_TOP = 40; // High-level objects including ceiling block
     public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
-    public static final int STRUCTURE_LAYER_SKY = 50;
+    public static final int STRUCTURE_LAYER_SKY = 50; // Untouchable top-level objects
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 
     public static final int STRUCTURE_MATERIAL_NONE = 0; // Collide to none positively
@@ -253,8 +254,9 @@ public class BlockConstants {
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
     public static final int FLOOR_CODE_DEFAULT = BLOCK_CODE_BLACK;
     public static final int FRAME_DEFAULT = 0;
-    public static final int FRAME_MAX_DEFAULT = -1; // Infinite
-    public static final int PERIOD_DEFAULT = 25;
+    public static final int PERIOD_STATIC_DEFAULT = -1;
+    public static final int PERIOD_DYNAMIC_DEFAULT = 25;
+    public static final int FRAME_MAX_INFINITE_DEFAULT = -1;
 
     public static Map<Integer, Integer> BLOCK_CODE_TYPE_MAP = new HashMap<>();
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
@@ -294,6 +296,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LIGHT_SMOKE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED_SEVERE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_DISINTEGRATE, BLOCK_TYPE_EFFECT);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WAVE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NO_RESOURCE, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLACK, BLOCK_TYPE_CEILING);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WHITE, BLOCK_TYPE_CEILING);

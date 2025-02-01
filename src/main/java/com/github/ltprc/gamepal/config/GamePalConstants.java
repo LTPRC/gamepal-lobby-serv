@@ -65,14 +65,14 @@ public class GamePalConstants {
 
     // Backend constants
 
-    public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1);
+    public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1D);
     public static final int REGION_RADIUS_DEFAULT = 50;
     public static final int SCENE_DEFAULT_WIDTH = 10;
     public static final int SCENE_DEFAULT_HEIGHT = 10;
     public static final int REGION_TYPE_DEFAULT = 0;
     public static final int REGION_TYPE_ISLAND = 10;
 
-    public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.ONE;
+    public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.25D);
 
     public static final int BUFF_DEFAULT_FRAME_DEAD = 10 * FRAME_PER_SECOND;

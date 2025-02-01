@@ -25,8 +25,8 @@ public class MovementInfo {
 //        faceDirection = BlockConstants.FACE_DIRECTION_DEFAULT;
 //        floorCode = BlockConstants.FLOOR_CODE_DEFAULT;
 //        frame = BlockConstants.FRAME_DEFAULT;
-//        frameMax = BlockConstants.FRAME_MAX_DEFAULT;
-//        period = BlockConstants.PERIOD_DEFAULT;
+//        frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
+//        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
 //    }
 
     public MovementInfo(Coordinate speed, BigDecimal maxSpeed, BigDecimal acceleration, BigDecimal faceDirection,
