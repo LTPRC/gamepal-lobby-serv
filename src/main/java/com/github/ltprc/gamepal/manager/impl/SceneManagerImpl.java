@@ -19,13 +19,10 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -55,9 +52,6 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private PlayerService playerService;
-
-    @Autowired
-    private WorldService worldService;
 
     @Autowired
     private MovementManager movementManager;
@@ -733,7 +727,7 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksByUserCode(final GameWorld world, final Block player, final int sceneScanRadius) {
+    public Queue<Block> collectBlocks(final GameWorld world, final Block player, final int sceneScanRadius) {
         Queue<Block> rankingQueue = collectBlocksFromScenes(world, player, sceneScanRadius);
         rankingQueue.addAll(collectBlocksFromCreatureMap(world, player, sceneScanRadius));
         return rankingQueue;
@@ -929,41 +923,6 @@ public class SceneManagerImpl implements SceneManager {
         }
         return rst;
     }
-
-//    @Override
-//    public Block addLoadedBlock(GameWorld world, int code, Integer normalBlockType, WorldCoordinate worldCoordinate) {
-//        String id = UUID.randomUUID().toString();
-//        Structure structure;
-//        BlockInfo blockInfo;
-//        switch (normalBlockType) {
-//            case 2:
-//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-//                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
-//                        new Shape(),
-//                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-//                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_WALL, id, code, structure);
-//                break;
-//            case 3:
-//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                        BlockConstants.STRUCTURE_LAYER_TOP,
-//                        new Shape(),
-//                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-//                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_CEILING, id, code, structure);
-//                break;
-//            case 1:
-//            default:
-//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                        BlockConstants.STRUCTURE_LAYER_BOTTOM,
-//                        new Shape(),
-//                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
-//                blockInfo = new BlockInfo(BlockConstants.BLOCK_TYPE_FLOOR, id, code, structure);
-//                break;
-//        }
-//        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(code);
-//        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-//        registerBlock(world, block);
-//        return block;
-//    }
 
     /**
      * Added a random direction and default distance

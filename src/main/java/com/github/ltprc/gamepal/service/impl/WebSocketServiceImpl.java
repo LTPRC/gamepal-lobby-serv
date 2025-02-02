@@ -386,7 +386,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Collect blocks
         // Old block format 24/09/30
-        Queue<Block> blockQueue = sceneManager.collectBlocksByUserCode(world, player, 2);
+        Queue<Block> blockQueue = sceneManager.collectBlocks(world, player, 2);
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {

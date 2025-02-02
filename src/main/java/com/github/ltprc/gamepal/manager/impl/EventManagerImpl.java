@@ -252,7 +252,8 @@ public class EventManagerImpl implements EventManager {
                             .forEach(flameCoordinate -> {
 //                                BlockUtil.fixWorldCoordinate(regionMap.get(worldCoordinate.getRegionNo()),
 //                                        flameCoordinate);
-                                addEvent(world, BlockConstants.BLOCK_CODE_FIRE, fromCreature.getBlockInfo().getId(), flameCoordinate);
+                                sceneManager.addOtherBlock(world, flameCoordinate, BlockConstants.BLOCK_CODE_FIRE);
+//                                addEvent(world, BlockConstants.BLOCK_CODE_FIRE, fromCreature.getBlockInfo().getId(), flameCoordinate);
                             });
                 }
                 break;
@@ -262,13 +263,13 @@ public class EventManagerImpl implements EventManager {
                 region.getScenes().values().stream()
                         .filter(scene -> SkillUtil.isSceneDetected(eventBlock, scene.getSceneCoordinate(), 1))
                         .forEach(scene -> scene.getBlocks().values().stream()
-                                .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_EFFECT)
+                                .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA)
                                 .filter(block -> block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE)
                                 .filter(block -> {
                                     BigDecimal distance = BlockUtil.calculateDistance(
                                             world.getRegionMap().get(worldCoordinate.getRegionNo()),
                                             worldCoordinate, block.getWorldCoordinate());
-                                    return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
+                                    return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
                                 })
                                 .forEach(block -> sceneManager.removeBlock(world, block, true)));
                 break;
@@ -380,6 +381,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
+    @Transactional
     public void updateEvent(GameWorld world, Block eventBlock) {
         if (eventBlock.getMovementInfo().getPeriod() == BlockConstants.PERIOD_STATIC_DEFAULT) {
             return;
@@ -394,8 +396,29 @@ public class EventManagerImpl implements EventManager {
                 return;
             }
         }
-        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TRAP) {
-            triggerTrap(world, eventBlock);
+        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA) {
+//            triggerTrap(world, eventBlock);
+            if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE) {
+                // Burn grid
+                if (sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
+                        || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
+                    sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
+                }
+                // Burn collected blocks 25/02/03
+                Queue<Block> rankingQueue = sceneManager.collectBlocks(world, eventBlock, 1);
+                rankingQueue.stream()
+                        .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
+                                || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
+                        .filter(targetBlock -> {
+                            BigDecimal distance = BlockUtil.calculateDistance(
+                                    world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
+                                    eventBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
+                            return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
+                        })
+                        .forEach(targetBlock -> {
+                            affectBlock(world, eventBlock, targetBlock);
+                        });
+            }
         }
     }
 
@@ -417,11 +440,11 @@ public class EventManagerImpl implements EventManager {
     @Override
     @Transactional
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
-        if (eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_EFFECT
-                && eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_TRAP) {
-            logger.error(ErrorUtil.ERROR_1013);
-            return;
-        }
+//        if (eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_EFFECT
+//                && eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLASMA) {
+//            logger.error(ErrorUtil.ERROR_1013);
+//            return;
+//        }
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
@@ -467,6 +490,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
+    @Transactional
     public void triggerTrap(GameWorld world, Block trapBlock) {
         Random random = new Random();
         String fromId = world.getSourceMap().containsKey(trapBlock.getBlockInfo().getId())
@@ -480,7 +504,7 @@ public class EventManagerImpl implements EventManager {
                         .anyMatch(player -> {
                             BigDecimal distance = BlockUtil.calculateDistance(
                                     world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_MINE) < 0;
+                            return null != distance && distance.compareTo(BlockConstants.MINE_RADIUS) < 0;
                         })) {
                     addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, trapBlock.getWorldCoordinate());
                     sceneManager.removeBlock(world, trapBlock, true);
@@ -492,16 +516,19 @@ public class EventManagerImpl implements EventManager {
                         || sceneManager.getGridBlockCode(world, trapBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
                     sceneManager.setGridBlockCode(world, trapBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                 }
-                // Burn players only
-                world.getCreatureMap().values().stream()
-                        .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
-                        .filter(player -> {
+                // Burn collected blocks 25/02/02
+                Queue<Block> rankingQueue = sceneManager.collectBlocks(world, trapBlock, 1);
+                rankingQueue.stream()
+                        .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
+                                || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
+                        .filter(targetBlock -> {
                             BigDecimal distance = BlockUtil.calculateDistance(
-                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                            return null != distance && distance.compareTo(SkillConstants.SKILL_RANGE_FIRE) < 0;
+                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()),
+                                    trapBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
+                            return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
                         })
-                        .forEach(player -> {
-                            affectBlock(world, trapBlock, player);
+                        .forEach(targetBlock -> {
+                            affectBlock(world, trapBlock, targetBlock);
                         });
                 break;
             case BlockConstants.BLOCK_CODE_WIRE_NETTING:

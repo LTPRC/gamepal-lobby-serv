@@ -444,6 +444,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
             case BlockConstants.BLOCK_TYPE_CEILING:
             case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
+            case BlockConstants.BLOCK_TYPE_PLASMA:
                 return false;
             default:
                 return true;
@@ -722,7 +723,7 @@ public class BlockUtil {
                         new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
@@ -774,7 +775,7 @@ public class BlockUtil {
                                         new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.5D))));
                         break;
                     case BlockConstants.BLOCK_CODE_BENCH:
-                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
                                         new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
@@ -844,7 +845,7 @@ public class BlockUtil {
                                         BlockConstants.ROUND_SCENE_OBJECT_RADIUS)));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_BOTTOM);
                 break;
             case BlockConstants.BLOCK_TYPE_ROCK:
@@ -853,7 +854,7 @@ public class BlockUtil {
                         roundShape);
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_GROUND, new Shape(),
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
@@ -879,6 +880,10 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
+                break;
+            case BlockConstants.BLOCK_TYPE_PLASMA:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
             default:
@@ -930,6 +935,16 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_DROP:
                 period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
                 break;
+            case BlockConstants.BLOCK_TYPE_PLASMA:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_FIRE:
+                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                    default:
+                        period = BlockConstants.PERIOD_STATIC_DEFAULT;
+                        break;
+                }
+                break;
             default:
                 period = BlockConstants.PERIOD_STATIC_DEFAULT;
                 break;
@@ -940,10 +955,10 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_DROP:
                 frameMax = period;
                 break;
-            case BlockConstants.BLOCK_TYPE_TRAP:
+            case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_FIRE:
-                        frameMax = 250;
+                        frameMax = period;
                         break;
                     default:
                         frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;

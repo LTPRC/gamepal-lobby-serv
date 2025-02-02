@@ -58,7 +58,6 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_EXPLODE = BigDecimal.valueOf(2);
     public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
-    public static final BigDecimal SKILL_RANGE_MINE = BigDecimal.ONE;
     public static final BigDecimal SKILL_RANGE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal SKILL_RANGE_BUILD = BigDecimal.ONE;
 }

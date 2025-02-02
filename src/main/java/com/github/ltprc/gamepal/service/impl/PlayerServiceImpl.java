@@ -1771,16 +1771,16 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public boolean validateActiveness(final GameWorld world, final String id) {
-        if (!world.getCreatureMap().containsKey(id)) {
-            return false;
-        }
         Block block = world.getCreatureMap().get(id);
         if (block.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
             return false;
         }
+        if (!world.getCreatureMap().containsKey(id) || !world.getPlayerInfoMap().containsKey(id)
+                || !world.getOnlineMap().containsKey(id)) {
+            return false;
+        }
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(id);
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
-                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0
-                && world.getOnlineMap().containsKey(block.getBlockInfo().getId());
+                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0;
     }
 }

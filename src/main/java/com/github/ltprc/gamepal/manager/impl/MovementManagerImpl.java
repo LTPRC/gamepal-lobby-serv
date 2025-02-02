@@ -3,6 +3,8 @@ package com.github.ltprc.gamepal.manager.impl;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.map.*;
@@ -11,11 +13,10 @@ import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.SkillUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,6 @@ public class MovementManagerImpl implements MovementManager {
     private static final Log logger = LogFactory.getLog(MovementManagerImpl.class);
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private SceneManager sceneManager;
 
     @Autowired
@@ -40,6 +38,9 @@ public class MovementManagerImpl implements MovementManager {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private EventManager eventManager;
 
     @Override
     public void speedUpBlock(GameWorld world, Block block, Coordinate deltaSpeed) {
@@ -53,7 +54,7 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void settleSpeedAndCoordinate(GameWorld world, Block worldMovingBlock, int sceneScanDepth) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
-        Queue<Block> rankingQueue = sceneManager.collectBlocksByUserCode(world, worldMovingBlock, 1);
+        Queue<Block> rankingQueue = sceneManager.collectBlocks(world, worldMovingBlock, 1);
         WorldCoordinate teleportWc = null;
         List<Block> rankingQueueList = new ArrayList<>(rankingQueue);
         for (Block block : rankingQueueList) {
@@ -144,22 +145,24 @@ public class MovementManagerImpl implements MovementManager {
                             "来到【" + region.getName() + "-" + scene.getName() + "】");
                 }
             }
-            region.getScenes().values().stream()
-                    .filter(scene -> SkillUtil.isSceneDetected(worldMovingBlock, scene.getSceneCoordinate(), 1))
-                    .forEach(scene -> scene.getBlocks().values().forEach(block -> {
-                BigDecimal distance = BlockUtil.calculateDistance(region, worldMovingBlock.getWorldCoordinate(),
-                        block.getWorldCoordinate());
-                if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP
-                        && null != distance && distance.compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0) {
-                    playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), block.getBlockInfo().getId());
-                }
-            }));
+//            region.getScenes().values().stream()
+//                    .filter(scene -> SkillUtil.isSceneDetected(worldMovingBlock, scene.getSceneCoordinate(), 1))
+//                    .forEach(scene -> scene.getBlocks().values().forEach(block -> {
+//                BigDecimal distance = BlockUtil.calculateDistance(region, worldMovingBlock.getWorldCoordinate(),
+//                        block.getWorldCoordinate());
+//                if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP
+//                        && null != distance && distance.compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0) {
+//                    playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), block.getBlockInfo().getId());
+//                }
+//            }));
         } else if (isSceneChanged) {
             region.getScenes().get(newWorldCoordinate.getSceneCoordinate()).getBlocks()
                     .put(worldMovingBlock.getBlockInfo().getId(), worldMovingBlock);
             region.getScenes().get(oldWorldCoordinate.getSceneCoordinate()).getBlocks()
                     .remove(worldMovingBlock.getBlockInfo().getId());
         }
+        Queue<Block> rankingQueue = sceneManager.collectBlocks(world, worldMovingBlock, 1);
+        rankingQueue.forEach(nearbyBlock -> checkBlockInteraction(world, worldMovingBlock, nearbyBlock));
     }
 
     @Override
@@ -193,6 +196,55 @@ public class MovementManagerImpl implements MovementManager {
             if (code != BlockConstants.BLOCK_CODE_WATER) {
                 worldMovingBlock.getMovementInfo().setFloorCode(code);
             }
+        }
+    }
+
+    private void checkBlockInteraction(GameWorld world, Block block, Block nearbyBlock) {
+        Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
+        BigDecimal distance = BlockUtil.calculateDistance(region, block.getWorldCoordinate(),
+                nearbyBlock.getWorldCoordinate());
+        if (null == distance) {
+            return;
+        }
+        String fromId = world.getSourceMap().containsKey(nearbyBlock.getBlockInfo().getId())
+                ? world.getSourceMap().get(nearbyBlock.getBlockInfo().getId())
+                : nearbyBlock.getBlockInfo().getId();
+        Random random = new Random();
+        switch (nearbyBlock.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_DROP:
+                if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                        && distance.compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0) {
+                    playerService.useDrop(block.getBlockInfo().getId(), nearbyBlock.getBlockInfo().getId());
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                switch (nearbyBlock.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_MINE:
+                        if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                                && playerService.validateActiveness(world, block.getBlockInfo().getId())
+                                && !StringUtils.equals(fromId, block.getBlockInfo().getId())
+                                && distance.compareTo(BlockConstants.MINE_RADIUS) < 0) {
+                            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, nearbyBlock.getWorldCoordinate());
+                            sceneManager.removeBlock(world, nearbyBlock, true);
+                        }
+                        break;
+                    case BlockConstants.BLOCK_CODE_WIRE_NETTING:
+                        if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                                && playerService.validateActiveness(world, block.getBlockInfo().getId())
+                                && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0
+                                && random.nextDouble()
+                                < Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
+                                + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
+                                / block.getMovementInfo().getMaxSpeed().doubleValue()) {
+                            eventManager.affectBlock(world, nearbyBlock, block);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
         }
     }
 }

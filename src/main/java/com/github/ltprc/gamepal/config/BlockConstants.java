@@ -209,6 +209,7 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_WALL_DECORATION = 34;
     public static final int BLOCK_TYPE_CEILING = 35;
     public static final int BLOCK_TYPE_CEILING_DECORATION = 36;
+    public static final int BLOCK_TYPE_PLASMA = 37;
 
     public static final int CROP_PERIOD = 250;
     public static final int CROP_STATUS_NONE = 0;
@@ -245,7 +246,9 @@ public class BlockConstants {
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.3D);
     public static final BigDecimal BARRIER_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal MINE_RADIUS = BigDecimal.ONE;
     public static final BigDecimal WIRE_NETTING_RADIUS = BigDecimal.valueOf(0.4D);
+    public static final BigDecimal FIRE_RADIUS = BigDecimal.valueOf(0.5D);
 
     public static final int HP_DEFAULT = 100;
 
@@ -290,7 +293,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPARK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NOISE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_MINE, BLOCK_TYPE_TRAP);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_FIRE, BLOCK_TYPE_TRAP);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_FIRE, BLOCK_TYPE_PLASMA);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPRAY, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPARK_SHORT, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LIGHT_SMOKE, BLOCK_TYPE_EFFECT);

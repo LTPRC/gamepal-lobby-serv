@@ -124,6 +124,7 @@ public class SkillUtil {
     /**
      * At present, we do not determine hp amount based on equipped tool
      * @param eventCode
+     * @param targetType
      * @return changed hp amount
      */
     public static int calculateChangedHp(final int eventCode, final int targetType) {
@@ -131,7 +132,8 @@ public class SkillUtil {
         if (targetType == BlockConstants.BLOCK_TYPE_NORMAL
                 || targetType == BlockConstants.BLOCK_TYPE_EFFECT
                 || targetType == BlockConstants.BLOCK_TYPE_DROP
-                || targetType == BlockConstants.BLOCK_TYPE_TELEPORT) {
+                || targetType == BlockConstants.BLOCK_TYPE_TELEPORT
+                || targetType == BlockConstants.BLOCK_TYPE_PLASMA) {
             // No hp effect
             return hp;
         }
