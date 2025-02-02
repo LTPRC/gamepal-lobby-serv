@@ -388,13 +388,16 @@ public class EventManagerImpl implements EventManager {
         }
         eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() + 1);
         updateEventLocation(world, eventBlock);
+        if (eventBlock.getMovementInfo().getFrameMax() != BlockConstants.FRAME_MAX_INFINITE_DEFAULT
+                && eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getFrameMax()) {
+            sceneManager.removeBlock(world, eventBlock, false);
+            return;
+        }
         if (eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getPeriod()) {
-            if (eventBlock.getMovementInfo().getFrameMax() == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
-                eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() - eventBlock.getMovementInfo().getPeriod());
-            } else {
-                sceneManager.removeBlock(world, eventBlock, false);
-                return;
-            }
+            eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame()
+                    - eventBlock.getMovementInfo().getPeriod());
+            eventBlock.getMovementInfo().setFrameMax(Math.max(0,
+                    eventBlock.getMovementInfo().getFrameMax() - eventBlock.getMovementInfo().getPeriod()));
         }
         if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA) {
 //            triggerTrap(world, eventBlock);

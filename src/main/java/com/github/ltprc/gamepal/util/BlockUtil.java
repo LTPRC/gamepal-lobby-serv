@@ -958,7 +958,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_FIRE:
-                        frameMax = period;
+                        frameMax = period * 5;
                         break;
                     default:
                         frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
@@ -974,7 +974,7 @@ public class BlockUtil {
                 BlockConstants.FACE_DIRECTION_DEFAULT,
                 BlockConstants.FLOOR_CODE_DEFAULT,
                 BlockConstants.FRAME_DEFAULT,
-                period,
-                frameMax);
+                frameMax,
+                period);
     }
 }

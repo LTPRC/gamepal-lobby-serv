@@ -65,10 +65,6 @@ public class NpcManagerImpl implements NpcManager {
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_PLAYER_DEFAULT);
 
         MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(BlockConstants.BLOCK_CODE_PLAYER_DEFAULT);
-//        movementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-//        movementInfo.setFaceDirection(BlockConstants.FACE_DIRECTION_DEFAULT);
-//        BlockUtil.updateMaxSpeed(movementInfo);
-//        movementInfo.setAcceleration(BlockConstants.ACCELERATION_DEFAULT);
 
         Block player = new Block(worldCoordinate, blockInfo, movementInfo);
         player.getBlockInfo().setId(userCode);
