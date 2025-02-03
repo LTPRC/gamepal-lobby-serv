@@ -510,10 +510,8 @@ public class BlockUtil {
         switch (eventCode) {
             case BlockConstants.BLOCK_CODE_EXPLODE:
             case BlockConstants.BLOCK_CODE_BLOCK:
-            case BlockConstants.BLOCK_CODE_UPGRADE:
             case BlockConstants.BLOCK_CODE_HEAL:
             case BlockConstants.BLOCK_CODE_DECAY:
-            case BlockConstants.BLOCK_CODE_SACRIFICE:
             case BlockConstants.BLOCK_CODE_CHEER:
             case BlockConstants.BLOCK_CODE_CURSE:
             case BlockConstants.BLOCK_CODE_SPARK:
@@ -523,6 +521,8 @@ public class BlockUtil {
             case BlockConstants.BLOCK_CODE_BLEED:
                 layer = BlockConstants.STRUCTURE_LAYER_TOP_DECORATION;
                 break;
+            case BlockConstants.BLOCK_CODE_UPGRADE:
+            case BlockConstants.BLOCK_CODE_SACRIFICE:
             case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
             case BlockConstants.BLOCK_CODE_WAVE:
                 layer = BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
@@ -860,8 +860,7 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_GROUND_DECORATION, new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        BlockConstants.STRUCTURE_LAYER_GROUND_DECORATION);
                 break;
             case BlockConstants.BLOCK_TYPE_WALL:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -870,8 +869,7 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION, new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
                 break;
             case BlockConstants.BLOCK_TYPE_CEILING:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
