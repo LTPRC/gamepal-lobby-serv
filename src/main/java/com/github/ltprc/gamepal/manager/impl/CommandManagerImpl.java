@@ -2,8 +2,8 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
@@ -123,10 +123,10 @@ public class CommandManagerImpl implements CommandManager {
             case "nwcwhatisthematrix":
                 playerService.generateNotificationMessage(userCode, "认清现实吧。");
                 playerInfo = world.getPlayerInfoMap().get(userCode);
-                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] == 0) {
-                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = -1;
+                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_REALISTIC] == 0) {
+                    playerInfo.getBuff()[BuffConstants.BUFF_CODE_REALISTIC] = -1;
                 } else {
-                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_REALISTIC] = 0;
+                    playerInfo.getBuff()[BuffConstants.BUFF_CODE_REALISTIC] = 0;
                 }
             case "nwcoracle":
                 playerService.generateNotificationMessage(userCode, "先知带你看世界。");
@@ -194,10 +194,10 @@ public class CommandManagerImpl implements CommandManager {
             case "nwcthereisnospoon":
                 playerService.generateNotificationMessage(userCode, "我无敌辣。");
                 playerInfo = world.getPlayerInfoMap().get(userCode);
-                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] == 0) {
-                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] = -1;
+                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] == 0) {
+                    playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] = -1;
                 } else {
-                    playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] = 0;
+                    playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] = 0;
                 }
                 break;
             case "nwczion":

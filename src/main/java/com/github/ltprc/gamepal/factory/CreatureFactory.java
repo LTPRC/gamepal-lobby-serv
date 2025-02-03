@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.factory;
 
+import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
@@ -32,7 +33,7 @@ public class CreatureFactory {
         playerInfo.setExp(0);
         SkillUtil.updateExpMax(playerInfo);
         playerInfo.setMoney(1);
-        playerInfo.setBuff(new int[GamePalConstants.BUFF_CODE_LENGTH]);
+        playerInfo.setBuff(new int[BuffConstants.BUFF_CODE_LENGTH]);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
         if (CreatureConstants.CREATURE_TYPE_ANIMAL != playerInfo.getCreatureType()) {
             SkillUtil.updateHumanSkills(playerInfo);

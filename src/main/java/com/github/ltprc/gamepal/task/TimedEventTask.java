@@ -1,12 +1,12 @@
 package com.github.ltprc.gamepal.task;
 
 import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -80,28 +80,28 @@ public class TimedEventTask {
 
                         PlayerInfo playerInfo = playerInfoMap.get(id);
                         if (playerService.validateActiveness(world, id)
-                                && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_KNOCKED] == 0) {
+                                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
                             Block player = creatureMap.get(id);
                             MovementInfo movementInfo = player.getMovementInfo();
                             double randomNumber;
 
                             // Change hp
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLEEDING] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLEEDING] != 0) {
                                 eventManager.changeHp(world, player, -1, false);
                             }
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_RECOVERING] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_RECOVERING] != 0) {
                                 eventManager.changeHp(world, player, 1, false);
                             }
 
                             // Change vp
                             int newVp = 10;
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SICK] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] != 0) {
                                 newVp -= 5;
                             }
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FRACTURED] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0) {
                                 newVp -= 5;
                             }
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_FATIGUED] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
                                 if (movementInfo.getSpeed().getX().doubleValue() > 0
                                         || movementInfo.getSpeed().getY().doubleValue() > 0) {
                                     newVp -= 15;
@@ -123,7 +123,7 @@ public class TimedEventTask {
                             }
                             if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                                 playerService.changeHunger(id, -1, false);
-                                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HUNGRY] != 0) {
+                                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] != 0) {
                                     eventManager.changeHp(world, player, -1, false);
                                 }
                             }
@@ -136,7 +136,7 @@ public class TimedEventTask {
                             }
                             if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                                 playerService.changeThirst(id, -1, false);
-                                if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_THIRSTY] != 0) {
+                                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] != 0) {
                                     eventManager.changeHp(world, player, -1, false);
                                 }
                             }
@@ -149,7 +149,7 @@ public class TimedEventTask {
 
                             // Change view radius
                             BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_BLIND] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLIND] != 0) {
                                 playerInfo.getPerceptionInfo().setDistinctVisionRadius(
                                         playerInfo.getPerceptionInfo().getDistinctVisionRadius()
                                                 .divide(BigDecimal.TEN, RoundingMode.HALF_UP));

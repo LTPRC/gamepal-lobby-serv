@@ -1,9 +1,6 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -11,12 +8,9 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -291,8 +285,8 @@ public class EventManagerImpl implements EventManager {
                                 .compareTo(SkillConstants.SKILL_RANGE_CURSE) < 0)
                         .forEach(worldBlock ->  {
                             PlayerInfo playerInfo = world.getPlayerInfoMap().get(worldBlock.getBlockInfo().getId());
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] != -1) {
-                                playerInfo.getBuff()[GamePalConstants.BUFF_CODE_SAD] = GamePalConstants.BUFF_DEFAULT_FRAME_SAD;
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SAD] != -1) {
+                                playerInfo.getBuff()[BuffConstants.BUFF_CODE_SAD] = BuffConstants.BUFF_DEFAULT_FRAME_SAD;
                                 playerService.changeVp(worldBlock.getBlockInfo().getId(), 0, true);
                             }
                         });
@@ -307,8 +301,8 @@ public class EventManagerImpl implements EventManager {
                                 .compareTo(SkillConstants.SKILL_RANGE_CHEER) < 0)
                         .forEach(worldBlock ->  {
                             PlayerInfo playerInfo = world.getPlayerInfoMap().get(worldBlock.getBlockInfo().getId());
-                            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] != -1) {
-                                playerInfo.getBuff()[GamePalConstants.BUFF_CODE_HAPPY] = GamePalConstants.BUFF_DEFAULT_FRAME_HAPPY;
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_HAPPY] != -1) {
+                                playerInfo.getBuff()[BuffConstants.BUFF_CODE_HAPPY] = BuffConstants.BUFF_DEFAULT_FRAME_HAPPY;
                                 playerService.changeVp(worldBlock.getBlockInfo().getId(), playerInfo.getVpMax(), true);
                             }
                         });
@@ -451,7 +445,7 @@ public class EventManagerImpl implements EventManager {
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getBuff()[GamePalConstants.BUFF_CODE_BLOCKED] != 0) {
+                && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getBuff()[BuffConstants.BUFF_CODE_BLOCKED] != 0) {
             changedHp /= 2;
         }
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
@@ -470,14 +464,14 @@ public class EventManagerImpl implements EventManager {
         if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
             PlayerInfo playerInfo = playerInfoMap.get(block.getBlockInfo().getId());
-            if (playerInfo.getBuff()[GamePalConstants.BUFF_CODE_INVINCIBLE] != 0) {
+            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] != 0) {
                 newHp = Math.max(oldHp, newHp);
             }
             if (newHp < oldHp) {
                 addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(), block.getWorldCoordinate());
             }
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
-            if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[GamePalConstants.BUFF_CODE_DEAD] == 0) {
+            if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0) {
                 playerService.knockPlayer(block.getBlockInfo().getId());
             }
         } else {

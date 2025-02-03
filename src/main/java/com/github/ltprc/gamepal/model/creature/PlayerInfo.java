@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.model.creature;
 
+import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class PlayerInfo {
     private int creatureType;
     private int gender;
     private int skinColor;
-    private int[] buff = new int[GamePalConstants.BUFF_CODE_LENGTH]; // buff code, remaining frame
+    private int[] buff = new int[BuffConstants.BUFF_CODE_LENGTH]; // buff code, remaining frame
     private List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
     private PerceptionInfo perceptionInfo;
 //    private int hpMax;
