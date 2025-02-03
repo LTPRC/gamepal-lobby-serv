@@ -70,7 +70,7 @@ public interface PlayerService {
 
     ResponseEntity<String> destroyPlayer(String userCode);
 
-    ResponseEntity<String> checkLevelUp(String userCode);
+    ResponseEntity<String> addExp(String userCode, int expVal);
 
     ResponseEntity<String> updateSkillsByTool(String userCode);
 

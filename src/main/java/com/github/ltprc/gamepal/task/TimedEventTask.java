@@ -165,9 +165,6 @@ public class TimedEventTask {
                                 }
                             }
 
-                            // Check level-up
-                            playerService.checkLevelUp(id);
-
                             // Check floorCode
                             BlockUtil.updateMaxSpeed(movementInfo);
                         }

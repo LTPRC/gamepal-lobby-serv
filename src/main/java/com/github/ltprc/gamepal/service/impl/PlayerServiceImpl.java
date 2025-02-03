@@ -1711,7 +1711,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> checkLevelUp(String userCode) {
+    public ResponseEntity<String> addExp(String userCode, int expVal) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -1727,13 +1727,22 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        playerInfo.setExp(playerInfo.getExp() + expVal);
+        checkLevelUp(world, userCode);
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    private void checkLevelUp(GameWorld world, String userCode) {
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
         if (playerInfo.getExp() >= playerInfo.getExpMax()) {
             playerInfo.setExp(0);
             playerInfo.setLevel(playerInfo.getLevel() + 1);
             SkillUtil.updateExpMax(playerInfo);
             eventManager.addEvent(world, BlockConstants.BLOCK_CODE_UPGRADE, userCode, player.getWorldCoordinate());
         }
-        return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
