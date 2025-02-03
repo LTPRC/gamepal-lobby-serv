@@ -44,7 +44,7 @@ public class PlayerInfo {
     private String nickname;
     private String nameColor;
     private int hairstyle;
-    private int hairColor;
+    private String hairColor;
     private int eyes;
     private int[] faceCoefs = new int[CreatureConstants.FACE_COEFS_LENGTH];
 

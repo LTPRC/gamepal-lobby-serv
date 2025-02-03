@@ -128,8 +128,8 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != hairstyle) {
             playerInfo.setHairstyle(hairstyle);
         }
-        Integer hairColor = req.getInteger("hairColor");
-        if (null != hairColor) {
+        String hairColor = req.getString("hairColor");
+        if (StringUtils.isNotBlank(hairColor)) {
             playerInfo.setHairColor(hairColor);
         }
         Integer eyes = req.getInteger("eyes");

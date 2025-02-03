@@ -271,13 +271,13 @@ public class NameUtil {
         int rst;
         switch (gender) {
             case CreatureConstants.GENDER_MALE:
-                rst = random.nextInt(6) + 1;
+                rst = random.nextInt(11) - 1;
                 break;
             case CreatureConstants.GENDER_FEMALE:
-                rst = random.nextInt(6) + 7;
+                rst = random.nextInt(10) + 10;
                 break;
             default:
-                rst = random.nextInt(12) + 1;
+                rst = random.nextInt(21) - 1;
                 break;
         }
         return rst;

@@ -57,7 +57,7 @@ public class CreatureFactory {
         playerInfo.setNameColor("#990000");
         playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
         playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
-        playerInfo.setHairColor(random.nextInt(3) + 1);
+        playerInfo.setHairColor("#000000");
         playerInfo.setEyes(random.nextInt(CreatureConstants.EYES_LENGTH) + 1);
         playerInfo.setFaceCoefs(Arrays.stream(new int[CreatureConstants.FACE_COEFS_LENGTH])
                 .map(faceCoef -> random.nextInt(100)).toArray());
