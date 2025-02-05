@@ -11,11 +11,18 @@ public class CreatureConstants {
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
     public static final int FACE_COEFS_LENGTH = 10;
+    public static final int GENDER_MALE = 1;
+    public static final int GENDER_FEMALE = 2;
+    public static final int OFFSET_X_LEFT = 0;
+    public static final int OFFSET_X_MIDDLE = 1;
+    public static final int OFFSET_X_RIGHT = 2;
+    public static final int OFFSET_Y_DOWNWARD = 0;
+    public static final int OFFSET_Y_LEFTWARD = 1;
+    public static final int OFFSET_Y_RIGHTWARD = 2;
+    public static final int OFFSET_Y_UPWARD = 3;
 
     // Backend constants
 
-    public static final int GENDER_MALE = 1;
-    public static final int GENDER_FEMALE = 2;
     public static final int SKIN_COLOR_C = 1;
     public static final int SKIN_COLOR_M = 2;
     public static final int SKIN_COLOR_A = 3;
