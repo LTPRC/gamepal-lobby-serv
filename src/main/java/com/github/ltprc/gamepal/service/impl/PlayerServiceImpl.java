@@ -142,6 +142,10 @@ public class PlayerServiceImpl implements PlayerService {
                 playerInfo.getFaceCoefs()[i] = faceCoefs.getInteger(i);
             }
         }
+        Integer breastType = req.getInteger("breastType");
+        if (null != breastType) {
+            playerInfo.setBreastType(breastType);
+        }
         String avatar = req.getString("avatar");
         if (StringUtils.isNotBlank(avatar)) {
             playerInfo.setAvatar(avatar);

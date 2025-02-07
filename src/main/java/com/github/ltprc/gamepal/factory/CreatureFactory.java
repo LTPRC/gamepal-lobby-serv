@@ -5,7 +5,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.util.NameUtil;
+import com.github.ltprc.gamepal.util.PlayerInfoUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +14,10 @@ import java.util.Random;
 
 @Component
 public class CreatureFactory {
+
+    private CreatureFactory() {}
+
+    private static final Random random = new Random();
 
     public static PlayerInfo createCreatureInstance(final int playerType) {
         PlayerInfo playerInfo = new PlayerInfo();
@@ -37,29 +41,33 @@ public class CreatureFactory {
         playerInfo.setPerceptionInfo(new PerceptionInfo());
         if (CreatureConstants.CREATURE_TYPE_ANIMAL != playerInfo.getCreatureType()) {
             SkillUtil.updateHumanSkills(playerInfo);
-            randomlyPersonalizePlayerInfo(playerInfo, NameUtil.generateGender());
+            randomlyPersonalizePlayerInfo(playerInfo, PlayerInfoUtil.generateGender());
         } else {
             SkillUtil.updateAnimalSkills(playerInfo);
-            randomlyPersonalizeAnimalInfo(playerInfo, NameUtil.generateGender());
+            randomlyPersonalizeAnimalInfo(playerInfo, PlayerInfoUtil.generateGender());
         }
         playerInfo.setRespawnPoint(GamePalConstants.DEFAULT_BIRTHPLACE);
         return playerInfo;
     }
 
     public static void randomlyPersonalizePlayerInfo(PlayerInfo playerInfo, int gender) {
-        Random random = new Random();
-        String origin = NameUtil.generateOrigin();
-        String[] names = NameUtil.generateNames(origin, gender);
+        String origin = PlayerInfoUtil.generateOrigin();
+        String[] names = PlayerInfoUtil.generateNames(origin, gender);
         playerInfo.setAvatar(String.valueOf(random.nextInt(CreatureConstants.AVATARS_LENGTH)));
         playerInfo.setGender(gender);
         playerInfo.setFirstName(names[0]);
         playerInfo.setLastName(names[1]);
         playerInfo.setNickname(names[2]);
-        playerInfo.setNameColor("#990000");
-        playerInfo.setSkinColor(NameUtil.generateSkinColorByOrigin(origin));
-        playerInfo.setHairstyle(NameUtil.generateHairStyleByGender(gender));
-        playerInfo.setHairColor("#000000");
-        playerInfo.setEyes(random.nextInt(CreatureConstants.EYES_LENGTH) + 1);
+        playerInfo.setNameColor(PlayerInfoUtil.generateNameColor());
+        playerInfo.setSkinColor(PlayerInfoUtil.generateSkinColorByOrigin(origin));
+        playerInfo.setBreastType(PlayerInfoUtil.generateBreastTypeByGender(gender));
+        playerInfo.setAccessories(PlayerInfoUtil.generateAccessoriesByGender(gender));
+        playerInfo.setHairstyle(PlayerInfoUtil.generateHairStyleByGender(gender));
+        playerInfo.setHairColor(PlayerInfoUtil.generateHairColorByOrigin(origin));
+        playerInfo.setEyes(random.nextInt(CreatureConstants.EYES_LENGTH));
+        playerInfo.setNose(random.nextInt(CreatureConstants.NOSE_LENGTH));
+        playerInfo.setMouth(random.nextInt(CreatureConstants.MOUTH_LENGTH));
+        playerInfo.setTongue(random.nextInt(CreatureConstants.TONGUE_LENGTH));
         playerInfo.setFaceCoefs(Arrays.stream(new int[CreatureConstants.FACE_COEFS_LENGTH])
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }
@@ -70,7 +78,6 @@ public class CreatureFactory {
     }
 
     private static int generateAnimalSkinColor() {
-        Random random = new Random();
         return random.nextInt(14) + 1;
     }
 }

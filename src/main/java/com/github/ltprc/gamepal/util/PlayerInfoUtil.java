@@ -1,14 +1,15 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Random;
 
-public class NameUtil {
+public class PlayerInfoUtil {
 
-    private NameUtil() {}
+    private PlayerInfoUtil() {}
+
+    private static final Random random = new Random();
 
     protected static final String[] chineseLastnames = new String[] { "王", "李", "张", "刘", "陈", "杨", "黄", "吴", "赵", "周",
             "徐", "孙", "马", "朱", "胡", "郭", "何", "林", "高", "罗", "郑", "梁", "谢", "宋", "唐", "许", "邓", "冯", "韩", "曹", "彭",
@@ -152,7 +153,6 @@ public class NameUtil {
     }
 
     public static String generateChineseLastname() {
-        Random random = new Random();
         int num = random.nextInt(10000);
         for (int i = 0; i < chineseLastnames.length; i++) {
             if (num < chineseLastnameWeights[i]) {
@@ -165,7 +165,6 @@ public class NameUtil {
     }
 
     public static String generateChineseFirstname(int gender) {
-        Random random = new Random();
         int num = random.nextInt(100);
         if (gender == CreatureConstants.GENDER_FEMALE) {
             return chineseFemaleFirstnames[num];
@@ -181,13 +180,11 @@ public class NameUtil {
     }
 
     public static String generateJapaneseLastname() {
-        Random random = new Random();
         int num = random.nextInt(100);
         return japaneseLastnames[num];
     }
 
     public static String generateJapaneseFirstname(int gender) {
-        Random random = new Random();
         int num = random.nextInt(100);
         if (gender == CreatureConstants.GENDER_FEMALE) {
             return japaneseFemaleFirstnames[num];
@@ -203,13 +200,11 @@ public class NameUtil {
     }
 
     public static String generateInternationalLastname() {
-        Random random = new Random();
         int num = random.nextInt(100);
         return internationalLastnames[num];
     }
 
     public static String generateInternationalFirstname(int gender) {
-        Random random = new Random();
         int num = random.nextInt(100);
         if (gender == CreatureConstants.GENDER_FEMALE) {
             return internationalFemaleFirstnames[num];
@@ -218,56 +213,71 @@ public class NameUtil {
         }
     }
 
+    public static String generateNameColor() {
+        int r = random.nextInt(200);
+        int g = random.nextInt(200);
+        int b = random.nextInt(200);
+        // Convert each integer to a two-digit hexadecimal string.
+        return String.format("#%02x%02x%02x", r, g, b);
+    }
+
     public static int generateSkinColorByOrigin(String origin) {
-        double r = Math.random();
+        double r;
         int rst;
         switch (origin) {
             case CreatureConstants.ORIGIN_CHINESE:
-                if (r < 0.01D) {
-                    rst = CreatureConstants.SKIN_COLOR_B;
-                } else if (r < 0.03D) {
-                    rst = CreatureConstants.SKIN_COLOR_C;
-                } else if (r < 0.1D) {
-                    rst = CreatureConstants.SKIN_COLOR_L;
-                } else if (r < 0.2D) {
-                    rst = CreatureConstants.SKIN_COLOR_M;
-                } else {
-                    rst = CreatureConstants.SKIN_COLOR_A;
+                r = random.nextGaussian() * 4;
+                if (r > 0) {
+                    r *= 3;
                 }
+                r += 25;
+                rst = Math.toIntExact(Math.round(r));
                 break;
             case CreatureConstants.ORIGIN_JAPANESE:
-                if (r < 0.01D) {
-                    rst = CreatureConstants.SKIN_COLOR_C;
-                } else if (r < 0.03D) {
-                    rst = CreatureConstants.SKIN_COLOR_B;
-                } else if (r < 0.1D) {
-                    rst = CreatureConstants.SKIN_COLOR_L;
-                } else if (r < 0.2D) {
-                    rst = CreatureConstants.SKIN_COLOR_M;
-                } else {
-                    rst = CreatureConstants.SKIN_COLOR_A;
+                r = random.nextGaussian() * 8;
+                if (r > 0) {
+                    r *= 3;
                 }
+                r += 25;
+                rst = Math.toIntExact(Math.round(r));
                 break;
             case CreatureConstants.ORIGIN_INTERNATIONAL:
             default:
-                if (r < 0.2D) {
-                    rst = CreatureConstants.SKIN_COLOR_C;
-                } else if (r < 0.4D) {
-                    rst = CreatureConstants.SKIN_COLOR_B;
-                } else if (r < 0.6D) {
-                    rst = CreatureConstants.SKIN_COLOR_A;
-                } else if (r < 0.8D) {
-                    rst = CreatureConstants.SKIN_COLOR_M;
-                } else {
-                    rst = CreatureConstants.SKIN_COLOR_L;
-                }
+                rst = random.nextInt(101);
+                break;
+        }
+        return rst;
+    }
+
+    public static int generateBreastTypeByGender(int gender) {
+        int rst;
+        switch (gender) {
+            case CreatureConstants.GENDER_FEMALE:
+                rst = random.nextInt(CreatureConstants.BREAST_TYPE_FEMALE_LENGTH);
+                break;
+            case CreatureConstants.GENDER_MALE:
+            default:
+                rst = 0;
+                break;
+        }
+        return rst;
+    }
+
+    public static int generateAccessoriesByGender(int gender) {
+        int rst;
+        switch (gender) {
+            case CreatureConstants.GENDER_FEMALE:
+                rst = random.nextInt(CreatureConstants.ACCESSORY_TYPE_FEMALE_LENGTH);
+                break;
+            case CreatureConstants.GENDER_MALE:
+            default:
+                rst = 0;
                 break;
         }
         return rst;
     }
 
     public static int generateHairStyleByGender(int gender) {
-        Random random = new Random();
         int rst;
         switch (gender) {
             case CreatureConstants.GENDER_MALE:
@@ -278,6 +288,40 @@ public class NameUtil {
                 break;
             default:
                 rst = random.nextInt(21) - 1;
+                break;
+        }
+        return rst;
+    }
+
+    public static String generateHairColorByOrigin(String origin) {
+        double r;
+        String rst;
+        switch (origin) {
+            case CreatureConstants.ORIGIN_CHINESE:
+                r = random.nextDouble();
+                if (r < 0.1D) {
+                    int grayScale = random.nextInt(256);
+                    rst = String.format("#%02x%02x%02x", grayScale, grayScale, grayScale);
+                } else if (r < 0.95D) {
+                    rst = String.format("#%02x%02x%02x", 0, 0, 0);
+                } else {
+                    rst = String.format("#%02x%02x%02x", random.nextInt(256), random.nextInt(256), random.nextInt(256));
+                }
+                break;
+            case CreatureConstants.ORIGIN_JAPANESE:
+                r = random.nextDouble();
+                if (r < 0.15D) {
+                    int grayScale = random.nextInt(256);
+                    rst = String.format("#%02x%02x%02x", grayScale, grayScale, grayScale);
+                } else if (r < 0.9D) {
+                    rst = String.format("#%02x%02x%02x", 0, 0, 0);
+                } else {
+                    rst = String.format("#%02x%02x%02x", random.nextInt(256), random.nextInt(256), random.nextInt(256));
+                }
+                break;
+            case CreatureConstants.ORIGIN_INTERNATIONAL:
+            default:
+                rst = String.format("#%02x%02x%02x", random.nextInt(256), random.nextInt(256), random.nextInt(256));
                 break;
         }
         return rst;

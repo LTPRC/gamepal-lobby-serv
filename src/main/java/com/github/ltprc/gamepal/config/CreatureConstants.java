@@ -10,7 +10,7 @@ public class CreatureConstants {
     public static final int PLAYER_TYPE_NPC = 1;
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
-    public static final int FACE_COEFS_LENGTH = 10;
+    public static final int FACE_COEFS_LENGTH = 13;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
     public static final int OFFSET_X_LEFT = 0;
@@ -23,11 +23,6 @@ public class CreatureConstants {
 
     // Backend constants
 
-    public static final int SKIN_COLOR_C = 1;
-    public static final int SKIN_COLOR_M = 2;
-    public static final int SKIN_COLOR_A = 3;
-    public static final int SKIN_COLOR_L = 4;
-    public static final int SKIN_COLOR_B = 5;
     public static final int SKIN_COLOR_PAOFU = 1;
     public static final int SKIN_COLOR_FROG = 2;
     public static final int SKIN_COLOR_MONKEY = 3;
@@ -81,8 +76,12 @@ public class CreatureConstants {
     public static final String ORIGIN_JAPANESE = "ORIGIN_JAPANESE";
     public static final String ORIGIN_INTERNATIONAL = "ORIGIN_INTERNATIONAL";
     public static final int AVATARS_LENGTH = 110;
-    public static final int HAIRSTYLE_LENGTH = 5;
-    public static final int EYES_LENGTH = 5;
+    public static final int BREAST_TYPE_FEMALE_LENGTH = 10;
+    public static final int ACCESSORY_TYPE_FEMALE_LENGTH = 10;
+    public static final int EYES_LENGTH = 10;
+    public static final int NOSE_LENGTH = 10;
+    public static final int MOUTH_LENGTH = 10;
+    public static final int TONGUE_LENGTH = 10;
 
     public static final int CAPACITY_MAX = 50;
 }
