@@ -10,7 +10,7 @@ public class CreatureConstants {
     public static final int PLAYER_TYPE_NPC = 1;
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
-    public static final int FACE_COEFS_LENGTH = 13;
+    public static final int FACE_COEFS_LENGTH = 14;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
     public static final int OFFSET_X_LEFT = 0;
