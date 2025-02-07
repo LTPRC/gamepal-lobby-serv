@@ -123,6 +123,14 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != skinColor) {
             playerInfo.setSkinColor(skinColor);
         }
+        Integer breastType = req.getInteger("breastType");
+        if (null != breastType) {
+            playerInfo.setBreastType(breastType);
+        }
+        Integer accessories = req.getInteger("accessories");
+        if (null != accessories) {
+            playerInfo.setAccessories(accessories);
+        }
         Integer hairstyle = req.getInteger("hairstyle");
         if (null != hairstyle) {
             playerInfo.setHairstyle(hairstyle);
@@ -135,16 +143,24 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != eyes) {
             playerInfo.setEyes(eyes);
         }
+        Integer nose = req.getInteger("nose");
+        if (null != nose) {
+            playerInfo.setNose(nose);
+        }
+        Integer mouth = req.getInteger("mouth");
+        if (null != mouth) {
+            playerInfo.setMouth(mouth);
+        }
+        Integer tongue = req.getInteger("tongue");
+        if (null != tongue) {
+            playerInfo.setTongue(tongue);
+        }
         JSONArray faceCoefs = req.getJSONArray("faceCoefs");
         if (null != faceCoefs) {
             playerInfo.setFaceCoefs(new int[CreatureConstants.FACE_COEFS_LENGTH]);
             for (int i = 0; i < CreatureConstants.FACE_COEFS_LENGTH; i++) {
                 playerInfo.getFaceCoefs()[i] = faceCoefs.getInteger(i);
             }
-        }
-        Integer breastType = req.getInteger("breastType");
-        if (null != breastType) {
-            playerInfo.setBreastType(breastType);
         }
         String avatar = req.getString("avatar");
         if (StringUtils.isNotBlank(avatar)) {
