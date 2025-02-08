@@ -37,6 +37,9 @@ public class PlayerInfo {
     private int nose;
     private int mouth;
     private int tongue;
+    private int eyebrows;
+    private int moustache;
+    private int beard;
     private int[] faceCoefs = new int[CreatureConstants.FACE_COEFS_LENGTH];
 
     // Dynamic properties

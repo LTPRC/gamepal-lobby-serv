@@ -326,4 +326,36 @@ public class PlayerInfoUtil {
         }
         return rst;
     }
+
+    public static int generateMoustacheByGender(int gender) {
+        int rst;
+        double r;
+        switch (gender) {
+            case CreatureConstants.GENDER_MALE:
+                r = random.nextGaussian() * 5;
+                rst = Math.min(CreatureConstants.MOUSTACHE_LENGTH - 1, (int) Math.floor(r));
+                break;
+            case CreatureConstants.GENDER_FEMALE:
+            default:
+                rst = 0;
+                break;
+        }
+        return rst;
+    }
+
+    public static int generateBeardByGender(int gender) {
+        int rst;
+        double r;
+        switch (gender) {
+            case CreatureConstants.GENDER_MALE:
+                r = random.nextGaussian() * 3;
+                rst = Math.min(CreatureConstants.BEARD_LENGTH - 1, (int) Math.floor(r));
+                break;
+            case CreatureConstants.GENDER_FEMALE:
+            default:
+                rst = 0;
+                break;
+        }
+        return rst;
+    }
 }

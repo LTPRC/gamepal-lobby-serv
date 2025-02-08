@@ -155,6 +155,18 @@ public class PlayerServiceImpl implements PlayerService {
         if (null != tongue) {
             playerInfo.setTongue(tongue);
         }
+        Integer eyebrows = req.getInteger("eyebrows");
+        if (null != eyebrows) {
+            playerInfo.setEyebrows(eyebrows);
+        }
+        Integer moustache = req.getInteger("moustache");
+        if (null != moustache) {
+            playerInfo.setMoustache(moustache);
+        }
+        Integer beard = req.getInteger("beard");
+        if (null != beard) {
+            playerInfo.setBeard(beard);
+        }
         JSONArray faceCoefs = req.getJSONArray("faceCoefs");
         if (null != faceCoefs) {
             playerInfo.setFaceCoefs(new int[CreatureConstants.FACE_COEFS_LENGTH]);

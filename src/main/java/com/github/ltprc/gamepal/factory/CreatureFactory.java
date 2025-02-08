@@ -68,6 +68,9 @@ public class CreatureFactory {
         playerInfo.setNose(random.nextInt(CreatureConstants.NOSE_LENGTH));
         playerInfo.setMouth(random.nextInt(CreatureConstants.MOUTH_LENGTH));
         playerInfo.setTongue(random.nextInt(CreatureConstants.TONGUE_LENGTH));
+        playerInfo.setEyebrows(random.nextInt(CreatureConstants.EYEBROWS_LENGTH));
+        playerInfo.setMoustache(PlayerInfoUtil.generateMoustacheByGender(gender));
+        playerInfo.setBeard(PlayerInfoUtil.generateBeardByGender(gender));
         playerInfo.setFaceCoefs(Arrays.stream(new int[CreatureConstants.FACE_COEFS_LENGTH])
                 .map(faceCoef -> random.nextInt(100)).toArray());
     }

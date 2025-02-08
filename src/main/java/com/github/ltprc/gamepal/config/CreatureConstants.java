@@ -10,16 +10,9 @@ public class CreatureConstants {
     public static final int PLAYER_TYPE_NPC = 1;
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
-    public static final int FACE_COEFS_LENGTH = 14;
+    public static final int FACE_COEFS_LENGTH = 16;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
-    public static final int OFFSET_X_LEFT = 0;
-    public static final int OFFSET_X_MIDDLE = 1;
-    public static final int OFFSET_X_RIGHT = 2;
-    public static final int OFFSET_Y_DOWNWARD = 0;
-    public static final int OFFSET_Y_LEFTWARD = 1;
-    public static final int OFFSET_Y_RIGHTWARD = 2;
-    public static final int OFFSET_Y_UPWARD = 3;
 
     // Backend constants
 
@@ -82,6 +75,9 @@ public class CreatureConstants {
     public static final int NOSE_LENGTH = 10;
     public static final int MOUTH_LENGTH = 10;
     public static final int TONGUE_LENGTH = 10;
+    public static final int EYEBROWS_LENGTH = 10;
+    public static final int MOUSTACHE_LENGTH = 10;
+    public static final int BEARD_LENGTH = 6;
 
     public static final int CAPACITY_MAX = 50;
 }
