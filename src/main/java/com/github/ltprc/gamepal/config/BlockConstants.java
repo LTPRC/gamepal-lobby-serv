@@ -252,8 +252,8 @@ public class BlockConstants {
 
     public static final int HP_DEFAULT = 100;
 
-    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.1);
-    public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.005);
+    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.5);
+    public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.05);
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
     public static final int FLOOR_CODE_DEFAULT = BLOCK_CODE_BLACK;
     public static final int FRAME_DEFAULT = 0;

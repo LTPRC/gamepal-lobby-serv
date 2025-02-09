@@ -359,23 +359,6 @@ public class BlockUtil {
         return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
     }
 
-    /**
-     * No need to consider structure's center
-     * @param c1
-     * @param ballisticAngle
-     * @param c2
-     * @return
-     */
-    public static BigDecimal calculateBallisticDistance(Coordinate c1, BigDecimal ballisticAngle, Coordinate c2) {
-        if (ballisticAngle.compareTo(BigDecimal.valueOf(90D)) == 0
-                || ballisticAngle.compareTo(BigDecimal.valueOf(270D)) == 0) {
-            return c1.getX().subtract(c2.getX()).abs();
-        }
-        double slope = -Math.tan(ballisticAngle.doubleValue() / 180 * Math.PI);
-        return BigDecimal.valueOf(Math.abs(-slope * c2.getX().doubleValue() - c2.getY().doubleValue()
-                + c1.getY().doubleValue() + slope * c1.getX().doubleValue()) / Math.sqrt(slope * slope + 1));
-    }
-
     public static boolean detectCollision(RegionInfo regionInfo, Block block1, Block block2) {
         Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
         Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());

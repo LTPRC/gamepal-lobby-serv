@@ -14,8 +14,9 @@ import java.util.Queue;
 public interface SceneManager {
     Region generateRegion(final int regionNo);
     void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate);
-    Queue<Block> collectBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
-    List<Block> collectAffectedBlocks(final GameWorld world, Block eventBlock, Block fromCreature);
+    Queue<Block> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
+    List<Block> collectAffectedBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
+                                      String sourceId);
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
     JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
                                              final boolean useWorldCoordinate);

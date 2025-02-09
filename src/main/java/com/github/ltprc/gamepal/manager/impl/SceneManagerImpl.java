@@ -729,13 +729,14 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocks(final GameWorld world, final Block player, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = collectBlocksFromScenes(world, player, sceneScanRadius);
-        rankingQueue.addAll(collectBlocksFromCreatureMap(world, player, sceneScanRadius));
+    public Queue<Block> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius) {
+        Queue<Block> rankingQueue = collectSurroundingBlocksFromScenes(world, player, sceneScanRadius);
+        rankingQueue.addAll(collectSurroundingBlocksFromCreatureMap(world, player, sceneScanRadius));
         return rankingQueue;
     }
 
-    private Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius) {
+    private Queue<Block> collectSurroundingBlocksFromScenes(final GameWorld world, final Block player,
+                                                            final int sceneScanRadius) {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
@@ -767,6 +768,36 @@ public class SceneManagerImpl implements SceneManager {
                 }
             }
         }
+        return rankingQueue;
+    }
+
+    private Queue<Block> collectSurroundingBlocksFromCreatureMap(final GameWorld world, final Block player,
+                                                                 final int sceneScanRadius) {
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
+        if (null == region) {
+            logger.error(ErrorUtil.ERROR_1027);
+            return new LinkedList<>();
+        }
+        Queue<Block> rankingQueue = BlockUtil.createRankingQueue(region);
+        // Collect detected creature blocks
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        creatureMap.values().stream()
+                // Creature blocks contain running player or NPC 24/03/25
+                .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
+                .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
+                .forEach(player1 -> {
+                    Block newBlock = new Block(player1);
+                    if (BlockUtil.checkPerceptionCondition(region, player,
+                            player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                                    ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
+                                    : null, newBlock)) {
+//                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
+//                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
+//                                        player.getWorldCoordinate().getSceneCoordinate()),
+//                                region.getHeight(), region.getWidth());
+                        rankingQueue.add(newBlock);
+                    }
+                });
         return rankingQueue;
     }
 
@@ -802,9 +833,9 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public List<Block> collectAffectedBlocks(final GameWorld world, Block eventBlock, Block fromCreature) {
+    public List<Block> collectAffectedBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate,
+                                             Block eventBlock, String sourceId) {
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
-        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
         if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
             return new ArrayList<>();
         }
@@ -814,7 +845,7 @@ public class SceneManagerImpl implements SceneManager {
                 BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
         // Pre-select blocks including creatures
         List<Block> preSelectedBlocks = world.getCreatureMap().values().stream()
-                .filter(creature -> !StringUtils.equals(creature.getBlockInfo().getId(), fromCreature.getBlockInfo().getId()))
+                .filter(creature -> !StringUtils.equals(creature.getBlockInfo().getId(), sourceId))
                 .filter(creature -> creature.getWorldCoordinate().getRegionNo() == region.getRegionNo())
                 .filter(creature -> preSelectedSceneCoordinates.contains(creature.getWorldCoordinate().getSceneCoordinate()))
                 .filter(creature -> playerService.validateActiveness(world, creature.getBlockInfo().getId()))
@@ -873,7 +904,7 @@ public class SceneManagerImpl implements SceneManager {
                         && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
                 break;
             default:
-                rst = BlockUtil.detectCollision(region, eventBlock, blocker);
+                rst = BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
                 break;
         }
         return rst;
@@ -894,35 +925,6 @@ public class SceneManagerImpl implements SceneManager {
                 .collect(Collectors.toList());
         collidedBlock.ifPresent(shortenedBlocks::add);
         return shortenedBlocks;
-    }
-
-    private Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius) {
-        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-        if (null == region) {
-            logger.error(ErrorUtil.ERROR_1027);
-            return new LinkedList<>();
-        }
-        Queue<Block> rankingQueue = BlockUtil.createRankingQueue(region);
-        // Collect detected creature blocks
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        creatureMap.values().stream()
-                // Creature blocks contain running player or NPC 24/03/25
-                .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
-                .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
-                .forEach(player1 -> {
-                    Block newBlock = new Block(player1);
-                    if (BlockUtil.checkPerceptionCondition(region, player,
-                            player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                                    ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
-                                    : null, newBlock)) {
-//                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
-//                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
-//                                        player.getWorldCoordinate().getSceneCoordinate()),
-//                                region.getHeight(), region.getWidth());
-                        rankingQueue.add(newBlock);
-                    }
-                });
-        return rankingQueue;
     }
 
     @Override

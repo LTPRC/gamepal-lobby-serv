@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -398,7 +397,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         // Collect blocks
         // Old block format 24/09/30
-        Queue<Block> blockQueue = sceneManager.collectBlocks(world, player, 2);
+        Queue<Block> blockQueue = sceneManager.collectSurroundingBlocks(world, player, 2);
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {

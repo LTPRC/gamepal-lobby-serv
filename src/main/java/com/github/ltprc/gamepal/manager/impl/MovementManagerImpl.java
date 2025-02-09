@@ -3,7 +3,6 @@ package com.github.ltprc.gamepal.manager.impl;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -54,10 +53,21 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void settleSpeedAndCoordinate(GameWorld world, Block worldMovingBlock, int sceneScanDepth) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
-        Queue<Block> rankingQueue = sceneManager.collectBlocks(world, worldMovingBlock, 1);
         WorldCoordinate teleportWc = null;
-        List<Block> rankingQueueList = new ArrayList<>(rankingQueue);
-        for (Block block : rankingQueueList) {
+        Block expectedNewBlock = new Block(worldMovingBlock);
+        expectedNewBlock.getWorldCoordinate().getCoordinate().setX(
+                expectedNewBlock.getWorldCoordinate().getCoordinate().getX()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
+        expectedNewBlock.getWorldCoordinate().getCoordinate().setY(
+                expectedNewBlock.getWorldCoordinate().getCoordinate().getY()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
+        BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
+        String fromId = world.getSourceMap().containsKey(worldMovingBlock.getBlockInfo().getId())
+                ? world.getSourceMap().get(worldMovingBlock.getBlockInfo().getId())
+                : worldMovingBlock.getBlockInfo().getId();
+        List<Block> affectedBlockList = sceneManager.collectAffectedBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlock, fromId);
+        for (Block block : affectedBlockList) {
             if (worldMovingBlock.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)
                     && worldMovingBlock.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO)) {
                 break;
@@ -161,7 +171,7 @@ public class MovementManagerImpl implements MovementManager {
             region.getScenes().get(oldWorldCoordinate.getSceneCoordinate()).getBlocks()
                     .remove(worldMovingBlock.getBlockInfo().getId());
         }
-        Queue<Block> rankingQueue = sceneManager.collectBlocks(world, worldMovingBlock, 1);
+        Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, worldMovingBlock, 1);
         rankingQueue.forEach(nearbyBlock -> checkBlockInteraction(world, worldMovingBlock, nearbyBlock));
     }
 

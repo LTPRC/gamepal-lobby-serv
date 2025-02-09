@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -52,35 +51,6 @@ public class EventManagerImpl implements EventManager {
         activateEvent(world, eventBlock, fromCreature);
     }
 
-//    private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
-//        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
-//        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
-//        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
-//            return;
-//        }
-//        Map<Integer, Region> regionMap = world.getRegionMap();
-//        Region region = regionMap.get(worldCoordinate.getRegionNo());
-//        Set<IntegerCoordinate> preSelectedSceneCoordinates =
-//                BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
-//        // Detect the maximum moving distance
-//        preSelectedSceneCoordinates.forEach(sceneCoordinate ->
-//                region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
-//                        .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
-//                        .filter(blocker -> BlockUtil.checkMaterialCollision(
-//                                eventBlock.getBlockInfo().getStructure().getMaterial(),
-//                                blocker.getBlockInfo().getStructure().getMaterial()))
-//                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
-//                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-//                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D
-//                        )
-//                        .forEach(blocker ->
-//                                BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, true)
-//                        ));
-//    }
-
     private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
         WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
@@ -89,7 +59,8 @@ public class EventManagerImpl implements EventManager {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        List<Block> preSelectedBlocks = sceneManager.collectAffectedBlocks(world, eventBlock, fromCreature);
+        List<Block> preSelectedBlocks = sceneManager.collectAffectedBlocks(world, fromWorldCoordinate, eventBlock,
+                fromCreature.getBlockInfo().getId());
         preSelectedBlocks.stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
                 .filter(blocker -> BlockUtil.checkMaterialCollision(
@@ -115,7 +86,8 @@ public class EventManagerImpl implements EventManager {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        List<Block> affectedBlockList = sceneManager.collectAffectedBlocks(world, eventBlock, fromCreature);
+        List<Block> affectedBlockList = sceneManager.collectAffectedBlocks(world, fromWorldCoordinate, eventBlock,
+                fromCreature.getBlockInfo().getId());
         // Effect after activation
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
@@ -328,7 +300,7 @@ public class EventManagerImpl implements EventManager {
                     sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                 }
                 // Burn collected blocks 25/02/03
-                Queue<Block> rankingQueue = sceneManager.collectBlocks(world, eventBlock, 1);
+                Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
                 rankingQueue.stream()
                         .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
                                 || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
@@ -356,7 +328,8 @@ public class EventManagerImpl implements EventManager {
                 || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_HEAL
                 || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_SACRIFICE
                 || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_DECAY) {
-            movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(), false);
+            movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(),
+                    false);
         }
     }
 
