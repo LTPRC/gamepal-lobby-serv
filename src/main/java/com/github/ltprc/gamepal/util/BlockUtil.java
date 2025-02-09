@@ -381,28 +381,53 @@ public class BlockUtil {
         // Rectangle vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
                 && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
-            return Math.abs(coordinate1.getX().subtract(coordinate2.getX()).doubleValue())
+//            return Math.abs(coordinate1.getX().subtract(coordinate2.getX()).doubleValue())
+//                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
+//                    && Math.abs(coordinate1.getY().subtract(coordinate2.getY()).doubleValue())
+//                    < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
+            return BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
                     < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                    && Math.abs(coordinate1.getY().subtract(coordinate2.getY()).doubleValue())
+                    && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
                     < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
         }
         // Round vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
             return detectCollision(regionInfo, block2, block1);
         }
-//        return (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() >= coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-//                || coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() <= coordinate2.getX().add(shape2.getRadius().getX()).doubleValue())
-//                && (coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() >= coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-//                || coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() <= coordinate2.getY().add(shape2.getRadius().getY()).doubleValue());
-        return ((coordinate1.getX().doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getX().doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-                && coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue())
-                || (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
-                && coordinate1.getY().doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-                && coordinate1.getY().doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue()));
-//                && (); // 4 apexes
+//        return ((coordinate1.getX().doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+//                && coordinate1.getX().doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
+//                && coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+//                && coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue())
+//                || (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
+//                && coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
+//                && coordinate1.getY().doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
+//                && coordinate1.getY().doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue()));
+////                && (); // 4 apexes
+        boolean isInsideRectangle1 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape1.getRadius().getX().multiply(BigDecimal.valueOf(2)).add(shape2.getRadius().getX()).doubleValue()
+                && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape2.getRadius().getY().doubleValue();
+        boolean isInsideRectangle2 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape2.getRadius().getX().doubleValue()
+                && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape1.getRadius().getY().multiply(BigDecimal.valueOf(2)).add(shape2.getRadius().getY()).doubleValue();
+        boolean isInsideRound1 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
+                        coordinate2.getY().subtract(shape2.getRadius().getY()))).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        boolean isInsideRound2 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
+                        coordinate2.getY().subtract(shape2.getRadius().getY()))).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        boolean isInsideRound3 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
+                        coordinate2.getY().add(shape2.getRadius().getY()))).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        boolean isInsideRound4 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
+                        coordinate2.getY().add(shape2.getRadius().getY()))).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        return isInsideRectangle1 || isInsideRectangle2 || isInsideRound1 || isInsideRound2 || isInsideRound3 || isInsideRound4;
     }
 
     public static boolean checkBlockTypeRegistrable(int blockType) {
@@ -596,6 +621,7 @@ public class BlockUtil {
                 break;
         }
         movementInfo.setMaxSpeed(maxSpeed);
+        movementInfo.setAcceleration(maxSpeed.multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO));
     }
 
     /**
@@ -613,17 +639,23 @@ public class BlockUtil {
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET;
             case BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH;
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH;
             case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
             case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH;
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET;
             case BlockConstants.STRUCTURE_MATERIAL_NONE:
+            case BlockConstants.STRUCTURE_MATERIAL_TARGET:
+            case BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH:
             default:
                 return false;
         }
@@ -710,6 +742,9 @@ public class BlockUtil {
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
+                break;
             case BlockConstants.BLOCK_TYPE_GAME:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_BOTTOM);
@@ -951,7 +986,8 @@ public class BlockUtil {
                 break;
         }
         return new MovementInfo(new Coordinate(),
-                BlockConstants.MAX_SPEED_DEFAULT, BlockConstants.ACCELERATION_DEFAULT,
+                BlockConstants.MAX_SPEED_DEFAULT,
+                BlockConstants.MAX_SPEED_DEFAULT.multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO),
                 BlockConstants.FACE_DIRECTION_DEFAULT,
                 BlockConstants.FLOOR_CODE_DEFAULT,
                 BlockConstants.FRAME_DEFAULT,

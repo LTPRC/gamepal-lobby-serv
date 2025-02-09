@@ -232,11 +232,13 @@ public class BlockConstants {
 
     public static final int STRUCTURE_MATERIAL_NONE = 0; // Collide to none positively
     public static final int STRUCTURE_MATERIAL_ALL = 1; // Collide to all positively
-    public static final int STRUCTURE_MATERIAL_SOLID = 2; // Collide to 1, 2, 3, 4 positively
-    public static final int STRUCTURE_MATERIAL_SOLID_FLESH = 3; // Collide to 1, 2, 3 positively
-    public static final int STRUCTURE_MATERIAL_SOLID_NO_FLESH = 4; // Collide to 1, 2, 4 positively
-    public static final int STRUCTURE_MATERIAL_PARTICLE = 10; // Collide to 1, 2, 3, 4 positively
-    public static final int STRUCTURE_MATERIAL_PARTICLE_NO_FLESH = 11; // Collide to 1, 2, 4 positively
+    public static final int STRUCTURE_MATERIAL_SOLID = 2; // Collide to 1, 2, 3, 4, 20 positively
+    public static final int STRUCTURE_MATERIAL_SOLID_FLESH = 3; // Collide to 1, 2, 3, 20, 21 positively
+    public static final int STRUCTURE_MATERIAL_SOLID_NO_FLESH = 4; // Collide to 1, 2, 4, 20 positively
+    public static final int STRUCTURE_MATERIAL_PARTICLE = 10; // Collide to 1, 2, 3, 4, 20 positively
+    public static final int STRUCTURE_MATERIAL_PARTICLE_NO_FLESH = 11; // Collide to 1, 2, 4, 20 positively
+    public static final int STRUCTURE_MATERIAL_TARGET = 20; // Collide to none positively
+    public static final int STRUCTURE_MATERIAL_TARGET_FLESH = 21; // Collide to none positively
 
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
@@ -252,8 +254,8 @@ public class BlockConstants {
 
     public static final int HP_DEFAULT = 100;
 
-    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.5);
-    public static final BigDecimal ACCELERATION_DEFAULT = BigDecimal.valueOf(0.05);
+    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.2D);
+    public static final BigDecimal ACCELERATION_MAX_SPEED_RATIO = BigDecimal.valueOf(0.1D);
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
     public static final int FLOOR_CODE_DEFAULT = BLOCK_CODE_BLACK;
     public static final int FRAME_DEFAULT = 0;

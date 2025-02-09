@@ -86,7 +86,7 @@ public class EventManagerImpl implements EventManager {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        List<Block> affectedBlockList = sceneManager.collectAffectedBlocks(world, fromWorldCoordinate, eventBlock,
+        List<Block> preSelectedBlocks = sceneManager.collectAffectedBlocks(world, fromWorldCoordinate, eventBlock,
                 fromCreature.getBlockInfo().getId());
         // Effect after activation
         switch (eventBlock.getBlockInfo().getCode()) {
@@ -101,14 +101,14 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_MELEE_CHOP:
             case BlockConstants.BLOCK_CODE_MELEE_PICK:
             case BlockConstants.BLOCK_CODE_MELEE_STAB:
-                affectedBlockList.forEach(target -> affectBlock(world, eventBlock, target));
+                preSelectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_HIT:
             case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
             case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-                affectedBlockList.forEach(target -> affectBlock(world, eventBlock, target));
-                updateBullet(world, eventBlock, fromCreature, affectedBlockList);
+                preSelectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
+                updateBullet(world, eventBlock, fromCreature, preSelectedBlocks);
                 WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                         world.getRegionMap().get(fromCreature.getWorldCoordinate().getRegionNo()),
                         fromCreature.getWorldCoordinate(),
@@ -128,7 +128,7 @@ public class EventManagerImpl implements EventManager {
                     equidistantPoints.forEach(tailSmokeCoordinate ->
                             addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, fromCreature.getBlockInfo().getId(), tailSmokeCoordinate));
                 }
-                updateBullet(world, eventBlock, fromCreature, affectedBlockList);
+                updateBullet(world, eventBlock, fromCreature, preSelectedBlocks);
                 addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromCreature.getBlockInfo().getId(), worldCoordinate);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
@@ -167,14 +167,14 @@ public class EventManagerImpl implements EventManager {
                 break;
             case BlockConstants.BLOCK_CODE_EXPLODE:
                 sceneManager.setGridBlockCode(world, worldCoordinate, BlockConstants.BLOCK_CODE_LAVA);
-                affectedBlockList.stream()
+                preSelectedBlocks.stream()
 //                        .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                         .forEach(block -> {
                             affectBlock(world, eventBlock, block);
                 });
                 break;
             case BlockConstants.BLOCK_CODE_CURSE:
-                affectedBlockList.stream()
+                preSelectedBlocks.stream()
                         .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                         .filter(target -> !target.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId())))
                         .filter(target -> BlockUtil.calculateDistance(
@@ -190,7 +190,7 @@ public class EventManagerImpl implements EventManager {
                         });
                 break;
             case BlockConstants.BLOCK_CODE_CHEER:
-                affectedBlockList.stream()
+                preSelectedBlocks.stream()
                         .filter(affectedBlock -> affectedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                         .filter(target -> !target.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId())))
                         .filter(target -> BlockUtil.calculateDistance(

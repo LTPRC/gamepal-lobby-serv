@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class MovementManagerImpl implements MovementManager {
@@ -55,59 +56,137 @@ public class MovementManagerImpl implements MovementManager {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         WorldCoordinate teleportWc = null;
         Block expectedNewBlock = new Block(worldMovingBlock);
-        expectedNewBlock.getWorldCoordinate().getCoordinate().setX(
-                expectedNewBlock.getWorldCoordinate().getCoordinate().getX()
-                        .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
-        expectedNewBlock.getWorldCoordinate().getCoordinate().setY(
-                expectedNewBlock.getWorldCoordinate().getCoordinate().getY()
-                        .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
+        expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getY())));
         BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
         String fromId = world.getSourceMap().containsKey(worldMovingBlock.getBlockInfo().getId())
                 ? world.getSourceMap().get(worldMovingBlock.getBlockInfo().getId())
                 : worldMovingBlock.getBlockInfo().getId();
-        List<Block> affectedBlockList = sceneManager.collectAffectedBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlock, fromId);
-        for (Block block : affectedBlockList) {
+
+        // Linear selection on pre-selected blocks
+        List<Block> preSelectedBlocks = sceneManager.collectAffectedBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                        expectedNewBlock, fromId).stream()
+                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
+                .filter(blocker -> BlockUtil.checkMaterialCollision(
+                        worldMovingBlock.getBlockInfo().getStructure().getMaterial(),
+                        blocker.getBlockInfo().getStructure().getMaterial()))
+                .filter(blocker -> BlockUtil.detectLineCollision(region, worldMovingBlock.getWorldCoordinate(),
+                        expectedNewBlock, blocker, false))
+                .collect(Collectors.toList());
+
+        boolean xCollision = false;
+        boolean yCollision = false;
+        boolean xYCollision = false;
+        for (Block block : preSelectedBlocks) {
+            if (BlockUtil.detectCollision(region, worldMovingBlock, block)) {
+                continue;
+            }
+//            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+//                    && block.getBlockInfo().getId().equals(worldMovingBlock.getBlockInfo().getId())) {
+//                continue;
+//            }
+//            Block newMovingBlock = new Block(worldMovingBlock);
+//            expectedNewBlock.getWorldCoordinate().getCoordinate().setX(
+//                    worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+//                            .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
+//            expectedNewBlock.getWorldCoordinate().getCoordinate().setY(
+//                    worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+//                            .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
+//            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT
+//                    && BlockUtil.detectCollision(region, block, expectedNewBlock)) {
+//                teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
+//                break;
+//            }
+//            newMovingBlock = new Block(worldMovingBlock);
+//            expectedNewBlock.getWorldCoordinate().getCoordinate().setX(
+//                    worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+//                            .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
+            if (!worldMovingBlock.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)) {
+                expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
+                        worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
+                        worldMovingBlock.getWorldCoordinate().getCoordinate().getY()));
+                BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
+                if (BlockUtil.detectCollision(region, expectedNewBlock, block)) {
+                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
+                        teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
+                        break;
+                    } else {
+                        xCollision = true;
+                    }
+                }
+            }
+//            if (!BlockUtil.detectCollision(region, worldMovingBlock, block)
+//                    && BlockUtil.detectCollision(region, expectedNewBlock, block)
+//                    && BlockUtil.checkMaterialCollision(newMovingBlock.getBlockInfo().getStructure().getMaterial(),
+//                    block.getBlockInfo().getStructure().getMaterial())) {
+//                worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+//            }
+//            newMovingBlock = new Block(worldMovingBlock);
+//            expectedNewBlock.getWorldCoordinate().getCoordinate().setY(
+//                    worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+//                            .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
+            if (!worldMovingBlock.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO)) {
+                expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
+                        worldMovingBlock.getWorldCoordinate().getCoordinate().getX(),
+                        worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY())));
+                BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
+                if (BlockUtil.detectCollision(region, expectedNewBlock, block)) {
+                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
+                        teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
+                        break;
+                    } else {
+                        yCollision = true;
+                    }
+                }
+            }
+            if (xCollision) {
+                worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+            }
+            if (yCollision) {
+                worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+            }
             if (worldMovingBlock.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)
                     && worldMovingBlock.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO)) {
                 break;
             }
-            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                    && block.getBlockInfo().getId().equals(worldMovingBlock.getBlockInfo().getId())) {
-                continue;
+            if (!worldMovingBlock.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)
+                    && !worldMovingBlock.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO)) {
+                expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
+                        worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
+                        worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY())));
+                BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
+                if (BlockUtil.detectCollision(region, expectedNewBlock, block)) {
+                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
+                        teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
+                        break;
+                    } else {
+                        xYCollision = true;
+                    }
+                }
             }
-            Block newMovingBlock = new Block(worldMovingBlock);
-            newMovingBlock.getWorldCoordinate().getCoordinate().setX(
-                    worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
-                            .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
-            newMovingBlock.getWorldCoordinate().getCoordinate().setY(
-                    worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
-                            .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
-            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT
-                    && BlockUtil.detectCollision(region, newMovingBlock, block)) {
-                teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
-                break;
+            if (xYCollision) {
+                if (!xCollision) {
+                    worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+                } else if (!yCollision) {
+                    worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+                } else {
+                    worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+                    worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+                }
             }
-            newMovingBlock = new Block(worldMovingBlock);
-            newMovingBlock.getWorldCoordinate().getCoordinate().setX(
-                    worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
-                            .add(worldMovingBlock.getMovementInfo().getSpeed().getX()));
-            if (!BlockUtil.detectCollision(region, worldMovingBlock, block)
-                    && BlockUtil.detectCollision(region, newMovingBlock, block)
-                    && BlockUtil.checkMaterialCollision(newMovingBlock.getBlockInfo().getStructure().getMaterial(),
-                    block.getBlockInfo().getStructure().getMaterial())) {
-                worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
-            }
-            newMovingBlock = new Block(worldMovingBlock);
-            newMovingBlock.getWorldCoordinate().getCoordinate().setY(
-                    worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
-                            .add(worldMovingBlock.getMovementInfo().getSpeed().getY()));
-            if (!BlockUtil.detectCollision(region, worldMovingBlock, block)
-                    && BlockUtil.detectCollision(region, newMovingBlock, block)
-                    && BlockUtil.checkMaterialCollision(newMovingBlock.getBlockInfo().getStructure().getMaterial(),
-                    block.getBlockInfo().getStructure().getMaterial())) {
-                worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
-            }
+//            if (!BlockUtil.detectCollision(region, worldMovingBlock, block)
+//                    && BlockUtil.detectCollision(region, newMovingBlock, block)
+//                    && BlockUtil.checkMaterialCollision(newMovingBlock.getBlockInfo().getStructure().getMaterial(),
+//                    block.getBlockInfo().getStructure().getMaterial())) {
+//                worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+//            }
         }
         // Settle worldMovingBlock position
         if (null == teleportWc) {
