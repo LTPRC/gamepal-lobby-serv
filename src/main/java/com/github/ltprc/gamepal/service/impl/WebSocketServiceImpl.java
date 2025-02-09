@@ -20,6 +20,7 @@ import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -28,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -110,14 +112,26 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
-            if (functions.containsKey("updatePlayerMovement")
+            if (functions.containsKey("settleCoordinate")
                     && !world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT]) {
-                JSONObject updatePlayerMovement = functions.getJSONObject("updatePlayerMovement");
-                WorldCoordinate worldCoordinate = JSON.toJavaObject(updatePlayerMovement
+                JSONObject settleCoordinate = functions.getJSONObject("settleCoordinate");
+                WorldCoordinate worldCoordinate = JSON.toJavaObject(settleCoordinate
                         .getJSONObject("worldCoordinate"), WorldCoordinate.class);
-                MovementInfo movementInfo = JSON.toJavaObject(updatePlayerMovement
+                MovementInfo movementInfo = JSON.toJavaObject(settleCoordinate
                         .getJSONObject("movementInfo"), MovementInfo.class);
-                playerService.updatePlayerMovement(userCode, worldCoordinate, movementInfo);
+                movementManager.settleCoordinate(world, player, worldCoordinate, false);
+                player.getMovementInfo().setSpeed(movementInfo.getSpeed());
+                player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
+            }
+            if (functions.containsKey("settleSpeedAndCoordinate")) {
+                JSONObject settleSpeedAndCoordinate = functions.getJSONObject("settleSpeedAndCoordinate");
+                MovementInfo movementInfo = JSON.toJavaObject(settleSpeedAndCoordinate
+                        .getJSONObject("movementInfo"), MovementInfo.class);
+                player.getMovementInfo().setSpeed(movementInfo.getSpeed());
+                player.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new Coordinate(),
+                        movementInfo.getSpeed()));
+                movementManager.settleSpeedAndCoordinate(world, player, 1);
+                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
             }
             if (functions.containsKey("useItems")) {
                 JSONArray useItems = functions.getJSONArray("useItems");
