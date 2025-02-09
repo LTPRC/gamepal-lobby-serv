@@ -1811,7 +1811,12 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public boolean validateActiveness(final GameWorld world, final String id) {
-        Block block = world.getCreatureMap().get(id);
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(id)) {
+            logger.warn(ErrorUtil.ERROR_1007);
+            return false;
+        }
+        Block block = creatureMap.get(id);
         if (block.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
             return false;
         }

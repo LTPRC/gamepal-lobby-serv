@@ -8,6 +8,7 @@ import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -37,6 +38,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -733,8 +735,7 @@ public class SceneManagerImpl implements SceneManager {
         return rankingQueue;
     }
 
-    @Override
-    public Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius) {
+    private Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius) {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
@@ -801,7 +802,101 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius) {
+    public List<Block> collectAffectedBlocks(final GameWorld world, Block eventBlock, Block fromCreature) {
+        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
+        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
+        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
+            return new ArrayList<>();
+        }
+        Map<Integer, Region> regionMap = world.getRegionMap();
+        Region region = regionMap.get(worldCoordinate.getRegionNo());
+        Set<IntegerCoordinate> preSelectedSceneCoordinates =
+                BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
+        // Pre-select blocks including creatures
+        List<Block> preSelectedBlocks = world.getCreatureMap().values().stream()
+                .filter(creature -> !StringUtils.equals(creature.getBlockInfo().getId(), fromCreature.getBlockInfo().getId()))
+                .filter(creature -> creature.getWorldCoordinate().getRegionNo() == region.getRegionNo())
+                .filter(creature -> preSelectedSceneCoordinates.contains(creature.getWorldCoordinate().getSceneCoordinate()))
+                .filter(creature -> playerService.validateActiveness(world, creature.getBlockInfo().getId()))
+                .filter(creature -> checkEventCondition(world, fromWorldCoordinate, eventBlock, creature))
+                .collect(Collectors.toList());
+        // Collect all collided blocks
+        preSelectedSceneCoordinates.forEach(sceneCoordinate ->
+                region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
+                        .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
+                        .forEach(preSelectedBlocks::add));
+        return preSelectedBlocks;
+    }
+
+    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
+        boolean rst;
+        Map<Integer, Region> regionMap = world.getRegionMap();
+        Region region = regionMap.get(from.getRegionNo());
+        BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
+                blocker.getWorldCoordinate());
+        BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
+        BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
+        BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
+        switch (eventBlock.getBlockInfo().getCode()) {
+            case BlockConstants.BLOCK_CODE_MELEE_HIT:
+            case BlockConstants.BLOCK_CODE_MELEE_KICK:
+            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
+            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
+            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
+            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
+            case BlockConstants.BLOCK_CODE_MELEE_PICK:
+            case BlockConstants.BLOCK_CODE_MELEE_STAB:
+                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
+                        && null != eventDistance
+                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
+                        && null != angle1
+                        && null != angle2
+                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+                        < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
+                break;
+            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
+            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
+                        && null != fromDistance
+                        && fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
+                        && null != angle1
+                        && null != angle2
+                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
+                        && BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
+                break;
+            case BlockConstants.BLOCK_CODE_EXPLODE:
+                rst = null != eventDistance
+                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
+                break;
+            default:
+                rst = BlockUtil.detectCollision(region, eventBlock, blocker);
+                break;
+        }
+        return rst;
+    }
+
+    private List<Block> shortenPreSelectedBlocks(RegionInfo regionInfo, WorldCoordinate from, Block eventBlock,
+                                                 List<Block> preSelectedBlocks) {
+        Optional<Block> collidedBlock = preSelectedBlocks.stream()
+                .filter(preSelectedBlock -> BlockUtil.checkMaterialCollision(
+                        eventBlock.getBlockInfo().getStructure().getMaterial(),
+                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
+                .filter(block -> null != BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate()))
+                .min(Comparator.comparing(block -> BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate())));
+        List<Block> shortenedBlocks = preSelectedBlocks.stream()
+                .filter(preSelectedBlock -> !BlockUtil.checkMaterialCollision(
+                        eventBlock.getBlockInfo().getStructure().getMaterial(),
+                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
+                .collect(Collectors.toList());
+        collidedBlock.ifPresent(shortenedBlocks::add);
+        return shortenedBlocks;
+    }
+
+    private Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius) {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);

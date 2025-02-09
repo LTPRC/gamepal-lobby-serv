@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -14,8 +15,7 @@ public interface SceneManager {
     Region generateRegion(final int regionNo);
     void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate);
     Queue<Block> collectBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
-    Queue<Block> collectBlocksFromScenes(final GameWorld world, final Block player, final int sceneScanRadius);
-    Queue<Block> collectBlocksFromCreatureMap(final GameWorld world, final Block player, final int sceneScanRadius);
+    List<Block> collectAffectedBlocks(final GameWorld world, Block eventBlock, Block fromCreature);
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
     JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
                                              final boolean useWorldCoordinate);

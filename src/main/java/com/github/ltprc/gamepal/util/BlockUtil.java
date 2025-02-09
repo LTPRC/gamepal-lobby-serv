@@ -304,10 +304,10 @@ public class BlockUtil {
         WorldCoordinate worldCoordinate3 = BlockUtil.locateCoordinateWithDirectionAndDistance(regionInfo,
                 block1.getWorldCoordinate(),
                 BlockUtil.calculateAngle(coordinate1, coordinate3), BlockUtil.calculateDistance(coordinate1, coordinate3));
-        block3.setWorldCoordinate(worldCoordinate3);
+        BlockUtil.copyWorldCoordinate(worldCoordinate3, block3.getWorldCoordinate());
         if (detectCollision(regionInfo, block3, block2)) {
             if (correctBlock1) {
-                block1.setWorldCoordinate(block3.getWorldCoordinate());
+                BlockUtil.copyWorldCoordinate(worldCoordinate3, block1.getWorldCoordinate());
             }
             return true;
         }

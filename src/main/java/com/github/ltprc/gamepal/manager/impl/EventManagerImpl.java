@@ -49,9 +49,37 @@ public class EventManagerImpl implements EventManager {
         }
         Block fromCreature = world.getCreatureMap().getOrDefault(sourceId, eventBlock);
         correctTarget(world, eventBlock, fromCreature);
-        List<Block> affectedBlockList = collectAffectedBlocks(world, eventBlock, fromCreature);
-        activateEvent(world, eventBlock, fromCreature, affectedBlockList);
+        activateEvent(world, eventBlock, fromCreature);
     }
+
+//    private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
+//        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
+//        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
+//        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
+//            return;
+//        }
+//        Map<Integer, Region> regionMap = world.getRegionMap();
+//        Region region = regionMap.get(worldCoordinate.getRegionNo());
+//        Set<IntegerCoordinate> preSelectedSceneCoordinates =
+//                BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
+//        // Detect the maximum moving distance
+//        preSelectedSceneCoordinates.forEach(sceneCoordinate ->
+//                region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
+//                        .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
+//                        .filter(blocker -> BlockUtil.checkMaterialCollision(
+//                                eventBlock.getBlockInfo().getStructure().getMaterial(),
+//                                blocker.getBlockInfo().getStructure().getMaterial()))
+//                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
+//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
+//                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
+//                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D
+//                        )
+//                        .forEach(blocker ->
+//                                BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, true)
+//                        ));
+//    }
 
     private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
@@ -61,127 +89,24 @@ public class EventManagerImpl implements EventManager {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        Set<IntegerCoordinate> preSelectedSceneCoordinates =
-                BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
-        // Detect the maximum moving distance
-        preSelectedSceneCoordinates.forEach(sceneCoordinate ->
-                region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
-                        .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
-                        .filter(blocker -> BlockUtil.checkMaterialCollision(
-                                eventBlock.getBlockInfo().getStructure().getMaterial(),
-                                blocker.getBlockInfo().getStructure().getMaterial()))
-                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-                                BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
-                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D
-                        )
-                        .forEach(blocker ->
-                                BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, true)
-                        ));
-    }
-
-    private List<Block> collectAffectedBlocks(GameWorld world, Block eventBlock, Block fromCreature) {
-        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
-        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
-        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
-            return new ArrayList<>();
-        }
-        Map<Integer, Region> regionMap = world.getRegionMap();
-        Region region = regionMap.get(worldCoordinate.getRegionNo());
-        Set<IntegerCoordinate> preSelectedSceneCoordinates =
-                BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
-        // Pre-select blocks including creatures
-        List<Block> preSelectedBlocks = world.getCreatureMap().values().stream()
-                .filter(creature -> creature.getWorldCoordinate().getRegionNo() == region.getRegionNo())
-                .filter(creature -> preSelectedSceneCoordinates.contains(creature.getWorldCoordinate().getSceneCoordinate()))
-                .filter(creature -> playerService.validateActiveness(world, creature.getBlockInfo().getId()))
-//                .filter(creature -> BlockUtil.checkMaterialCollision(
-//                        eventBlock.getBlockInfo().getStructure().getMaterial(),
-//                        creature.getBlockInfo().getStructure().getMaterial()))
-                .filter(creature -> checkEventCondition(world, fromWorldCoordinate, eventBlock, creature))
-                .collect(Collectors.toList());
-        // Collect all collided blocks
-        preSelectedSceneCoordinates.forEach(sceneCoordinate ->
-                region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
-//                        .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-//                                BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate()).doubleValue(),
-//                                BlockUtil.calculateAngle(region, from, worldCoordinate).doubleValue()) < 135D)
-                        .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
-                        .forEach(preSelectedBlocks::add));
-//        return shortenPreSelectedBlocks(region, fromWorldCoordinate, eventBlock, preSelectedBlocks);
-        return preSelectedBlocks;
-    }
-
-    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
-        boolean rst = false;
-        Map<Integer, Region> regionMap = world.getRegionMap();
-        Region region = regionMap.get(from.getRegionNo());
-        BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
-                blocker.getWorldCoordinate());
-        BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
-        BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
-        BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
-        switch (eventBlock.getBlockInfo().getCode()) {
-            case BlockConstants.BLOCK_CODE_MELEE_HIT:
-            case BlockConstants.BLOCK_CODE_MELEE_KICK:
-            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
-            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
-            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
-            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
-            case BlockConstants.BLOCK_CODE_MELEE_PICK:
-            case BlockConstants.BLOCK_CODE_MELEE_STAB:
-                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && null != eventDistance
-                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
-                        && null != angle1
-                        && null != angle2
-                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
-                break;
-            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
-            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
-            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
-            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && null != fromDistance
-                        && fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
-                        && null != angle1
-                        && null != angle2
-                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                        && BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
-                break;
-            case BlockConstants.BLOCK_CODE_EXPLODE:
-                rst = null != eventDistance
-                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
-                break;
-            default:
-                break;
-        }
-        return rst;
-    }
-
-    private List<Block> shortenPreSelectedBlocks(RegionInfo regionInfo, WorldCoordinate from, Block eventBlock,
-                                                 List<Block> preSelectedBlocks) {
-        Optional<Block> collidedBlock = preSelectedBlocks.stream()
-                .filter(preSelectedBlock -> BlockUtil.checkMaterialCollision(
+        List<Block> preSelectedBlocks = sceneManager.collectAffectedBlocks(world, eventBlock, fromCreature);
+        preSelectedBlocks.stream()
+                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
+                .filter(blocker -> BlockUtil.checkMaterialCollision(
                         eventBlock.getBlockInfo().getStructure().getMaterial(),
-                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
-                .filter(block -> null != BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate()))
-                .min(Comparator.comparing(block -> BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate())));
-        List<Block> shortenedBlocks = preSelectedBlocks.stream()
-                .filter(preSelectedBlock -> !BlockUtil.checkMaterialCollision(
-                        eventBlock.getBlockInfo().getStructure().getMaterial(),
-                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
-                .collect(Collectors.toList());
-        collidedBlock.ifPresent(shortenedBlocks::add);
-        return shortenedBlocks;
+                        blocker.getBlockInfo().getStructure().getMaterial()))
+                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+                        BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
+                        BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
+                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
+                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D)
+                .forEach(blocker ->
+                        BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, true)
+                );
     }
 
-    private void activateEvent(GameWorld world, Block eventBlock, Block fromCreature, List<Block> affectedBlockList) {
+    private void activateEvent(GameWorld world, Block eventBlock, Block fromCreature) {
         Random random = new Random();
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
         WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
@@ -190,6 +115,7 @@ public class EventManagerImpl implements EventManager {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
+        List<Block> affectedBlockList = sceneManager.collectAffectedBlocks(world, eventBlock, fromCreature);
         // Effect after activation
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
@@ -437,11 +363,6 @@ public class EventManagerImpl implements EventManager {
     @Override
     @Transactional
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
-//        if (eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_EFFECT
-//                && eventBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLASMA) {
-//            logger.error(ErrorUtil.ERROR_1013);
-//            return;
-//        }
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
@@ -483,70 +404,6 @@ public class EventManagerImpl implements EventManager {
                 addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, block.getBlockInfo().getId(), block.getWorldCoordinate());
                 sceneManager.removeBlock(world, block, true);
             }
-        }
-    }
-
-    @Override
-    @Transactional
-    public void triggerTrap(GameWorld world, Block trapBlock) {
-        Random random = new Random();
-        String fromId = world.getSourceMap().containsKey(trapBlock.getBlockInfo().getId())
-                ? world.getSourceMap().get(trapBlock.getBlockInfo().getId())
-                : trapBlock.getBlockInfo().getId();
-        switch (trapBlock.getBlockInfo().getCode()) {
-            case BlockConstants.BLOCK_CODE_MINE:
-                if (world.getCreatureMap().values().stream()
-                        .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
-                        .filter(player -> !StringUtils.equals(fromId, player.getBlockInfo().getId()))
-                        .anyMatch(player -> {
-                            BigDecimal distance = BlockUtil.calculateDistance(
-                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                            return null != distance && distance.compareTo(BlockConstants.MINE_RADIUS) < 0;
-                        })) {
-                    addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, trapBlock.getWorldCoordinate());
-                    sceneManager.removeBlock(world, trapBlock, true);
-                }
-                break;
-            case BlockConstants.BLOCK_CODE_FIRE:
-                // Burn grid
-                if (sceneManager.getGridBlockCode(world, trapBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
-                        || sceneManager.getGridBlockCode(world, trapBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
-                    sceneManager.setGridBlockCode(world, trapBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
-                }
-                // Burn collected blocks 25/02/02
-                Queue<Block> rankingQueue = sceneManager.collectBlocks(world, trapBlock, 1);
-                rankingQueue.stream()
-                        .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
-                                || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
-                        .filter(targetBlock -> {
-                            BigDecimal distance = BlockUtil.calculateDistance(
-                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()),
-                                    trapBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
-                            return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
-                        })
-                        .forEach(targetBlock -> {
-                            affectBlock(world, trapBlock, targetBlock);
-                        });
-                break;
-            case BlockConstants.BLOCK_CODE_WIRE_NETTING:
-                world.getCreatureMap().values().stream()
-                        .filter(player -> playerService.validateActiveness(world, player.getBlockInfo().getId()))
-                        .filter(player -> {
-                            BigDecimal distance = BlockUtil.calculateDistance(
-                                    world.getRegionMap().get(trapBlock.getWorldCoordinate().getRegionNo()), trapBlock.getWorldCoordinate(), player.getWorldCoordinate());
-                            return null != distance && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0;
-                        })
-                        .forEach(player -> {
-                            if (random.nextDouble()
-                                    < Math.sqrt(Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
-                                    + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-                                    / player.getMovementInfo().getMaxSpeed().doubleValue()) {
-                                affectBlock(world, trapBlock, player);
-                            }
-                        });
-                break;
-            default:
-                break;
         }
     }
 }

@@ -9,5 +9,4 @@ public interface EventManager {
     void updateEvent(GameWorld world, Block eventBlock);
     void affectBlock(GameWorld world, Block eventBlock, Block targetBlock);
     void changeHp(GameWorld world, Block block, int value, boolean isAbsolute);
-    void triggerTrap(GameWorld world, Block trapBlock);
 }
