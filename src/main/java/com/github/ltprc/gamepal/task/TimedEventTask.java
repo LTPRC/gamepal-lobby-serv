@@ -13,6 +13,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -71,7 +72,6 @@ public class TimedEventTask {
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
             onlineMap.keySet().stream()
-//                    .filter(blockInfo -> blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER)
                     .filter(creatureMap::containsKey)
                     .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(id -> {
@@ -169,7 +169,9 @@ public class TimedEventTask {
                             BlockUtil.updateMaxSpeed(movementInfo);
                         }
 
-                        buffManager.changeBuff(world, id);
+                        if (creatureMap.containsKey(id)) {
+                            buffManager.changeBuff(world, id);
+                        }
                     });
 
             // Update farms

@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.util;
 
+import com.alibaba.fastjson.JSON;
 import com.github.ltprc.gamepal.model.GamepalError;
 
 public class ErrorUtil {
@@ -53,4 +54,9 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1102 = new GamepalError("1102", "Invalid playerCount.");
     public static final GamepalError ERROR_1103 = new GamepalError("1103", "Invalid gameStatus.");
     public static final GamepalError ERROR_1104 = new GamepalError("1104", "Invalid playerStatus.");
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
+    }
 }

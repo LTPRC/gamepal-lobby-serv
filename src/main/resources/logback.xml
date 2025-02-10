@@ -1,0 +1,16 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 编码器 -->
+        <encoder>
+            <!-- 日志输出格式 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %class{0}.%method:%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 设置根logger的日志级别为DEBUG，并将其与STDOUT appender关联 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

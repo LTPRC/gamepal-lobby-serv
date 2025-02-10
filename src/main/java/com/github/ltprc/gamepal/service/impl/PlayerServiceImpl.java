@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.manager.impl.BuffManagerImpl;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.*;
 import com.github.ltprc.gamepal.model.item.*;
@@ -1199,18 +1200,18 @@ public class PlayerServiceImpl implements PlayerService {
     public String findTopBossId(final String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
-            logger.error(ErrorUtil.ERROR_1016);
+            logger.error(String.valueOf(ErrorUtil.ERROR_1016));
             return userCode;
         }
         Map<String, Block> creatureMap = world.getCreatureMap();
         if (!creatureMap.containsKey(userCode)) {
-            logger.error(ErrorUtil.ERROR_1007);
+            logger.error(String.valueOf(ErrorUtil.ERROR_1007));
             return userCode;
         }
         Block player = creatureMap.get(userCode);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
-            logger.error(ErrorUtil.ERROR_1007);
+            logger.error(String.valueOf(ErrorUtil.ERROR_1007));
             return userCode;
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
@@ -1389,14 +1390,14 @@ public class PlayerServiceImpl implements PlayerService {
             Map.Entry<String, Integer> drop = world.getDropMap().get(dropId);
             getItem(userCode, drop.getKey(), drop.getValue());
         } else {
-            logger.warn(ErrorUtil.ERROR_1030);
+            logger.warn(String.valueOf(ErrorUtil.ERROR_1030));
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
         }
         if (world.getBlockMap().containsKey(dropId)) {
             Block dropBlock = world.getBlockMap().get(dropId);
             sceneManager.removeBlock(world, dropBlock, false);
         } else {
-            logger.warn(ErrorUtil.ERROR_1030);
+            logger.warn(String.valueOf(ErrorUtil.ERROR_1030));
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
         }
         return ResponseEntity.ok().body(rst.toString());
@@ -1740,6 +1741,10 @@ public class PlayerServiceImpl implements PlayerService {
         // TODO Game-over display
         userService.logoff(userCode, "", false);
         world.getCreatureMap().remove(userCode);
+        world.getPlayerInfoMap().remove(userCode);
+        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
+            world.getNpcBrainMap().remove(userCode);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1815,7 +1820,7 @@ public class PlayerServiceImpl implements PlayerService {
     public boolean validateActiveness(final GameWorld world, final String id) {
         Map<String, Block> creatureMap = world.getCreatureMap();
         if (!creatureMap.containsKey(id)) {
-            logger.warn(ErrorUtil.ERROR_1007);
+            logger.warn(String.valueOf(ErrorUtil.ERROR_1007));
             return false;
         }
         Block block = creatureMap.get(id);
