@@ -607,16 +607,18 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_CODE_SNOW:
             case BlockConstants.BLOCK_CODE_LAVA:
+            case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.6));
                 break;
             case BlockConstants.BLOCK_CODE_ROUGH:
             case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
-            case BlockConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
                 maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.8));
                 break;
             case BlockConstants.BLOCK_CODE_BLACK:
             case BlockConstants.BLOCK_CODE_GRASS:
             case BlockConstants.BLOCK_CODE_DIRT:
+            case BlockConstants.BLOCK_CODE_WATER_DEEP:
             default:
                 break;
         }

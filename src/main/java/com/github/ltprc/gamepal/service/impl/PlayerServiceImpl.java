@@ -1113,7 +1113,9 @@ public class PlayerServiceImpl implements PlayerService {
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
                 boolean fishingResult = false;
-                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER) {
+                if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_SHALLOW
+                        || sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_MEDIUM
+                        || sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_DEEP) {
                     fishingResult = goFishing(userCode);
                     eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SPRAY, userCode, buildingWorldCoordinate);
                 } else {
@@ -1132,7 +1134,7 @@ public class PlayerServiceImpl implements PlayerService {
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) != BlockConstants.BLOCK_CODE_DIRT) {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
                 } else {
-                    sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_WATER);
+                    sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
                 }
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:

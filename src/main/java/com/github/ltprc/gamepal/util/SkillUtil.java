@@ -202,8 +202,9 @@ public class SkillUtil {
 
     public static boolean blockCode2Build(int code) {
         switch (code) {
-//            case BlockConstants.BLOCK_CODE_BLACK:
-            case BlockConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
+            case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
+            case BlockConstants.BLOCK_CODE_WATER_DEEP:
                 return false;
             default:
                 return true;

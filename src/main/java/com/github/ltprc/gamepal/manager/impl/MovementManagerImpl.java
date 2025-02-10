@@ -67,7 +67,7 @@ public class MovementManagerImpl implements MovementManager {
                 : worldMovingBlock.getBlockInfo().getId();
 
         // Linear selection on pre-selected blocks
-        List<Block> preSelectedBlocks = sceneManager.collectAffectedBlocks(world, worldMovingBlock.getWorldCoordinate(),
+        List<Block> preSelectedBlocks = sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
                         expectedNewBlock, fromId).stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
                 .filter(blocker -> BlockUtil.checkMaterialCollision(
@@ -272,19 +272,24 @@ public class MovementManagerImpl implements MovementManager {
             WorldCoordinate worldCoordinate = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
             BlockUtil.fixWorldCoordinateReal(region, worldCoordinate);
             IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
-            int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
-            int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
-            int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
-            int code4 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
-            if (code1 == BlockConstants.BLOCK_CODE_WATER && code2 == BlockConstants.BLOCK_CODE_WATER
-                    && code3 == BlockConstants.BLOCK_CODE_WATER && code4 == BlockConstants.BLOCK_CODE_WATER) {
-                worldMovingBlock.getMovementInfo().setFloorCode(BlockConstants.BLOCK_CODE_WATER);
-                return;
-            }
+//            int floorCode;
+//            floorCode = scene.getGird()
+//                    [gridCoordinate.getX() + worldCoordinate.getCoordinate().getX().doubleValue() % 1 < 0.5 ? 0 : 1]
+//                    [gridCoordinate.getY() + worldCoordinate.getCoordinate().getY().doubleValue() % 1 < 0.5 ? 0 : 1];
+//            int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+//            int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
+//            int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
+//            int code4 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
+//            if (code1 == BlockConstants.BLOCK_CODE_WATER_SHALLOW && code2 == BlockConstants.BLOCK_CODE_WATER_SHALLOW
+//                    && code3 == BlockConstants.BLOCK_CODE_WATER_SHALLOW && code4 == BlockConstants.BLOCK_CODE_WATER_SHALLOW) {
+//                worldMovingBlock.getMovementInfo().setFloorCode(BlockConstants.BLOCK_CODE_WATER_SHALLOW);
+//                return;
+//            }
             int code = sceneManager.getGridBlockCode(world, worldMovingBlock.getWorldCoordinate());
-            if (code != BlockConstants.BLOCK_CODE_WATER) {
-                worldMovingBlock.getMovementInfo().setFloorCode(code);
-            }
+            worldMovingBlock.getMovementInfo().setFloorCode(code);
+//            if (code != BlockConstants.BLOCK_CODE_WATER_SHALLOW) {
+//                worldMovingBlock.getMovementInfo().setFloorCode(code);
+//            }
         }
     }
 

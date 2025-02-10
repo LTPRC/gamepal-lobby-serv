@@ -114,16 +114,16 @@ public class SceneManagerImpl implements SceneManager {
         for (int i = - region.getRadius() + 1; i < region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius() - 1);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
             sceneCoordinate = new IntegerCoordinate(i, - region.getRadius() + 1);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
             sceneCoordinate = new IntegerCoordinate(region.getRadius() - 1, i);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
             sceneCoordinate = new IntegerCoordinate(- region.getRadius() + 1, i);
             region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER);
+            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
         }
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             for (int j = - region.getRadius(); j <= region.getRadius(); j++) {
@@ -148,7 +148,7 @@ public class SceneManagerImpl implements SceneManager {
                             altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else {
                     if (d >= 0.8D) {
-                        blockCode = BlockConstants.BLOCK_CODE_WATER;
+                        blockCode = BlockConstants.BLOCK_CODE_WATER_SHALLOW;
                     } else if (d >= 0.6D) {
                         blockCode = BlockConstants.BLOCK_CODE_SWAMP;
                     } else if (d >= 0.4D) {
@@ -618,7 +618,9 @@ public class SceneManagerImpl implements SceneManager {
                 weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 10);
                 break;
             case BlockConstants.BLOCK_CODE_SNOW:
-            case BlockConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
+            case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
+            case BlockConstants.BLOCK_CODE_WATER_DEEP:
             case BlockConstants.BLOCK_CODE_BLACK:
             default:
                 break;
@@ -701,7 +703,9 @@ public class SceneManagerImpl implements SceneManager {
                 break;
             case BlockConstants.BLOCK_CODE_SAND:
             case BlockConstants.BLOCK_CODE_LAVA:
-            case BlockConstants.BLOCK_CODE_WATER:
+            case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
+            case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
+            case BlockConstants.BLOCK_CODE_WATER_DEEP:
             case BlockConstants.BLOCK_CODE_BLACK:
             default:
                 break;
@@ -833,8 +837,8 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public List<Block> collectAffectedBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate,
-                                             Block eventBlock, String sourceId) {
+    public List<Block> collectLinearBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate,
+                                           Block eventBlock, String sourceId) {
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
         if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
             return new ArrayList<>();
@@ -849,65 +853,18 @@ public class SceneManagerImpl implements SceneManager {
                 .filter(creature -> creature.getWorldCoordinate().getRegionNo() == region.getRegionNo())
                 .filter(creature -> preSelectedSceneCoordinates.contains(creature.getWorldCoordinate().getSceneCoordinate()))
                 .filter(creature -> playerService.validateActiveness(world, creature.getBlockInfo().getId()))
-                .filter(creature -> checkEventCondition(world, fromWorldCoordinate, eventBlock, creature))
+                .filter(creature ->  BlockUtil.checkMaterialCollision(eventBlock.getBlockInfo().getStructure().getMaterial(),
+                        creature.getBlockInfo().getStructure().getMaterial()))
+                .filter(creature -> BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, creature, false))
                 .collect(Collectors.toList());
         // Collect all collided blocks
         preSelectedSceneCoordinates.forEach(sceneCoordinate ->
                 region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
-                        .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
+                        .filter(blocker ->  BlockUtil.checkMaterialCollision(eventBlock.getBlockInfo().getStructure().getMaterial(),
+                                blocker.getBlockInfo().getStructure().getMaterial()))
+                        .filter(blocker -> BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, false))
                         .forEach(preSelectedBlocks::add));
         return preSelectedBlocks;
-    }
-
-    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
-        boolean rst;
-        Map<Integer, Region> regionMap = world.getRegionMap();
-        Region region = regionMap.get(from.getRegionNo());
-        BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
-                blocker.getWorldCoordinate());
-        BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
-        BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
-        BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
-        switch (eventBlock.getBlockInfo().getCode()) {
-            case BlockConstants.BLOCK_CODE_MELEE_HIT:
-            case BlockConstants.BLOCK_CODE_MELEE_KICK:
-            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
-            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
-            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
-            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
-            case BlockConstants.BLOCK_CODE_MELEE_PICK:
-            case BlockConstants.BLOCK_CODE_MELEE_STAB:
-                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && null != eventDistance
-                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
-                        && null != angle1
-                        && null != angle2
-                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
-                break;
-            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
-            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
-            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
-            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && null != fromDistance
-                        && fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
-                        && null != angle1
-                        && null != angle2
-                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                        && BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
-                break;
-            case BlockConstants.BLOCK_CODE_EXPLODE:
-                rst = null != eventDistance
-                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
-                break;
-            default:
-                rst = BlockUtil.detectLineCollision(region, from, eventBlock, blocker, false);
-                break;
-        }
-        return rst;
     }
 
     private List<Block> shortenPreSelectedBlocks(RegionInfo regionInfo, WorldCoordinate from, Block eventBlock,

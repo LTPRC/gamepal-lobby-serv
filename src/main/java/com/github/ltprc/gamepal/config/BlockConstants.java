@@ -53,7 +53,9 @@ public class BlockConstants {
     public static final int BLOCK_CODE_ROUGH = 1015;
     public static final int BLOCK_CODE_SUBTERRANEAN = 1016;
     public static final int BLOCK_CODE_LAVA = 1017;
-    public static final int BLOCK_CODE_WATER = 1018;
+    public static final int BLOCK_CODE_WATER_SHALLOW = 1018;
+    public static final int BLOCK_CODE_WATER_MEDIUM = 1019;
+    public static final int BLOCK_CODE_WATER_DEEP = 1020;
     public static final int BLOCK_CODE_EDGE_DIRT_UP = 1020;
     public static final int BLOCK_CODE_EDGE_DIRT_LEFT = 1021;
     public static final int BLOCK_CODE_EDGE_DIRT_RIGHT = 1022;
@@ -313,7 +315,9 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_ROUGH, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SUBTERRANEAN, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LAVA, BLOCK_TYPE_FLOOR);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WATER, BLOCK_TYPE_FLOOR);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WATER_SHALLOW, BLOCK_TYPE_FLOOR);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WATER_MEDIUM, BLOCK_TYPE_FLOOR);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WATER_DEEP, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EDGE_DIRT_UP, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EDGE_DIRT_LEFT, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EDGE_DIRT_RIGHT, BLOCK_TYPE_FLOOR);
@@ -447,7 +451,9 @@ public class BlockConstants {
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_ROUGH, new Color(96, 96, 0));
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_SUBTERRANEAN, new Color(128, 128, 128));
         BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_LAVA, new Color(96, 16, 16));
-        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER, new Color(64, 192, 255));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER_SHALLOW, new Color(64, 192, 255));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER_MEDIUM, new Color(48, 240, 192));
+        BLOCK_CODE_COLOR_MAP.put(BLOCK_CODE_WATER_DEEP, new Color(32, 96, 128));
     }
 
     private BlockConstants() {
