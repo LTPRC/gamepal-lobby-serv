@@ -49,6 +49,11 @@ public class EventManagerImpl implements EventManager {
         }
         Block fromCreature = world.getCreatureMap().getOrDefault(sourceId, eventBlock);
         correctTarget(world, eventBlock, fromCreature);
+        // STRUCTURE_MATERIAL_PARTICLE_NO_FLESH is for piercing creatures
+        // STRUCTURE_MATERIAL_PARTICLE is for hitting creatures
+        if (eventBlock.getBlockInfo().getStructure().getMaterial() == BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH) {
+            eventBlock.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_PARTICLE);
+        }
         activateEvent(world, eventBlock, fromCreature);
     }
 
@@ -91,7 +96,6 @@ public class EventManagerImpl implements EventManager {
                 fromCreature.getBlockInfo().getId()).stream()
                 .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
                 .collect(Collectors.toList());
-        // Effect after activation
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
                 affectBlock(world, eventBlock, fromCreature);
