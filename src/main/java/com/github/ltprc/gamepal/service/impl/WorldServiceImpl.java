@@ -11,12 +11,10 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -36,7 +33,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 /**
  * Do not put too many dynamic game logics into this class.
  */
-@Transactional
 @Service
 public class WorldServiceImpl implements WorldService {
 

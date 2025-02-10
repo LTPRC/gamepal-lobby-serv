@@ -31,7 +31,6 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 
-@Transactional
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -55,6 +54,7 @@ public class UserServiceImpl implements UserService {
     private Map<String, String> userWorldMap = new LinkedHashMap<>(); // userCode, worldId
 
     @Override
+    @Transactional
     public ResponseEntity<String> registerAccount(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -90,6 +90,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> cancelAccount(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -106,6 +107,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> login(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
@@ -146,6 +148,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> logoff(HttpServletRequest request) {
         JSONObject req = null;
         try {
@@ -159,6 +162,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<String> logoff(String userCode, String token, boolean needToken) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = getWorldByUserCode(userCode);

@@ -325,7 +325,6 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
-    @Transactional
     public void updateEvent(GameWorld world, Block eventBlock) {
         if (eventBlock.getMovementInfo().getPeriod() == BlockConstants.PERIOD_STATIC_DEFAULT) {
             return;
