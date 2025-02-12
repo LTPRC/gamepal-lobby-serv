@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoArgsConstructor
 public class Scene extends SceneInfo {
     private Map<String, Block> blocks;
-    private int[][] gird; // terrain grid
+    private int[][] grid; // terrain grid
 
     public Scene(Scene scene) {
         blocks = new ConcurrentHashMap<>(scene.blocks);
-        gird = ArrayUtils.clone(scene.gird);
+        grid = ArrayUtils.clone(scene.grid);
     }
 }

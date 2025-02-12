@@ -78,6 +78,20 @@ public class SceneManagerImpl implements SceneManager {
             case GamePalConstants.REGION_TYPE_ISLAND:
                 initializeRegionTerrainMapIsland(region);
                 break;
+            default:
+            case GamePalConstants.REGION_TYPE_EMPTY:
+            case GamePalConstants.REGION_TYPE_ALL_DIRT:
+            case GamePalConstants.REGION_TYPE_ALL_SAND:
+            case GamePalConstants.REGION_TYPE_ALL_GRASS:
+            case GamePalConstants.REGION_TYPE_ALL_SNOW:
+            case GamePalConstants.REGION_TYPE_ALL_SWAMP:
+            case GamePalConstants.REGION_TYPE_ALL_ROUGH:
+            case GamePalConstants.REGION_TYPE_ALL_SUBTERRANEAN:
+            case GamePalConstants.REGION_TYPE_ALL_LAVA:
+            case GamePalConstants.REGION_TYPE_ALL_WATER_SHALLOW:
+            case GamePalConstants.REGION_TYPE_ALL_WATER_MEDIUM:
+            case GamePalConstants.REGION_TYPE_ALL_WATER_DEEP:
+                break;
         }
     }
 
@@ -233,7 +247,28 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1031);
             return;
         }
-        int terrainCode = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
+        int terrainCode = BlockConstants.BLOCK_CODE_BLACK;
+        switch (region.getType()) {
+            case GamePalConstants.REGION_TYPE_ALL_DIRT:
+            case GamePalConstants.REGION_TYPE_ALL_SAND:
+            case GamePalConstants.REGION_TYPE_ALL_GRASS:
+            case GamePalConstants.REGION_TYPE_ALL_SNOW:
+            case GamePalConstants.REGION_TYPE_ALL_SWAMP:
+            case GamePalConstants.REGION_TYPE_ALL_ROUGH:
+            case GamePalConstants.REGION_TYPE_ALL_SUBTERRANEAN:
+            case GamePalConstants.REGION_TYPE_ALL_LAVA:
+            case GamePalConstants.REGION_TYPE_ALL_WATER_SHALLOW:
+            case GamePalConstants.REGION_TYPE_ALL_WATER_MEDIUM:
+            case GamePalConstants.REGION_TYPE_ALL_WATER_DEEP:
+                terrainCode = region.getType();
+                break;
+            case GamePalConstants.REGION_TYPE_EMPTY:
+            case GamePalConstants.REGION_TYPE_ISLAND:
+                terrainCode = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
+                break;
+            default:
+                break;
+        }
         region.getScenes().put(sceneCoordinate, scene);
         fillSceneTemplate(world, region, scene, terrainCode);
         if (terrainCode == BlockConstants.BLOCK_CODE_BLACK) {
@@ -244,66 +279,66 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private Scene fillSceneTemplate(GameWorld world, final Region region, final Scene scene, final int blockCode) {
-        scene.setGird(new int[region.getWidth() + 1][region.getHeight() + 1]);
+        scene.setGrid(new int[region.getWidth() + 1][region.getHeight() + 1]);
         for (int i = 0; i <= region.getWidth(); i++) {
             for (int j = 0; j <= region.getHeight(); j++) {
-                scene.getGird()[i][j] = 1001;
+                scene.getGrid()[i][j] = 1001;
             }
         }
         IntegerCoordinate sceneCoordinate = scene.getSceneCoordinate();
         Scene scene1;
         for (int l = 0; l <= region.getWidth(); l++) {
             for (int k = 0; k <= region.getHeight(); k++) {
-                scene.getGird()[l][k] = blockCode;
+                scene.getGrid()[l][k] = blockCode;
             }
         }
         // Area 0,0
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() - 1));
         if (null != scene1) {
-            scene.getGird()[0][0] = scene1.getGird()[region.getWidth()][region.getHeight()];
+            scene.getGrid()[0][0] = scene1.getGrid()[region.getWidth()][region.getHeight()];
         } else {
-            scene.getGird()[0][0] = region.getTerrainMap()
+            scene.getGrid()[0][0] = region.getTerrainMap()
                     .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() - 1), blockCode);
         }
         // Area 2,0
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() - 1));
         if (null != scene1) {
-            scene.getGird()[region.getWidth()][0] = scene1.getGird()[0][region.getHeight()];
+            scene.getGrid()[region.getWidth()][0] = scene1.getGrid()[0][region.getHeight()];
         } else {
-            scene.getGird()[region.getWidth()][0] = region.getTerrainMap()
+            scene.getGrid()[region.getWidth()][0] = region.getTerrainMap()
                     .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() - 1), blockCode);
         }
         // Area 0,2
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() + 1));
         if (null != scene1) {
-            scene.getGird()[0][region.getHeight()] = scene1.getGird()[region.getWidth()][0];
+            scene.getGrid()[0][region.getHeight()] = scene1.getGrid()[region.getWidth()][0];
         } else {
-            scene.getGird()[0][region.getHeight()] = region.getTerrainMap()
+            scene.getGrid()[0][region.getHeight()] = region.getTerrainMap()
                     .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY() + 1), blockCode);
         }
         // Area 2,2
         scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() + 1));
         if (null != scene1) {
-            scene.getGird()[region.getWidth()][region.getHeight()] = scene1.getGird()[0][0];
+            scene.getGrid()[region.getWidth()][region.getHeight()] = scene1.getGrid()[0][0];
         } else {
-            scene.getGird()[region.getWidth()][region.getHeight()] = region.getTerrainMap()
+            scene.getGrid()[region.getWidth()][region.getHeight()] = region.getTerrainMap()
                     .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY() + 1), blockCode);
         }
         for (int i = 1; i < region.getWidth(); i++) {
             // Area 1,0
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() - 1));
             if (null != scene1) {
-                scene.getGird()[i][0] = scene1.getGird()[i][region.getHeight()];
+                scene.getGrid()[i][0] = scene1.getGrid()[i][region.getHeight()];
             } else {
-                scene.getGird()[i][0] = region.getTerrainMap()
+                scene.getGrid()[i][0] = region.getTerrainMap()
                         .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() + 1), blockCode);
             }
             // Area 1,2
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() + 1));
             if (null != scene1) {
-                scene.getGird()[i][region.getHeight()] = scene1.getGird()[i][0];
+                scene.getGrid()[i][region.getHeight()] = scene1.getGrid()[i][0];
             } else {
-                scene.getGird()[i][region.getHeight()] = region.getTerrainMap()
+                scene.getGrid()[i][region.getHeight()] = region.getTerrainMap()
                         .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX(), sceneCoordinate.getY() + 1), blockCode);
             }
         }
@@ -311,17 +346,17 @@ public class SceneManagerImpl implements SceneManager {
             // Area 0,1
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY()));
             if (null != scene1) {
-                scene.getGird()[i][region.getHeight()] = scene1.getGird()[region.getHeight()][i];
+                scene.getGrid()[i][region.getHeight()] = scene1.getGrid()[region.getHeight()][i];
             } else {
-                scene.getGird()[i][region.getHeight()] = region.getTerrainMap()
+                scene.getGrid()[i][region.getHeight()] = region.getTerrainMap()
                         .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() - 1, sceneCoordinate.getY()), blockCode);
             }
             // Area 2,1
             scene1 = region.getScenes().get(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY()));
             if (null != scene1) {
-                scene.getGird()[region.getHeight()][i] = scene1.getGird()[0][i];
+                scene.getGrid()[region.getHeight()][i] = scene1.getGrid()[0][i];
             } else {
-                scene.getGird()[region.getHeight()][i] = region.getTerrainMap()
+                scene.getGrid()[region.getHeight()][i] = region.getTerrainMap()
                         .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY()), blockCode);
             }
         }
@@ -335,10 +370,10 @@ public class SceneManagerImpl implements SceneManager {
         Random random = new Random();
         for (int l = 1; l < region.getWidth(); l++) {
             for (int k = 1; k < region.getHeight(); k++) {
-                int upCode = scene.getGird()[l][0];
-                int leftCode = scene.getGird()[0][k];
-                int rightCode = scene.getGird()[region.getWidth()][k];
-                int downCode = scene.getGird()[l][region.getHeight()];
+                int upCode = scene.getGrid()[l][0];
+                int leftCode = scene.getGrid()[0][k];
+                int rightCode = scene.getGrid()[region.getWidth()][k];
+                int downCode = scene.getGrid()[l][region.getHeight()];
                 int upWeight = region.getHeight() - k;
                 int leftWeight = region.getWidth() - l;
                 int rightWeight = l;
@@ -349,30 +384,30 @@ public class SceneManagerImpl implements SceneManager {
                 downWeight = Math.max(0, downWeight - region.getHeight() / 2);
                 int val = random.nextInt(upWeight + leftWeight + rightWeight + downWeight + 1);
                 if (val < upWeight) {
-                    scene.getGird()[l][k] = upCode;
+                    scene.getGrid()[l][k] = upCode;
                     continue;
                 } else {
                     val -= upWeight;
                 }
                 if (val < leftWeight) {
-                    scene.getGird()[l][k] = leftCode;
+                    scene.getGrid()[l][k] = leftCode;
                     continue;
                 } else {
                     val -= rightWeight;
                 }
                 if (val < rightWeight) {
-                    scene.getGird()[l][k] = rightCode;
+                    scene.getGrid()[l][k] = rightCode;
                     continue;
                 } else {
                     val -= leftWeight;
                 }
                 if (val < downWeight) {
-                    scene.getGird()[l][k] = downCode;
+                    scene.getGrid()[l][k] = downCode;
                     continue;
                 } else {
                     val -= downWeight;
                 }
-                scene.getGird()[l][k] = defaultBlockCode;
+                scene.getGrid()[l][k] = defaultBlockCode;
             }
         }
     }
@@ -384,22 +419,22 @@ public class SceneManagerImpl implements SceneManager {
                 // TODO Last row/column may cause overlap issue with player 25/01/19
                 switch (random.nextInt(4)) {
                     case 0:
-                        int upleftBlockCode = scene.getGird()[i][j];
+                        int upleftBlockCode = scene.getGrid()[i][j];
                         addSceneObject(world, regionInfo, scene, upleftBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 1:
-                        int uprightBlockCode = scene.getGird()[i + 1][j];
+                        int uprightBlockCode = scene.getGrid()[i + 1][j];
                         addSceneObject(world, regionInfo, scene, uprightBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 2:
-                        int downleftBlockCode = scene.getGird()[i][j + 1];
+                        int downleftBlockCode = scene.getGrid()[i][j + 1];
                         addSceneObject(world, regionInfo, scene, downleftBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 3:
-                        int downrightBlockCode = scene.getGird()[i + 1][j + 1];
+                        int downrightBlockCode = scene.getGrid()[i + 1][j + 1];
                         addSceneObject(world, regionInfo, scene, downrightBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
@@ -642,22 +677,22 @@ public class SceneManagerImpl implements SceneManager {
             for (int j = 0; j < regionInfo.getHeight(); j++) {
                 switch (random.nextInt(4)) {
                     case 0:
-                        int upleftBlockCode = scene.getGird()[i][j];
+                        int upleftBlockCode = scene.getGrid()[i][j];
                         addSceneAnimal(world, regionInfo, scene, upleftBlockCode, BigDecimal.valueOf(i),
                                 BigDecimal.valueOf(j));
                         break;
                     case 1:
-                        int uprightBlockCode = scene.getGird()[i + 1][j];
+                        int uprightBlockCode = scene.getGrid()[i + 1][j];
                         addSceneAnimal(world, regionInfo, scene, uprightBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j));
                         break;
                     case 2:
-                        int downleftBlockCode = scene.getGird()[i][j + 1];
+                        int downleftBlockCode = scene.getGrid()[i][j + 1];
                         addSceneAnimal(world, regionInfo, scene, downleftBlockCode, BigDecimal.valueOf(i),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
                     case 3:
-                        int downrightBlockCode = scene.getGird()[i + 1][j + 1];
+                        int downrightBlockCode = scene.getGrid()[i + 1][j + 1];
                         addSceneAnimal(world, regionInfo, scene, downrightBlockCode, BigDecimal.valueOf(i + 0.5D),
                                 BigDecimal.valueOf(j + 0.5D));
                         break;
@@ -899,8 +934,8 @@ public class SceneManagerImpl implements SceneManager {
 //                for (int l = 0; l <= region.getWidth(); l++) {
 //                    for (int k = 0; k <= region.getHeight(); k++) {
 //                        int val = BlockConstants.BLOCK_CODE_BLACK;
-//                        if (null != scene && null != scene.getGird()) {
-//                            val = scene.getGird()[l][k];
+//                        if (null != scene && null != scene.getGrid()) {
+//                            val = scene.getGrid()[l][k];
 //                        }
 //                        grids[l + (j - sceneCoordinate.getX() + sceneScanRadius) * region.getWidth()]
 //                                [k + (i - sceneCoordinate.getY() + sceneScanRadius) * region.getHeight()] = val;
@@ -915,8 +950,8 @@ public class SceneManagerImpl implements SceneManager {
                 for (int l = 0; l <= region.getWidth(); l++) {
                     for (int k = 0; k <= region.getHeight(); k++) {
                         int val = BlockConstants.BLOCK_CODE_BLACK;
-                        if (null != scene && null != scene.getGird()) {
-                            val = scene.getGird()[l][k];
+                        if (null != scene && null != scene.getGrid()) {
+                            val = scene.getGrid()[l][k];
                         }
                         grids[l + (j - sceneCoordinate.getX() + sceneScanRadius) * region.getWidth()]
                                 [k + (i - sceneCoordinate.getY() + sceneScanRadius) * region.getHeight()] = val;
@@ -1233,9 +1268,9 @@ public class SceneManagerImpl implements SceneManager {
         int code = BlockConstants.BLOCK_CODE_BLACK;
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
-        if (null != scene.getGird() && null != scene.getGird()[0]) {
+        if (null != scene.getGrid() && null != scene.getGrid()[0]) {
             IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
-            code = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
+            code = scene.getGrid()[gridCoordinate.getX()][gridCoordinate.getY()];
         }
         return code;
     }
@@ -1244,29 +1279,29 @@ public class SceneManagerImpl implements SceneManager {
     public void setGridBlockCode(GameWorld world, WorldCoordinate worldCoordinate, int code) {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
-        if (null != scene.getGird() && null != scene.getGird()[0]) {
+        if (null != scene.getGrid() && null != scene.getGrid()[0]) {
             IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
-            scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()] = code;
+            scene.getGrid()[gridCoordinate.getX()][gridCoordinate.getY()] = code;
             IntegerCoordinate nearbySceneCoordinate = new IntegerCoordinate(worldCoordinate.getSceneCoordinate());
             if (gridCoordinate.getX() == 0) {
                 nearbySceneCoordinate.setX(nearbySceneCoordinate.getX() - 1);
-                gridCoordinate.setX(scene.getGird()[0].length - 1);
+                gridCoordinate.setX(scene.getGrid()[0].length - 1);
             }
-            if (gridCoordinate.getX() == scene.getGird()[0].length - 1) {
+            if (gridCoordinate.getX() == scene.getGrid()[0].length - 1) {
                 nearbySceneCoordinate.setX(nearbySceneCoordinate.getX() + 1);
                 gridCoordinate.setX(0);
             }
             if (gridCoordinate.getY() == 0) {
                 nearbySceneCoordinate.setY(nearbySceneCoordinate.getY() - 1);
-                gridCoordinate.setY(scene.getGird().length - 1);
+                gridCoordinate.setY(scene.getGrid().length - 1);
             }
-            if (gridCoordinate.getY() == scene.getGird().length - 1) {
+            if (gridCoordinate.getY() == scene.getGrid().length - 1) {
                 nearbySceneCoordinate.setY(nearbySceneCoordinate.getY() + 1);
                 gridCoordinate.setY(0);
             }
             scene = region.getScenes().get(nearbySceneCoordinate);
-            if (null != scene && null != scene.getGird() && null != scene.getGird()[0]) {
-                scene.getGird()[scene.getGird().length - 1][gridCoordinate.getY()] = code;
+            if (null != scene && null != scene.getGrid() && null != scene.getGrid()[0]) {
+                scene.getGrid()[scene.getGrid().length - 1][gridCoordinate.getY()] = code;
             }
         }
     }

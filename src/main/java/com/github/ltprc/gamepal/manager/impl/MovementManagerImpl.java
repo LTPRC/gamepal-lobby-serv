@@ -268,18 +268,18 @@ public class MovementManagerImpl implements MovementManager {
             worldService.expandScene(world, worldMovingBlock.getWorldCoordinate(), 1);
             return;
         }
-        if (null != scene.getGird() && null != scene.getGird()[0]) {
+        if (null != scene.getGrid() && null != scene.getGrid()[0]) {
             WorldCoordinate worldCoordinate = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
             BlockUtil.fixWorldCoordinateReal(region, worldCoordinate);
             IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
 //            int floorCode;
-//            floorCode = scene.getGird()
+//            floorCode = scene.getGrid()
 //                    [gridCoordinate.getX() + worldCoordinate.getCoordinate().getX().doubleValue() % 1 < 0.5 ? 0 : 1]
 //                    [gridCoordinate.getY() + worldCoordinate.getCoordinate().getY().doubleValue() % 1 < 0.5 ? 0 : 1];
-//            int code1 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY()];
-//            int code2 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
-//            int code3 = scene.getGird()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
-//            int code4 = scene.getGird()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
+//            int code1 = scene.getGrid()[gridCoordinate.getX()][gridCoordinate.getY()];
+//            int code2 = scene.getGrid()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
+//            int code3 = scene.getGrid()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
+//            int code4 = scene.getGrid()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
 //            if (code1 == BlockConstants.BLOCK_CODE_WATER_SHALLOW && code2 == BlockConstants.BLOCK_CODE_WATER_SHALLOW
 //                    && code3 == BlockConstants.BLOCK_CODE_WATER_SHALLOW && code4 == BlockConstants.BLOCK_CODE_WATER_SHALLOW) {
 //                worldMovingBlock.getMovementInfo().setFloorCode(BlockConstants.BLOCK_CODE_WATER_SHALLOW);

@@ -147,19 +147,25 @@ public class WorldServiceImpl implements WorldService {
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));
                 Scene newScene = new Scene();
-                String name = scene.getString("name");
                 int y = scene.getInteger("y");
                 int x = scene.getInteger("x");
-                newScene.setName(name);
-                newScene.setSceneCoordinate(new IntegerCoordinate(x, y));
-                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
-                newScene.setBlocks(new ConcurrentHashMap<>());
-                newScene.setGird(new int[newRegion.getWidth() + 1][newRegion.getHeight() + 1]);
+                IntegerCoordinate sceneCoordinate = new IntegerCoordinate(x, y);
+                newScene.setSceneCoordinate(sceneCoordinate);
+                Integer terrain = scene.getInteger("terrain");
+                if (null == terrain) {
+                    terrain = BlockConstants.BLOCK_CODE_BLACK;
+                }
+                newRegion.getTerrainMap().put(sceneCoordinate, terrain);
+                newScene.setGrid(new int[newRegion.getWidth() + 1][newRegion.getHeight() + 1]);
                 for (int i = 0; i <= newRegion.getWidth(); i++) {
                     for (int j = 0; j <= newRegion.getHeight(); j++) {
-                        newScene.getGird()[i][j] = 1001;
+                        newScene.getGrid()[i][j] = terrain;
                     }
                 }
+                String name = scene.getString("name");
+                newScene.setName(name);
+                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
+                newScene.setBlocks(new ConcurrentHashMap<>());
                 // Collect normal square blocks from map object
                 JSONArray map = scene.getJSONArray("map");
                 if (null != map && !map.isEmpty()) {
