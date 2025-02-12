@@ -577,7 +577,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -600,7 +599,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> changeHunger(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -623,7 +621,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> changeThirst(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -646,7 +643,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> changePrecision(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
