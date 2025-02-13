@@ -363,6 +363,9 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        if (!bagInfoMap.containsKey(userCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
         BagInfo bagInfo = bagInfoMap.get(userCode);
         int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
         if (oldItemAmount + itemAmount < 0) {
@@ -1108,7 +1111,7 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_FISH:
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
                 boolean fishingResult = false;
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_SHALLOW
                         || sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_MEDIUM
@@ -1127,7 +1130,7 @@ public class PlayerServiceImpl implements PlayerService {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_MELEE);
+                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) != BlockConstants.BLOCK_CODE_DIRT) {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
                 } else {

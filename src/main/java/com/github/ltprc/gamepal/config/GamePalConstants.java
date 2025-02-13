@@ -19,12 +19,6 @@ public class GamePalConstants {
     public static final int PLAYER_STATUS_RUNNING = 1;
     public static final int FRAME_PER_SECOND = 25;
     public static final int MINI_MAP_DEFAULT_SIZE = 100;
-    public static final int MAX_WORLD_TIME = 86400;
-    public static final int UPDATED_WORLD_TIME_PER_SECOND = 60;
-    public static final int WORLD_TIME_SUNRISE_BEGIN = 18000;
-    public static final int WORLD_TIME_SUNRISE_END = 25200;
-    public static final int WORLD_TIME_SUNSET_BEGIN = 61200;
-    public static final int WORLD_TIME_SUNSET_END = 68400;
 
     public static final int INTERACTION_USE = 0;
     public static final int INTERACTION_EXCHANGE = 1;
@@ -41,9 +35,17 @@ public class GamePalConstants {
     public static final int INTERACTION_PLANT = 12;
     public static final int INTERACTION_GATHER = 13;
 
+    public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1D);
+
     // Backend constants
 
-    public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1D);
+    public static final int MAX_WORLD_TIME = 86400;
+    public static final int UPDATED_WORLD_TIME_PER_SECOND = 60;
+    public static final int WORLD_TIME_SUNRISE_BEGIN = 18000;
+    public static final int WORLD_TIME_SUNRISE_END = 25200;
+    public static final int WORLD_TIME_SUNSET_BEGIN = 61200;
+    public static final int WORLD_TIME_SUNSET_END = 68400;
+
     public static final int REGION_RADIUS_DEFAULT = 50;
     public static final int SCENE_DEFAULT_WIDTH = 10;
     public static final int SCENE_DEFAULT_HEIGHT = 10;

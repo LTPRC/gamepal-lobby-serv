@@ -39,10 +39,7 @@ public class SkillConstants {
     public static final int SKILL_MODE_SEMI_AUTO = 0;
     public static final int SKILL_MODE_AUTO = 1;
 
-    public static final int SKILL_DEFAULT_FRAME = 25;
-
-    public static final int SKILL_TYPE_DEFAULT = 0;
-    public static final int SKILL_TYPE_ATTACK = 1;
+    public static final BigDecimal SKILL_RANGE_BUILD = BigDecimal.ONE;
 
     // Backend constants
 
@@ -59,5 +56,9 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_FIRE = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal SKILL_RANGE_BUILD = BigDecimal.ONE;
+
+    public static final int SKILL_DEFAULT_FRAME = 25;
+
+    public static final int SKILL_TYPE_DEFAULT = 0;
+    public static final int SKILL_TYPE_ATTACK = 1;
 }
