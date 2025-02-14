@@ -65,6 +65,7 @@ public class GamePalConstants {
 
     public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.25D);
+    public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
 
     public static final long PLAYER_LOGOFF_THRESHOLD_IN_SECOND = 300L;
     public static final int DROP_DISAPPEAR_THRESHOLD_IN_FRAME = 60 * FRAME_PER_SECOND;

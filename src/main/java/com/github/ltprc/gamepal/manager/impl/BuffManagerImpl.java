@@ -51,6 +51,7 @@ public class BuffManagerImpl implements BuffManager {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(player.getWorldCoordinate().getRegionNo());
+
         for (int i = 0; i < BuffConstants.BUFF_CODE_LENGTH; i++) {
             if (playerInfo.getBuff()[i] <= 0) {
                 continue;
@@ -77,6 +78,10 @@ public class BuffManagerImpl implements BuffManager {
                         playerService.generateNotificationMessage(userCode, "距离濒死结束还有"
                                 + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
                     }
+                }
+            } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] == 0) {
+                 if (player.getMovementInfo().getFloorCode() == BlockConstants.BLOCK_CODE_WATER_DEEP) {
+                     playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] = -1;
                 }
             }
         }
@@ -107,7 +112,6 @@ public class BuffManagerImpl implements BuffManager {
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0) {
             playerService.killPlayer(userCode);
         }
-
         if (playerInfo.getHunger() < playerInfo.getHungerMax() / 10
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] = -1;
@@ -140,6 +144,18 @@ public class BuffManagerImpl implements BuffManager {
         } else if (bagInfo.getCapacity().compareTo(bagInfo.getCapacityMax()) <= 0
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0){
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] = 0;
+        }
+
+        if (player.getMovementInfo().getFloorCode() == BlockConstants.BLOCK_CODE_WATER_DEEP
+                && (!player.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)
+                || !player.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO))) {
+            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] == 0
+                    && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] == 0) {
+                playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] = BuffConstants.BUFF_DEFAULT_FRAME_DIVING;
+            }
+        } else {
+            playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] = 0;
+            playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] = 0;
         }
     }
 

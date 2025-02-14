@@ -69,7 +69,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void onOpen(Session session, String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
-            logger.info(ErrorUtil.ERROR_1019);
+            logger.error(ErrorUtil.ERROR_1019);
             return;
         }
         world.getSessionMap().put(userCode, session);

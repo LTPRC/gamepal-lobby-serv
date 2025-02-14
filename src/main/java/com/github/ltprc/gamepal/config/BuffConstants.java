@@ -24,7 +24,9 @@ public class BuffConstants {
     public static final int BUFF_CODE_OVERWEIGHTED = 18;
     public static final int BUFF_CODE_KNOCKED = 19;
     public static final int BUFF_CODE_REVIVED = 20;
-    public static final int BUFF_CODE_LENGTH = 21;
+    public static final int BUFF_CODE_DIVING = 21;
+    public static final int BUFF_CODE_DROWNING = 22;
+    public static final int BUFF_CODE_LENGTH = 23;
 
     // Backend constants
 
@@ -33,6 +35,7 @@ public class BuffConstants {
     public static final int BUFF_DEFAULT_FRAME_BLOCKED = 1 * GamePalConstants.FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_HAPPY = 10 * GamePalConstants.FRAME_PER_SECOND;
     public static final int BUFF_DEFAULT_FRAME_SAD = 10 * GamePalConstants.FRAME_PER_SECOND;
+    public static final int BUFF_DEFAULT_FRAME_DIVING = 10 * GamePalConstants.FRAME_PER_SECOND;
 
     private BuffConstants() {
     }

@@ -673,7 +673,7 @@ public class BlockUtil {
     }
 
     public static int convertBlockCode2Type(int blockCode) {
-        return BlockConstants.BLOCK_CODE_TYPE_MAP.getOrDefault(blockCode, BlockConstants.BLOCK_TYPE_NORMAL);
+        return BlockConstants.BLOCK_CODE_TYPE_MAP.getOrDefault(blockCode, BlockConstants.BLOCK_TYPE_FLOOR);
     }
 
     public static BlockInfo createBlockInfoByCode(int blockCode) {

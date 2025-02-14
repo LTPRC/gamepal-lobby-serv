@@ -6,6 +6,8 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -13,7 +15,6 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -45,10 +46,10 @@ public class TimedEventTask {
     private EventManager eventManager;
 
     @Autowired
-    private SceneManager sceneManager;
+    private FarmManager farmManager;
 
     @Autowired
-    private FarmManager farmManager;
+    private MovementManager movementManager;
 
     @Scheduled(fixedRate = 20)
     public void executeByHalfFrame() {
@@ -74,8 +75,11 @@ public class TimedEventTask {
             onlineMap.keySet().stream()
                     .filter(creatureMap::containsKey)
                     .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
+                    .forEach(id -> buffManager.updateBuffTime(world, id));
+
+            onlineMap.keySet().stream()
+                    .filter(id -> playerService.validateActiveness(world, id))
                     .forEach(id -> {
-                        buffManager.updateBuffTime(world, id);
                         buffManager.changeBuff(world, id);
 
                         PlayerInfo playerInfo = playerInfoMap.get(id);
@@ -86,11 +90,24 @@ public class TimedEventTask {
                             double randomNumber;
 
                             // Change hp
+                            int changedHp = 0;
                             if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLEEDING] != 0) {
-                                eventManager.changeHp(world, player, -1, false);
+                                changedHp--;
                             }
                             if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_RECOVERING] != 0) {
-                                eventManager.changeHp(world, player, 1, false);
+                                changedHp++;
+                            }
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] != 0) {
+                                changedHp--;
+                            }
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] != 0) {
+                                changedHp--;
+                            }
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] != 0) {
+                                changedHp -= 10;
+                            }
+                            if (changedHp != 0) {
+                                eventManager.changeHp(world, player, changedHp, false);
                             }
 
                             // Change vp
@@ -123,9 +140,6 @@ public class TimedEventTask {
                             }
                             if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                                 playerService.changeHunger(id, -1, false);
-                                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] != 0) {
-                                    eventManager.changeHp(world, player, -1, false);
-                                }
                             }
 
                             // Change thirst
@@ -136,9 +150,6 @@ public class TimedEventTask {
                             }
                             if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
                                 playerService.changeThirst(id, -1, false);
-                                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] != 0) {
-                                    eventManager.changeHp(world, player, -1, false);
-                                }
                             }
 
                             // Change precision
@@ -164,9 +175,33 @@ public class TimedEventTask {
                                     playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrame() - 1);
                                 }
                             }
+                            if (movementInfo.getFloorCode() == BlockConstants.BLOCK_CODE_WATER_DEEP) {
+                                playerInfo.getSkills().get(0).setFrame(playerInfo.getSkills().get(0).getFrameMax());
+                            }
 
-                            // Check floorCode
+                            // Change maxSpeed
                             BlockUtil.updateMaxSpeed(movementInfo);
+
+                            Map<Integer, Region> regionMap = world.getRegionMap();
+                            Region region = regionMap.get(player.getWorldCoordinate().getRegionNo());
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] != 0) {
+                                if (Math.random() < 0.01D) {
+                                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BUBBLE, id,
+                                            BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                                                    player.getWorldCoordinate(), BigDecimal.valueOf(Math.random() * 360),
+                                                    BigDecimal.valueOf(Math.random()
+                                                            * GamePalConstants.BUBBLE_THROW_RADIUS.doubleValue())));
+                                }
+                            }
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] != 0) {
+                                if (Math.random() < 0.5D) {
+                                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BUBBLE, id,
+                                            BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                                                    player.getWorldCoordinate(), BigDecimal.valueOf(Math.random() * 360),
+                                                    BigDecimal.valueOf(Math.random()
+                                                            * GamePalConstants.BUBBLE_THROW_RADIUS.doubleValue())));
+                                }
+                            }
                         }
 
                         if (creatureMap.containsKey(id)) {
