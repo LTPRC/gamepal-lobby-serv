@@ -1296,13 +1296,14 @@ public class PlayerServiceImpl implements PlayerService {
         int toolIndex = ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex();
         Set<String> newTools = new ConcurrentSkipListSet<>();
         if (playerInfo.getTools().contains(itemNo)) {
-            playerInfo.getTools().stream()
-                    .filter(toolNo -> !itemNo.equals(toolNo))
-                    .forEach(newTools::add);
-            playerInfo.setTools(newTools);
+//            playerInfo.getTools().stream()
+//                    .filter(toolNo -> !itemNo.equals(toolNo))
+//                    .forEach(newTools::add);
+//            playerInfo.setTools(newTools);
+            playerInfo.getTools().remove(itemNo);
         } else if (toolIndex != ItemConstants.TOOL_INDEX_DEFAULT) {
             playerInfo.getTools().stream()
-                    .filter(toolNo -> toolIndex != ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex())
+                    .filter(toolNo -> toolIndex != ((Tool) worldService.getItemMap().get(toolNo)).getItemIndex())
                     .forEach(newTools::add);
             playerInfo.setTools(newTools);
             playerInfo.getTools().add(itemNo);
@@ -1330,13 +1331,14 @@ public class PlayerServiceImpl implements PlayerService {
         int outfitIndex = ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex();
         Set<String> newOutfits = new ConcurrentSkipListSet<>();
         if (playerInfo.getOutfits().contains(itemNo)) {
-            playerInfo.getOutfits().stream()
-                    .filter(outfitNo -> !itemNo.equals(outfitNo))
-                    .forEach(newOutfits::add);
-            playerInfo.setOutfits(newOutfits);
+//            playerInfo.getOutfits().stream()
+//                    .filter(outfitNo -> !itemNo.equals(outfitNo))
+//                    .forEach(newOutfits::add);
+//            playerInfo.setOutfits(newOutfits);
+            playerInfo.getOutfits().remove(itemNo);
         } else if (outfitIndex != ItemConstants.OUTFIT_INDEX_DEFAULT) {
             playerInfo.getOutfits().stream()
-                    .filter(outfitNo -> outfitIndex != ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex())
+                    .filter(outfitNo -> outfitIndex != ((Outfit) worldService.getItemMap().get(outfitNo)).getItemIndex())
                     .forEach(newOutfits::add);
             playerInfo.setOutfits(newOutfits);
             playerInfo.getOutfits().add(itemNo);
