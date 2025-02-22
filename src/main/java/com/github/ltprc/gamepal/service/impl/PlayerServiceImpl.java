@@ -331,9 +331,11 @@ public class PlayerServiceImpl implements PlayerService {
         switch (itemNo.charAt(0)) {
             case ItemConstants.ITEM_CHARACTER_TOOL:
                 useTools(userCode, itemNo);
+                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_IMAGE_DATA] = true;
                 break;
             case ItemConstants.ITEM_CHARACTER_OUTFIT:
                 useOutfits(userCode, itemNo);
+                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_IMAGE_DATA] = true;
                 break;
             case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(userCode, itemNo, itemAmount);

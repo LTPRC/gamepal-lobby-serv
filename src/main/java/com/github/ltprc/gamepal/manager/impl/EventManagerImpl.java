@@ -385,7 +385,6 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
-    @Transactional
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());

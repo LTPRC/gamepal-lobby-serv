@@ -87,7 +87,7 @@ public class TimedEventTask {
                                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
                             Block player = creatureMap.get(id);
                             MovementInfo movementInfo = player.getMovementInfo();
-                            double randomNumber;
+                            double randomNumber = Math.random();;
 
                             // Change hp
                             int changedHp = 0;
