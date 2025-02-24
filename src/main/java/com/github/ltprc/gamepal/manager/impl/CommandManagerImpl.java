@@ -66,8 +66,8 @@ public class CommandManagerImpl implements CommandManager {
             case "nwcagents":
                 playerService.generateNotificationMessage(userCode, "特工们，准备战斗。");
                 for (int i = 0; i < 3; i++) {
-                    Block agent = npcManager.putSpecificCreatureByRole(world,
-                            userCode, player.getWorldCoordinate(), CreatureConstants.NPC_ROLE_MINION);
+                    Block agent = npcManager.putSpecificCreatureByRole(world, userCode,
+                            new WorldCoordinate(player.getWorldCoordinate()), CreatureConstants.NPC_ROLE_MINION);
                     PlayerInfo playerInfo = world.getPlayerInfoMap().get(agent.getBlockInfo().getId());
                     CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_MALE);
                     playerService.getItem(agent.getBlockInfo().getId(), "o005", 1);
@@ -100,8 +100,8 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwctrinity":
                 playerService.generateNotificationMessage(userCode, "枪在手，跟我走。");
-                Block trinity = npcManager.putSpecificCreatureByRole(world, userCode, player.getWorldCoordinate(),
-                        CreatureConstants.NPC_ROLE_PEER);
+                Block trinity = npcManager.putSpecificCreatureByRole(world, userCode,
+                        new WorldCoordinate(player.getWorldCoordinate()), CreatureConstants.NPC_ROLE_PEER);
                 playerInfo = world.getPlayerInfoMap().get(trinity.getBlockInfo().getId());
                 CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_FEMALE);
                 playerService.getItem(trinity.getBlockInfo().getId(), "o004", 1);

@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class EventManagerImpl implements EventManager {
 
     private static final Log logger = LogFactory.getLog(EventManagerImpl.class);
+    private static final Random random = new Random();
 
     @Autowired
     private PlayerService playerService;
@@ -385,6 +386,7 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
+    @Transactional
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
@@ -412,7 +414,13 @@ public class EventManagerImpl implements EventManager {
                 newHp = Math.max(oldHp, newHp);
             }
             if (newHp < oldHp) {
-                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(), block.getWorldCoordinate());
+                Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
+                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                region, block.getWorldCoordinate(),
+                                BigDecimal.valueOf(random.nextDouble() * 360),
+                                GamePalConstants.BLEED_RADIUS_MAX.multiply(
+                                        BigDecimal.valueOf(random.nextDouble()))));
             }
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
             if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0) {

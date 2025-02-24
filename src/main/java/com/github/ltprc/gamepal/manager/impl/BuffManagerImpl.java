@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -22,12 +23,14 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Random;
 
 
 @Component
 public class BuffManagerImpl implements BuffManager {
 
     private static final Log logger = LogFactory.getLog(BuffManagerImpl.class);
+    private static final Random random = new Random();
 
     @Autowired
     private PlayerService playerService;
@@ -74,7 +77,12 @@ public class BuffManagerImpl implements BuffManager {
                     BlockUtil.fixWorldCoordinate(region, bleedSevereWc);
                     eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED_SEVERE, userCode, bleedSevereWc);
                     if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
-                        eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED, userCode, player.getWorldCoordinate());
+                        eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED, userCode,
+                                BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                        region, player.getWorldCoordinate(),
+                                        BigDecimal.valueOf(random.nextDouble() * 360),
+                                        GamePalConstants.BLEED_RADIUS_MAX.multiply(
+                                                BigDecimal.valueOf(random.nextDouble()))));
                         playerService.generateNotificationMessage(userCode, "距离濒死结束还有"
                                 + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");
                     }
