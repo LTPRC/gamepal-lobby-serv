@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,10 +94,19 @@ public class EventManagerImpl implements EventManager {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        List<Block> affectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
-                fromCreature.getBlockInfo().getId()).stream()
-                .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
-                .collect(Collectors.toList());
+        List<Block> affectedBlocks;
+        if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_EXPLODE) {
+            affectedBlocks = sceneManager.collectSurroundingBlocks(world, eventBlock,
+                            SkillConstants.SKILL_RANGE_EXPLODE.divide(BigDecimal.valueOf(Math.max(region.getHeight(),
+                                    region.getWidth())), 2, RoundingMode.HALF_UP).intValue()).stream()
+                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
+                    .collect(Collectors.toList());
+        } else {
+            affectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
+                            fromCreature.getBlockInfo().getId()).stream()
+                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
+                    .collect(Collectors.toList());
+        }
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
                 affectBlock(world, eventBlock, fromCreature);
@@ -410,10 +420,10 @@ public class EventManagerImpl implements EventManager {
         if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
             PlayerInfo playerInfo = playerInfoMap.get(block.getBlockInfo().getId());
-            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] != 0) {
-                newHp = Math.max(oldHp, newHp);
-            }
             if (newHp < oldHp) {
+                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] != 0) {
+                    return;
+                }
                 Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
                 addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(),
                         BlockUtil.locateCoordinateWithDirectionAndDistance(
@@ -421,6 +431,11 @@ public class EventManagerImpl implements EventManager {
                                 BigDecimal.valueOf(random.nextDouble() * 360),
                                 GamePalConstants.BLEED_RADIUS_MAX.multiply(
                                         BigDecimal.valueOf(random.nextDouble()))));
+            } else if (newHp > oldHp) {
+                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
+                        || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+                    return;
+                }
             }
             block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
             if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0) {

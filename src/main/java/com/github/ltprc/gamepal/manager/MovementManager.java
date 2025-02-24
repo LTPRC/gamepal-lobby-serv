@@ -10,4 +10,5 @@ public interface MovementManager {
     void settleSpeedAndCoordinate(GameWorld world, Block block, int sceneScanDepth);
     void settleCoordinate(GameWorld world, Block block, final WorldCoordinate newWorldCoordinate, boolean isTeleport);
     void syncFloorCode(GameWorld world, Block block);
+    void updateCreatureMaxSpeed(GameWorld world, String userCode);
 }

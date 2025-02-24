@@ -6,10 +6,7 @@ import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.BuffManager;
-import com.github.ltprc.gamepal.manager.CommandManager;
-import com.github.ltprc.gamepal.manager.MovementManager;
-import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -17,7 +14,6 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +44,7 @@ public class CommandManagerImpl implements CommandManager {
     private MovementManager movementManager;
 
     @Autowired
-    private WorldService worldService;
+    private EventManager eventManager;
 
     @Override
     public ResponseEntity<String> useCommand(String userCode, String commandContent) {
@@ -185,7 +181,7 @@ public class CommandManagerImpl implements CommandManager {
                 break;
             case "nwcbluepill":
                 playerService.generateNotificationMessage(userCode, "真香，嗝。");
-                playerService.knockPlayer(userCode);
+                eventManager.changeHp(world, player, 0, true);
                 break;
             case "nwcredpill":
                 playerService.generateNotificationMessage(userCode, "我复活辣。");

@@ -265,6 +265,8 @@ public class BlockConstants {
     public static final BigDecimal FIRE_RADIUS = BigDecimal.valueOf(0.5D);
 
     public static final int HP_DEFAULT = 100;
+    public static final BigDecimal HP_PULL_RATIO = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal HP_RESPAWN_RATIO = BigDecimal.ONE;
 
     public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.2D);
     public static final BigDecimal ACCELERATION_MAX_SPEED_RATIO = BigDecimal.valueOf(0.1D);

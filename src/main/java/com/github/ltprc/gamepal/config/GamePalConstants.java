@@ -34,6 +34,7 @@ public class GamePalConstants {
     public static final int INTERACTION_PACK = 11;
     public static final int INTERACTION_PLANT = 12;
     public static final int INTERACTION_GATHER = 13;
+    public static final int INTERACTION_PULL = 14;
 
     public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1D);
 

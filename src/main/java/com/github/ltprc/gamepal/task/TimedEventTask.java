@@ -82,6 +82,9 @@ public class TimedEventTask {
                     .forEach(id -> {
                         buffManager.changeBuff(world, id);
 
+                        // Change maxSpeed
+                        movementManager.updateCreatureMaxSpeed(world, id);
+
                         PlayerInfo playerInfo = playerInfoMap.get(id);
                         if (playerService.validateActiveness(world, id)
                                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
@@ -178,9 +181,6 @@ public class TimedEventTask {
                             if (movementInfo.getFloorCode() == BlockConstants.BLOCK_CODE_WATER_DEEP) {
                                 playerInfo.getSkills().get(0).setFrame(playerInfo.getSkills().get(0).getFrameMax());
                             }
-
-                            // Change maxSpeed
-                            BlockUtil.updateMaxSpeed(movementInfo);
 
                             Map<Integer, Region> regionMap = world.getRegionMap();
                             Region region = regionMap.get(player.getWorldCoordinate().getRegionNo());

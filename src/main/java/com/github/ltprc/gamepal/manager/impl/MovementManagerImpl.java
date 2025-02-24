@@ -1,11 +1,14 @@
 package com.github.ltprc.gamepal.manager.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
@@ -19,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -340,5 +344,58 @@ public class MovementManagerImpl implements MovementManager {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void updateCreatureMaxSpeed(GameWorld world, String userCode) {
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Block player = creatureMap.get(userCode);
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        double maxSpeedCoef = 1D;
+        switch (player.getMovementInfo().getFloorCode()) {
+            case BlockConstants.BLOCK_CODE_SWAMP:
+                maxSpeedCoef = Math.min(maxSpeedCoef, 0.2D);
+                break;
+            case BlockConstants.BLOCK_CODE_SAND:
+                maxSpeedCoef = Math.min(maxSpeedCoef, 0.4D);
+                break;
+            case BlockConstants.BLOCK_CODE_SNOW:
+            case BlockConstants.BLOCK_CODE_LAVA:
+            case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
+                maxSpeedCoef = Math.min(maxSpeedCoef, 0.6D);
+                break;
+            case BlockConstants.BLOCK_CODE_ROUGH:
+            case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
+            case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
+                maxSpeedCoef = Math.min(maxSpeedCoef, 0.8D);
+                break;
+            case BlockConstants.BLOCK_CODE_BLACK:
+            case BlockConstants.BLOCK_CODE_GRASS:
+            case BlockConstants.BLOCK_CODE_DIRT:
+            case BlockConstants.BLOCK_CODE_WATER_DEEP:
+            default:
+                break;
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+            maxSpeedCoef = Math.min(maxSpeedCoef, 0D);
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
+            maxSpeedCoef = Math.min(maxSpeedCoef, 0.25D);
+        }
+        player.getMovementInfo().setMaxSpeed(BlockConstants.MAX_SPEED_DEFAULT.multiply(BigDecimal.valueOf(maxSpeedCoef)));
+        player.getMovementInfo().setAcceleration(player.getMovementInfo().getMaxSpeed().multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO));
     }
 }

@@ -685,13 +685,14 @@ public class PlayerServiceImpl implements PlayerService {
         if (!playerInfoMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         for (int i = 0; i < itemAmount; i++) {
             ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet()
                     .forEach((Map.Entry<String, Integer> entry) -> {
                         switch (entry.getKey()) {
                             case "hp":
-                                eventManager.changeHp(world, creatureMap.get(userCode), entry.getValue(), false);
+                                eventManager.changeHp(world, player, entry.getValue(), false);
                                 break;
                             case "vp":
                                 changeVp(userCode, entry.getValue(), false);
@@ -709,7 +710,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         switch (worldService.getItemMap().get(itemNo).getItemNo()) {
             case "c005":
-                knockPlayer(userCode);
+                eventManager.changeHp(world, player, 0, true);
                 break;
             case "c006":
                 revivePlayer(userCode);
@@ -787,7 +788,20 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
         }
         String id = interactionInfo.getId();
-        Block block = world.getBlockMap().get(id);
+        Block block;
+        switch (interactionCode) {
+            case GamePalConstants.INTERACTION_TALK:
+            case GamePalConstants.INTERACTION_ATTACK:
+            case GamePalConstants.INTERACTION_FLIRT:
+            case GamePalConstants.INTERACTION_SUCCUMB:
+            case GamePalConstants.INTERACTION_EXPEL:
+            case GamePalConstants.INTERACTION_PULL:
+                block = creatureMap.get(id);
+                break;
+            default:
+                block = world.getBlockMap().get(id);
+                break;
+        }
         if (null == block) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
         }
@@ -874,10 +888,13 @@ public class PlayerServiceImpl implements PlayerService {
                 sceneManager.removeBlock(world, block, false);
                 break;
             case GamePalConstants.INTERACTION_PLANT:
-                farmManager.plant(world, userCode, block.getBlockInfo().getId(), "c064");
+                farmManager.plant(world, userCode, id, "c064");
                 break;
             case GamePalConstants.INTERACTION_GATHER:
-                farmManager.gather(world, userCode, block.getBlockInfo().getId());
+                farmManager.gather(world, userCode, id);
+                break;
+            case GamePalConstants.INTERACTION_PULL:
+                pullPlayer(userCode, id);
                 break;
             default:
                 break;
@@ -1447,10 +1464,6 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         player.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-        changeVp(userCode, 0, true);
-        changeHunger(userCode, 0, true);
-        changeThirst(userCode, 0, true);
-        changePrecision(userCode, 0, true);
         // Reset all skill remaining time
         for (int i = 0; i < playerInfo.getSkills().size(); i++) {
             if (null != playerInfo.getSkills().get(i)) {
@@ -1486,6 +1499,10 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        changeVp(userCode, 0, true);
+        changeHunger(userCode, 0, true);
+        changeThirst(userCode, 0, true);
+        changePrecision(userCode, 0, true);
 
         addPlayerTrophy(userCode, playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] != 0);
         eventManager.addEvent(world, BlockConstants.BLOCK_CODE_DECAY, userCode, player.getWorldCoordinate());
@@ -1498,6 +1515,32 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
         }
+        return ResponseEntity.ok().body(rst.toString());
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<String> pullPlayer(String fromUserCode, String toUserCode) {
+        JSONObject rst = ContentUtil.generateRst();
+        GameWorld world = userService.getWorldByUserCode(toUserCode);
+        if (null == world) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
+        }
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(toUserCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(toUserCode)) {
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
+        }
+        Block player = creatureMap.get(toUserCode);
+        PlayerInfo playerInfo = playerInfoMap.get(toUserCode);
+        playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = 0;
+        eventManager.changeHp(world, player, BigDecimal.valueOf(player.getBlockInfo().getHpMax().get())
+                .multiply(BlockConstants.HP_PULL_RATIO).intValue(), true);
+        generateNotificationMessage(fromUserCode, "你将对方从濒死状态救助了。");
+        generateNotificationMessage(toUserCode, "你从濒死状态被救助了。");
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1520,11 +1563,12 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = 0;
-        eventManager.changeHp(world, player, player.getBlockInfo().getHpMax().get(), true);
+        eventManager.changeHp(world, player, BigDecimal.valueOf(player.getBlockInfo().getHpMax().get())
+                .multiply(BlockConstants.HP_RESPAWN_RATIO).intValue(), true);
         changeVp(userCode, playerInfo.getVpMax(), true);
         changeHunger(userCode, playerInfo.getHungerMax(), true);
         changeThirst(userCode, playerInfo.getThirstMax(), true);
-        changePrecision(userCode, playerInfo.getThirstMax(), true);
+        changePrecision(userCode, playerInfo.getPrecisionMax(), true);
 
         movementManager.settleCoordinate(world, player, playerInfo.getRespawnPoint(), true);
 

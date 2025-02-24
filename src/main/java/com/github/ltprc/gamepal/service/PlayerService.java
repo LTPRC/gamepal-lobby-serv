@@ -64,6 +64,8 @@ public interface PlayerService {
 
     ResponseEntity<String> killPlayer(String userCode);
 
+    ResponseEntity<String> pullPlayer(String fromUserCode, String toUserCode);
+
     ResponseEntity<String> revivePlayer(String userCode);
 
     ResponseEntity<String> addPlayerTrophy(String userCode, boolean hasTrophy);

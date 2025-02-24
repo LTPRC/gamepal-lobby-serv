@@ -1,10 +1,8 @@
 package com.github.ltprc.gamepal.util;
 
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.ItemConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
@@ -594,36 +592,6 @@ public class BlockUtil {
         } else {
             return distance.compareTo(perceptionInfo1.getIndistinctVisionRadius()) <= 0;
         }
-    }
-
-    public static void updateMaxSpeed(MovementInfo movementInfo) {
-        BigDecimal maxSpeed = BlockConstants.MAX_SPEED_DEFAULT;
-        switch (movementInfo.getFloorCode()) {
-            case BlockConstants.BLOCK_CODE_SWAMP:
-                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.2));
-                break;
-            case BlockConstants.BLOCK_CODE_SAND:
-                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.4));
-                break;
-            case BlockConstants.BLOCK_CODE_SNOW:
-            case BlockConstants.BLOCK_CODE_LAVA:
-            case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
-                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.6));
-                break;
-            case BlockConstants.BLOCK_CODE_ROUGH:
-            case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
-            case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
-                maxSpeed = maxSpeed.multiply(BigDecimal.valueOf(0.8));
-                break;
-            case BlockConstants.BLOCK_CODE_BLACK:
-            case BlockConstants.BLOCK_CODE_GRASS:
-            case BlockConstants.BLOCK_CODE_DIRT:
-            case BlockConstants.BLOCK_CODE_WATER_DEEP:
-            default:
-                break;
-        }
-        movementInfo.setMaxSpeed(maxSpeed);
-        movementInfo.setAcceleration(maxSpeed.multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO));
     }
 
     /**
