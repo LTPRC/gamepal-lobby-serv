@@ -105,11 +105,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Check functions
         JSONObject functions = null;
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(player.getBlockInfo().getId());
+        long timestamp = Instant.now().getEpochSecond();
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
-                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_IMAGE_DATA] = true;
+                playerInfo.setTimeUpdated(timestamp);
             }
             if (functions.containsKey("settleCoordinate")
                     && !world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT]) {

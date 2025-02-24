@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -328,14 +329,15 @@ public class PlayerServiceImpl implements PlayerService {
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0 || itemAmount <= 0) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
+        long timestamp = Instant.now().getEpochSecond();
         switch (itemNo.charAt(0)) {
             case ItemConstants.ITEM_CHARACTER_TOOL:
                 useTools(userCode, itemNo);
-                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_IMAGE_DATA] = true;
+                playerInfo.setTimeUpdated(timestamp);
                 break;
             case ItemConstants.ITEM_CHARACTER_OUTFIT:
                 useOutfits(userCode, itemNo);
-                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_IMAGE_DATA] = true;
+                playerInfo.setTimeUpdated(timestamp);
                 break;
             case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(userCode, itemNo, itemAmount);
