@@ -999,6 +999,11 @@ public class SceneManagerImpl implements SceneManager {
                 WorldCoordinate to = world.getTeleportMap().get(block.getBlockInfo().getId());
                 rst.put("to", to);
                 break;
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+                if (block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
+                    rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 if (!world.getFarmMap().containsKey(block.getBlockInfo().getId())) {
                     return null;
@@ -1167,6 +1172,9 @@ public class SceneManagerImpl implements SceneManager {
                                             BigDecimal.valueOf(random.nextDouble() * 360),
                                             GamePalConstants.DROP_THROW_RADIUS));
                         });
+                if (block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
+                    world.getPlayerInfoMap().remove(block.getBlockInfo().getId());
+                }
                 break;
             case BlockConstants.BLOCK_TYPE_TOILET:
                 for (int i = 0; i < 3 + random.nextInt(3); i++) {

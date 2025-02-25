@@ -105,12 +105,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Check functions
         JSONObject functions = null;
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(player.getBlockInfo().getId());
-        long timestamp = Instant.now().getEpochSecond();
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
-                playerInfo.setTimeUpdated(timestamp);
+                playerService.updateTimestamp(playerInfo);
             }
             if (functions.containsKey("settleCoordinate")
                     && !world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT]) {
@@ -339,7 +338,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), 2))
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true)));
-        rst.put("playerInfos", playerInfos);
 
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
         if (world.getInteractionInfoMap().containsKey(userCode)) {
@@ -403,11 +401,17 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Poll all blocks
         JSONArray blocks = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
-            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, blockQueue.poll(), false);
+            Block block = blockQueue.poll();
+            if (null != block && block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
+                playerInfos.put(block.getBlockInfo().getId(),
+                        sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true));
+            }
+            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, block, false);
             if (null != convertedBlock) {
                 blocks.add(convertedBlock);
             }
         }
+        rst.put("playerInfos", playerInfos);
         rst.put("blocks", blocks);
 
         // Response of functions 24/03/17
@@ -415,7 +419,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONObject miniMap = new JSONObject();
         if (null != functions) {
             if (Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
-                functionsResponse.put("createPlayerInfoInstance", CreatureFactory.createCreatureInstance(CreatureConstants.PLAYER_TYPE_HUMAN));
+                functionsResponse.put("createPlayerInfoInstance", CreatureFactory.createCreatureInstance(
+                        CreatureConstants.PLAYER_TYPE_HUMAN, CreatureConstants.CREATURE_TYPE_HUMAN));
             }
             if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
                 JSONArray background = MiniMapManager.generateMiniMapBackground(region,

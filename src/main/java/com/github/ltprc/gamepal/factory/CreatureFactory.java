@@ -20,7 +20,7 @@ public class CreatureFactory {
 
     private static final Random random = new Random();
 
-    public static PlayerInfo createCreatureInstance(final int playerType) {
+    public static PlayerInfo createCreatureInstance(final int playerType, final int creatureType) {
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setPlayerType(playerType);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
@@ -43,6 +43,7 @@ public class CreatureFactory {
         playerInfo.setMoney(1);
         playerInfo.setBuff(new int[BuffConstants.BUFF_CODE_LENGTH]);
         playerInfo.setPerceptionInfo(new PerceptionInfo());
+        playerInfo.setCreatureType(creatureType);
         if (CreatureConstants.CREATURE_TYPE_ANIMAL != playerInfo.getCreatureType()) {
             SkillUtil.updateHumanSkills(playerInfo);
             randomlyPersonalizePlayerInfo(playerInfo, PlayerInfoUtil.generateGender());
@@ -86,5 +87,27 @@ public class CreatureFactory {
 
     private static int generateAnimalSkinColor() {
         return random.nextInt(14) + 1;
+    }
+
+    public static void copyPersonalizedPlayerInfo(PlayerInfo fromPlayerInfo, PlayerInfo toPlayerInfo) {
+        toPlayerInfo.setAvatar(fromPlayerInfo.getAvatar());
+        toPlayerInfo.setGender(fromPlayerInfo.getGender());
+        toPlayerInfo.setFirstName(fromPlayerInfo.getFirstName());
+        toPlayerInfo.setLastName(fromPlayerInfo.getLastName());
+        toPlayerInfo.setNickname(fromPlayerInfo.getNickname());
+        toPlayerInfo.setNameColor(fromPlayerInfo.getNameColor());
+        toPlayerInfo.setSkinColor(fromPlayerInfo.getSkinColor());
+        toPlayerInfo.setBreastType(fromPlayerInfo.getBreastType());
+        toPlayerInfo.setAccessories(fromPlayerInfo.getAccessories());
+        toPlayerInfo.setHairstyle(fromPlayerInfo.getHairstyle());
+        toPlayerInfo.setHairColor(fromPlayerInfo.getHairColor());
+        toPlayerInfo.setEyes(fromPlayerInfo.getEyes());
+        toPlayerInfo.setNose(fromPlayerInfo.getNose());
+        toPlayerInfo.setMouth(fromPlayerInfo.getMouth());
+        toPlayerInfo.setTongue(fromPlayerInfo.getTongue());
+        toPlayerInfo.setEyebrows(fromPlayerInfo.getEyebrows());
+        toPlayerInfo.setMoustache(fromPlayerInfo.getMoustache());
+        toPlayerInfo.setBeard(fromPlayerInfo.getBeard());
+        toPlayerInfo.setFaceCoefs(fromPlayerInfo.getFaceCoefs());
     }
 }

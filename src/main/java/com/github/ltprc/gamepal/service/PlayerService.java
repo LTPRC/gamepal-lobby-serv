@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -77,4 +78,6 @@ public interface PlayerService {
     ResponseEntity<String> updateSkillsByTool(String userCode);
 
     boolean validateActiveness(final GameWorld world, final String id);
+
+    void updateTimestamp(PlayerInfo playerInfo);
 }

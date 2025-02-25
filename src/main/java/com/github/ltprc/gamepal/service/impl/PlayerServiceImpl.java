@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.*;
-import com.github.ltprc.gamepal.manager.impl.BuffManagerImpl;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.creature.*;
 import com.github.ltprc.gamepal.model.item.*;
@@ -45,6 +45,7 @@ public class PlayerServiceImpl implements PlayerService {
     private static final Integer RELATION_MIN = -100;
     private static final Integer RELATION_MAX = 100;
     private static final Log logger = LogFactory.getLog(PlayerServiceImpl.class);
+    private static final Random random = new Random();
 
     @Autowired
     private UserService userService;
@@ -329,15 +330,14 @@ public class PlayerServiceImpl implements PlayerService {
         if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0 || itemAmount <= 0) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
         }
-        long timestamp = Instant.now().getEpochSecond();
         switch (itemNo.charAt(0)) {
             case ItemConstants.ITEM_CHARACTER_TOOL:
                 useTools(userCode, itemNo);
-                playerInfo.setTimeUpdated(timestamp);
+                updateTimestamp(playerInfo);
                 break;
             case ItemConstants.ITEM_CHARACTER_OUTFIT:
                 useOutfits(userCode, itemNo);
-                playerInfo.setTimeUpdated(timestamp);
+                updateTimestamp(playerInfo);
                 break;
             case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(userCode, itemNo, itemAmount);
@@ -765,7 +765,6 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public ResponseEntity<String> interactBlocks(String userCode, int interactionCode) {
         JSONObject rst = ContentUtil.generateRst();
-        Random random = new Random();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
@@ -978,7 +977,6 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = creatureMap.get(userCode);
         WorldCoordinate worldCoordinate = player.getWorldCoordinate();
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-        Random random = new Random();
         double gaussianValue = random.nextGaussian();
         // 将生成的值转换成指定的均值和标准差
         BigDecimal direction = player.getMovementInfo().getFaceDirection();
@@ -1194,7 +1192,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private boolean goFishing(final String userCode) {
-        Random random = new Random();
         int randomValue = random.nextInt(100);
         if (randomValue < 5) {
             getItem(userCode, "c035", 1);
@@ -1373,7 +1370,6 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public ResponseEntity<String> addDrop(String userCode, String itemNo, int amount) {
         JSONObject rst = ContentUtil.generateRst();
-        Random random = new Random();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
@@ -1478,6 +1474,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = BuffConstants.BUFF_DEFAULT_FRAME_KNOCKED;
         }
+        updateTimestamp(playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1499,12 +1496,11 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        addPlayerTrophy(userCode, playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] != 0);
         changeVp(userCode, 0, true);
         changeHunger(userCode, 0, true);
         changeThirst(userCode, 0, true);
         changePrecision(userCode, 0, true);
-
-        addPlayerTrophy(userCode, playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] != 0);
         eventManager.addEvent(world, BlockConstants.BLOCK_CODE_DECAY, userCode, player.getWorldCoordinate());
         buffManager.resetBuff(playerInfo);
         if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_REALISTIC] != 0) {
@@ -1515,6 +1511,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
         }
+        updateTimestamp(playerInfo);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1581,7 +1578,6 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public ResponseEntity<String> addPlayerTrophy(String userCode, boolean hasTrophy) {
         JSONObject rst = ContentUtil.generateRst();
-        Random random = new Random();
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
@@ -1598,18 +1594,28 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
 
-        Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(), BlockConstants.BLOCK_CODE_BOX);
-        String id = remainContainer.getBlockInfo().getId();
-//        worldService.registerOnline(world, id);
-        movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));
+        Block remainContainer = sceneManager.addOtherBlock(world, player.getWorldCoordinate(),
+                playerInfo.getCreatureType() == CreatureConstants.CREATURE_TYPE_HUMAN
+                        ? BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT
+                        : BlockConstants.BLOCK_CODE_ANIMAL_REMAIN_DEFAULT);
+        String remainId = remainContainer.getBlockInfo().getId();
+        if (playerInfo.getCreatureType() == CreatureConstants.CREATURE_TYPE_HUMAN) {
+            PlayerInfo remainPlayerInfo = CreatureFactory.createCreatureInstance(playerInfo.getPlayerType(),
+                    playerInfo.getCreatureType());
+            CreatureFactory.copyPersonalizedPlayerInfo(playerInfo, remainPlayerInfo);
+            remainPlayerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
+            playerInfoMap.put(remainId, remainPlayerInfo);
+        }
+
+//        movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
+//                new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+//                GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());
             itemsMap.forEach((key, value) -> {
                 getItem(userCode, key, -value);
-                getItem(id, key, value);
+                getItem(remainId, key, value);
             });
         }
         switch (playerInfo.getCreatureType()) {
@@ -1619,117 +1625,117 @@ public class PlayerServiceImpl implements PlayerService {
                 switch (playerInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_PAOFU:
                     case CreatureConstants.SKIN_COLOR_CAT:
-                        getItem(id, "c038", random.nextInt(2) + 1);
+                        getItem(remainId, "c038", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FROG:
                     case CreatureConstants.SKIN_COLOR_MONKEY:
                     case CreatureConstants.SKIN_COLOR_RACOON:
-                        getItem(id, "m004", 1);
+                        getItem(remainId, "m004", 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_CHICKEN:
                         if (random.nextDouble() < 0.25D) {
-                            getItem(id, "c040", random.nextInt(1) + 1);
+                            getItem(remainId, "c040", random.nextInt(1) + 1);
                         }
-                        getItem(id, "c031", random.nextInt(2) + 1);
+                        getItem(remainId, "c031", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_BUFFALO:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "j037", random.nextInt(2) + 1);
+                            getItem(remainId, "j037", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m004", random.nextInt(3) + 1);
+                            getItem(remainId, "m004", random.nextInt(3) + 1);
                         }
-                        getItem(id, "c032", random.nextInt(4) + 1);
+                        getItem(remainId, "c032", random.nextInt(4) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FOX:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m004", random.nextInt(2) + 1);
+                            getItem(remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c037", random.nextInt(2) + 1);
+                        getItem(remainId, "c037", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4) + 1);
+                            getItem(remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m004", random.nextInt(2) + 1);
+                            getItem(remainId, "m004", random.nextInt(2) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_SHEEP:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c034", random.nextInt(2) + 1);
+                        getItem(remainId, "c034", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_TIGER:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4) + 1);
+                            getItem(remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m004", random.nextInt(3) + 1);
+                            getItem(remainId, "m004", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_DOG:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "j063", 1);
+                            getItem(remainId, "j063", 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "j193", 1);
+                            getItem(remainId, "j193", 1);
                         }
                         if (random.nextDouble() < 0.25D) {
-                            getItem(id, "j191", random.nextInt(4) + 1);
+                            getItem(remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m004", random.nextInt(2) + 1);
+                            getItem(remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c037", random.nextInt(2) + 1);
+                        getItem(remainId, "c037", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_WOLF:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4) + 1);
+                            getItem(remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(id, "m004", random.nextInt(2) + 1);
+                            getItem(remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c037", random.nextInt(3) + 1);
+                        getItem(remainId, "c037", random.nextInt(3) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_BOAR:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "j191", random.nextInt(4) + 1);
+                            getItem(remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(id, "m004", random.nextInt(3) + 1);
+                            getItem(remainId, "m004", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_HORSE:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m006", random.nextInt(2) + 1);
+                            getItem(remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(id, "m004", random.nextInt(2) + 1);
+                            getItem(remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(id, "c036", random.nextInt(2) + 1);
+                        getItem(remainId, "c036", random.nextInt(2) + 1);
                         break;
                     default:
                         return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1038));
@@ -1883,5 +1889,11 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(id);
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0;
+    }
+
+    @Override
+    public void updateTimestamp(PlayerInfo playerInfo) {
+        long timestamp = Instant.now().getEpochSecond();
+        playerInfo.setTimeUpdated(timestamp);
     }
 }
