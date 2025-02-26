@@ -125,6 +125,19 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
             case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+                BigDecimal tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
+                        worldCoordinate.getRegionNo()), fromWorldCoordinate, worldCoordinate);
+                if (null != tailSmokeLength) {
+                    int tailSmokeAmount = tailSmokeLength.intValue() * 10 + 1;
+                    WorldCoordinate liftedFromWorldCoordinate = new WorldCoordinate(fromWorldCoordinate);
+                    liftedFromWorldCoordinate.getCoordinate().setY(liftedFromWorldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)));
+                    BlockUtil.fixWorldCoordinate(region, liftedFromWorldCoordinate);
+                    List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
+                            regionMap.get(worldCoordinate.getRegionNo()), liftedFromWorldCoordinate,
+                            worldCoordinate, tailSmokeAmount);
+                    equidistantPoints.forEach(tailSmokeCoordinate ->
+                            addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, fromCreature.getBlockInfo().getId(), tailSmokeCoordinate));
+                }
                 affectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
                 updateBullet(world, eventBlock, fromCreature, affectedBlocks);
                 WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
@@ -136,12 +149,15 @@ public class EventManagerImpl implements EventManager {
                 addEvent(world, BlockConstants.BLOCK_CODE_SPARK_SHORT, fromCreature.getBlockInfo().getId(), sparkWc);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-                BigDecimal tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
+                tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
                         worldCoordinate.getRegionNo()), fromWorldCoordinate, worldCoordinate);
                 if (null != tailSmokeLength) {
-                    int tailSmokeAmount = tailSmokeLength.intValue() + 1;
+                    int tailSmokeAmount = tailSmokeLength.intValue() * 10 + 1;
+                    WorldCoordinate liftedFromWorldCoordinate = new WorldCoordinate(fromWorldCoordinate);
+                    liftedFromWorldCoordinate.getCoordinate().setY(liftedFromWorldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)));
+                    BlockUtil.fixWorldCoordinate(region, liftedFromWorldCoordinate);
                     List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
-                            regionMap.get(worldCoordinate.getRegionNo()), fromWorldCoordinate,
+                            regionMap.get(worldCoordinate.getRegionNo()), liftedFromWorldCoordinate,
                             worldCoordinate, tailSmokeAmount);
                     equidistantPoints.forEach(tailSmokeCoordinate ->
                             addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, fromCreature.getBlockInfo().getId(), tailSmokeCoordinate));

@@ -914,6 +914,9 @@ public class BlockUtil {
                     case BlockConstants.BLOCK_CODE_SPARK_SHORT:
                         period = 5;
                         break;
+                    case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
+                        period = 6;
+                        break;
                     case BlockConstants.BLOCK_CODE_DECAY:
                     case BlockConstants.BLOCK_CODE_CHEER:
                     case BlockConstants.BLOCK_CODE_CURSE:

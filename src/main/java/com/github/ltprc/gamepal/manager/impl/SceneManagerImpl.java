@@ -448,8 +448,8 @@ public class SceneManagerImpl implements SceneManager {
     private void addSceneObject(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
                                 BigDecimal y) {
         Random random = new Random();
-        Coordinate coordinate = new Coordinate(x.subtract(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(random.nextDouble())),
-                y.subtract(BigDecimal.valueOf(0.5)).add(BigDecimal.valueOf(random.nextDouble())));
+        Coordinate coordinate = new Coordinate(x.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
+                y.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())));
         WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                 coordinate);
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
