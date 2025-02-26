@@ -1158,12 +1158,6 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
-                for (int i = 0; i < 1 + random.nextInt(3); i++) {
-                    drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
-                }
                 world.getBagInfoMap().get(block.getBlockInfo().getId()).getItems().entrySet()
                         .forEach(entry -> {
                             Block dropFromContainer = addDropBlock(world, block.getWorldCoordinate(), entry);
@@ -1172,8 +1166,21 @@ public class SceneManagerImpl implements SceneManager {
                                             BigDecimal.valueOf(random.nextDouble() * 360),
                                             GamePalConstants.DROP_THROW_RADIUS));
                         });
-                if (block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
-                    world.getPlayerInfoMap().remove(block.getBlockInfo().getId());
+                switch (block.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_BOX:
+                        for (int i = 0; i < 1 + random.nextInt(3); i++) {
+                            drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
+                            movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                    new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                                    GamePalConstants.DROP_THROW_RADIUS));
+                        }
+                        break;
+                    case BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT:
+                        world.getPlayerInfoMap().remove(block.getBlockInfo().getId());
+                        break;
+                    case BlockConstants.BLOCK_CODE_ANIMAL_REMAIN_DEFAULT:
+                    default:
+                        break;
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_TOILET:
