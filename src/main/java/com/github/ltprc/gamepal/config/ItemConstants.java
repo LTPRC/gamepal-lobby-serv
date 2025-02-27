@@ -17,13 +17,6 @@ public class ItemConstants {
     public static final char RECIPE_CHARACTER_COOKER = 'c';
     public static final char RECIPE_CHARACTER_SINK = 's';
 
-    public static final String ITEM_NO_OUTFIT_UNDERWEAR = "o001";
-    public static final String ITEM_NO_OUTFIT_ZGC_1 = "o002";
-    public static final String ITEM_NO_OUTFIT_ZGC_2 = "o003";
-    public static final String ITEM_NO_OUTFIT_SOLDIER = "o004";
-    public static final String ITEM_NO_OUTFIT_SUIT_1 = "o005";
-    public static final String ITEM_NO_OUTFIT_SUIT_2 = "o006";
-
     // Backend constants
 
     public static final int TOOL_INDEX_DEFAULT = 0;

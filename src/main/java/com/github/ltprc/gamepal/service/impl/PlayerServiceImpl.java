@@ -395,14 +395,16 @@ public class PlayerServiceImpl implements PlayerService {
             }
         }
         BigDecimal capacity = bagInfo.getCapacity();
-        bagInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
-                .multiply(BigDecimal.valueOf(itemAmount))));
-        if (itemAmount < 0) {
-            generateNotificationMessage(userCode,
-                    "失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
-        } else {
-            generateNotificationMessage(userCode,
-                    "获得 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
+        if (worldService.getItemMap().containsKey(itemNo)) {
+            Item item = worldService.getItemMap().get(itemNo);
+            bagInfo.setCapacity(capacity.add(item.getWeight().multiply(BigDecimal.valueOf(itemAmount))));
+            if (itemAmount < 0) {
+                generateNotificationMessage(userCode,
+                        "失去 " + item.getName() + "(" + (-1) * itemAmount + ")");
+            } else {
+                generateNotificationMessage(userCode,
+                        "获得 " + item.getName() + "(" + itemAmount + ")");
+            }
         }
         if (world.getFlagMap().containsKey(userCode)) {
             world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
