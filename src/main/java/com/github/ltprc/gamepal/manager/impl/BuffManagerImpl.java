@@ -81,7 +81,7 @@ public class BuffManagerImpl implements BuffManager {
                                 BlockUtil.locateCoordinateWithDirectionAndDistance(
                                         region, player.getWorldCoordinate(),
                                         BigDecimal.valueOf(random.nextDouble() * 360),
-                                        GamePalConstants.BLEED_RADIUS_MAX.multiply(
+                                        BlockConstants.BLEED_RADIUS_MAX.multiply(
                                                 BigDecimal.valueOf(random.nextDouble()))));
                         playerService.generateNotificationMessage(userCode, "距离濒死结束还有"
                                 + playerInfo.getBuff()[i] / GamePalConstants.FRAME_PER_SECOND + "秒。");

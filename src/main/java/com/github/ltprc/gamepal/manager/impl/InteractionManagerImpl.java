@@ -1,0 +1,233 @@
+package com.github.ltprc.gamepal.manager.impl;
+
+import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.factory.BlockFactory;
+import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.InteractionInfo;
+import com.github.ltprc.gamepal.model.map.Region;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
+import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Random;
+
+@Component
+public class InteractionManagerImpl implements InteractionManager {
+
+    private static final Log logger = LogFactory.getLog(InteractionManagerImpl.class);
+    private static final Random random = new Random();
+
+    @Autowired
+    private PlayerService playerService;
+
+    @Autowired
+    private SceneManager sceneManager;
+
+    @Autowired
+    private MovementManager movementManager;
+
+    @Autowired
+    private FarmManager farmManager;
+
+    @Autowired
+    private EventManager eventManager;
+
+    @Override
+    public void searchInteraction(GameWorld world, String userCode) {
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Block player = creatureMap.get(userCode);
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
+        Queue<Block> rankingQueue = BlockFactory.createDistanceRankingQueue(region, player.getWorldCoordinate());
+        sceneManager.collectSurroundingBlocks(world, player, 1).stream()
+                .filter(block -> BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+                        block.getWorldCoordinate()).doubleValue()
+                        < InteractionConstants.MAX_INTERACTION_DISTANCE.doubleValue())
+                .filter(block -> BlockUtil.compareAnglesInDegrees(
+                        BlockUtil.calculateAngle(region, player.getWorldCoordinate(),
+                                block.getWorldCoordinate()).doubleValue(),
+                                player.getMovementInfo().getFaceDirection().doubleValue())
+                        < InteractionConstants.MAX_INTERACTION_ANGLE.doubleValue())
+                .filter(block -> BlockUtil.checkMaterialCollision(
+                        player.getBlockInfo().getStructure().getMaterial(),
+                        block.getBlockInfo().getStructure().getMaterial())
+                        || BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType()))
+                .filter(block -> !StringUtils.equals(block.getBlockInfo().getId(), userCode))
+                .forEach(rankingQueue::add);
+        if (!rankingQueue.isEmpty() && BlockUtil.checkBlockTypeInteractive(rankingQueue.peek().getBlockInfo().getType())) {
+            world.getInteractionInfoMap().put(userCode, generateInteractionInfo(rankingQueue.peek().getBlockInfo()));
+        } else {
+            world.getInteractionInfoMap().remove(userCode);
+        }
+    }
+
+    private InteractionInfo generateInteractionInfo(BlockInfo blockInfo) {
+        InteractionInfo interactionInfo = new InteractionInfo();
+        interactionInfo.setType(blockInfo.getType());
+        interactionInfo.setId(blockInfo.getId());
+        interactionInfo.setCode(blockInfo.getCode());
+        // Get list from Front-end
+        return interactionInfo;
+    }
+
+    /**
+     * Not all cases need to be implemented
+     * @param userCode
+     * @param interactionCode
+     * @return
+     */
+    @Override
+    public void interactBlocks(GameWorld world, String userCode, int interactionCode) {
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+            playerService.generateNotificationMessage(userCode, "濒死状态无法进行交互！");
+            logger.error(ErrorUtil.ERROR_1043);
+            return;
+        }
+        InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
+        if (null == interactionInfo) {
+            logger.error(ErrorUtil.ERROR_1034);
+            return;
+        }
+        String id = interactionInfo.getId();
+        Block block;
+        switch (interactionCode) {
+            case InteractionConstants.INTERACTION_TALK:
+            case InteractionConstants.INTERACTION_ATTACK:
+            case InteractionConstants.INTERACTION_FLIRT:
+            case InteractionConstants.INTERACTION_SUCCUMB:
+            case InteractionConstants.INTERACTION_EXPEL:
+            case InteractionConstants.INTERACTION_PULL:
+                block = creatureMap.get(id);
+                break;
+            default:
+                block = world.getBlockMap().get(id);
+                break;
+        }
+        if (null == block) {
+            logger.error(ErrorUtil.ERROR_1012);
+            return;
+        }
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
+        switch (interactionCode) {
+            case InteractionConstants.INTERACTION_USE:
+                switch (block.getBlockInfo().getType()) {
+                    case BlockConstants.BLOCK_TYPE_TOILET:
+                        playerService.generateNotificationMessage(userCode, "你正在使用马桶。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_GAME:
+//                        playerService.generateNotificationMessage(userCode, "你开启了桌游。");
+//                        if (!world.getTerminalMap().containsKey(id)) {
+//                            GameTerminal gameTerminal = new GameTerminal(world);
+//                            gameTerminal.setId(id);
+//                            gameTerminal.setUserCode(userCode);
+//                            gameTerminal.setStatus(GameConstants.GAME_PLAYER_STATUS_START);
+//                            gameTerminal.setOutputs(new ArrayList<>());
+//                            world.getTerminalMap().put(id, gameTerminal);
+//                        }
+//                        stateMachineService.gameTerminalInput((GameTerminal) world.getTerminalMap().get(id), "1");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_COOKER:
+                        playerService.generateNotificationMessage(userCode, "你正在使用灶台。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_SINK:
+                        playerService.generateNotificationMessage(userCode, "你正在使用饮水台。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP:
+                        playerService.generateNotificationMessage(userCode, "你正在使用工作台。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+                        playerService.generateNotificationMessage(userCode, "你正在使用工具工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+                        playerService.generateNotificationMessage(userCode, "你正在使用弹药工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+                        playerService.generateNotificationMessage(userCode, "你正在使用服装工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+                        playerService.generateNotificationMessage(userCode, "你正在使用化学工坊。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                        playerService.generateNotificationMessage(userCode, "你正在使用回收站。");
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case InteractionConstants.INTERACTION_EXCHANGE:
+                switch (block.getBlockInfo().getType()) {
+                    case BlockConstants.BLOCK_TYPE_STORAGE:
+                        playerService.generateNotificationMessage(userCode, "你正在整理个人物品。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_CONTAINER:
+                        playerService.generateNotificationMessage(userCode, "你正在整理容器。");
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case InteractionConstants.INTERACTION_SLEEP:
+                playerInfo.setVp(playerInfo.getVpMax());
+                playerInfo.setRespawnPoint(block.getWorldCoordinate());
+                playerService.generateNotificationMessage(userCode, "你打了一个盹。");
+                break;
+            case InteractionConstants.INTERACTION_DRINK:
+                playerInfo.setThirst(playerInfo.getThirstMax());
+                playerService.generateNotificationMessage(userCode, "你痛饮了起来。");
+                break;
+            case InteractionConstants.INTERACTION_DECOMPOSE:
+                break;
+            case InteractionConstants.INTERACTION_SET:
+                playerService.generateNotificationMessage(userCode, "你捯饬了起来。");
+                break;
+            case InteractionConstants.INTERACTION_PACK:
+                Block packedDrop = sceneManager.addDropBlock(world, block.getWorldCoordinate(),
+                        new AbstractMap.SimpleEntry<>(BlockUtil.convertBlockInfo2ItemNo(block.getBlockInfo()), 1));
+                movementManager.speedUpBlock(world, packedDrop, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                        new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                        BlockConstants.DROP_THROW_RADIUS));
+                sceneManager.removeBlock(world, block, false);
+                break;
+            case InteractionConstants.INTERACTION_PLANT:
+                farmManager.plant(world, userCode, id, "c064");
+                break;
+            case InteractionConstants.INTERACTION_GATHER:
+                farmManager.gather(world, userCode, id);
+                break;
+            case InteractionConstants.INTERACTION_PULL:
+                playerService.pullPlayer(userCode, id);
+                break;
+            default:
+                break;
+        }
+    }
+}

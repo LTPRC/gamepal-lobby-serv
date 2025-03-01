@@ -20,22 +20,6 @@ public class GamePalConstants {
     public static final int FRAME_PER_SECOND = 25;
     public static final int MINI_MAP_DEFAULT_SIZE = 100;
 
-    public static final int INTERACTION_USE = 0;
-    public static final int INTERACTION_EXCHANGE = 1;
-    public static final int INTERACTION_SLEEP = 2;
-    public static final int INTERACTION_DRINK = 3;
-    public static final int INTERACTION_DECOMPOSE = 4;
-    public static final int INTERACTION_TALK = 5;
-    public static final int INTERACTION_ATTACK = 6;
-    public static final int INTERACTION_FLIRT = 7;
-    public static final int INTERACTION_SET = 8;
-    public static final int INTERACTION_SUCCUMB = 9;
-    public static final int INTERACTION_EXPEL = 10;
-    public static final int INTERACTION_PACK = 11;
-    public static final int INTERACTION_PLANT = 12;
-    public static final int INTERACTION_GATHER = 13;
-    public static final int INTERACTION_PULL = 14;
-
     public static final BigDecimal MAX_WIND_SPEED = BigDecimal.valueOf(0.1D);
 
     // Backend constants
@@ -63,11 +47,6 @@ public class GamePalConstants {
     public static final int REGION_TYPE_ALL_WATER_SHALLOW = BlockConstants.BLOCK_CODE_WATER_SHALLOW;
     public static final int REGION_TYPE_ALL_WATER_MEDIUM = BlockConstants.BLOCK_CODE_WATER_MEDIUM;
     public static final int REGION_TYPE_ALL_WATER_DEEP = BlockConstants.BLOCK_CODE_WATER_DEEP;
-
-    public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.25D);
-    public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
-    public static final BigDecimal BLEED_RADIUS_MAX = BigDecimal.valueOf(0.1D);
 
     public static final long PLAYER_LOGOFF_THRESHOLD_IN_SECOND = 300L;
     public static final int DROP_DISAPPEAR_THRESHOLD_IN_FRAME = 60 * FRAME_PER_SECOND;

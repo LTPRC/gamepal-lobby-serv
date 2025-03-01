@@ -266,12 +266,10 @@ public class MovementManagerImpl implements MovementManager {
             worldService.expandRegion(world, worldMovingBlock.getWorldCoordinate().getRegionNo());
             return;
         }
-        Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
-        if (null == scene) {
-            logger.error(ErrorUtil.ERROR_1041);
+        if (!region.getScenes().containsKey(worldMovingBlock.getWorldCoordinate().getSceneCoordinate())) {
             worldService.expandScene(world, worldMovingBlock.getWorldCoordinate(), 1);
-            return;
         }
+        Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
         if (null != scene.getGrid() && null != scene.getGrid()[0]) {
             WorldCoordinate worldCoordinate = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
             BlockUtil.fixWorldCoordinateReal(region, worldCoordinate);

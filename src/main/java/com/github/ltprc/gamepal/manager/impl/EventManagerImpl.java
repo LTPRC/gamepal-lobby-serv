@@ -417,6 +417,7 @@ public class EventManagerImpl implements EventManager {
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                && changedHp < 0
                 && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getBuff()[BuffConstants.BUFF_CODE_BLOCKED] != 0) {
             changedHp /= 2;
         }
@@ -445,7 +446,7 @@ public class EventManagerImpl implements EventManager {
                         BlockUtil.locateCoordinateWithDirectionAndDistance(
                                 region, block.getWorldCoordinate(),
                                 BigDecimal.valueOf(random.nextDouble() * 360),
-                                GamePalConstants.BLEED_RADIUS_MAX.multiply(
+                                BlockConstants.BLEED_RADIUS_MAX.multiply(
                                         BigDecimal.valueOf(random.nextDouble()))));
             } else if (newHp > oldHp) {
                 if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0

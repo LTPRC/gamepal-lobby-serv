@@ -377,151 +377,6 @@ public class PlayerServiceImpl implements PlayerService {
         return ResponseEntity.ok().body(rst.toString());
     }
 
-    /**
-     * Not all cases need to be implemented
-     * @param userCode
-     * @param interactionCode
-     * @return
-     */
-    @Override
-    public ResponseEntity<String> interactBlocks(String userCode, int interactionCode) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
-            generateNotificationMessage(userCode, "濒死状态无法进行交互！");
-            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
-        }
-        InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
-        if (null == interactionInfo) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
-        }
-        String id = interactionInfo.getId();
-        Block block;
-        switch (interactionCode) {
-            case GamePalConstants.INTERACTION_TALK:
-            case GamePalConstants.INTERACTION_ATTACK:
-            case GamePalConstants.INTERACTION_FLIRT:
-            case GamePalConstants.INTERACTION_SUCCUMB:
-            case GamePalConstants.INTERACTION_EXPEL:
-            case GamePalConstants.INTERACTION_PULL:
-                block = creatureMap.get(id);
-                break;
-            default:
-                block = world.getBlockMap().get(id);
-                break;
-        }
-        if (null == block) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
-        }
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
-        switch (interactionCode) {
-            case GamePalConstants.INTERACTION_USE:
-                switch (block.getBlockInfo().getType()) {
-                    case BlockConstants.BLOCK_TYPE_TOILET:
-                        generateNotificationMessage(userCode, "你正在使用马桶。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_GAME:
-                        generateNotificationMessage(userCode, "你开启了桌游。");
-                        if (!world.getTerminalMap().containsKey(id)) {
-                            GameTerminal gameTerminal = new GameTerminal(world);
-                            gameTerminal.setId(id);
-                            gameTerminal.setUserCode(userCode);
-                            gameTerminal.setStatus(GameConstants.GAME_PLAYER_STATUS_START);
-                            gameTerminal.setOutputs(new ArrayList<>());
-                            world.getTerminalMap().put(id, gameTerminal);
-                        }
-                        stateMachineService.gameTerminalInput((GameTerminal) world.getTerminalMap().get(id), "1");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_COOKER:
-                        generateNotificationMessage(userCode, "你正在使用灶台。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_SINK:
-                        generateNotificationMessage(userCode, "你正在使用饮水台。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP:
-                        generateNotificationMessage(userCode, "你正在使用工作台。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
-                        generateNotificationMessage(userCode, "你正在使用工具工坊。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
-                        generateNotificationMessage(userCode, "你正在使用弹药工坊。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
-                        generateNotificationMessage(userCode, "你正在使用服装工坊。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
-                        generateNotificationMessage(userCode, "你正在使用化学工坊。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
-                        generateNotificationMessage(userCode, "你正在使用回收站。");
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case GamePalConstants.INTERACTION_EXCHANGE:
-                switch (block.getBlockInfo().getType()) {
-                    case BlockConstants.BLOCK_TYPE_STORAGE:
-                        generateNotificationMessage(userCode, "你正在整理个人物品。");
-                        break;
-                    case BlockConstants.BLOCK_TYPE_CONTAINER:
-                        generateNotificationMessage(userCode, "你正在整理容器。");
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case GamePalConstants.INTERACTION_SLEEP:
-                playerInfo.setVp(playerInfo.getVpMax());
-                playerInfo.setRespawnPoint(block.getWorldCoordinate());
-                generateNotificationMessage(userCode, "你打了一个盹。");
-                break;
-            case GamePalConstants.INTERACTION_DRINK:
-                playerInfo.setThirst(playerInfo.getThirstMax());
-                generateNotificationMessage(userCode, "你痛饮了起来。");
-                break;
-            case GamePalConstants.INTERACTION_DECOMPOSE:
-                break;
-            case GamePalConstants.INTERACTION_SET:
-                generateNotificationMessage(userCode, "你捯饬了起来。");
-                break;
-            case GamePalConstants.INTERACTION_PACK:
-                Block packedDrop = sceneManager.addDropBlock(world, block.getWorldCoordinate(),
-                        new AbstractMap.SimpleEntry<>(BlockUtil.convertBlockInfo2ItemNo(block.getBlockInfo()), 1));
-                movementManager.speedUpBlock(world, packedDrop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                        new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                        GamePalConstants.DROP_THROW_RADIUS));
-                sceneManager.removeBlock(world, block, false);
-                break;
-            case GamePalConstants.INTERACTION_PLANT:
-                farmManager.plant(world, userCode, id, "c064");
-                break;
-            case GamePalConstants.INTERACTION_GATHER:
-                farmManager.gather(world, userCode, id);
-                break;
-            case GamePalConstants.INTERACTION_PULL:
-                pullPlayer(userCode, id);
-                break;
-            default:
-                break;
-        }
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
     @Override
     public ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown) {
         JSONObject rst = ContentUtil.generateRst();
@@ -950,7 +805,7 @@ public class PlayerServiceImpl implements PlayerService {
         Block drop = sceneManager.addDropBlock(world, player.getWorldCoordinate(),
                 new AbstractMap.SimpleEntry<>(itemNo, amount));
         movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
-                BigDecimal.valueOf(random.nextDouble() * 360), GamePalConstants.DROP_THROW_RADIUS));
+                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS));
 //        MovementInfo movementInfo = block.getMovementInfo();
 //        dropMovementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
 //        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
@@ -981,19 +836,6 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             logger.warn(String.valueOf(ErrorUtil.ERROR_1030));
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
-        }
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> updateInteractionInfo(String userCode, InteractionInfo interactionInfo) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        if (null != interactionInfo) {
-            world.getInteractionInfoMap().put(userCode, interactionInfo);
         }
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -1171,9 +1013,9 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfoMap.put(remainId, remainPlayerInfo);
         }
 
-//        movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
-//                new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-//                GamePalConstants.REMAIN_CONTAINER_THROW_RADIUS));
+        movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
+                BlockConstants.REMAIN_CONTAINER_THROW_RADIUS));
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());

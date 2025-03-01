@@ -12,6 +12,6 @@ import java.util.List;
 public class InteractionInfo {
     private int type;
     private String id;
-    private String code;
+    private int code;
     private List<Integer> list;
 }

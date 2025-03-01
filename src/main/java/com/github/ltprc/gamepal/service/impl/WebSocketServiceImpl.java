@@ -65,6 +65,9 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Autowired
     private ItemManager itemManager;
 
+    @Autowired
+    private InteractionManager interactionManager;
+
     @Override
     public void onOpen(Session session, String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -215,11 +218,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.addDrop(userCode, itemNo, itemAmount);
                 }
             });
-            if (functions.containsKey("useDrop")) {
-                JSONObject useDrop = functions.getJSONObject("useDrop");
-                String id = useDrop.getString("id");
-                playerService.useDrop(userCode, id);
-            }
+//            if (functions.containsKey("useDrop")) {
+//                JSONObject useDrop = functions.getJSONObject("useDrop");
+//                String id = useDrop.getString("id");
+//                playerService.useDrop(userCode, id);
+//            }
             if (functions.containsKey("setRelation")) {
                 JSONObject setRelation = functions.getJSONObject("setRelation");
                 String userCode1 = setRelation.getString("userCode");
@@ -231,26 +234,31 @@ public class WebSocketServiceImpl implements WebSocketService {
                     logger.warn(setRelationRst);
                 }
             }
-            playerService.updateInteractionInfo(userCode,
-                    functions.getObject("updateInteractionInfo", InteractionInfo.class));
+
+            // Lazy updating interactionInfo only
+            InteractionInfo interactionInfo = functions.getObject("updateInteractionInfo", InteractionInfo.class);
+            if (null != interactionInfo) {
+                world.getInteractionInfoMap().put(userCode, interactionInfo);
+            }
+
             if (functions.containsKey("interactBlocks")) {
                 JSONArray interactBlocks = functions.getJSONArray("interactBlocks");
                 interactBlocks.forEach(interactBlock ->
-                    playerService.interactBlocks(userCode, ((JSONObject) interactBlock).getInteger("interactionCode"))
-                );
+                        interactionManager.interactBlocks(world, userCode,
+                                ((JSONObject) interactBlock).getInteger("interactionCode")));
             }
-            if (functions.containsKey("terminalInputs")) {
-                JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
-                for (Object terminalInput : terminalInputs) {
-                    String id = ((JSONObject) terminalInput).getString("id");
-                    Terminal terminal = world.getTerminalMap().get(id);
-                    if (null == terminal) {
-                        logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
-                    } else {
-                        stateMachineService.gameTerminalInput((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
-                    }
-                }
-            }
+//            if (functions.containsKey("terminalInputs")) {
+//                JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
+//                for (Object terminalInput : terminalInputs) {
+//                    String id = ((JSONObject) terminalInput).getString("id");
+//                    Terminal terminal = world.getTerminalMap().get(id);
+//                    if (null == terminal) {
+//                        logger.error(ErrorUtil.ERROR_1021 + " userCode: " + userCode);
+//                    } else {
+//                        stateMachineService.gameTerminalInput((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
+//                    }
+//                }
+//            }
             if (functions.containsKey("useSkills")) {
                 if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] == 0) {
                     JSONArray useSkills = functions.getJSONArray("useSkills");
@@ -348,31 +356,27 @@ public class WebSocketServiceImpl implements WebSocketService {
             }
         }
 
-//        rst.put("drops", world.getDropMap());
-
-//        rst.put("teleports", world.getTeleportMap());
-
         // Return relations
         JSONObject relations = new JSONObject();
         relations.putAll(playerService.getRelationMapByUserCode(userCode));
         rst.put("relations", relations);
-        JSONArray terminalOutputs = new JSONArray();
-        world.getTerminalMap().entrySet().stream()
-                .filter(entry -> userCode.equals(entry.getValue().getUserCode()))
-                .forEach(entry -> {
-                    entry.getValue().flushOutput().forEach(output -> {
-                        JSONObject terminalOutput = new JSONObject();
-                        terminalOutput.put("content", output);
-                        terminalOutputs.add(terminalOutput);
-                    });
-                    JSONObject gameOutput = ((GameTerminal) entry.getValue()).getGameOutput();
-                    if (null != gameOutput) {
-                        terminalOutputs.add(gameOutput);
-                    }
-                });
-        if (!terminalOutputs.isEmpty()) {
-            rst.put("terminalOutputs", terminalOutputs);
-        }
+//        JSONArray terminalOutputs = new JSONArray();
+//        world.getTerminalMap().entrySet().stream()
+//                .filter(entry -> userCode.equals(entry.getValue().getUserCode()))
+//                .forEach(entry -> {
+//                    entry.getValue().flushOutput().forEach(output -> {
+//                        JSONObject terminalOutput = new JSONObject();
+//                        terminalOutput.put("content", output);
+//                        terminalOutputs.add(terminalOutput);
+//                    });
+//                    JSONObject gameOutput = ((GameTerminal) entry.getValue()).getGameOutput();
+//                    if (null != gameOutput) {
+//                        terminalOutputs.add(gameOutput);
+//                    }
+//                });
+//        if (!terminalOutputs.isEmpty()) {
+//            rst.put("terminalOutputs", terminalOutputs);
+//        }
 
         // Return regionInfo not region 24/03/18
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
@@ -438,6 +442,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Latest timestamp
         rst.put("currentSecond", Instant.now().getEpochSecond() % 60);
         rst.put("currentMillisecond", Instant.now().getNano() / 1000_000);
+
+        rst.put("interactionInfo", world.getInteractionInfoMap().get(userCode));
 
 //        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
 //            analyzeJsonContent(rst);

@@ -8,6 +8,7 @@ import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -780,7 +781,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = BlockUtil.createRankingQueue(region);
+        Queue<Block> rankingQueue = BlockFactory.createYRankingQueue(region);
         IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
@@ -816,7 +817,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = BlockUtil.createRankingQueue(region);
+        Queue<Block> rankingQueue = BlockFactory.createYRankingQueue(region);
         // Collect detected creature blocks
         Map<String, Block> creatureMap = world.getCreatureMap();
         creatureMap.values().stream()
@@ -1154,7 +1155,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
@@ -1164,7 +1165,7 @@ public class SceneManagerImpl implements SceneManager {
                             movementManager.speedUpBlock(world, dropFromContainer,
                                     BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
                                             BigDecimal.valueOf(random.nextDouble() * 360),
-                                            GamePalConstants.DROP_THROW_RADIUS));
+                                            BlockConstants.DROP_THROW_RADIUS));
                         });
                 switch (block.getBlockInfo().getCode()) {
                     case BlockConstants.BLOCK_CODE_BOX:
@@ -1172,7 +1173,7 @@ public class SceneManagerImpl implements SceneManager {
                             drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
                             movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                                     new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                                    GamePalConstants.DROP_THROW_RADIUS));
+                                    BlockConstants.DROP_THROW_RADIUS));
                         }
                         break;
                     case BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT:
@@ -1188,7 +1189,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m007", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_COOKER:
@@ -1197,7 +1198,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m002", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
@@ -1205,7 +1206,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m018", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_SINK:
@@ -1219,7 +1220,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m001", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
@@ -1227,7 +1228,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m003", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
@@ -1235,7 +1236,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_ROCK:
@@ -1243,7 +1244,7 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m002", 1));
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 int randomValue = random.nextInt(100);
                 if (randomValue < 2) {
@@ -1270,7 +1271,7 @@ public class SceneManagerImpl implements SceneManager {
                 if (null != drop) {
                     movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
                             new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            GamePalConstants.DROP_THROW_RADIUS));
+                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             default:

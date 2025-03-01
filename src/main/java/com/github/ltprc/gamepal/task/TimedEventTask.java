@@ -1,13 +1,12 @@
 package com.github.ltprc.gamepal.task;
 
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.BuffConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
+import com.github.ltprc.gamepal.model.map.Scene;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -15,6 +14,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class TimedEventTask {
@@ -51,6 +52,12 @@ public class TimedEventTask {
     @Autowired
     private MovementManager movementManager;
 
+    @Autowired
+    private InteractionManager interactionManager;
+
+    @Autowired
+    private SceneManager sceneManager;
+
     @Scheduled(fixedRate = 20)
     public void executeByHalfFrame() {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
@@ -66,7 +73,7 @@ public class TimedEventTask {
             GameWorld world = entry.getValue();
 
             // Update events
-            world.getBlockMap().values().forEach(block -> eventManager.updateEvent(world, block));
+//            world.getBlockMap().values().forEach(block -> eventManager.updateEvent(world, block));
 
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
@@ -75,7 +82,24 @@ public class TimedEventTask {
             onlineMap.keySet().stream()
                     .filter(creatureMap::containsKey)
                     .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(id -> buffManager.updateBuffTime(world, id));
+                    .forEach(id -> {
+                        Block player = creatureMap.get(id);
+                        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
+                        // Update events
+                        Set<IntegerCoordinate> preSelectedSceneCoordinates = BlockUtil.preSelectSceneCoordinates(
+                                region, player.getWorldCoordinate(), player.getWorldCoordinate());
+                        preSelectedSceneCoordinates = BlockUtil.expandSceneCoordinates(preSelectedSceneCoordinates, 1);
+                        preSelectedSceneCoordinates.forEach(sceneCoordinate -> {
+                            if (!region.getScenes().containsKey(sceneCoordinate)) {
+                                sceneManager.fillScene(world, region, sceneCoordinate);
+                            }
+                            Scene scene = region.getScenes().get(sceneCoordinate);
+                            scene.getBlocks().values().forEach(block -> eventManager.updateEvent(world, block));
+                        });
+                        // Update buff time
+                        buffManager.updateBuffTime(world, id);
+                    });
+//                    .forEach(id -> buffManager.updateBuffTime(world, id));
 
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))
@@ -182,6 +206,10 @@ public class TimedEventTask {
                                 playerInfo.getSkills().get(0).setFrame(playerInfo.getSkills().get(0).getFrameMax());
                             }
 
+                            // Update possible interacted blocks
+                            interactionManager.searchInteraction(world, id);
+
+                            // Add decorating effects
                             Map<Integer, Region> regionMap = world.getRegionMap();
                             Region region = regionMap.get(player.getWorldCoordinate().getRegionNo());
                             if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] != 0) {
@@ -190,7 +218,7 @@ public class TimedEventTask {
                                             BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                                                     player.getWorldCoordinate(), BigDecimal.valueOf(Math.random() * 360),
                                                     BigDecimal.valueOf(Math.random()
-                                                            * GamePalConstants.BUBBLE_THROW_RADIUS.doubleValue())));
+                                                            * BlockConstants.BUBBLE_THROW_RADIUS.doubleValue())));
                                 }
                             }
                             if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] != 0) {
@@ -199,7 +227,7 @@ public class TimedEventTask {
                                             BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                                                     player.getWorldCoordinate(), BigDecimal.valueOf(Math.random() * 360),
                                                     BigDecimal.valueOf(Math.random()
-                                                            * GamePalConstants.BUBBLE_THROW_RADIUS.doubleValue())));
+                                                            * BlockConstants.BUBBLE_THROW_RADIUS.doubleValue())));
                                 }
                             }
                         }

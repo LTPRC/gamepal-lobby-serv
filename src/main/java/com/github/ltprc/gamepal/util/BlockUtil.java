@@ -2,7 +2,6 @@ package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
@@ -263,6 +262,21 @@ public class BlockUtil {
         return rst;
     }
 
+    public static Set<IntegerCoordinate> expandSceneCoordinates(Set<IntegerCoordinate> sceneCoordinates, int range) {
+        if (range <= 0) {
+            return sceneCoordinates;
+        }
+        Set<IntegerCoordinate> set = new HashSet<>();
+        for (IntegerCoordinate sceneCoordinate : sceneCoordinates) {
+            for (int i = sceneCoordinate.getY() - 1; i <= sceneCoordinate.getY() + 1; i++) {
+                for (int j = sceneCoordinate.getX() - 1; j <= sceneCoordinate.getX() + 1; j++) {
+                    set.add(new IntegerCoordinate(j, i));
+                }
+            }
+        }
+        return expandSceneCoordinates(set, range - 1);
+    }
+
     /**
      *
      * @param regionInfo
@@ -455,32 +469,6 @@ public class BlockUtil {
             default:
                 return true;
         }
-    }
-
-    public static Queue<Block> createRankingQueue(final RegionInfo regionInfo) {
-        return new PriorityQueue<>((o1, o2) -> {
-            if (!Objects.equals(o1.getBlockInfo().getStructure().getLayer() / 10,
-                    o2.getBlockInfo().getStructure().getLayer() / 10)) {
-                return o1.getBlockInfo().getStructure().getLayer() / 10
-                        - o2.getBlockInfo().getStructure().getLayer() / 10;
-            }
-            BigDecimal verticalDistance = calculateVerticalDistance(regionInfo, o1.getWorldCoordinate(),
-                    o2.getWorldCoordinate());
-            if (null != verticalDistance && !verticalDistance.equals(BigDecimal.ZERO)) {
-                return BigDecimal.ZERO.compareTo(verticalDistance);
-            }
-            BigDecimal horizontalDistance = calculateHorizontalDistance(regionInfo, o1.getWorldCoordinate(),
-                    o2.getWorldCoordinate());
-            if (null != horizontalDistance && !horizontalDistance.equals(BigDecimal.ZERO)) {
-                return BigDecimal.ZERO.compareTo(horizontalDistance);
-            }
-            int layerDiff = o1.getBlockInfo().getStructure().getLayer() % 10
-                    - o2.getBlockInfo().getStructure().getLayer() % 10;
-            if (layerDiff != 0) {
-                return layerDiff;
-            }
-            return o1.getBlockInfo().getCode() - o2.getBlockInfo().getCode();
-        });
     }
 
     public static WorldCoordinate locateCoordinateWithDirectionAndDistance(RegionInfo regionInfo,

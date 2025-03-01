@@ -261,11 +261,14 @@ public class BlockConstants {
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.3D);
-    public static final BigDecimal BARRIER_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal MINE_RADIUS = BigDecimal.ONE;
     public static final BigDecimal WIRE_NETTING_RADIUS = BigDecimal.valueOf(0.4D);
     public static final BigDecimal FIRE_RADIUS = BigDecimal.valueOf(0.5D);
+    public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
+    public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
+    public static final BigDecimal BLEED_RADIUS_MAX = BigDecimal.valueOf(0.1D);
 
     public static final int HP_DEFAULT = 100;
     public static final BigDecimal HP_PULL_RATIO = BigDecimal.valueOf(0.1D);

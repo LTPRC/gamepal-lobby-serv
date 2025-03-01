@@ -2,7 +2,6 @@ package com.github.ltprc.gamepal.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import org.springframework.http.ResponseEntity;
 
@@ -26,8 +25,6 @@ public interface PlayerService {
 
     ResponseEntity<String> changePrecision(String userCode, int value, boolean isAbsolute);
 
-    ResponseEntity<String> interactBlocks(String userCode, int interactionCode);
-
     ResponseEntity<String> useSkill(String userCode, int skillNo, boolean isDown);
 
     ResponseEntity<String> setMember(String userCode, String userCode1, String userCode2);
@@ -37,8 +34,6 @@ public interface PlayerService {
     ResponseEntity<String> addDrop(String userCode, String itemNo, int amount);
 
     ResponseEntity<String> useDrop(String userCode, String dropId);
-
-    ResponseEntity<String> updateInteractionInfo(String userCode, InteractionInfo interactionInfo);
 
     ResponseEntity<String> knockPlayer(String userCode);
 
