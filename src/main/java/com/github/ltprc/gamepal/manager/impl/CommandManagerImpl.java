@@ -46,6 +46,9 @@ public class CommandManagerImpl implements CommandManager {
     @Autowired
     private EventManager eventManager;
 
+    @Autowired
+    private ItemManager itemManager;
+
     @Override
     public ResponseEntity<String> useCommand(String userCode, String commandContent) {
         JSONObject rst = ContentUtil.generateRst();
@@ -66,11 +69,11 @@ public class CommandManagerImpl implements CommandManager {
                             new WorldCoordinate(player.getWorldCoordinate()), CreatureConstants.NPC_ROLE_MINION);
                     PlayerInfo playerInfo = world.getPlayerInfoMap().get(agent.getBlockInfo().getId());
                     CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_MALE);
-                    playerService.getItem(agent.getBlockInfo().getId(), "o005", 1);
-                    playerService.useItem(agent.getBlockInfo().getId(), "o005", 1);
-                    playerService.getItem(agent.getBlockInfo().getId(), "t002", 1);
-                    playerService.useItem(agent.getBlockInfo().getId(), "t002", 1);
-                    playerService.getItem(agent.getBlockInfo().getId(), "a002", 7);
+                    itemManager.getItem(world, agent.getBlockInfo().getId(), "o005", 1);
+                    itemManager.useItem(world, agent.getBlockInfo().getId(), "o005", 1);
+                    itemManager.getItem(world, agent.getBlockInfo().getId(), "t002", 1);
+                    itemManager.useItem(world, agent.getBlockInfo().getId(), "t002", 1);
+                    itemManager.getItem(world, agent.getBlockInfo().getId(), "a002", 7);
                 }
                 break;
             case "nwclotsofguns":
@@ -100,11 +103,11 @@ public class CommandManagerImpl implements CommandManager {
                         new WorldCoordinate(player.getWorldCoordinate()), CreatureConstants.NPC_ROLE_PEER);
                 playerInfo = world.getPlayerInfoMap().get(trinity.getBlockInfo().getId());
                 CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_FEMALE);
-                playerService.getItem(trinity.getBlockInfo().getId(), "o004", 1);
-                playerService.useItem(trinity.getBlockInfo().getId(), "o004", 1);
-                playerService.getItem(trinity.getBlockInfo().getId(), "t000", 1);
-                playerService.useItem(trinity.getBlockInfo().getId(), "t000", 1);
-                playerService.getItem(trinity.getBlockInfo().getId(), "a001", 20);
+                itemManager.getItem(world, trinity.getBlockInfo().getId(), "o004", 1);
+                itemManager.useItem(world, trinity.getBlockInfo().getId(), "o004", 1);
+                itemManager.getItem(world, trinity.getBlockInfo().getId(), "t000", 1);
+                itemManager.useItem(world, trinity.getBlockInfo().getId(), "t000", 1);
+                itemManager.getItem(world, trinity.getBlockInfo().getId(), "a001", 20);
                 break;
             case "nwcnebuchadnezzar":
                 playerService.generateNotificationMessage(userCode, "跑得快。");

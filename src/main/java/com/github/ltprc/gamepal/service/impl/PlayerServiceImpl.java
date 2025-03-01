@@ -12,7 +12,6 @@ import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -36,7 +35,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -76,6 +74,9 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private FarmManager farmManager;
+
+    @Autowired
+    private ItemManager itemManager;
 
     @Override
     public ResponseEntity<String> updatePlayerInfoCharacter(String userCode, JSONObject req) {
@@ -185,25 +186,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> updatePlayerMovement(String userCode, WorldCoordinate worldCoordinate,
-                                                       MovementInfo movementInfo) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Block player = creatureMap.get(userCode);
-        movementManager.settleCoordinate(world, player, worldCoordinate, false);
-        player.getMovementInfo().setSpeed(movementInfo.getSpeed());
-        player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
     public ResponseEntity<String> generateNotificationMessage(String userCode, String content) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         if (null == world) {
@@ -308,284 +290,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> useItem(String userCode, String itemNo, int itemAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
-        BagInfo bagInfo = bagInfoMap.get(userCode);
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
-            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
-        }
-        if (StringUtils.isBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
-        }
-        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0 || itemAmount <= 0) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
-        }
-        switch (itemNo.charAt(0)) {
-            case ItemConstants.ITEM_CHARACTER_TOOL:
-                useTools(userCode, itemNo);
-                updateTimestamp(playerInfo);
-                break;
-            case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                useOutfits(userCode, itemNo);
-                updateTimestamp(playerInfo);
-                break;
-            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
-                useConsumable(userCode, itemNo, itemAmount);
-                break;
-            case ItemConstants.ITEM_CHARACTER_MATERIAL:
-            case ItemConstants.ITEM_CHARACTER_JUNK:
-            case ItemConstants.ITEM_CHARACTER_AMMO:
-            case ItemConstants.ITEM_CHARACTER_NOTE:
-            case ItemConstants.ITEM_CHARACTER_RECORDING:
-            default:
-                break;
-        }
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> getItem(String userCode, String itemNo, int itemAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        if (itemAmount == 0) {
-            return ResponseEntity.ok().body(rst.toString());
-        }
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
-        if (!bagInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        BagInfo bagInfo = bagInfoMap.get(userCode);
-        int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
-        if (oldItemAmount + itemAmount < 0) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
-        }
-        bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
-            switch (itemNo.charAt(0)) {
-                case ItemConstants.ITEM_CHARACTER_TOOL:
-                    if (playerInfoMap.containsKey(userCode)) {
-                        playerInfoMap.get(userCode).getTools().remove(itemNo);
-                    }
-                    updateSkillsByTool(userCode);
-                    break;
-                case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                    if (playerInfoMap.containsKey(userCode)) {
-                        playerInfoMap.get(userCode).getOutfits().remove(itemNo);
-                    }
-                    updateSkillsByTool(userCode);
-                    break;
-                default:
-                    break;
-            }
-        }
-        BigDecimal capacity = bagInfo.getCapacity();
-        if (worldService.getItemMap().containsKey(itemNo)) {
-            Item item = worldService.getItemMap().get(itemNo);
-            bagInfo.setCapacity(capacity.add(item.getWeight().multiply(BigDecimal.valueOf(itemAmount))));
-            if (itemAmount < 0) {
-                generateNotificationMessage(userCode,
-                        "失去 " + item.getName() + "(" + (-1) * itemAmount + ")");
-            } else {
-                generateNotificationMessage(userCode,
-                        "获得 " + item.getName() + "(" + itemAmount + ")");
-            }
-        }
-        if (world.getFlagMap().containsKey(userCode)) {
-            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
-        }
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> getPreservedItem(String userCode, String itemNo, int itemAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        if (itemAmount == 0) {
-            return ResponseEntity.ok().body(rst.toString());
-        }
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, BagInfo> preservedBagInfoMap = world.getPreservedBagInfoMap();
-        BagInfo preservedBagInfo = preservedBagInfoMap.get(userCode);
-        int oldItemAmount = preservedBagInfo.getItems().getOrDefault(itemNo, 0);
-        if (oldItemAmount + itemAmount < 0) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
-        }
-        preservedBagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (itemAmount < 0) {
-            generateNotificationMessage(userCode,
-                    "失去 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
-        } else {
-            generateNotificationMessage(userCode,
-                    "储存 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
-        }
-        if (world.getFlagMap().containsKey(userCode)) {
-            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
-        }
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> getInteractedItem(String userCode, String itemNo, int itemAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        if (itemAmount == 0) {
-            return ResponseEntity.ok().body(rst.toString());
-        }
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
-        BagInfo bagInfo = bagInfoMap.get(userCode);
-        int oldItemAmount = bagInfo.getItems().getOrDefault(itemNo, 0);
-        if (oldItemAmount + itemAmount < 0) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
-        }
-        InteractionInfo interactionInfo = world.getInteractionInfoMap().get(userCode);
-        if (null == interactionInfo) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1034));
-        }
-        String id = interactionInfo.getId();
-        Block block = world.getBlockMap().get(id);
-        if (null == block) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1012));
-        }
-        BagInfo interactedBagInfo;
-        int oldInteractedItemAmount;
-        switch (block.getBlockInfo().getType()) {
-            case BlockConstants.BLOCK_TYPE_STORAGE:
-                Map<String, BagInfo> preservedBagInfoMap = world.getPreservedBagInfoMap();
-                interactedBagInfo = preservedBagInfoMap.get(userCode);
-                oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
-                break;
-            case BlockConstants.BLOCK_TYPE_CONTAINER:
-                interactedBagInfo = bagInfoMap.get(id);
-                oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
-                break;
-            default:
-                return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1013));
-        }
-        if (oldInteractedItemAmount - itemAmount < 0) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1035));
-        }
-        interactedBagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldInteractedItemAmount - itemAmount, Integer.MAX_VALUE)));
-        bagInfo.getItems().put(itemNo, Math.max(0, Math.min(oldItemAmount + itemAmount, Integer.MAX_VALUE)));
-        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0) {
-            switch (itemNo.charAt(0)) {
-                case ItemConstants.ITEM_CHARACTER_TOOL:
-                    if (playerInfoMap.containsKey(userCode)) {
-                        playerInfoMap.get(userCode).getTools().remove(itemNo);
-                    }
-                    break;
-                case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                    if (playerInfoMap.containsKey(userCode)) {
-                        playerInfoMap.get(userCode).getOutfits().remove(itemNo);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        BigDecimal capacity = bagInfo.getCapacity();
-        bagInfo.setCapacity(capacity.add(worldService.getItemMap().get(itemNo).getWeight()
-                .multiply(BigDecimal.valueOf(itemAmount))));
-        if (itemAmount < 0) {
-            generateNotificationMessage(userCode,
-                    "存入 " + worldService.getItemMap().get(itemNo).getName() + "(" + (-1) * itemAmount + ")");
-        } else {
-            generateNotificationMessage(userCode,
-                    "取出 " + worldService.getItemMap().get(itemNo).getName() + "(" + itemAmount + ")");
-        }
-        if (world.getFlagMap().containsKey(userCode)) {
-            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-            world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
-        }
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> recycleItem(String userCode, String itemNo, int itemAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
-        BagInfo bagInfo = bagInfoMap.get(userCode);
-        if (StringUtils.isBlank(itemNo) || !bagInfo.getItems().containsKey(itemNo)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1020));
-        }
-        if (bagInfo.getItems().getOrDefault(itemNo, 0) == 0 || itemAmount <= 0) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
-        }
-        switch (itemNo.charAt(0)) {
-            case ItemConstants.ITEM_CHARACTER_JUNK:
-                getItem(userCode, itemNo, -1);
-                ((Junk) worldService.getItemMap().get(itemNo)).getMaterials()
-                        .forEach((key, value) -> getItem(userCode, key, value));
-                break;
-            case ItemConstants.ITEM_CHARACTER_TOOL:
-            case ItemConstants.ITEM_CHARACTER_OUTFIT:
-            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
-            case ItemConstants.ITEM_CHARACTER_MATERIAL:
-            case ItemConstants.ITEM_CHARACTER_AMMO:
-            case ItemConstants.ITEM_CHARACTER_NOTE:
-            case ItemConstants.ITEM_CHARACTER_RECORDING:
-            default:
-                break;
-        }
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_ITEMS] = true;
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_INTERACTED_ITEMS] = true;
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> useRecipe(String userCode, String recipeNo, int recipeAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
-        BagInfo bagInfo = bagInfoMap.get(userCode);
-        Map<String, Recipe> recipeMap = worldService.getRecipeMap();
-        if (StringUtils.isBlank(recipeNo) || !recipeMap.containsKey(recipeNo)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1023));
-        }
-        Recipe recipe = recipeMap.get(recipeNo);
-        if (recipe.getCost().entrySet().stream()
-                .anyMatch(entry -> bagInfo.getItems().getOrDefault(entry.getKey(), 0) < entry.getValue() * recipeAmount)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1024));
-        }
-        recipe.getCost().entrySet()
-                .forEach(entry -> getItem(userCode, entry.getKey(), - entry.getValue() * recipeAmount));
-        recipe.getValue().entrySet()
-                .forEach(entry -> getItem(userCode, entry.getKey(), entry.getValue() * recipeAmount));
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_RECIPES] = true;
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
     public ResponseEntity<String> changeVp(String userCode, int value, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -670,91 +374,6 @@ public class PlayerServiceImpl implements PlayerService {
         int oldPrecision = playerInfo.getPrecision();
         int newPrecision = isAbsolute ? value : oldPrecision + value;
         playerInfo.setPrecision(Math.max(0, Math.min(newPrecision, playerInfo.getPrecisionMax())));
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    private ResponseEntity<String> useConsumable(String userCode, String itemNo, int itemAmount) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        if (null == world) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
-        }
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        for (int i = 0; i < itemAmount; i++) {
-            ((Consumable) worldService.getItemMap().get(itemNo)).getEffects().entrySet()
-                    .forEach((Map.Entry<String, Integer> entry) -> {
-                        switch (entry.getKey()) {
-                            case "hp":
-                                eventManager.changeHp(world, player, entry.getValue(), false);
-                                break;
-                            case "vp":
-                                changeVp(userCode, entry.getValue(), false);
-                                break;
-                            case "hunger":
-                                changeHunger(userCode, entry.getValue(), false);
-                                break;
-                            case "thirst":
-                                changeThirst(userCode, entry.getValue(), false);
-                                break;
-                            default:
-                                break;
-                        }
-                    });
-        }
-        switch (worldService.getItemMap().get(itemNo).getItemNo()) {
-            case "c005":
-                eventManager.changeHp(world, player, 0, true);
-                break;
-            case "c006":
-                revivePlayer(userCode);
-                break;
-            case "c007":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] = -1;
-                break;
-            case "c008":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] = 0;
-                break;
-            case "c009":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLEEDING] = -1;
-                break;
-            case "c010":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLEEDING] = 0;
-                break;
-            case "c011":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] = -1;
-                break;
-            case "c012":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] = 0;
-                break;
-            case "c013":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] = -1;
-                break;
-            case "c014":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] = 0;
-                break;
-            case "c015":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLIND] = -1;
-                break;
-            case "c016":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLIND] = 0;
-                break;
-            case "c063":
-                playerInfo.getBuff()[BuffConstants.BUFF_CODE_RECOVERING]
-                        = 15 * GamePalConstants.FRAME_PER_SECOND;
-                break;
-            default:
-                break;
-        }
-        getItem(userCode, itemNo, -1 * itemAmount);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -941,7 +560,7 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfo.getSkills().get(skillNo).setFrame(playerInfo.getSkills().get(skillNo).getFrameMax());
                     boolean skillResult = generateEventBySkill(userCode, skillNo);
                     if (skillResult && StringUtils.isNotBlank(ammoCode)) {
-                        getItem(userCode, ammoCode, -1);
+                        itemManager.getItem(world, userCode, ammoCode, -1);
                     }
                 } else {
                     logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfo.getSkills().get(skillNo).getSkillMode());
@@ -954,7 +573,7 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfo.getSkills().get(skillNo).setFrame(playerInfo.getSkills().get(skillNo).getFrameMax());
                     boolean skillResult = generateEventBySkill(userCode, skillNo);
                     if (skillResult && StringUtils.isNotBlank(ammoCode)) {
-                        getItem(userCode, ammoCode, -1);
+                        itemManager.getItem(world, userCode, ammoCode, -1);
                     }
                 }
             } else if (playerInfo.getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
@@ -1202,21 +821,26 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private boolean goFishing(final String userCode) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        if (null == world) {
+            logger.error(String.valueOf(ErrorUtil.ERROR_1016));
+            return false;
+        }
         int randomValue = random.nextInt(100);
         if (randomValue < 5) {
-            getItem(userCode, "c035", 1);
+            itemManager.getItem(world, userCode, "c035", 1);
         } else if (randomValue < 10) {
-            getItem(userCode, "m006", 1);
+            itemManager.getItem(world, userCode, "m006", 1);
         } else if (randomValue < 12) {
-            getItem(userCode, "j082", 1);
+            itemManager.getItem(world, userCode, "j082", 1);
         } else if (randomValue < 15) {
-            getItem(userCode, "j126", 1);
+            itemManager.getItem(world, userCode, "j126", 1);
         } else if (randomValue < 18) {
-            getItem(userCode, "j135", 1);
+            itemManager.getItem(world, userCode, "j135", 1);
         } else if (randomValue < 20) {
-            getItem(userCode, "j145", 1);
+            itemManager.getItem(world, userCode, "j145", 1);
         } else if (randomValue < 22) {
-            getItem(userCode, "j191", 1);
+            itemManager.getItem(world, userCode, "j191", 1);
         } else {
             return false;
         }
@@ -1308,76 +932,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> useTools(String userCode, String itemNo) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int toolIndex = ((Tool) worldService.getItemMap().get(itemNo)).getItemIndex();
-        Set<String> newTools = new ConcurrentSkipListSet<>();
-        if (playerInfo.getTools().contains(itemNo)) {
-//            playerInfo.getTools().stream()
-//                    .filter(toolNo -> !itemNo.equals(toolNo))
-//                    .forEach(newTools::add);
-//            playerInfo.setTools(newTools);
-            playerInfo.getTools().remove(itemNo);
-        } else if (toolIndex != ItemConstants.TOOL_INDEX_DEFAULT) {
-            playerInfo.getTools().stream()
-                    .filter(toolNo -> toolIndex != ((Tool) worldService.getItemMap().get(toolNo)).getItemIndex())
-                    .forEach(newTools::add);
-            playerInfo.setTools(newTools);
-            playerInfo.getTools().add(itemNo);
-        } else {
-            playerInfo.getTools().add(itemNo);
-        }
-        updateSkillsByTool(userCode);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
-    public ResponseEntity<String> useOutfits(String userCode, String itemNo) {
-        JSONObject rst = ContentUtil.generateRst();
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (!playerInfoMap.containsKey(userCode)) {
-            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-        }
-        Block player = creatureMap.get(userCode);
-        PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        int outfitIndex = ((Outfit) worldService.getItemMap().get(itemNo)).getItemIndex();
-        Set<String> newOutfits = new ConcurrentSkipListSet<>();
-        if (playerInfo.getOutfits().contains(itemNo)) {
-//            playerInfo.getOutfits().stream()
-//                    .filter(outfitNo -> !itemNo.equals(outfitNo))
-//                    .forEach(newOutfits::add);
-//            playerInfo.setOutfits(newOutfits);
-            playerInfo.getOutfits().remove(itemNo);
-        } else if (outfitIndex != ItemConstants.OUTFIT_INDEX_DEFAULT) {
-            playerInfo.getOutfits().stream()
-                    .filter(outfitNo -> outfitIndex != ((Outfit) worldService.getItemMap().get(outfitNo)).getItemIndex())
-                    .forEach(newOutfits::add);
-            playerInfo.setOutfits(newOutfits);
-            playerInfo.getOutfits().add(itemNo);
-        } else {
-            playerInfo.getOutfits().add(itemNo);
-        }
-        updateSkillsByTool(userCode);
-        return ResponseEntity.ok().body(rst.toString());
-    }
-
-    @Override
     public ResponseEntity<String> addDrop(String userCode, String itemNo, int amount) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -1416,7 +970,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         if (world.getDropMap().containsKey(dropId)) {
             Map.Entry<String, Integer> drop = world.getDropMap().get(dropId);
-            getItem(userCode, drop.getKey(), drop.getValue());
+            itemManager.getItem(world, userCode, drop.getKey(), drop.getValue());
         } else {
             logger.warn(String.valueOf(ErrorUtil.ERROR_1030));
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
@@ -1624,8 +1178,8 @@ public class PlayerServiceImpl implements PlayerService {
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());
             itemsMap.forEach((key, value) -> {
-                getItem(userCode, key, -value);
-                getItem(remainId, key, value);
+                itemManager.getItem(world, userCode, key, -value);
+                itemManager.getItem(world, remainId, key, value);
             });
         }
         switch (playerInfo.getCreatureType()) {
@@ -1635,117 +1189,117 @@ public class PlayerServiceImpl implements PlayerService {
                 switch (playerInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_PAOFU:
                     case CreatureConstants.SKIN_COLOR_CAT:
-                        getItem(remainId, "c038", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c038", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FROG:
                     case CreatureConstants.SKIN_COLOR_MONKEY:
                     case CreatureConstants.SKIN_COLOR_RACOON:
-                        getItem(remainId, "m004", 1);
+                        itemManager.getItem(world, remainId, "m004", 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_CHICKEN:
                         if (random.nextDouble() < 0.25D) {
-                            getItem(remainId, "c040", random.nextInt(1) + 1);
+                            itemManager.getItem(world, remainId, "c040", random.nextInt(1) + 1);
                         }
-                        getItem(remainId, "c031", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c031", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_BUFFALO:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "j037", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "j037", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "m004", random.nextInt(3) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1);
                         }
-                        getItem(remainId, "c032", random.nextInt(4) + 1);
+                        itemManager.getItem(world, remainId, "c032", random.nextInt(4) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_FOX:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(remainId, "c037", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c037", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_SHEEP:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
-                        getItem(remainId, "c034", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c034", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_TIGER:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "m004", random.nextInt(3) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_DOG:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "j063", 1);
+                            itemManager.getItem(world, remainId, "j063", 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "j193", 1);
+                            itemManager.getItem(world, remainId, "j193", 1);
                         }
                         if (random.nextDouble() < 0.25D) {
-                            getItem(remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(remainId, "c037", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c037", random.nextInt(2) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_WOLF:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            getItem(remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(remainId, "c037", random.nextInt(3) + 1);
+                        itemManager.getItem(world, remainId, "c037", random.nextInt(3) + 1);
                         break;
                     case CreatureConstants.SKIN_COLOR_BOAR:
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            getItem(remainId, "m004", random.nextInt(3) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_HORSE:
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            getItem(remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
                         }
-                        getItem(remainId, "c036", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c036", random.nextInt(2) + 1);
                         break;
                     default:
                         return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1038));

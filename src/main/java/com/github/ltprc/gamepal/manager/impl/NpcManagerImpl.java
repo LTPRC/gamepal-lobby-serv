@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
+import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
@@ -55,6 +56,9 @@ public class NpcManagerImpl implements NpcManager {
 
     @Autowired
     private WorldService worldService;
+
+    @Autowired
+    private ItemManager itemManager;
 
     @Override
     public Block createCreature(GameWorld world, final int playerType, final int creatureType, String userCode) {
@@ -319,7 +323,7 @@ public class NpcManagerImpl implements NpcManager {
                                 Tool tool = (Tool) itemMap.get(toolStr);
                                 if (tool.getSkills().stream().noneMatch(skill ->
                                         bagInfo.getItems().getOrDefault(skill.getAmmoCode(), 0) > 0)) {
-                                    playerService.useItem(npcUserCode, toolStr, 1);
+                                    itemManager.useItem(world, npcUserCode, toolStr, 1);
                                 }
                             });
                     // Old targets

@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.manager.impl;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.manager.FarmManager;
+import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -24,6 +25,9 @@ public class FarmManagerImpl implements FarmManager {
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired
+    private ItemManager itemManager;
 
     @Override
     public void updateFarmStatus(GameWorld world) {
@@ -61,7 +65,7 @@ public class FarmManagerImpl implements FarmManager {
             return;
         }
         playerService.generateNotificationMessage(userCode, "种植成功。");
-        playerService.getItem(userCode, cropCode, -1);
+        itemManager.getItem(world, userCode, cropCode, -1);
         farmInfo.setCropStatus(BlockConstants.CROP_STATUS_PLANTED);
         Random random = new Random();
         farmInfo.setCropAmount(random.nextInt(3) + 3);
@@ -80,7 +84,7 @@ public class FarmManagerImpl implements FarmManager {
             return;
         }
         playerService.generateNotificationMessage(userCode, "采集成功。");
-        playerService.getItem(userCode, farmInfo.getCropCode(), farmInfo.getCropAmount());
+        itemManager.getItem(world, userCode, farmInfo.getCropCode(), farmInfo.getCropAmount());
         farmInfo.setCropStatus(BlockConstants.CROP_STATUS_GATHERED);
         farmInfo.setCropAmount(0);
     }

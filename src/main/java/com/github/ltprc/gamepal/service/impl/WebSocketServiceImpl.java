@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.CommandManager;
-import com.github.ltprc.gamepal.manager.MiniMapManager;
-import com.github.ltprc.gamepal.manager.MovementManager;
-import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -64,6 +61,9 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private MovementManager movementManager;
+
+    @Autowired
+    private ItemManager itemManager;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -136,7 +136,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 useItems.forEach(useItem -> {
                     String itemNo = ((JSONObject) useItem).getString("itemNo");
                     int itemAmount = ((JSONObject) useItem).getInteger("itemAmount");
-                    playerService.useItem(userCode, itemNo, itemAmount);
+                    itemManager.useItem(world, userCode, itemNo, itemAmount);
                 });
             }
             if (functions.containsKey("getItems")) {
@@ -144,7 +144,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 getItems.forEach(getItem -> {
                     String itemNo = ((JSONObject) getItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getItem).getInteger("itemAmount");
-                    playerService.getItem(userCode, itemNo, itemAmount);
+                    itemManager.getItem(world, userCode, itemNo, itemAmount);
                 });
             }
             if (functions.containsKey("getPreservedItems")) {
@@ -152,7 +152,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 getPreservedItems.forEach(getPreservedItem -> {
                     String itemNo = ((JSONObject) getPreservedItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getPreservedItem).getInteger("itemAmount");
-                    playerService.getPreservedItem(userCode, itemNo, itemAmount);
+                    itemManager.getPreservedItem(world, userCode, itemNo, itemAmount);
                 });
             }
             if (functions.containsKey("getInteractedItems")) {
@@ -160,7 +160,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 getInteractedItems.forEach(getInteractedItem -> {
                     String itemNo = ((JSONObject) getInteractedItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getInteractedItem).getInteger("itemAmount");
-                    playerService.getInteractedItem(userCode, itemNo, itemAmount);
+                    itemManager.getInteractedItem(world, userCode, itemNo, itemAmount);
                 });
             }
             if (functions.containsKey("recycleItems")) {
@@ -168,7 +168,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 recycleItems.forEach(recycleItem -> {
                     String itemNo = ((JSONObject) recycleItem).getString("itemNo");
                     int itemAmount = ((JSONObject) recycleItem).getInteger("itemAmount");
-                    playerService.recycleItem(userCode, itemNo, itemAmount);
+                    itemManager.recycleItem(world, userCode, itemNo, itemAmount);
                 });
             }
             if (functions.containsKey("useRecipes")) {
@@ -176,7 +176,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 useRecipes.forEach(useRecipe -> {
                     String recipeNo = ((JSONObject) useRecipe).getString("recipeNo");
                     int recipeAmount = ((JSONObject) useRecipe).getInteger("recipeAmount");
-                    playerService.useRecipe(userCode, recipeNo, recipeAmount);
+                    itemManager.useRecipe(world, userCode, recipeNo, recipeAmount);
                 });
             }
             // Check incoming messages
@@ -211,7 +211,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             drops.forEach(obj -> {
                 String itemNo = ((JSONObject) obj).getString("itemNo");
                 int itemAmount = ((JSONObject) obj).getInteger("itemAmount");
-                if (playerService.getItem(userCode, itemNo, -1 * itemAmount).getStatusCode().is2xxSuccessful()) {
+                if (itemManager.getItem(world, userCode, itemNo, -1 * itemAmount)) {
                     playerService.addDrop(userCode, itemNo, itemAmount);
                 }
             });
