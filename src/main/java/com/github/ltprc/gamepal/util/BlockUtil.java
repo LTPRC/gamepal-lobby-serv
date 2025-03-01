@@ -734,17 +734,13 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_COOKER:
             case BlockConstants.BLOCK_TYPE_SINK:
             case BlockConstants.BLOCK_TYPE_CONTAINER:
-                switch (blockCode) {
-                    case BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT:
-                    case BlockConstants.BLOCK_CODE_ANIMAL_REMAIN_DEFAULT:
-                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape);
-                        break;
-                    default:
-                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
-                        break;
-                }
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
+                break;
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE, roundShape);
                 break;
             case BlockConstants.BLOCK_TYPE_BUILDING:
                 switch (blockCode) {

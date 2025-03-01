@@ -59,7 +59,7 @@
   {"recipeNo": "0603", "type": 6, "cost": {"j050": 1}, "value": {"c050": 1}},
   {"recipeNo": "0604", "type": 6, "cost": {"j150": 1}, "value": {"c050": 1}},
 
-  {"recipeNo": "1101", "type": 11, "cost": {"c050": 2}, "value": {"c004": 1}},
+  {"recipeNo": "1101", "type": 11, "cost": {"c050": 2}, "value": {"c068": 1}},
   {"recipeNo": "1102", "type": 11, "cost": {"c031": 1}, "value": {"c041": 1}},
   {"recipeNo": "1103", "type": 11, "cost": {"c032": 1}, "value": {"c042": 1}},
   {"recipeNo": "1104", "type": 11, "cost": {"c033": 1}, "value": {"c043": 1}},
@@ -69,7 +69,7 @@
   {"recipeNo": "1108", "type": 11, "cost": {"c037": 1}, "value": {"c047": 1}},
   {"recipeNo": "1109", "type": 11, "cost": {"c038": 1}, "value": {"c048": 1}},
   {"recipeNo": "1110", "type": 11, "cost": {"c039": 1}, "value": {"c049": 1}},
-  {"recipeNo": "1111", "type": 11, "cost": {"c040": 1, "c004": 1}, "value": {"c051": 1}},
+  {"recipeNo": "1111", "type": 11, "cost": {"c040": 1, "c068": 1}, "value": {"c051": 1}},
   {"recipeNo": "1112", "type": 11, "cost": {"c017": 1, "c026": 1}, "value": {"c052": 1}},
   {"recipeNo": "1113", "type": 11, "cost": {"c017": 1}, "value": {"c053": 1}},
   {"recipeNo": "1114", "type": 11, "cost": {"c018": 1, "c026": 1}, "value": {"c054": 1}},

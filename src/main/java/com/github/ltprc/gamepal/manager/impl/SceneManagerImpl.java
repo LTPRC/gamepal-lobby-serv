@@ -1000,10 +1000,8 @@ public class SceneManagerImpl implements SceneManager {
                 WorldCoordinate to = world.getTeleportMap().get(block.getBlockInfo().getId());
                 rst.put("to", to);
                 break;
-            case BlockConstants.BLOCK_TYPE_CONTAINER:
-                if (block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
-                    rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
-                }
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+                rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 if (!world.getFarmMap().containsKey(block.getBlockInfo().getId())) {
@@ -1058,7 +1056,9 @@ public class SceneManagerImpl implements SceneManager {
         MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(blockCode);
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         registerBlock(world, block);
-        if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_CONTAINER) {
+        if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_CONTAINER
+                || blockInfo.getType() == BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER
+                || blockInfo.getType() == BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER) {
             BagInfo bagInfo = new BagInfo();
             bagInfo.setId(block.getBlockInfo().getId());
             world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
@@ -1134,6 +1134,8 @@ public class SceneManagerImpl implements SceneManager {
                 world.getTeleportMap().remove(block.getBlockInfo().getId());
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
                 world.getBagInfoMap().remove(block.getBlockInfo().getId());
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
@@ -1159,6 +1161,8 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
                 world.getBagInfoMap().get(block.getBlockInfo().getId()).getItems().entrySet()
                         .forEach(entry -> {
                             Block dropFromContainer = addDropBlock(world, block.getWorldCoordinate(), entry);

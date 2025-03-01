@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.manager.impl;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.Coordinate;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
@@ -20,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class InteractionManagerImpl implements InteractionManager {
@@ -42,9 +40,6 @@ public class InteractionManagerImpl implements InteractionManager {
 
     @Autowired
     private FarmManager farmManager;
-
-    @Autowired
-    private EventManager eventManager;
 
     @Override
     public void searchInteraction(GameWorld world, String userCode) {
@@ -72,18 +67,87 @@ public class InteractionManagerImpl implements InteractionManager {
                 .filter(block -> !StringUtils.equals(block.getBlockInfo().getId(), userCode))
                 .forEach(rankingQueue::add);
         if (!rankingQueue.isEmpty() && BlockUtil.checkBlockTypeInteractive(rankingQueue.peek().getBlockInfo().getType())) {
-            world.getInteractionInfoMap().put(userCode, generateInteractionInfo(rankingQueue.peek().getBlockInfo()));
+            world.getInteractionInfoMap().put(userCode, generateInteractionInfo(world, rankingQueue.peek().getBlockInfo()));
         } else {
             world.getInteractionInfoMap().remove(userCode);
         }
     }
 
-    private InteractionInfo generateInteractionInfo(BlockInfo blockInfo) {
+    private InteractionInfo generateInteractionInfo(GameWorld world, BlockInfo blockInfo) {
         InteractionInfo interactionInfo = new InteractionInfo();
         interactionInfo.setType(blockInfo.getType());
         interactionInfo.setId(blockInfo.getId());
         interactionInfo.setCode(blockInfo.getCode());
-        // Get list from Front-end
+        // Keep syncing with Frontend
+        List<Integer> list = new ArrayList<>();
+        switch (blockInfo.getType()) {
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+                if (!playerInfoMap.containsKey(blockInfo.getId())) {
+                    logger.error(ErrorUtil.ERROR_1007);
+                    break;
+                }
+                PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
+                if (playerService.validateActiveness(world, blockInfo.getId())) {
+                    if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                        list.add(InteractionConstants.INTERACTION_TALK);
+                        list.add(InteractionConstants.INTERACTION_SUCCUMB);
+                        list.add(InteractionConstants.INTERACTION_EXPEL);
+                    }
+                    if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+                        list.add(InteractionConstants.INTERACTION_PULL);
+                    }
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_BED:
+                list.add(InteractionConstants.INTERACTION_SLEEP);
+                list.add(InteractionConstants.INTERACTION_PACK);
+                break;
+            case BlockConstants.BLOCK_TYPE_TOILET:
+            case BlockConstants.BLOCK_TYPE_SINK:
+                list.add(InteractionConstants.INTERACTION_USE);
+                list.add(InteractionConstants.INTERACTION_DRINK);
+                list.add(InteractionConstants.INTERACTION_PACK);
+                break;
+            case BlockConstants.BLOCK_TYPE_DRESSER:
+                list.add(InteractionConstants.INTERACTION_SET);
+                list.add(InteractionConstants.INTERACTION_PACK);
+                break;
+            case BlockConstants.BLOCK_TYPE_GAME:
+                list.add(InteractionConstants.INTERACTION_USE);
+                break;
+            case BlockConstants.BLOCK_TYPE_STORAGE:
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
+                list.add(InteractionConstants.INTERACTION_EXCHANGE);
+                list.add(InteractionConstants.INTERACTION_PACK);
+                break;
+            case BlockConstants.BLOCK_TYPE_COOKER:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                list.add(InteractionConstants.INTERACTION_USE);
+                list.add(InteractionConstants.INTERACTION_PACK);
+                break;
+            case BlockConstants.BLOCK_TYPE_FARM:
+                if (!world.getFarmMap().containsKey(blockInfo.getId())) {
+                    logger.error(ErrorUtil.ERROR_1014);
+                    break;
+                }
+                FarmInfo farmInfo = world.getFarmMap().get(blockInfo.getId());
+                if (farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_NONE
+                        || farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_GATHERED) {
+                    list.add(InteractionConstants.INTERACTION_PLANT);
+                } else if (farmInfo.getCropStatus() == BlockConstants.CROP_STATUS_MATURE) {
+                    list.add(InteractionConstants.INTERACTION_GATHER);
+                }
+                break;
+        }
+        interactionInfo.setList(list);
         return interactionInfo;
     }
 
@@ -190,6 +254,12 @@ public class InteractionManagerImpl implements InteractionManager {
                         break;
                     case BlockConstants.BLOCK_TYPE_CONTAINER:
                         playerService.generateNotificationMessage(userCode, "你正在整理容器。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+                        playerService.generateNotificationMessage(userCode, "你正在整理人类躯体。");
+                        break;
+                    case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
+                        playerService.generateNotificationMessage(userCode, "你正在整理动物躯体。");
                         break;
                     default:
                         break;

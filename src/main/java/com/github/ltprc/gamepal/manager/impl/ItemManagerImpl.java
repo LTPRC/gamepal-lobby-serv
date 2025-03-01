@@ -202,6 +202,8 @@ public class ItemManagerImpl implements ItemManager {
                 oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
                 interactedBagInfo = bagInfoMap.get(id);
                 oldInteractedItemAmount = interactedBagInfo.getItems().getOrDefault(itemNo, 0);
                 break;
