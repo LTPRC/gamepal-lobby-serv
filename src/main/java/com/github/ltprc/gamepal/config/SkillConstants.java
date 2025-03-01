@@ -57,8 +57,6 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_FIRE = BigDecimal.valueOf(0.5D);
 
-    public static final int SKILL_DEFAULT_FRAME = 25;
-
     public static final int SKILL_TYPE_DEFAULT = 0;
     public static final int SKILL_TYPE_ATTACK = 1;
 }

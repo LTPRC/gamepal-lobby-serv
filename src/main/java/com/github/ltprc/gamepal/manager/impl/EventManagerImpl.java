@@ -130,7 +130,7 @@ public class EventManagerImpl implements EventManager {
                 if (null != tailSmokeLength) {
                     int tailSmokeAmount = tailSmokeLength.intValue() * 10 + 1;
                     WorldCoordinate liftedFromWorldCoordinate = new WorldCoordinate(fromWorldCoordinate);
-                    liftedFromWorldCoordinate.getCoordinate().setY(liftedFromWorldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)));
+                    liftedFromWorldCoordinate.getCoordinate().setY(liftedFromWorldCoordinate.getCoordinate().getY().subtract(BigDecimal.valueOf(0.5D)));
                     BlockUtil.fixWorldCoordinate(region, liftedFromWorldCoordinate);
                     List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
                             regionMap.get(worldCoordinate.getRegionNo()), liftedFromWorldCoordinate,
@@ -154,7 +154,7 @@ public class EventManagerImpl implements EventManager {
                 if (null != tailSmokeLength) {
                     int tailSmokeAmount = tailSmokeLength.intValue() * 10 + 1;
                     WorldCoordinate liftedFromWorldCoordinate = new WorldCoordinate(fromWorldCoordinate);
-                    liftedFromWorldCoordinate.getCoordinate().setY(liftedFromWorldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)));
+                    liftedFromWorldCoordinate.getCoordinate().setY(liftedFromWorldCoordinate.getCoordinate().getY().subtract(BigDecimal.valueOf(0.5D)));
                     BlockUtil.fixWorldCoordinate(region, liftedFromWorldCoordinate);
                     List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
                             regionMap.get(worldCoordinate.getRegionNo()), liftedFromWorldCoordinate,

@@ -24,31 +24,31 @@ public class SkillUtil {
     public static void updateHumanSkills(PlayerInfo playerInfo) {
         List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                15, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME * 2, SkillConstants.SKILL_TYPE_ATTACK,
+                25, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
+                25, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
+                25, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
         playerInfo.setSkills(skills);
     }
 
     public static void updateAnimalSkills(PlayerInfo playerInfo) {
         List<Skill> skills = new ArrayList<>(SkillConstants.SKILL_LENGTH);
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_SCRATCH, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                15, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                25, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                15, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                SkillConstants.SKILL_DEFAULT_FRAME, SkillConstants.SKILL_TYPE_ATTACK,
+                15, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
         switch (playerInfo.getSkinColor()) {
             case CreatureConstants.SKIN_COLOR_PAOFU:

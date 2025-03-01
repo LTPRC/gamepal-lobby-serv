@@ -1003,41 +1003,49 @@ public class PlayerServiceImpl implements PlayerService {
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_CURSE, userCode, worldCoordinate);
                 break;
             case SkillConstants.SKILL_CODE_MELEE_HIT:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_HIT, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_KICK:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_KICK, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_SCRATCH, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_SMASH:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_SMASH, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_CLEAVE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_CHOP:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_CHOP, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_PICK:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_PICK, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_STAB:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_STAB, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
