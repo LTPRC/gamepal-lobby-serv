@@ -13,7 +13,7 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Tool;
-import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
@@ -23,10 +23,7 @@ import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ContentUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.SkillUtil;
+import com.github.ltprc.gamepal.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,7 +72,7 @@ public class NpcManagerImpl implements NpcManager {
         player.getMovementInfo().setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         PlayerInfo playerInfo = CreatureFactory.createCreatureInstance(playerType, creatureType);
         playerInfo.setTopBossId(userCode);
-        BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
+        PlayerInfoUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
         buffManager.initializeBuff(playerInfo);
         world.getCreatureMap().put(userCode, player);
         world.getPlayerInfoMap().put(userCode, playerInfo);
@@ -349,7 +346,7 @@ public class NpcManagerImpl implements NpcManager {
                     Optional<Block> red = creatureMap.values().stream()
                             .filter(player1 -> !npcUserCode.equals(player1.getBlockInfo().getId()))
                             .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
-                            .filter(player1 -> BlockUtil.checkPerceptionCondition(
+                            .filter(player1 -> PlayerInfoUtil.checkPerceptionCondition(
                                     world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()), player,
                                     world.getPlayerInfoMap().get(npcUserCode).getPerceptionInfo(), player1))
                             .min((player1, player2) -> {
@@ -512,30 +509,23 @@ public class NpcManagerImpl implements NpcManager {
         }
         double distance = distanceBigDecimal.doubleValue();
         if (npcPlayer.getWorldCoordinate().getRegionNo() != wc.getRegionNo() || distance <= stopDistance) {
-            npcPlayer.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
-            // Aim at target 24/08/08
+            // TODO movementMode == STAND
+            npcPlayer.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+            // Aim at target 25/03/03
             npcPlayer.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(
                     world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(), wc));
             return rst;
         }
-        // Speed logics, sync with front-end 24/08/24
+        // Speed logics, sync with front-end 25/03/03
         double newSpeed = Math.sqrt(Math.pow(npcPlayer.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                 + Math.pow(npcPlayer.getMovementInfo().getSpeed().getY().doubleValue(), 2)) + npcPlayer.getMovementInfo().getAcceleration().doubleValue();
-        newSpeed = Math.min(newSpeed, distance - stopDistance);
-//        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0
-//                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
-//            newSpeed = 0D;
-//        } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0
-//                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0
-//                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
-//            newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue() * 0.25, newSpeed);
-//        } else {
-            newSpeed = Math.min(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue(), newSpeed);
-//        }
-        npcPlayer.getMovementInfo().setSpeed(new Coordinate(BigDecimal.valueOf(
-                newSpeed * Math.cos(npcPlayer.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)),
-                BigDecimal.valueOf(-1 * newSpeed * Math.sin(npcPlayer.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI))));
-
+        newSpeed = Math.max(newSpeed, distance - stopDistance);
+        newSpeed = Math.max(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue(), newSpeed);
+        npcPlayer.getMovementInfo().setSpeed(new Coordinate(
+                BigDecimal.valueOf(newSpeed * Math.cos(npcPlayer.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)),
+                BigDecimal.valueOf(-1 * newSpeed * Math.sin(npcPlayer.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)),
+                BlockConstants.Z_SPEED_DEFAULT));
+        // Aim at target 25/03/03
         npcPlayer.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()),
                 npcPlayer.getWorldCoordinate(), wc));
         return rst;

@@ -5,7 +5,7 @@ import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -52,6 +52,8 @@ public class InteractionManagerImpl implements InteractionManager {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         Queue<Block> rankingQueue = BlockFactory.createDistanceRankingQueue(region, player.getWorldCoordinate());
         sceneManager.collectSurroundingBlocks(world, player, 1).stream()
+                .filter(block -> null != BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+                        block.getWorldCoordinate()))
                 .filter(block -> BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
                         block.getWorldCoordinate()).doubleValue()
                         < InteractionConstants.MAX_INTERACTION_DISTANCE.doubleValue())
@@ -104,8 +106,6 @@ public class InteractionManagerImpl implements InteractionManager {
                 list.add(InteractionConstants.INTERACTION_PACK);
                 break;
             case BlockConstants.BLOCK_TYPE_TOILET:
-            case BlockConstants.BLOCK_TYPE_SINK:
-                list.add(InteractionConstants.INTERACTION_USE);
                 list.add(InteractionConstants.INTERACTION_DRINK);
                 list.add(InteractionConstants.INTERACTION_PACK);
                 break;
@@ -131,6 +131,11 @@ public class InteractionManagerImpl implements InteractionManager {
             case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
             case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
                 list.add(InteractionConstants.INTERACTION_USE);
+                list.add(InteractionConstants.INTERACTION_PACK);
+                break;
+            case BlockConstants.BLOCK_TYPE_SINK:
+                list.add(InteractionConstants.INTERACTION_USE);
+                list.add(InteractionConstants.INTERACTION_DRINK);
                 list.add(InteractionConstants.INTERACTION_PACK);
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:

@@ -3,8 +3,7 @@ package com.github.ltprc.gamepal.task;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.Region;
 import com.github.ltprc.gamepal.model.map.Scene;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -14,7 +13,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerInfoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -147,12 +146,14 @@ public class TimedEventTask {
                             }
                             if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
                                 if (movementInfo.getSpeed().getX().doubleValue() > 0
-                                        || movementInfo.getSpeed().getY().doubleValue() > 0) {
+                                        || movementInfo.getSpeed().getY().doubleValue() > 0
+                                        || movementInfo.getSpeed().getZ().doubleValue() > 0) {
                                     newVp -= 15;
                                 }
                             } else {
                                 if (Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
                                         + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
+                                        + Math.pow(movementInfo.getSpeed().getZ().doubleValue(), 2)
                                         > Math.pow(movementInfo.getMaxSpeed().doubleValue() / 2, 2)) {
                                     newVp -= 15;
                                 }
@@ -162,7 +163,8 @@ public class TimedEventTask {
                             // Change hunger
                             randomNumber = Math.random();
                             if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
-                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
+                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
+                                    || Math.abs(movementInfo.getSpeed().getZ().doubleValue()) > 0) {
                                 randomNumber *= 10;
                             }
                             if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
@@ -172,7 +174,8 @@ public class TimedEventTask {
                             // Change thirst
                             randomNumber = Math.random();
                             if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
-                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0) {
+                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
+                                    || Math.abs(movementInfo.getSpeed().getZ().doubleValue()) > 0) {
                                 randomNumber *= 10;
                             }
                             if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
@@ -182,11 +185,12 @@ public class TimedEventTask {
                             // Change precision
                             playerService.changePrecision(id, 50 - 100
                                     * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
-                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
+                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
+                                    + Math.pow(movementInfo.getSpeed().getZ().doubleValue(), 2))
                                     / movementInfo.getMaxSpeed().doubleValue()), false);
 
                             // Change view radius
-                            BlockUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
+                            PlayerInfoUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
                             if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLIND] != 0) {
                                 playerInfo.getPerceptionInfo().setDistinctVisionRadius(
                                         playerInfo.getPerceptionInfo().getDistinctVisionRadius()
@@ -263,6 +267,7 @@ public class TimedEventTask {
                         // Add footstep
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
+                                + Math.pow(player.getMovementInfo().getSpeed().getZ().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
                             eventManager.addEvent(world, BlockConstants.BLOCK_CODE_NOISE, id,
                                     player.getWorldCoordinate());

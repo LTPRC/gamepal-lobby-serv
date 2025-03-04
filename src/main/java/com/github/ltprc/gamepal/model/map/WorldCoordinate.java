@@ -1,5 +1,7 @@
 package com.github.ltprc.gamepal.model.map;
 
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,7 +15,7 @@ public class WorldCoordinate {
     public WorldCoordinate() {
         regionNo = 0;
         sceneCoordinate = new IntegerCoordinate(0, 0);
-        coordinate = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO);
+        coordinate = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
     public WorldCoordinate(WorldCoordinate worldCoordinate) {

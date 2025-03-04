@@ -12,13 +12,14 @@ import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.StateMachineService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.terminal.GameTerminal;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -601,7 +602,10 @@ public class PlayerServiceImpl implements PlayerService {
                 WorldCoordinate buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
                         player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
                 IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
-                buildingWorldCoordinate.setCoordinate(new Coordinate(BigDecimal.valueOf(integerCoordinate.getX()), BigDecimal.valueOf(integerCoordinate.getY())));
+                buildingWorldCoordinate.setCoordinate(new Coordinate(
+                        BigDecimal.valueOf(integerCoordinate.getX()),
+                        BigDecimal.valueOf(integerCoordinate.getY()),
+                        player.getWorldCoordinate().getCoordinate().getZ()));
                 Block fakeBuilding = new Block(buildingWorldCoordinate,
                         BlockUtil.createBlockInfoByCode(blockInfo1.get().getCode()),
                         BlockUtil.createMovementInfoByCode(blockInfo1.get().getCode()));
@@ -865,7 +869,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
         }
 
-        player.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        player.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
         // Reset all skill remaining time
         for (int i = 0; i < playerInfo.getSkills().size(); i++) {
             if (null != playerInfo.getSkills().get(i)) {

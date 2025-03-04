@@ -20,12 +20,15 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerInfoUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -449,8 +452,10 @@ public class SceneManagerImpl implements SceneManager {
     private void addSceneObject(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
                                 BigDecimal y) {
         Random random = new Random();
-        Coordinate coordinate = new Coordinate(x.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
-                y.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())));
+        Coordinate coordinate = new Coordinate(
+                x.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
+                y.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
+                BlockConstants.Z_DEFAULT);
         WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                 coordinate);
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
@@ -758,8 +763,11 @@ public class SceneManagerImpl implements SceneManager {
                 int skinColor = weightList.get(i).getKey();
                 playerInfo.setSkinColor(skinColor);
                 WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(),
-                        scene.getSceneCoordinate(), new Coordinate(x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
-                        y.add(BigDecimal.valueOf(random.nextDouble() / 2))));
+                        scene.getSceneCoordinate(),
+                        new Coordinate(
+                                x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
+                                y.add(BigDecimal.valueOf(random.nextDouble() / 2)),
+                                BlockConstants.Z_DEFAULT));
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 break;
             }
@@ -795,7 +803,7 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 if (!CollectionUtils.isEmpty(scene.getBlocks())) {
                     scene.getBlocks().values().forEach(block -> {
-                        if (BlockUtil.checkPerceptionCondition(region, player,
+                        if (PlayerInfoUtil.checkPerceptionCondition(region, player,
                                 player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                                 ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
                                 : null, block)) {
@@ -826,7 +834,7 @@ public class SceneManagerImpl implements SceneManager {
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
                 .forEach(player1 -> {
                     Block newBlock = new Block(player1);
-                    if (BlockUtil.checkPerceptionCondition(region, player,
+                    if (PlayerInfoUtil.checkPerceptionCondition(region, player,
                             player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                                     ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
                                     : null, newBlock)) {

@@ -6,6 +6,9 @@ import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.structure.*;
 
 import java.math.BigDecimal;
@@ -24,16 +27,18 @@ public class BlockUtil {
     public static Coordinate adjustCoordinate(Coordinate coordinate, IntegerCoordinate integerCoordinate, int height,
                                               int width) {
         // Pos-y is south, neg-y is north
-        return new Coordinate(coordinate.getX().add(BigDecimal.valueOf(
-                integerCoordinate.getX()).multiply(BigDecimal.valueOf(width))),
+        return new Coordinate(
+                coordinate.getX().add(BigDecimal.valueOf(
+                        integerCoordinate.getX()).multiply(BigDecimal.valueOf(height))),
                 coordinate.getY().add(BigDecimal.valueOf(
-                        integerCoordinate.getY()).multiply(BigDecimal.valueOf(height))));
+                        integerCoordinate.getY()).multiply(BigDecimal.valueOf(width))),
+                coordinate.getZ());
     }
 
     /**
      * Keep the coordinate inside the range of width multiply height based on its sceneCoordinate.
-     * @param worldCoordinate
      * @param regionInfo
+     * @param worldCoordinate
      */
     public static void fixWorldCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
         while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(-1)) < 0) {
@@ -86,6 +91,11 @@ public class BlockUtil {
                 regionInfo.getHeight(), regionInfo.getWidth());
     }
 
+    /**
+     * Z-axis added
+     * @param from
+     * @param to
+     */
     public static void copyWorldCoordinate(final WorldCoordinate from, WorldCoordinate to) {
         to.setRegionNo(from.getRegionNo());
         Coordinate coordinate = from.getCoordinate();
@@ -129,6 +139,32 @@ public class BlockUtil {
     }
 
     public static BigDecimal calculateVerticalDistance(Coordinate c1, Coordinate c2) {
+        return c2.getY().subtract(c1.getY());
+    }
+
+    /**
+     * Z-axis added
+     * @param regionInfo
+     * @param wc1
+     * @param wc2
+     * @return
+     */
+    public static BigDecimal calculateZDistance(RegionInfo regionInfo, WorldCoordinate wc1,
+                                                         WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        return calculateHorizontalDistance(wc1.getCoordinate(), wc2.getCoordinate());
+    }
+
+    /**
+     * Z-axis added
+     * @param c1
+     * @param c2
+     * @return
+     */
+    public static BigDecimal calculateZDistance(Coordinate c1, Coordinate c2) {
         return c2.getY().subtract(c1.getY());
     }
 
@@ -200,6 +236,14 @@ public class BlockUtil {
         return rst >= 180D ? 360D - rst : rst;
     }
 
+    /**
+     * Z-axis added
+     * @param regionInfo
+     * @param wc1
+     * @param wc2
+     * @param amount
+     * @return
+     */
     public static List<WorldCoordinate> collectEquidistantPoints(RegionInfo regionInfo, WorldCoordinate wc1,
                                                                  WorldCoordinate wc2, int amount) {
         List<WorldCoordinate> rst = new ArrayList<>();
@@ -208,21 +252,31 @@ public class BlockUtil {
         }
         BigDecimal deltaWidth = calculateHorizontalDistance(regionInfo, wc1, wc2);
         BigDecimal deltaHeight = calculateVerticalDistance(regionInfo, wc1, wc2);
-        if (null == deltaWidth || null == deltaHeight) {
+        BigDecimal deltaZ = calculateZDistance(regionInfo, wc1, wc2);
+        if (null == deltaWidth || null == deltaHeight || null == deltaZ) {
             return rst;
         }
         deltaWidth = deltaWidth.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         deltaHeight = deltaHeight.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        deltaZ = deltaZ.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         WorldCoordinate wc3 = new WorldCoordinate(wc1);
         for (int i = 1; i < amount; i++) {
             wc3.getCoordinate().setX(wc3.getCoordinate().getX().add(deltaWidth));
             wc3.getCoordinate().setY(wc3.getCoordinate().getY().add(deltaHeight));
+            wc3.getCoordinate().setZ(wc3.getCoordinate().getZ().add(deltaZ));
             fixWorldCoordinate(regionInfo, wc3);
             rst.add(new WorldCoordinate(wc3));
         }
         return rst;
     }
 
+    /**
+     * Z-axis added
+     * @param c1
+     * @param c2
+     * @param amount
+     * @return
+     */
     public static List<Coordinate> collectEquidistantPoints(Coordinate c1, Coordinate c2, int amount) {
         List<Coordinate> rst = new ArrayList<>();
         if (amount < 2) {
@@ -232,17 +286,20 @@ public class BlockUtil {
                 .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         BigDecimal deltaHeight = calculateVerticalDistance(c1, c2)
                 .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
+        BigDecimal deltaZ = calculateZDistance(c1, c2)
+                .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         Coordinate c3 = new Coordinate(c1);
         for (int i = 1; i < amount; i++) {
             c3.setX(c3.getX().add(deltaWidth));
             c3.setY(c3.getY().add(deltaHeight));
+            c3.setZ(c3.getZ().add(deltaZ));
             rst.add(new Coordinate(c3));
         }
         return rst;
     }
 
     public static Set<IntegerCoordinate> preSelectSceneCoordinates(Region region, WorldCoordinate wc1,
-                                                                    WorldCoordinate wc2) {
+                                                                   WorldCoordinate wc2) {
         Set<IntegerCoordinate> rst = new HashSet<>();
         if (wc1.getRegionNo() != region.getRegionNo() || wc2.getRegionNo() != region.getRegionNo()) {
             return rst;
@@ -293,24 +350,9 @@ public class BlockUtil {
                 || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-//        BigDecimal eventDirection =
-//                BlockUtil.calculateAngle(from.getCoordinate(), block1.getWorldCoordinate().getCoordinate());
         Coordinate coordinate0 = convertWorldCoordinate2Coordinate(regionInfo, from);
         Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
         Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-//        if (eventDirection.compareTo(BigDecimal.valueOf(90D)) == 0
-//                || eventDirection.compareTo(BigDecimal.valueOf(270D)) == 0) {
-//            boolean rst = coordinate1.getX().subtract(coordinate2.getX()).abs().doubleValue()
-//                    < block1.getBlockInfo().getStructure().getShape().getRadius().getX()
-//                    .add(block2.getBlockInfo().getStructure().getShape().getRadius().getX()).doubleValue();
-//            if (rst && correctBlock1) {
-//                block1.getWorldCoordinate().getCoordinate().setX(block1.getWorldCoordinate().getCoordinate().getX()
-//                        .subtract(coordinate1.getX()).add(coordinate3.getX()));
-//                block1.getWorldCoordinate().getCoordinate().setY(block1.getWorldCoordinate().getCoordinate().getY()
-//                        .subtract(coordinate1.getY()).add(coordinate3.getY()));
-//            }
-//            return rst;
-//        }
         Coordinate coordinate3 = findClosestPoint(coordinate0, coordinate1, coordinate2);
         Block block3 = new Block(block1);
         WorldCoordinate worldCoordinate3 = BlockUtil.locateCoordinateWithDirectionAndDistance(regionInfo,
@@ -333,9 +375,11 @@ public class BlockUtil {
      * @param coordinate2
      * @return
      */
-    public static Coordinate findClosestPoint(Coordinate coordinate0, Coordinate coordinate1, Coordinate coordinate2) {
-        Coordinate segmentVector = new Coordinate(coordinate1.getX().subtract(coordinate0.getX()), coordinate1.getY().subtract(coordinate0.getY()));
-        Coordinate pointVector = new Coordinate(coordinate2.getX().subtract(coordinate0.getX()), coordinate2.getY().subtract(coordinate0.getY()));
+    private static Coordinate findClosestPoint(Coordinate coordinate0, Coordinate coordinate1, Coordinate coordinate2) {
+        Coordinate segmentVector = new Coordinate(coordinate1.getX().subtract(coordinate0.getX()),
+                coordinate1.getY().subtract(coordinate0.getY()), coordinate1.getZ().subtract(coordinate0.getZ()));
+        Coordinate pointVector = new Coordinate(coordinate2.getX().subtract(coordinate0.getX()),
+                coordinate2.getY().subtract(coordinate0.getY()), coordinate2.getZ().subtract(coordinate0.getZ()));
 
         BigDecimal segmentLengthSquared = segmentVector.getX().pow(2).add(segmentVector.getY().pow(2));
         if (segmentLengthSquared.equals(BigDecimal.ZERO)) {
@@ -356,8 +400,10 @@ public class BlockUtil {
         } else {
             BigDecimal newX = coordinate0.getX().add(segmentVector.getX().multiply(t));
             BigDecimal newY = coordinate0.getY().add(segmentVector.getY().multiply(t));
-            return new Coordinate(newX.round(new MathContext(3, RoundingMode.FLOOR)),
-                    newY.round(new MathContext(3, RoundingMode.FLOOR)));
+            return new Coordinate(
+                    newX.round(new MathContext(3, RoundingMode.FLOOR)),
+                    newY.round(new MathContext(3, RoundingMode.FLOOR)),
+                    coordinate0.getZ());
         }
     }
 
@@ -367,11 +413,27 @@ public class BlockUtil {
      * @param coordinate2
      * @return
      */
-    public static BigDecimal dotProduct(Coordinate coordinate1, Coordinate coordinate2) {
+    private static BigDecimal dotProduct(Coordinate coordinate1, Coordinate coordinate2) {
         return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
     }
 
+    /**
+     * Z-axis added
+     * @param regionInfo
+     * @param block1
+     * @param block2
+     * @return
+     */
     public static boolean detectCollision(RegionInfo regionInfo, Block block1, Block block2) {
+        return detectPlanarCollision(regionInfo, block1, block2)
+                && detectZCollision(regionInfo, block1, block2);
+    }
+
+    private static boolean detectPlanarCollision(RegionInfo regionInfo, Block block1, Block block2) {
+        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
         Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
         Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
         Shape shape1 = block1.getBlockInfo().getStructure().getShape();
@@ -393,10 +455,6 @@ public class BlockUtil {
         // Rectangle vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
                 && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
-//            return Math.abs(coordinate1.getX().subtract(coordinate2.getX()).doubleValue())
-//                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-//                    && Math.abs(coordinate1.getY().subtract(coordinate2.getY()).doubleValue())
-//                    < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
             return BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
                     < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
                     && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
@@ -406,40 +464,49 @@ public class BlockUtil {
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
             return detectCollision(regionInfo, block2, block1);
         }
-//        return ((coordinate1.getX().doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-//                && coordinate1.getX().doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
-//                && coordinate1.getY().add(shape1.getRadius().getY()).doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-//                && coordinate1.getY().subtract(shape1.getRadius().getY()).doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue())
-//                || (coordinate1.getX().add(shape1.getRadius().getX()).doubleValue() > coordinate2.getX().subtract(shape2.getRadius().getX()).doubleValue()
-//                && coordinate1.getX().subtract(shape1.getRadius().getX()).doubleValue() < coordinate2.getX().add(shape2.getRadius().getX()).doubleValue()
-//                && coordinate1.getY().doubleValue() > coordinate2.getY().subtract(shape2.getRadius().getY()).doubleValue()
-//                && coordinate1.getY().doubleValue() < coordinate2.getY().add(shape2.getRadius().getY()).doubleValue()));
-////                && (); // 4 apexes
         boolean isInsideRectangle1 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape1.getRadius().getX().multiply(BigDecimal.valueOf(2)).add(shape2.getRadius().getX()).doubleValue()
+                < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
                 && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape2.getRadius().getY().doubleValue();
         boolean isInsideRectangle2 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape2.getRadius().getX().doubleValue()
                 && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape1.getRadius().getY().multiply(BigDecimal.valueOf(2)).add(shape2.getRadius().getY()).doubleValue();
+                < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
         boolean isInsideRound1 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
-                        coordinate2.getY().subtract(shape2.getRadius().getY()))).doubleValue()
+                new Coordinate(
+                        coordinate2.getX().subtract(shape2.getRadius().getX()),
+                        coordinate2.getY().subtract(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
                 < shape1.getRadius().getX().doubleValue();
         boolean isInsideRound2 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
-                        coordinate2.getY().subtract(shape2.getRadius().getY()))).doubleValue()
+                new Coordinate(
+                        coordinate2.getX().add(shape2.getRadius().getX()),
+                        coordinate2.getY().subtract(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
                 < shape1.getRadius().getX().doubleValue();
         boolean isInsideRound3 = BlockUtil.calculateDistance(coordinate1,
                 new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
-                        coordinate2.getY().add(shape2.getRadius().getY()))).doubleValue()
+                        coordinate2.getY().add(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
                 < shape1.getRadius().getX().doubleValue();
         boolean isInsideRound4 = BlockUtil.calculateDistance(coordinate1,
                 new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
-                        coordinate2.getY().add(shape2.getRadius().getY()))).doubleValue()
+                        coordinate2.getY().add(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
                 < shape1.getRadius().getX().doubleValue();
         return isInsideRectangle1 || isInsideRectangle2 || isInsideRound1 || isInsideRound2 || isInsideRound3 || isInsideRound4;
+    }
+
+    private static boolean detectZCollision(RegionInfo regionInfo, Block block1, Block block2) {
+        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        return block1.getWorldCoordinate().getCoordinate().getZ()
+                .subtract(block1.getWorldCoordinate().getCoordinate().getZ())
+                .abs()
+                .compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getZ()
+                        .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())) < 0;
     }
 
     public static boolean checkBlockTypeRegistrable(int blockType) {
@@ -483,8 +550,10 @@ public class BlockUtil {
     public static Coordinate locateCoordinateWithDirectionAndDistance(Coordinate coordinate, BigDecimal direction,
                                                                       BigDecimal distance) {
         double angle = direction.doubleValue() / 180 * Math.PI;
-        return new Coordinate(coordinate.getX().add(BigDecimal.valueOf(distance.doubleValue() * Math.cos(angle))),
-                coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))));
+        return new Coordinate(
+                coordinate.getX().add(BigDecimal.valueOf(distance.doubleValue() * Math.cos(angle))),
+                coordinate.getY().subtract(BigDecimal.valueOf(distance.doubleValue() * Math.sin(angle))),
+                coordinate.getZ());
     }
 
     public static IntegerCoordinate convertCoordinate2BasicIntegerCoordinate(WorldCoordinate worldCoordinate) {
@@ -526,60 +595,6 @@ public class BlockUtil {
                 break;
         }
         return layer;
-    }
-
-    public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {
-        BigDecimal visionRadius = CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS;
-        if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
-                && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
-            visionRadius = visionRadius.add(BigDecimal.valueOf(CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS
-                    .subtract(CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
-                    * (worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
-                    / (GamePalConstants.WORLD_TIME_SUNRISE_END - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)));
-        } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
-                && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
-            visionRadius = visionRadius.add(BigDecimal.valueOf(CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS
-                    .subtract(CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
-                    * (GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
-                    / (GamePalConstants.WORLD_TIME_SUNSET_END - GamePalConstants.WORLD_TIME_SUNSET_BEGIN)));
-        } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
-                && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
-            visionRadius = CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS;
-        }
-        perceptionInfo.setDistinctVisionRadius(visionRadius);
-        perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius()
-                .multiply(BigDecimal.valueOf(2)));
-        perceptionInfo.setDistinctVisionAngle(CreatureConstants.DEFAULT_DISTINCT_VISION_ANGLE);
-        perceptionInfo.setIndistinctVisionAngle(CreatureConstants.DEFAULT_INDISTINCT_VISION_ANGLE);
-        perceptionInfo.setDistinctHearingRadius(CreatureConstants.DEFAULT_DISTINCT_HEARING_RADIUS);
-        perceptionInfo.setIndistinctHearingRadius(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
-    }
-
-    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final Block player1,
-                                                   final PerceptionInfo perceptionInfo1, final Block block2) {
-        if (player1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
-            return true;
-        }
-        if (player1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        BigDecimal distance = BlockUtil.calculateDistance(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
-        BigDecimal angle = BlockUtil.calculateAngle(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
-        if (null == distance || null == angle) {
-            return false;
-        }
-        if (distance.compareTo(perceptionInfo1.getDistinctHearingRadius()) <= 0) {
-            return true;
-        }
-        if (block2.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
-            return distance.compareTo(perceptionInfo1.getDistinctVisionRadius()) <= 0
-                    && BlockUtil.compareAnglesInDegrees(angle.doubleValue(),
-                    player1.getMovementInfo().getFaceDirection().doubleValue())
-                    < perceptionInfo1.getDistinctVisionAngle().doubleValue() / 2;
-        } else {
-            return distance.compareTo(perceptionInfo1.getIndistinctVisionRadius()) <= 0;
-        }
     }
 
     /**
@@ -638,8 +653,8 @@ public class BlockUtil {
         Structure structure;
         int structureMaterial;
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS));
+                new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
+                        BlockConstants.Z_DEFAULT));
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
                 switch (blockCode) {
@@ -666,34 +681,34 @@ public class BlockUtil {
                         structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
                         break;
                 }
-                Coordinate imageSize;
+                PlanarCoordinate imageSize;
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_BLOCK:
                     case BlockConstants.BLOCK_CODE_UPGRADE:
                     case BlockConstants.BLOCK_CODE_SPRAY:
-                        imageSize = new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
+                        imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
                         break;
                     default:
-                        imageSize = new Coordinate(BigDecimal.ONE, BigDecimal.ONE);
+                        imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE);
                         break;
                 }
                 structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(blockCode),
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS)), imageSize);
+                                new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS,
+                                        BlockConstants.Z_DEFAULT)), imageSize);
                 break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS)),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                                new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS,
+                                        BlockConstants.Z_DEFAULT)),
+                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
-                        new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
+                        new PlanarCoordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
@@ -713,8 +728,8 @@ public class BlockUtil {
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.5D))));
+                                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.5D),
+                                        BlockConstants.Z_DEFAULT)));
                         break;
                     default:
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -726,8 +741,8 @@ public class BlockUtil {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.5D))));
+                                new Coordinate(BigDecimal.valueOf(0.25D), BigDecimal.valueOf(0.5D),
+                                        BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_DRESSER:
             case BlockConstants.BLOCK_TYPE_STORAGE:
@@ -752,43 +767,43 @@ public class BlockUtil {
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.5D))));
+                                        new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.5D),
+                                                BlockConstants.Z_DEFAULT)));
                         break;
                     case BlockConstants.BLOCK_CODE_BENCH:
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.2D))));
+                                        new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.2D),
+                                                BlockConstants.Z_DEFAULT)));
                         break;
                     case BlockConstants.BLOCK_CODE_DESK_1:
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BigDecimal.valueOf(0.3D), BigDecimal.valueOf(0.2D))));
+                                        new Coordinate(BigDecimal.valueOf(0.3D), BigDecimal.valueOf(0.2D),
+                                                BlockConstants.Z_DEFAULT)));
                         break;
                     case BlockConstants.BLOCK_CODE_DESK_2:
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BigDecimal.valueOf(0.2D), BigDecimal.valueOf(0.3D))));
+                                        new Coordinate(BigDecimal.valueOf(0.2D), BigDecimal.valueOf(0.3D),
+                                                BlockConstants.Z_DEFAULT)));
                         break;
                     case BlockConstants.BLOCK_CODE_ASH_PILE:
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.4D))));
+                                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.4D),
+                                                BlockConstants.Z_DEFAULT)));
                         break;
                     case BlockConstants.BLOCK_CODE_WORKSHOP_EMPTY:
                         structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE,
                                 new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.2D))));
+                                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.2D),
+                                                BlockConstants.Z_DEFAULT)));
                         break;
                     case BlockConstants.BLOCK_CODE_TABLE_1:
                     case BlockConstants.BLOCK_CODE_TABLE_2:
@@ -808,22 +823,22 @@ public class BlockUtil {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-                                new Coordinate(BigDecimal.valueOf(0.2D), BigDecimal.valueOf(0.4D))));
+                                new Coordinate(BigDecimal.valueOf(0.2D), BigDecimal.valueOf(0.4D),
+                                        BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         roundShape,
-                        new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3)));
+                        new PlanarCoordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3)));
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
                                 new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
-                                        BlockConstants.ROUND_SCENE_OBJECT_RADIUS)));
+                                        BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
+                                        BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
@@ -837,7 +852,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_FLOOR:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_GROUND, new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
@@ -846,7 +861,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_WALL:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
@@ -868,7 +883,7 @@ public class BlockUtil {
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
-                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
         }
         BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, structure);

@@ -11,6 +11,8 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -175,7 +177,7 @@ public class WorldServiceImpl implements WorldService {
                             Integer value = blockRow.getInteger(j);
                             WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                     newScene.getSceneCoordinate(),
-                                    new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i)));
+                                    new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i), BlockConstants.Z_DEFAULT));
 //                            Block block = sceneManager.addLoadedBlock(world, value % 10000, value / 10000, worldCoordinate);
                             sceneManager.addOtherBlock(world, worldCoordinate, value % 10000);
                         }
@@ -189,8 +191,10 @@ public class WorldServiceImpl implements WorldService {
                         Integer type = blockRow.getInteger(0);
                         WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                 newScene.getSceneCoordinate(),
-                                new Coordinate(BigDecimal.valueOf(blockRow.getInteger(2)),
-                                        BigDecimal.valueOf(blockRow.getInteger(3))));
+                                new Coordinate(
+                                        BigDecimal.valueOf(blockRow.getInteger(2)),
+                                        BigDecimal.valueOf(blockRow.getInteger(3)),
+                                        BlockConstants.Z_DEFAULT));
                         Block block;
                         switch (type) {
                             case BlockConstants.BLOCK_TYPE_DROP:
@@ -200,8 +204,10 @@ public class WorldServiceImpl implements WorldService {
                                 block = sceneManager.addTeleportBlock(world, blockRow.getInteger(1), worldCoordinate, new WorldCoordinate(blockRow.getInteger(4),
                                         new IntegerCoordinate(blockRow.getInteger(5),
                                                 blockRow.getInteger(6)),
-                                        new Coordinate(BigDecimal.valueOf(blockRow.getInteger(7)),
-                                                BigDecimal.valueOf(blockRow.getInteger(8)))));
+                                        new Coordinate(
+                                                BigDecimal.valueOf(blockRow.getInteger(7)),
+                                                BigDecimal.valueOf(blockRow.getInteger(8)),
+                                                BlockConstants.Z_DEFAULT)));
                                 break;
                             default:
                                 block = sceneManager.addOtherBlock(world, worldCoordinate, blockRow.getInteger(1));

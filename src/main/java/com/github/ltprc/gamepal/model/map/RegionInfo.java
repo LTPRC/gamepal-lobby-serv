@@ -13,6 +13,7 @@ public class RegionInfo {
     private String name;
     private int height;
     private int width;
+    private int altitude;
     private int radius;
 
     public RegionInfo(RegionInfo regionInfo) {
@@ -21,6 +22,7 @@ public class RegionInfo {
         name = regionInfo.name;
         height = regionInfo.height;
         width = regionInfo.width;
+        altitude = regionInfo.altitude;
         radius = regionInfo.radius;
     }
 }

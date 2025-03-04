@@ -1,4 +1,4 @@
-package com.github.ltprc.gamepal.model.map;
+package com.github.ltprc.gamepal.model.map.coordinate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

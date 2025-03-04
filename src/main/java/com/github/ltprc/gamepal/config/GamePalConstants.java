@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.config;
 
-import com.github.ltprc.gamepal.model.map.Coordinate;
-import com.github.ltprc.gamepal.model.map.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 
 import java.math.BigDecimal;
@@ -52,5 +52,5 @@ public class GamePalConstants {
     public static final int DROP_DISAPPEAR_THRESHOLD_IN_FRAME = 60 * FRAME_PER_SECOND;
 
     public static final WorldCoordinate DEFAULT_BIRTHPLACE = new WorldCoordinate(1,
-            new IntegerCoordinate(0, 0), new Coordinate(new BigDecimal(5), new BigDecimal(5)));
+            new IntegerCoordinate(0, 0), new Coordinate(BigDecimal.valueOf(5D), BigDecimal.valueOf(5D), BigDecimal.ZERO));
 }

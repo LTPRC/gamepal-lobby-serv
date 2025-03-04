@@ -1,8 +1,14 @@
 package com.github.ltprc.gamepal.util;
 
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
+import com.github.ltprc.gamepal.model.map.RegionInfo;
+import com.github.ltprc.gamepal.model.map.block.Block;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.Random;
 
 public class PlayerInfoUtil {
@@ -10,6 +16,60 @@ public class PlayerInfoUtil {
     private PlayerInfoUtil() {}
 
     private static final Random random = new Random();
+
+    public static void updatePerceptionInfo(PerceptionInfo perceptionInfo, int worldTime) {
+        BigDecimal visionRadius = CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS;
+        if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_BEGIN
+                && worldTime < GamePalConstants.WORLD_TIME_SUNRISE_END) {
+            visionRadius = visionRadius.add(BigDecimal.valueOf(CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
+                    * (worldTime - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)
+                    / (GamePalConstants.WORLD_TIME_SUNRISE_END - GamePalConstants.WORLD_TIME_SUNRISE_BEGIN)));
+        } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNSET_BEGIN
+                && worldTime < GamePalConstants.WORLD_TIME_SUNSET_END) {
+            visionRadius = visionRadius.add(BigDecimal.valueOf(CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS
+                    .subtract(CreatureConstants.DEFAULT_NIGHT_VISION_RADIUS).doubleValue()
+                    * (GamePalConstants.WORLD_TIME_SUNSET_END - worldTime)
+                    / (GamePalConstants.WORLD_TIME_SUNSET_END - GamePalConstants.WORLD_TIME_SUNSET_BEGIN)));
+        } else if (worldTime >= GamePalConstants.WORLD_TIME_SUNRISE_END
+                && worldTime < GamePalConstants.WORLD_TIME_SUNSET_BEGIN) {
+            visionRadius = CreatureConstants.DEFAULT_DAYTIME_VISION_RADIUS;
+        }
+        perceptionInfo.setDistinctVisionRadius(visionRadius);
+        perceptionInfo.setIndistinctVisionRadius(perceptionInfo.getDistinctVisionRadius()
+                .multiply(BigDecimal.valueOf(2)));
+        perceptionInfo.setDistinctVisionAngle(CreatureConstants.DEFAULT_DISTINCT_VISION_ANGLE);
+        perceptionInfo.setIndistinctVisionAngle(CreatureConstants.DEFAULT_INDISTINCT_VISION_ANGLE);
+        perceptionInfo.setDistinctHearingRadius(CreatureConstants.DEFAULT_DISTINCT_HEARING_RADIUS);
+        perceptionInfo.setIndistinctHearingRadius(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS);
+    }
+
+    public static boolean checkPerceptionCondition(final RegionInfo regionInfo, final Block player1,
+                                                   final PerceptionInfo perceptionInfo1, final Block block2) {
+        if (player1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER) {
+            return true;
+        }
+        if (player1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        BigDecimal distance = BlockUtil.calculateDistance(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
+        BigDecimal angle = BlockUtil.calculateAngle(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
+        if (null == distance || null == angle) {
+            return false;
+        }
+        if (distance.compareTo(perceptionInfo1.getDistinctHearingRadius()) <= 0) {
+            return true;
+        }
+        if (block2.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
+            return distance.compareTo(perceptionInfo1.getDistinctVisionRadius()) <= 0
+                    && BlockUtil.compareAnglesInDegrees(angle.doubleValue(),
+                    player1.getMovementInfo().getFaceDirection().doubleValue())
+                    < perceptionInfo1.getDistinctVisionAngle().doubleValue() / 2;
+        } else {
+            return distance.compareTo(perceptionInfo1.getIndistinctVisionRadius()) <= 0;
+        }
+    }
 
     protected static final String[] chineseLastnames = new String[] { "王", "李", "张", "刘", "陈", "杨", "黄", "吴", "赵", "周",
             "徐", "孙", "马", "朱", "胡", "郭", "何", "林", "高", "罗", "郑", "梁", "谢", "宋", "唐", "许", "邓", "冯", "韩", "曹", "彭",

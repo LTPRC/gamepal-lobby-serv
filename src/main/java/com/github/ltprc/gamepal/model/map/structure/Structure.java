@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.model.map.structure;
 
-import com.github.ltprc.gamepal.model.map.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +12,7 @@ public class Structure {
     private Integer material;
     private Integer layer;
     private Shape shape = new Shape();
-    private Coordinate imageSize = new Coordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
+    private PlanarCoordinate imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
 
     public Structure(Integer material, Integer layer) {
         this.material = material;
@@ -24,8 +24,8 @@ public class Structure {
         this.shape = new Shape(shape);
     }
 
-    public Structure(Integer material, Integer layer, Shape shape, Coordinate imageSize) {
+    public Structure(Integer material, Integer layer, Shape shape, PlanarCoordinate imageSize) {
         this(material, layer, shape);
-        this.imageSize = new Coordinate(imageSize);
+        this.imageSize = new PlanarCoordinate(imageSize);
     }
 }

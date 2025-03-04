@@ -11,11 +11,11 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.service.*;
-import com.github.ltprc.gamepal.terminal.GameTerminal;
-import com.github.ltprc.gamepal.terminal.Terminal;
 import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -125,13 +125,18 @@ public class WebSocketServiceImpl implements WebSocketService {
                 player.getMovementInfo().setSpeed(movementInfo.getSpeed());
                 player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
             }
-            if (functions.containsKey("settleSpeedAndCoordinate")) {
-                JSONObject settleSpeedAndCoordinate = functions.getJSONObject("settleSpeedAndCoordinate");
-                MovementInfo movementInfo = JSON.toJavaObject(settleSpeedAndCoordinate
-                        .getJSONObject("movementInfo"), MovementInfo.class);
-                player.getMovementInfo().setSpeed(movementInfo.getSpeed());
-                player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
-                movementManager.settleSpeedAndCoordinate(world, player, 1);
+//            if (functions.containsKey("settleSpeedAndCoordinate")) {
+//                JSONObject settleSpeedAndCoordinate = functions.getJSONObject("settleSpeedAndCoordinate");
+//                MovementInfo movementInfo = JSON.toJavaObject(settleSpeedAndCoordinate
+//                        .getJSONObject("movementInfo"), MovementInfo.class);
+//                player.getMovementInfo().setSpeed(movementInfo.getSpeed());
+//                player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
+//                movementManager.settleSpeedAndCoordinate(world, player, 1);
+//                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
+//            }
+            if (functions.containsKey("settleAcceleration")) {
+                Coordinate accelerationCoordinate = functions.getObject("settleAcceleration", Coordinate.class);
+                movementManager.settleAcceleration(world, player, accelerationCoordinate);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
             }
             if (functions.containsKey("useItems")) {
