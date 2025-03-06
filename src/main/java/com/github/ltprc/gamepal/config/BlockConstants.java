@@ -286,6 +286,9 @@ public class BlockConstants {
     public static final int PERIOD_STATIC_DEFAULT = -1;
     public static final int PERIOD_DYNAMIC_DEFAULT = 25;
     public static final int FRAME_MAX_INFINITE_DEFAULT = -1;
+    public static final int MOVEMENT_MODE_DEFAULT = 0;
+    public static final int MOVEMENT_MODE_STAND_GROUND = 1;
+    public static final int MOVEMENT_MODE_WALK = 2;
 
     public static Map<Integer, Integer> BLOCK_CODE_TYPE_MAP = new HashMap<>();
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();

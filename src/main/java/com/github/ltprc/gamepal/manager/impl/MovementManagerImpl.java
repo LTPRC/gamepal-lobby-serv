@@ -58,7 +58,7 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     @Override
-    public void settleAcceleration(GameWorld world, Block block, Coordinate accelerationCoordinate) {
+    public void settleAcceleration(GameWorld world, Block block, Coordinate accelerationCoordinate, int movementMode) {
         if (accelerationCoordinate.getX().equals(BigDecimal.ZERO)
                 && accelerationCoordinate.getY().equals(BigDecimal.ZERO)) {
             block.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
@@ -72,6 +72,17 @@ public class MovementManagerImpl implements MovementManager {
                     * Math.sqrt(accelerationCoordinate.getX().pow(2)
                     .add(accelerationCoordinate.getY().pow(2)).doubleValue());
             newSpeed = Math.min(newSpeed, maxSpeed);
+            switch (movementMode) {
+                case BlockConstants.MOVEMENT_MODE_STAND_GROUND:
+                    newSpeed = 0D;
+                    break;
+                case BlockConstants.MOVEMENT_MODE_WALK:
+                    newSpeed = Math.min(newSpeed, block.getMovementInfo().getMaxSpeed().doubleValue() / 2);
+                    break;
+                case BlockConstants.MOVEMENT_MODE_DEFAULT:
+                default:
+                    break;
+            }
             block.getMovementInfo().setSpeed(new Coordinate(
                     BigDecimal.valueOf(newSpeed * accelerationCoordinate.getX().doubleValue()
                             / Math.sqrt(accelerationCoordinate.getX().pow(2)
@@ -80,8 +91,7 @@ public class MovementManagerImpl implements MovementManager {
                             / Math.sqrt(accelerationCoordinate.getX().pow(2)
                             .add(accelerationCoordinate.getY().pow(2)).doubleValue())),
                     block.getMovementInfo().getSpeed().getZ().add(accelerationCoordinate.getZ())));
-            block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new Coordinate(),
-                    block.getMovementInfo().getSpeed()));
+            block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new Coordinate(), accelerationCoordinate));
         }
         settleSpeedAndCoordinate(world, block, 1);
     }

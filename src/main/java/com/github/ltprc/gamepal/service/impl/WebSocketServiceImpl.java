@@ -135,8 +135,11 @@ public class WebSocketServiceImpl implements WebSocketService {
 //                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
 //            }
             if (functions.containsKey("settleAcceleration")) {
-                Coordinate accelerationCoordinate = functions.getObject("settleAcceleration", Coordinate.class);
-                movementManager.settleAcceleration(world, player, accelerationCoordinate);
+                JSONObject settleAcceleration = functions.getJSONObject("settleAcceleration");
+                Coordinate accelerationCoordinate = new Coordinate(settleAcceleration.getBigDecimal("x"),
+                        settleAcceleration.getBigDecimal("y"), settleAcceleration.getBigDecimal("z"));
+                Integer movementMode = settleAcceleration.getInteger("movementMode");
+                movementManager.settleAcceleration(world, player, accelerationCoordinate, movementMode);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
             }
             if (functions.containsKey("useItems")) {

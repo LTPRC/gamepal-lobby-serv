@@ -501,33 +501,20 @@ public class NpcManagerImpl implements NpcManager {
         double stopDistance = request.getDouble("stopDistance");
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         Block npcPlayer = world.getCreatureMap().get(npcUserCode);
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
-        BigDecimal distanceBigDecimal = BlockUtil.calculateDistance(
+        BigDecimal distance = BlockUtil.calculateDistance(
                 world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(), wc);
-        if (null == distanceBigDecimal) {
+        BigDecimal direction = BlockUtil.calculateAngle(world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()),
+                npcPlayer.getWorldCoordinate(), wc);
+        if (null == distance || null == direction) {
             return rst;
         }
-        double distance = distanceBigDecimal.doubleValue();
-        if (npcPlayer.getWorldCoordinate().getRegionNo() != wc.getRegionNo() || distance <= stopDistance) {
-            // TODO movementMode == STAND
-            npcPlayer.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
-            // Aim at target 25/03/03
-            npcPlayer.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(
-                    world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(), wc));
-            return rst;
-        }
-        // Speed logics, sync with front-end 25/03/03
-        double newSpeed = Math.sqrt(Math.pow(npcPlayer.getMovementInfo().getSpeed().getX().doubleValue(), 2)
-                + Math.pow(npcPlayer.getMovementInfo().getSpeed().getY().doubleValue(), 2)) + npcPlayer.getMovementInfo().getAcceleration().doubleValue();
-        newSpeed = Math.max(newSpeed, distance - stopDistance);
-        newSpeed = Math.max(npcPlayer.getMovementInfo().getMaxSpeed().doubleValue(), newSpeed);
-        npcPlayer.getMovementInfo().setSpeed(new Coordinate(
-                BigDecimal.valueOf(newSpeed * Math.cos(npcPlayer.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)),
-                BigDecimal.valueOf(-1 * newSpeed * Math.sin(npcPlayer.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)),
-                BlockConstants.Z_SPEED_DEFAULT));
-        // Aim at target 25/03/03
-        npcPlayer.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()),
-                npcPlayer.getWorldCoordinate(), wc));
+        int movementMode = distance.doubleValue() <= stopDistance ? BlockConstants.MOVEMENT_MODE_STAND_GROUND
+                : BlockConstants.MOVEMENT_MODE_DEFAULT;
+        Coordinate accelerationCoordinate = new Coordinate(
+                BigDecimal.valueOf(Math.cos(direction.doubleValue() / 180 * Math.PI)),
+                BigDecimal.valueOf(-1 * Math.sin(direction.doubleValue() / 180 * Math.PI)),
+                BigDecimal.ZERO);
+        movementManager.settleAcceleration(world, npcPlayer, accelerationCoordinate, movementMode);
         return rst;
     }
 }
