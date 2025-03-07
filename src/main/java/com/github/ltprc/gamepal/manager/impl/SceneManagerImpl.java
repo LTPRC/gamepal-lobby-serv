@@ -117,7 +117,6 @@ public class SceneManagerImpl implements SceneManager {
             }
         }
         // Set terrainMap
-        Map<IntegerCoordinate, Integer> terrainMap = region.getTerrainMap();
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius());
             region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
@@ -128,20 +127,20 @@ public class SceneManagerImpl implements SceneManager {
             sceneCoordinate = new IntegerCoordinate(-region.getRadius(), i);
             region.getTerrainMap().put(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
         }
-        for (int i = - region.getRadius() + 1; i < region.getRadius(); i++) {
-            IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius() - 1);
-            region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
-            sceneCoordinate = new IntegerCoordinate(i, - region.getRadius() + 1);
-            region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
-            sceneCoordinate = new IntegerCoordinate(region.getRadius() - 1, i);
-            region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
-            sceneCoordinate = new IntegerCoordinate(- region.getRadius() + 1, i);
-            region.getAltitudeMap().put(sceneCoordinate, -1D);
-            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
-        }
+//        for (int i = - region.getRadius() + 1; i < region.getRadius(); i++) {
+//            IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, region.getRadius() - 1);
+//            region.getAltitudeMap().put(sceneCoordinate, -1D);
+//            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
+//            sceneCoordinate = new IntegerCoordinate(i, - region.getRadius() + 1);
+//            region.getAltitudeMap().put(sceneCoordinate, -1D);
+//            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
+//            sceneCoordinate = new IntegerCoordinate(region.getRadius() - 1, i);
+//            region.getAltitudeMap().put(sceneCoordinate, -1D);
+//            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
+//            sceneCoordinate = new IntegerCoordinate(- region.getRadius() + 1, i);
+//            region.getAltitudeMap().put(sceneCoordinate, -1D);
+//            defineScene(region, altitudeMap, sceneCoordinate, null, 0D, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
+//        }
         for (int i = - region.getRadius(); i <= region.getRadius(); i++) {
             for (int j = - region.getRadius(); j <= region.getRadius(); j++) {
                 IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, j);
@@ -149,21 +148,15 @@ public class SceneManagerImpl implements SceneManager {
                 double d = random.nextDouble();
                 if (altitudeMap.get(sceneCoordinate) >= 0.65D) {
                     blockCode = BlockConstants.BLOCK_CODE_SNOW;
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
-                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else if (altitudeMap.get(sceneCoordinate) >= 0.6D) {
                     blockCode = BlockConstants.BLOCK_CODE_ROUGH;
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
-                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
                 } else if (altitudeMap.get(sceneCoordinate) >= 0.4D) {
                     if (d >= 0.75D) {
                         blockCode = BlockConstants.BLOCK_CODE_DIRT;
                     } else {
                         blockCode = BlockConstants.BLOCK_CODE_GRASS;
                     }
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
-                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
-                } else {
+                } else if (altitudeMap.get(sceneCoordinate) >= 0D) {
                     if (d >= 0.8D) {
                         blockCode = BlockConstants.BLOCK_CODE_WATER_SHALLOW;
                     } else if (d >= 0.6D) {
@@ -175,9 +168,15 @@ public class SceneManagerImpl implements SceneManager {
                     } else {
                         blockCode = BlockConstants.BLOCK_CODE_SUBTERRANEAN;
                     }
-                    defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
-                            altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
+                } else if (altitudeMap.get(sceneCoordinate) >= -0.1D) {
+                    blockCode = BlockConstants.BLOCK_CODE_WATER_SHALLOW;
+                } else if (altitudeMap.get(sceneCoordinate) >= -0.2D) {
+                    blockCode = BlockConstants.BLOCK_CODE_WATER_MEDIUM;
+                } else {
+                    blockCode = BlockConstants.BLOCK_CODE_WATER_DEEP;
                 }
+                defineScene(region, altitudeMap, new IntegerCoordinate(i, j), altitudeMap.get(sceneCoordinate) - 0.05D,
+                        altitudeMap.get(sceneCoordinate) + 0.05D, blockCode);
             }
         }
     }
@@ -1332,5 +1331,13 @@ public class SceneManagerImpl implements SceneManager {
                 scene.getGrid()[scene.getGrid().length - 1][gridCoordinate.getY()] = code;
             }
         }
+    }
+
+    @Override
+    public BigDecimal getAltitude(GameWorld world, WorldCoordinate worldCoordinate) {
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        Map<IntegerCoordinate, Double> altitudeMap = region.getAltitudeMap();
+        return BigDecimal.valueOf(altitudeMap.getOrDefault(worldCoordinate.getSceneCoordinate(),
+                BlockConstants.Z_DEFAULT.doubleValue()));
     }
 }

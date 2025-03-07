@@ -282,6 +282,7 @@ public class BlockConstants {
     public static final BigDecimal ACCELERATION_MAX_SPEED_RATIO = BigDecimal.valueOf(0.1D);
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
     public static final int FLOOR_CODE_DEFAULT = BLOCK_CODE_BLACK;
+    public static final BigDecimal MAX_Z_STEP_DEFAULT = BigDecimal.valueOf(0.5D);
     public static final int FRAME_DEFAULT = 0;
     public static final int PERIOD_STATIC_DEFAULT = -1;
     public static final int PERIOD_DYNAMIC_DEFAULT = 25;

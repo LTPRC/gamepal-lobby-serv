@@ -100,32 +100,64 @@ public class MovementManagerImpl implements MovementManager {
     public void settleSpeedAndCoordinate(GameWorld world, Block worldMovingBlock, int sceneScanDepth) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         WorldCoordinate teleportWc = null;
-        Block expectedNewBlock = new Block(worldMovingBlock);
-        expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
+        Block expectedNewBlockX = new Block(worldMovingBlock);
+        Block expectedNewBlockY = new Block(worldMovingBlock);
+        Block expectedNewBlockXY = new Block(worldMovingBlock);
+        expectedNewBlockX.getWorldCoordinate().setCoordinate(new Coordinate(
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getY(),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
+        expectedNewBlockY.getWorldCoordinate().setCoordinate(new Coordinate(
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getX(),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
+        expectedNewBlockXY.getWorldCoordinate().setCoordinate(new Coordinate(
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
-        BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
+        BlockUtil.fixWorldCoordinate(region, expectedNewBlockX.getWorldCoordinate());
+        BlockUtil.fixWorldCoordinate(region, expectedNewBlockY.getWorldCoordinate());
+        BlockUtil.fixWorldCoordinate(region, expectedNewBlockXY.getWorldCoordinate());
         String fromId = world.getSourceMap().containsKey(worldMovingBlock.getBlockInfo().getId())
                 ? world.getSourceMap().get(worldMovingBlock.getBlockInfo().getId())
                 : worldMovingBlock.getBlockInfo().getId();
+        boolean xCollision = false;
+        boolean yCollision = false;
+        if (sceneManager.getAltitude(world, expectedNewBlockX.getWorldCoordinate())
+                .subtract(expectedNewBlockX.getWorldCoordinate().getCoordinate().getZ())
+                .compareTo(BlockConstants.MAX_Z_STEP_DEFAULT) > 0) {
+            xCollision = true;
+        }
+        if (sceneManager.getAltitude(world, expectedNewBlockY.getWorldCoordinate())
+                .subtract(expectedNewBlockY.getWorldCoordinate().getCoordinate().getZ())
+                .compareTo(BlockConstants.MAX_Z_STEP_DEFAULT) > 0) {
+            yCollision = true;
+        }
+        if (sceneManager.getAltitude(world, expectedNewBlockXY.getWorldCoordinate())
+                .subtract(expectedNewBlockXY.getWorldCoordinate().getCoordinate().getZ())
+                .compareTo(BlockConstants.MAX_Z_STEP_DEFAULT) > 0) {
+            xCollision = true;
+            yCollision = true;
+        }
 
         // Linear selection on pre-selected blocks
         List<Block> preSelectedBlocks = sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                        expectedNewBlock, fromId).stream()
+                        expectedNewBlockXY, fromId).stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
                 .filter(blocker -> BlockUtil.checkMaterialCollision(
                         worldMovingBlock.getBlockInfo().getStructure().getMaterial(),
                         blocker.getBlockInfo().getStructure().getMaterial()))
                 .filter(blocker -> BlockUtil.detectLineCollision(region, worldMovingBlock.getWorldCoordinate(),
-                        expectedNewBlock, blocker, false))
+                        expectedNewBlockXY, blocker, false))
                 .collect(Collectors.toList());
 
-        boolean xCollision = false;
-        boolean yCollision = false;
         for (Block block : preSelectedBlocks) {
             if (BlockUtil.detectCollision(region, worldMovingBlock, block)) {
                 continue;
@@ -134,14 +166,7 @@ public class MovementManagerImpl implements MovementManager {
                 break;
             }
             if (!xCollision) {
-                expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getY(),
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
-                BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
-                if (BlockUtil.detectCollision(region, expectedNewBlock, block)) {
+                if (BlockUtil.detectCollision(region, expectedNewBlockX, block)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -151,14 +176,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
             }
             if (!yCollision) {
-                expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getX(),
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
-                BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
-                if (BlockUtil.detectCollision(region, expectedNewBlock, block)) {
+                if (BlockUtil.detectCollision(region, expectedNewBlockY, block)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -168,15 +186,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
             }
             if (!xCollision && !yCollision) {
-                expectedNewBlock.getWorldCoordinate().setCoordinate(new Coordinate(
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
-                        worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
-                BlockUtil.fixWorldCoordinate(region, expectedNewBlock.getWorldCoordinate());
-                if (BlockUtil.detectCollision(region, expectedNewBlock, block)) {
+                if (BlockUtil.detectCollision(region, expectedNewBlockXY, block)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -228,6 +238,7 @@ public class MovementManagerImpl implements MovementManager {
 
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock.getWorldCoordinate());
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
+        worldMovingBlock.getWorldCoordinate().getCoordinate().setZ(sceneManager.getAltitude(world, worldMovingBlock.getWorldCoordinate()));
         BlockUtil.fixWorldCoordinate(region, worldMovingBlock.getWorldCoordinate());
         syncFloorCode(world, worldMovingBlock);
         if (worldMovingBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {

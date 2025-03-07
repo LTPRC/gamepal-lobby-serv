@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.model.map.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -29,4 +30,5 @@ public interface SceneManager {
     void removeBlock(GameWorld world, Block block, boolean isDestroyed);
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
+    BigDecimal getAltitude(final GameWorld world, final WorldCoordinate worldCoordinate);
 }
