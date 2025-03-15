@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,34 +73,41 @@ public class TimedEventTask {
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
 
-            // Update events
-//            world.getBlockMap().values().forEach(block -> eventManager.updateEvent(world, block));
-
             Map<String, Long> onlineMap = world.getOnlineMap();
             Map<String, Block> creatureMap = world.getCreatureMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
+            Map<Integer, Set<IntegerCoordinate>> preSelectedSceneCoordinates = new HashMap<>();
             onlineMap.keySet().stream()
                     .filter(creatureMap::containsKey)
                     .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                     .forEach(id -> {
                         Block player = creatureMap.get(id);
                         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-                        // Update events
-                        Set<IntegerCoordinate> preSelectedSceneCoordinates = BlockUtil.preSelectSceneCoordinates(
-                                region, player.getWorldCoordinate(), player.getWorldCoordinate());
-                        preSelectedSceneCoordinates = BlockUtil.expandSceneCoordinates(preSelectedSceneCoordinates, 1);
-                        preSelectedSceneCoordinates.forEach(sceneCoordinate -> {
-                            if (!region.getScenes().containsKey(sceneCoordinate)) {
-                                sceneManager.fillScene(world, region, sceneCoordinate);
-                            }
-                            Scene scene = region.getScenes().get(sceneCoordinate);
-                            scene.getBlocks().values().forEach(block -> eventManager.updateEvent(world, block));
-                        });
+                        // Pre-select scenes for updating events
+                        BlockUtil.preSelectSceneCoordinates(
+                                region, player.getWorldCoordinate(), player.getWorldCoordinate())
+                                .forEach(sceneCoordinate -> {
+                                    if (!region.getScenes().containsKey(sceneCoordinate)) {
+                                        sceneManager.fillScene(world, region, sceneCoordinate);
+                                    }
+                                    preSelectedSceneCoordinates.putIfAbsent(region.getRegionNo(), new HashSet<>());
+                                    preSelectedSceneCoordinates.get(region.getRegionNo()).add(sceneCoordinate);
+                                });
                         // Update buff time
                         buffManager.updateBuffTime(world, id);
                     });
-//                    .forEach(id -> buffManager.updateBuffTime(world, id));
+
+            preSelectedSceneCoordinates.forEach((regionNo, sceneCoordinates) -> {
+                Region region = world.getRegionMap().get(regionNo);
+                sceneCoordinates.forEach(sceneCoordinate -> {
+                    Scene scene = region.getScenes().get(sceneCoordinate);
+                    scene.getBlocks().values().forEach(block -> {
+                        // Update events
+                        eventManager.updateEvent(world, block);
+                    });
+                });
+            });
 
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))
@@ -161,25 +170,29 @@ public class TimedEventTask {
                             playerService.changeVp(id, newVp, false);
 
                             // Change hunger
-                            randomNumber = Math.random();
-                            if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
-                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
-                                    || Math.abs(movementInfo.getSpeed().getZ().doubleValue()) > 0) {
-                                randomNumber *= 10;
-                            }
-                            if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
-                                playerService.changeHunger(id, -1, false);
+                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                                randomNumber = Math.random();
+                                if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
+                                        || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
+                                        || Math.abs(movementInfo.getSpeed().getZ().doubleValue()) > 0) {
+                                    randomNumber *= 10;
+                                }
+                                if (randomNumber < 1000D / (7 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
+                                    playerService.changeHunger(id, -1, false);
+                                }
                             }
 
                             // Change thirst
-                            randomNumber = Math.random();
-                            if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
-                                    || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
-                                    || Math.abs(movementInfo.getSpeed().getZ().doubleValue()) > 0) {
-                                randomNumber *= 10;
-                            }
-                            if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
-                                playerService.changeThirst(id, -1, false);
+                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                                randomNumber = Math.random();
+                                if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
+                                        || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
+                                        || Math.abs(movementInfo.getSpeed().getZ().doubleValue()) > 0) {
+                                    randomNumber *= 10;
+                                }
+                                if (randomNumber < 1000D / (3 * 24 * 60 * GamePalConstants.FRAME_PER_SECOND)) {
+                                    playerService.changeThirst(id, -1, false);
+                                }
                             }
 
                             // Change precision
