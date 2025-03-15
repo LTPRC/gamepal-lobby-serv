@@ -110,4 +110,9 @@ public class CreatureFactory {
         toPlayerInfo.setBeard(fromPlayerInfo.getBeard());
         toPlayerInfo.setFaceCoefs(fromPlayerInfo.getFaceCoefs());
     }
+
+    public static void copyDisplayedPlayerInfo(PlayerInfo fromPlayerInfo, PlayerInfo toPlayerInfo) {
+        toPlayerInfo.getTools().addAll(fromPlayerInfo.getTools());
+        toPlayerInfo.getOutfits().addAll(fromPlayerInfo.getOutfits());
+    }
 }

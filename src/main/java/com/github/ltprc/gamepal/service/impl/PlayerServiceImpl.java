@@ -1014,6 +1014,7 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfo.getCreatureType());
             CreatureFactory.copyPersonalizedPlayerInfo(playerInfo, remainPlayerInfo);
             remainPlayerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
+            CreatureFactory.copyDisplayedPlayerInfo(playerInfo, remainPlayerInfo);
             playerInfoMap.put(remainId, remainPlayerInfo);
         }
 
