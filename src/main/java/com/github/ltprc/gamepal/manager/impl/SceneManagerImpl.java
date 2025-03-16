@@ -16,14 +16,16 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.region.Region;
+import com.github.ltprc.gamepal.model.map.region.RegionInfo;
+import com.github.ltprc.gamepal.model.map.scene.Scene;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
 public class SceneManagerImpl implements SceneManager {
 
     private static final Log logger = LogFactory.getLog(SceneManagerImpl.class);
+    private static final Random random = new Random();
 
     @Autowired
     private UserService userService;
@@ -100,7 +103,6 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private void initializeRegionTerrainMapIsland(Region region) {
-        Random random = new Random();
         Grid grid = new Grid(region.getRadius() * 2 + 1);
         NoiseGenerator noiseGenerator = new NoiseGenerator();
         noiseStage(grid, noiseGenerator, 3, 0.1f);
@@ -205,6 +207,15 @@ public class SceneManagerImpl implements SceneManager {
         return rst;
     }
 
+    /**
+     *
+     * @param region
+     * @param altitudeMap
+     * @param sceneCoordinate
+     * @param minAltitude Threshold for polluting terrain
+     * @param maxAltitude Threshold for polluting terrain
+     * @param blockCode
+     */
     private static void defineScene(final Region region, Map<IntegerCoordinate, Double> altitudeMap,
                                     final IntegerCoordinate sceneCoordinate, final Double minAltitude,
                                     final Double maxAltitude, final int blockCode) {
@@ -274,11 +285,6 @@ public class SceneManagerImpl implements SceneManager {
         }
         region.getScenes().put(sceneCoordinate, scene);
         fillSceneTemplate(world, region, scene, terrainCode);
-        if (terrainCode == BlockConstants.BLOCK_CODE_BLACK) {
-            scene.getBlocks().values().forEach(block -> removeBlock(world, block, false));
-        } else {
-            addSceneAnimals(world, region, scene);
-        }
     }
 
     private Scene fillSceneTemplate(GameWorld world, final Region region, final Scene scene, final int blockCode) {
@@ -363,14 +369,18 @@ public class SceneManagerImpl implements SceneManager {
                         .getOrDefault(new IntegerCoordinate(sceneCoordinate.getX() + 1, sceneCoordinate.getY()), blockCode);
             }
         }
-        // Pollute from 4 sides
-        polluteBlockCode(region, scene, blockCode);
-        addSceneObjects(world, region, scene);
+        if (blockCode == BlockConstants.BLOCK_CODE_BLACK) {
+            scene.getBlocks().values().forEach(block -> removeBlock(world, block, false));
+        } else {
+            // Pollute from 4 sides
+            polluteBlockCode(region, scene, blockCode);
+            addSceneObjects(world, region, scene);
+            addSceneAnimals(world, region, scene);
+        }
         return scene;
     }
 
     private void polluteBlockCode(final Region region, final Scene scene, final int defaultBlockCode) {
-        Random random = new Random();
         for (int l = 1; l < region.getWidth(); l++) {
             for (int k = 1; k < region.getHeight(); k++) {
                 int upCode = scene.getGrid()[l][0];
@@ -416,7 +426,6 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private void addSceneObjects(GameWorld world, RegionInfo regionInfo, Scene scene) {
-        Random random = new Random();
         for (int i = 0; i < regionInfo.getWidth() - 1; i++) {
             for (int j = 0; j < regionInfo.getHeight() - 1; j++) {
                 // TODO Last row/column may cause overlap issue with player 25/01/19
@@ -450,7 +459,6 @@ public class SceneManagerImpl implements SceneManager {
 
     private void addSceneObject(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
                                 BigDecimal y) {
-        Random random = new Random();
         Coordinate coordinate = new Coordinate(
                 x.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
                 y.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
@@ -677,7 +685,6 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private void addSceneAnimals(GameWorld world, RegionInfo regionInfo, Scene scene) {
-        Random random = new Random();
         for (int i = 0; i < regionInfo.getWidth(); i++) {
             for (int j = 0; j < regionInfo.getHeight(); j++) {
                 switch (random.nextInt(4)) {
@@ -710,7 +717,6 @@ public class SceneManagerImpl implements SceneManager {
 
     private void addSceneAnimal(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
                                 BigDecimal y) {
-        Random random = new Random();
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
         weightMap.put(BlockConstants.BLOCK_CODE_BLACK, 10000);
         switch (blockCode) {
@@ -1154,7 +1160,6 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     private void destroyBlock(GameWorld world, Block block) {
-        Random random = new Random();
         Block drop = null;
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_BED:

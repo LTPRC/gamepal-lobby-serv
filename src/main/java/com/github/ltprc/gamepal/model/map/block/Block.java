@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.model.map.block;
 
-import com.github.ltprc.gamepal.model.map.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import lombok.Data;
 
 @Data

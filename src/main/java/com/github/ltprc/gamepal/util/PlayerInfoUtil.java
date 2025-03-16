@@ -4,7 +4,7 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
-import com.github.ltprc.gamepal.model.map.RegionInfo;
+import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import org.apache.commons.lang3.StringUtils;
 

@@ -1,6 +1,7 @@
-package com.github.ltprc.gamepal.model.map;
+package com.github.ltprc.gamepal.model.map.region;
 
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.scene.Scene;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

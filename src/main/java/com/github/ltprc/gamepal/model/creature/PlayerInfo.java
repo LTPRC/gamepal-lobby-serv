@@ -3,7 +3,7 @@ package com.github.ltprc.gamepal.model.creature;
 import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
-import com.github.ltprc.gamepal.model.map.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

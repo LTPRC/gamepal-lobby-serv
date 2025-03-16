@@ -1,7 +1,7 @@
 package com.github.ltprc.gamepal.factory;
 
-import com.github.ltprc.gamepal.model.map.RegionInfo;
-import com.github.ltprc.gamepal.model.map.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.region.RegionInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import org.springframework.stereotype.Component;

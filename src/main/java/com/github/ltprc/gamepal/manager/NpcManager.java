@@ -4,7 +4,7 @@ package com.github.ltprc.gamepal.manager;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 
 import java.math.BigDecimal;
 

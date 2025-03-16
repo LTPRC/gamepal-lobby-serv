@@ -1,14 +1,15 @@
 package com.github.ltprc.gamepal.util;
 
 import com.github.ltprc.gamepal.config.*;
-import com.github.ltprc.gamepal.model.creature.PerceptionInfo;
-import com.github.ltprc.gamepal.model.map.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
+import com.github.ltprc.gamepal.model.map.region.Region;
+import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.structure.*;
 
 import java.math.BigDecimal;

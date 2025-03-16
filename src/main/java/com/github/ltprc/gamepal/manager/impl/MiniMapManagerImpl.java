@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.manager.MiniMapManager;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.Region;
+import com.github.ltprc.gamepal.model.map.region.Region;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
