@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.RegionConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.FarmManager;
@@ -72,21 +73,21 @@ public class SceneManagerImpl implements SceneManager {
         region.getScenes().put(sceneCoordinate, scene);
         int terrainCode = BlockConstants.BLOCK_CODE_BLACK;
         switch (region.getType()) {
-            case GamePalConstants.REGION_TYPE_ALL_DIRT:
-            case GamePalConstants.REGION_TYPE_ALL_SAND:
-            case GamePalConstants.REGION_TYPE_ALL_GRASS:
-            case GamePalConstants.REGION_TYPE_ALL_SNOW:
-            case GamePalConstants.REGION_TYPE_ALL_SWAMP:
-            case GamePalConstants.REGION_TYPE_ALL_ROUGH:
-            case GamePalConstants.REGION_TYPE_ALL_SUBTERRANEAN:
-            case GamePalConstants.REGION_TYPE_ALL_LAVA:
-            case GamePalConstants.REGION_TYPE_ALL_WATER_SHALLOW:
-            case GamePalConstants.REGION_TYPE_ALL_WATER_MEDIUM:
-            case GamePalConstants.REGION_TYPE_ALL_WATER_DEEP:
+            case RegionConstants.REGION_TYPE_ALL_DIRT:
+            case RegionConstants.REGION_TYPE_ALL_SAND:
+            case RegionConstants.REGION_TYPE_ALL_GRASS:
+            case RegionConstants.REGION_TYPE_ALL_SNOW:
+            case RegionConstants.REGION_TYPE_ALL_SWAMP:
+            case RegionConstants.REGION_TYPE_ALL_ROUGH:
+            case RegionConstants.REGION_TYPE_ALL_SUBTERRANEAN:
+            case RegionConstants.REGION_TYPE_ALL_LAVA:
+            case RegionConstants.REGION_TYPE_ALL_WATER_SHALLOW:
+            case RegionConstants.REGION_TYPE_ALL_WATER_MEDIUM:
+            case RegionConstants.REGION_TYPE_ALL_WATER_DEEP:
                 terrainCode = region.getType();
                 break;
-            case GamePalConstants.REGION_TYPE_EMPTY:
-            case GamePalConstants.REGION_TYPE_ISLAND:
+            case RegionConstants.REGION_TYPE_EMPTY:
+            case RegionConstants.REGION_TYPE_ISLAND:
                 terrainCode = region.getTerrainMap().getOrDefault(sceneCoordinate, BlockConstants.BLOCK_CODE_BLACK);
                 break;
             default:
@@ -280,7 +281,7 @@ public class SceneManagerImpl implements SceneManager {
         Coordinate coordinate = new Coordinate(
                 x.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
                 y.subtract(BigDecimal.valueOf(0.5D)).add(BigDecimal.valueOf(random.nextDouble())),
-                BlockConstants.Z_DEFAULT);
+                regionInfo.getAltitude());
         WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                 coordinate);
         Map<Integer, Integer> weightMap = new LinkedHashMap<>();
@@ -590,7 +591,7 @@ public class SceneManagerImpl implements SceneManager {
                         new Coordinate(
                                 x.add(BigDecimal.valueOf(random.nextDouble() / 2)),
                                 y.add(BigDecimal.valueOf(random.nextDouble() / 2)),
-                                BlockConstants.Z_DEFAULT));
+                                regionInfo.getAltitude()));
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 break;
             }

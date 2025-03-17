@@ -4,7 +4,7 @@ import com.github.czyzby.noise4j.map.Grid;
 import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
 import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.RegionConstants;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 
@@ -34,22 +34,22 @@ public class RegionFactory {
 
     private static void initializeRegionTerrainMap(Region region) {
         switch (region.getType()) {
-            case GamePalConstants.REGION_TYPE_ISLAND:
+            case RegionConstants.REGION_TYPE_ISLAND:
                 initializeRegionTerrainMapIsland(region);
                 break;
             default:
-            case GamePalConstants.REGION_TYPE_EMPTY:
-            case GamePalConstants.REGION_TYPE_ALL_DIRT:
-            case GamePalConstants.REGION_TYPE_ALL_SAND:
-            case GamePalConstants.REGION_TYPE_ALL_GRASS:
-            case GamePalConstants.REGION_TYPE_ALL_SNOW:
-            case GamePalConstants.REGION_TYPE_ALL_SWAMP:
-            case GamePalConstants.REGION_TYPE_ALL_ROUGH:
-            case GamePalConstants.REGION_TYPE_ALL_SUBTERRANEAN:
-            case GamePalConstants.REGION_TYPE_ALL_LAVA:
-            case GamePalConstants.REGION_TYPE_ALL_WATER_SHALLOW:
-            case GamePalConstants.REGION_TYPE_ALL_WATER_MEDIUM:
-            case GamePalConstants.REGION_TYPE_ALL_WATER_DEEP:
+            case RegionConstants.REGION_TYPE_EMPTY:
+            case RegionConstants.REGION_TYPE_ALL_DIRT:
+            case RegionConstants.REGION_TYPE_ALL_SAND:
+            case RegionConstants.REGION_TYPE_ALL_GRASS:
+            case RegionConstants.REGION_TYPE_ALL_SNOW:
+            case RegionConstants.REGION_TYPE_ALL_SWAMP:
+            case RegionConstants.REGION_TYPE_ALL_ROUGH:
+            case RegionConstants.REGION_TYPE_ALL_SUBTERRANEAN:
+            case RegionConstants.REGION_TYPE_ALL_LAVA:
+            case RegionConstants.REGION_TYPE_ALL_WATER_SHALLOW:
+            case RegionConstants.REGION_TYPE_ALL_WATER_MEDIUM:
+            case RegionConstants.REGION_TYPE_ALL_WATER_DEEP:
                 break;
         }
     }

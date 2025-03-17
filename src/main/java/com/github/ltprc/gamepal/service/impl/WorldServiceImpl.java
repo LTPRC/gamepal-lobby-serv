@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
+import com.github.ltprc.gamepal.config.RegionConstants;
 import com.github.ltprc.gamepal.factory.RegionFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -139,7 +140,7 @@ public class WorldServiceImpl implements WorldService {
             int height = region.getInteger("height");
             int width = region.getInteger("width");
             Region newRegion = RegionFactory.generateRegion(regionNo, regionType, regionName, width, height,
-                    GamePalConstants.REGION_RADIUS_DEFAULT, BlockConstants.Z_DEFAULT);
+                    RegionConstants.REGION_RADIUS_DEFAULT, RegionConstants.SCENE_ALTITUDE_DEFAULT);
             world.getRegionMap().put(regionNo, newRegion);
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
@@ -168,8 +169,7 @@ public class WorldServiceImpl implements WorldService {
                             Integer value = blockRow.getInteger(j);
                             WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                     newScene.getSceneCoordinate(),
-                                    new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i), BlockConstants.Z_DEFAULT));
-//                            Block block = sceneManager.addLoadedBlock(world, value % 10000, value / 10000, worldCoordinate);
+                                    new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i), newRegion.getAltitude()));
                             sceneManager.addOtherBlock(world, worldCoordinate, value % 10000);
                         }
                     }
@@ -185,20 +185,25 @@ public class WorldServiceImpl implements WorldService {
                                 new Coordinate(
                                         BigDecimal.valueOf(blockRow.getInteger(2)),
                                         BigDecimal.valueOf(blockRow.getInteger(3)),
-                                        BlockConstants.Z_DEFAULT));
+                                        newRegion.getAltitude()));
                         Block block;
                         switch (type) {
                             case BlockConstants.BLOCK_TYPE_DROP:
                                 block = sceneManager.addDropBlock(world, worldCoordinate, new AbstractMap.SimpleEntry<>(blockRow.getString(4), blockRow.getInteger(5)));
                                 break;
                             case BlockConstants.BLOCK_TYPE_TELEPORT:
+                                Region toRegion = world.getRegionMap().get(blockRow.getInteger(4));
+                                BigDecimal toAltitude = newRegion.getAltitude();
+                                if (null != toRegion) {
+                                    toAltitude = toRegion.getAltitude();
+                                }
                                 block = sceneManager.addTeleportBlock(world, blockRow.getInteger(1), worldCoordinate, new WorldCoordinate(blockRow.getInteger(4),
                                         new IntegerCoordinate(blockRow.getInteger(5),
                                                 blockRow.getInteger(6)),
                                         new Coordinate(
                                                 BigDecimal.valueOf(blockRow.getInteger(7)),
                                                 BigDecimal.valueOf(blockRow.getInteger(8)),
-                                                BlockConstants.Z_DEFAULT)));
+                                                toAltitude)));
                                 break;
                             default:
                                 block = sceneManager.addOtherBlock(world, worldCoordinate, blockRow.getInteger(1));
@@ -282,9 +287,9 @@ public class WorldServiceImpl implements WorldService {
     public void expandRegion(GameWorld world, int regionNo) {
         Map<Integer, Region> regionMap = world.getRegionMap();
         if (!regionMap.containsKey(regionNo)) {
-            Region region = RegionFactory.generateRegion(regionNo, GamePalConstants.REGION_TYPE_ISLAND,
-                    "Auto Region " + regionNo, GamePalConstants.SCENE_DEFAULT_WIDTH,
-                    GamePalConstants.SCENE_DEFAULT_HEIGHT, GamePalConstants.REGION_RADIUS_DEFAULT,
+            Region region = RegionFactory.generateRegion(regionNo, RegionConstants.REGION_TYPE_ISLAND,
+                    "Auto Region " + regionNo, RegionConstants.SCENE_WIDTH_DEFAULT,
+                    RegionConstants.SCENE_HEIGHT_DEFAULT, RegionConstants.REGION_RADIUS_DEFAULT,
                     BlockConstants.Z_DEFAULT);
             world.getRegionMap().put(regionNo, region);
         }

@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.BuffManager;
-import com.github.ltprc.gamepal.manager.ItemManager;
-import com.github.ltprc.gamepal.manager.MovementManager;
-import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
@@ -57,6 +54,9 @@ public class NpcManagerImpl implements NpcManager {
     @Autowired
     private ItemManager itemManager;
 
+    @Autowired
+    private SceneManager sceneManager;
+
     @Override
     public Block createCreature(GameWorld world, final int playerType, final int creatureType, String userCode) {
 
@@ -90,6 +90,7 @@ public class NpcManagerImpl implements NpcManager {
         Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         BlockUtil.copyWorldCoordinate(worldCoordinate, player.getWorldCoordinate());
+        sceneManager.updateAltitude(world, player);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), player.getWorldCoordinate());
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
                 playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
