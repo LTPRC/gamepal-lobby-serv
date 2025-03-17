@@ -656,6 +656,7 @@ public class BlockUtil {
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
                         BlockConstants.Z_DEFAULT));
+        PlanarCoordinate imageSize;
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
                 switch (blockCode) {
@@ -682,7 +683,6 @@ public class BlockUtil {
                         structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
                         break;
                 }
-                PlanarCoordinate imageSize;
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_BLOCK:
                     case BlockConstants.BLOCK_CODE_UPGRADE:
@@ -828,10 +828,23 @@ public class BlockUtil {
                                         BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_BIG_PINE:
+                    case BlockConstants.BLOCK_CODE_BIG_OAK:
+                    case BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE:
+                    case BlockConstants.BLOCK_CODE_PINE:
+                    case BlockConstants.BLOCK_CODE_OAK:
+                    case BlockConstants.BLOCK_CODE_WITHERED_TREE:
+                    case BlockConstants.BLOCK_CODE_PALM:
+                        imageSize = new PlanarCoordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3));
+                        break;
+                    default:
+                        imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
+                        break;
+                }
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_ALL,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
-                        roundShape,
-                        new PlanarCoordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(3)));
+                        roundShape, imageSize);
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,

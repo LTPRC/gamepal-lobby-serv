@@ -260,7 +260,7 @@ public class BlockConstants {
     public static final int STRUCTURE_SHAPE_TYPE_ROUND = 1;
     public static final int STRUCTURE_SHAPE_TYPE_SQUARE = 2;
     public static final int STRUCTURE_SHAPE_TYPE_RECTANGLE = 3;
-    public static final BigDecimal Z_DEFAULT = BigDecimal.ONE;
+    public static final BigDecimal Z_DEFAULT = BigDecimal.ZERO;
     public static final BigDecimal PLAYER_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal EVENT_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.3D);

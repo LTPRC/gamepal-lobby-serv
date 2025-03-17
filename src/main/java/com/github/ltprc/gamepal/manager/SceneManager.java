@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.Queue;
 
 public interface SceneManager {
-    Region generateRegion(final int regionNo);
     void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate);
     Queue<Block> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
     List<Block> collectLinearBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
                                     String sourceId);
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
+    BigDecimal[][] collectAltitudesByUserCode(final String userCode, final int sceneScanRadius);
     JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
                                              final boolean useWorldCoordinate);
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
@@ -31,4 +31,5 @@ public interface SceneManager {
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
     BigDecimal getAltitude(final GameWorld world, final WorldCoordinate worldCoordinate);
+    void updateAltitude(final GameWorld world, Block block);
 }

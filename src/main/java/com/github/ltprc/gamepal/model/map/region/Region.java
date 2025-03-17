@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,5 +19,5 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Region extends RegionInfo{
     private Map<IntegerCoordinate, Scene> scenes = new ConcurrentHashMap<>(); // sceneCoordinate, scene
     private Map<IntegerCoordinate, Integer> terrainMap = new HashMap<>();
-    private Map<IntegerCoordinate, Double> altitudeMap = new HashMap<>();
+    private Map<IntegerCoordinate, BigDecimal> altitudeMap = new HashMap<>();
 }

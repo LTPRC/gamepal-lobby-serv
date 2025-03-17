@@ -6,7 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
-import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.factory.RegionFactory;
+import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.item.*;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -21,6 +22,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.SceneUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,9 +55,6 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private SceneManager sceneManager;
-
-    @Autowired
-    private NpcManager npcManager;
 
     @Override
     public Map<String, GameWorld> getWorldMap() {
@@ -139,37 +138,27 @@ public class WorldServiceImpl implements WorldService {
             String regionName =  region.getString("name");
             int height = region.getInteger("height");
             int width = region.getInteger("width");
-            Region newRegion = new Region();
-            newRegion.setRegionNo(regionNo);
+            Region newRegion = RegionFactory.generateRegion(regionNo, regionType, regionName, width, height,
+                    GamePalConstants.REGION_RADIUS_DEFAULT, BlockConstants.Z_DEFAULT);
             world.getRegionMap().put(regionNo, newRegion);
-            newRegion.setType(regionType);
-            newRegion.setName(regionName);
-            newRegion.setHeight(height);
-            newRegion.setWidth(width);
-            newRegion.setRadius(GamePalConstants.REGION_RADIUS_DEFAULT);
             JSONArray scenes = region.getJSONArray("scenes");
             for (Object obj2 : scenes) {
                 JSONObject scene = JSON.parseObject(String.valueOf(obj2));
-                Scene newScene = new Scene();
-                int y = scene.getInteger("y");
-                int x = scene.getInteger("x");
-                IntegerCoordinate sceneCoordinate = new IntegerCoordinate(x, y);
-                newScene.setSceneCoordinate(sceneCoordinate);
+                Scene newScene = SceneFactory.createScene(newRegion, new IntegerCoordinate(scene.getInteger("x"),
+                        scene.getInteger("y")), scene.getString("name"));
+                SceneUtil.initiateSceneGravitatedStacks(newRegion, newScene);
+                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
+                // Load specific terrain
                 Integer terrain = scene.getInteger("terrain");
                 if (null == terrain) {
                     terrain = BlockConstants.BLOCK_CODE_BLACK;
                 }
-                newRegion.getTerrainMap().put(sceneCoordinate, terrain);
-                newScene.setGrid(new int[newRegion.getWidth() + 1][newRegion.getHeight() + 1]);
+                newRegion.getTerrainMap().put(newScene.getSceneCoordinate(), terrain);
                 for (int i = 0; i <= newRegion.getWidth(); i++) {
                     for (int j = 0; j <= newRegion.getHeight(); j++) {
                         newScene.getGrid()[i][j] = terrain;
                     }
                 }
-                String name = scene.getString("name");
-                newScene.setName(name);
-                newRegion.getScenes().put(newScene.getSceneCoordinate(), newScene);
-                newScene.setBlocks(new ConcurrentHashMap<>());
                 // Collect normal square blocks from map object
                 JSONArray map = scene.getJSONArray("map");
                 if (null != map && !map.isEmpty()) {
@@ -293,7 +282,10 @@ public class WorldServiceImpl implements WorldService {
     public void expandRegion(GameWorld world, int regionNo) {
         Map<Integer, Region> regionMap = world.getRegionMap();
         if (!regionMap.containsKey(regionNo)) {
-            Region region = sceneManager.generateRegion(regionNo);
+            Region region = RegionFactory.generateRegion(regionNo, GamePalConstants.REGION_TYPE_ISLAND,
+                    "Auto Region " + regionNo, GamePalConstants.SCENE_DEFAULT_WIDTH,
+                    GamePalConstants.SCENE_DEFAULT_HEIGHT, GamePalConstants.REGION_RADIUS_DEFAULT,
+                    BlockConstants.Z_DEFAULT);
             world.getRegionMap().put(regionNo, region);
         }
     }

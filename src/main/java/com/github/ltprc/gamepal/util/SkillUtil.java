@@ -18,6 +18,8 @@ import java.util.Random;
 @Component
 public class SkillUtil {
 
+    private static final Random random = new Random();
+
     private SkillUtil() {}
 
     public static void updateHumanSkills(PlayerInfo playerInfo) {
@@ -136,7 +138,6 @@ public class SkillUtil {
             // No hp effect
             return hp;
         }
-        Random random = new Random();
         switch (eventCode) {
             case BlockConstants.BLOCK_CODE_HEAL:
                 if (targetType == BlockConstants.BLOCK_TYPE_PLAYER) {

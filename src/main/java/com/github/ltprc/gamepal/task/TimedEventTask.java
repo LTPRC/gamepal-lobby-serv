@@ -224,7 +224,9 @@ public class TimedEventTask {
                             }
 
                             // Update possible interacted blocks
-                            interactionManager.searchInteraction(world, id);
+                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                                interactionManager.searchInteraction(world, id);
+                            }
 
                             // Add decorating effects
                             Map<Integer, Region> regionMap = world.getRegionMap();

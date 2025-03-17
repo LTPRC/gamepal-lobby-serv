@@ -33,6 +33,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
@@ -406,9 +407,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         });
         rst.put("sceneInfos", sceneInfos);
 
-        // Collect grids
+        // Collect grids and altitudes
         int[][] grids = sceneManager.collectGridsByUserCode(userCode, 2);
         rst.put("grids", grids);
+        BigDecimal[][] altitudes = sceneManager.collectAltitudesByUserCode(userCode, 2);
+        rst.put("altitudes", altitudes);
 
         // Collect blocks
         // Old block format 24/09/30

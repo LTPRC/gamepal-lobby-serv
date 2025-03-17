@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,7 +15,7 @@ public class RegionInfo {
     private String name;
     private int height;
     private int width;
-    private int altitude;
+    private BigDecimal altitude;
     private int radius;
 
     public RegionInfo(RegionInfo regionInfo) {
