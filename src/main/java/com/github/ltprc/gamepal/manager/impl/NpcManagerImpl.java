@@ -203,9 +203,7 @@ public class NpcManagerImpl implements NpcManager {
         npcBrain.setBehavior(behavior);
         switch (behavior) {
             case CreatureConstants.NPC_BEHAVIOR_IDLE:
-                npcBrain.getGreenQueue().clear();
-                npcBrain.getYellowQueue().clear();
-                npcBrain.getRedQueue().clear();
+                resetNpcBrainQueues(npcUserCode);
                 break;
             case CreatureConstants.NPC_BEHAVIOR_MOVE:
                 npcBrain.getGreenQueue().add(targetWorldCoordinate);
@@ -365,8 +363,9 @@ public class NpcManagerImpl implements NpcManager {
                         prepare2Attack(world, npcUserCode, red.get().getBlockInfo().getId());
                     }
                     // Remove not alive element from red queue 24/08/08
-                    while (!npcBrain.getRedQueue().isEmpty() && !playerService.validateActiveness(world,
-                            npcBrain.getRedQueue().peek().getBlockInfo().getId())) {
+                    while (!npcBrain.getRedQueue().isEmpty()
+                            && (!playerService.validateActiveness(world, npcBrain.getRedQueue().peek().getBlockInfo().getId())
+                            || world.getPlayerInfoMap().get(npcUserCode).getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0)) {
                         npcBrain.getRedQueue().poll();
                     }
                     // Move & Destroy
@@ -488,7 +487,7 @@ public class NpcManagerImpl implements NpcManager {
         if (null != npcBrain) {
             npcBrain.getGreenQueue().clear();
             npcBrain.getYellowQueue().clear();
-            npcBrain.getGreenQueue().clear();
+            npcBrain.getRedQueue().clear();
         }
     }
 

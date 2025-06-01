@@ -38,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -734,23 +736,6 @@ public class SceneManagerImpl implements SceneManager {
         return preSelectedBlocks;
     }
 
-    private List<Block> shortenPreSelectedBlocks(RegionInfo regionInfo, WorldCoordinate from, Block eventBlock,
-                                                 List<Block> preSelectedBlocks) {
-        Optional<Block> collidedBlock = preSelectedBlocks.stream()
-                .filter(preSelectedBlock -> BlockUtil.checkMaterialCollision(
-                        eventBlock.getBlockInfo().getStructure().getMaterial(),
-                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
-                .filter(block -> null != BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate()))
-                .min(Comparator.comparing(block -> BlockUtil.calculateDistance(regionInfo, from, block.getWorldCoordinate())));
-        List<Block> shortenedBlocks = preSelectedBlocks.stream()
-                .filter(preSelectedBlock -> !BlockUtil.checkMaterialCollision(
-                        eventBlock.getBlockInfo().getStructure().getMaterial(),
-                        preSelectedBlock.getBlockInfo().getStructure().getMaterial()))
-                .collect(Collectors.toList());
-        collidedBlock.ifPresent(shortenedBlocks::add);
-        return shortenedBlocks;
-    }
-
     @Override
     public int[][] collectGridsByUserCode(String userCode, int sceneScanRadius) {
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -855,6 +840,10 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 FarmInfo farmInfo = world.getFarmMap().get(block.getBlockInfo().getId());
                 rst.put("farmInfo", farmInfo);
+                break;
+            case BlockConstants.BLOCK_TYPE_FLOOR:
+                break;
+            case BlockConstants.BLOCK_TYPE_WALL:
                 break;
             default:
                 break;
@@ -1178,20 +1167,27 @@ public class SceneManagerImpl implements SceneManager {
     @Override
     public BigDecimal getAltitude(GameWorld world, WorldCoordinate worldCoordinate) {
         GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
-        return gravitatedStack.getMaxAltitude();
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        return null == gravitatedStack ? region.getAltitude() : gravitatedStack.getMaxAltitude();
     }
 
     @Override
     public void updateAltitude(GameWorld world, Block block) {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
         GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
-        worldCoordinate.getCoordinate().setZ(gravitatedStack.getMaxAltitude());
+        worldCoordinate.getCoordinate().setZ(null == gravitatedStack ? worldCoordinate.getCoordinate().getZ() : gravitatedStack.getMaxAltitude());
     }
 
     private GravitatedStack locateGravitatedStack(GameWorld world, WorldCoordinate worldCoordinate) {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
         IntegerCoordinate altitudeCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
-        return scene.getGravitatedStacks()[altitudeCoordinate.getX()][altitudeCoordinate.getY()];
+        WorldCoordinate locatedWorldCoordinate = new WorldCoordinate(worldCoordinate.getRegionNo(),
+                worldCoordinate.getSceneCoordinate(),
+                new Coordinate(BigDecimal.valueOf(altitudeCoordinate.getX()),
+                        BigDecimal.valueOf(altitudeCoordinate.getY()),
+                        worldCoordinate.getCoordinate().getZ()));
+        BlockUtil.fixWorldCoordinateReal(region, locatedWorldCoordinate);
+        Scene scene = region.getScenes().get(locatedWorldCoordinate.getSceneCoordinate());
+        return scene.getGravitatedStacks()[locatedWorldCoordinate.getCoordinate().getX().intValue()][locatedWorldCoordinate.getCoordinate().getY().intValue()];
     }
 }

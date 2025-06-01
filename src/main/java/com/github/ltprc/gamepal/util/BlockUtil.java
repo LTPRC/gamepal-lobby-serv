@@ -530,8 +530,8 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
             case BlockConstants.BLOCK_TYPE_WALL:
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
-            case BlockConstants.BLOCK_TYPE_CEILING:
-            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
+//            case BlockConstants.BLOCK_TYPE_CEILING:
+//            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 return false;
             default:
@@ -881,14 +881,14 @@ public class BlockUtil {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
                 break;
-            case BlockConstants.BLOCK_TYPE_CEILING:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_TOP);
-                break;
-            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
-                break;
+//            case BlockConstants.BLOCK_TYPE_CEILING:
+//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+//                        BlockConstants.STRUCTURE_LAYER_TOP);
+//                break;
+//            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
+//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+//                        BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
+//                break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);

@@ -52,6 +52,8 @@ public class EventManagerImpl implements EventManager {
         }
         Block fromCreature = world.getCreatureMap().getOrDefault(sourceId, eventBlock);
         correctTarget(world, eventBlock, fromCreature);
+        // Unified directions of event block and origin block
+        eventBlock.getMovementInfo().setFaceDirection(fromCreature.getMovementInfo().getFaceDirection());
         // STRUCTURE_MATERIAL_PARTICLE_NO_FLESH is for piercing creatures
         // STRUCTURE_MATERIAL_PARTICLE is for hitting creatures
         if (eventBlock.getBlockInfo().getStructure().getMaterial() == BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH) {
@@ -146,7 +148,7 @@ public class EventManagerImpl implements EventManager {
                         fromCreature.getWorldCoordinate(),
                         fromCreature.getMovementInfo().getFaceDirection().add(BigDecimal.valueOf(
                                 SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
-                                        * (random.nextDouble() - 0.5D))), BigDecimal.ONE);
+                                        * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SPARK_SHORT);
                 addEvent(world, BlockConstants.BLOCK_CODE_SPARK_SHORT, fromCreature.getBlockInfo().getId(), sparkWc);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
@@ -341,7 +343,7 @@ public class EventManagerImpl implements EventManager {
                 case BlockConstants.BLOCK_TYPE_TREE:
                 case BlockConstants.BLOCK_TYPE_WALL:
                 case BlockConstants.BLOCK_TYPE_FLOOR:
-                case BlockConstants.BLOCK_TYPE_CEILING:
+//                case BlockConstants.BLOCK_TYPE_CEILING:
                     eventCode = BlockConstants.BLOCK_CODE_LIGHT_SMOKE;
                     break;
                 default:
