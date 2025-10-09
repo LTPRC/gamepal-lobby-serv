@@ -38,8 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1187,6 +1185,9 @@ public class SceneManagerImpl implements SceneManager {
                         BigDecimal.valueOf(altitudeCoordinate.getY()),
                         worldCoordinate.getCoordinate().getZ()));
         BlockUtil.fixWorldCoordinateReal(region, locatedWorldCoordinate);
+        if (!region.getScenes().containsKey(locatedWorldCoordinate.getSceneCoordinate())) {
+            fillScene(world, region, locatedWorldCoordinate.getSceneCoordinate());
+        }
         Scene scene = region.getScenes().get(locatedWorldCoordinate.getSceneCoordinate());
         return scene.getGravitatedStacks()[locatedWorldCoordinate.getCoordinate().getX().intValue()][locatedWorldCoordinate.getCoordinate().getY().intValue()];
     }

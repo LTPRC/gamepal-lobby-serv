@@ -89,7 +89,6 @@ public class EventManagerImpl implements EventManager {
     }
 
     private void activateEvent(GameWorld world, Block eventBlock, Block fromCreature) {
-        Random random = new Random();
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
         WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
         if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
