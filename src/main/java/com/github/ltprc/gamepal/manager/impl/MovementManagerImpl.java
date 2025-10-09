@@ -149,8 +149,14 @@ public class MovementManagerImpl implements MovementManager {
         }
 
         // Linear selection on pre-selected blocks
-        List<Block> preSelectedBlocks = sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                        expectedNewBlockXY, fromId).stream()
+        Set<Block> preSelectedBlocks = new HashSet<>();
+        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockXY, fromId));
+        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockX, fromId));
+        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockY, fromId));
+        preSelectedBlocks.stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
                 .filter(blocker -> BlockUtil.checkMaterialCollision(
                         worldMovingBlock.getBlockInfo().getStructure().getMaterial(),

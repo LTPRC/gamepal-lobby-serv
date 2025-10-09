@@ -504,10 +504,16 @@ public class BlockUtil {
             return false;
         }
         return block1.getWorldCoordinate().getCoordinate().getZ()
-                .subtract(block1.getWorldCoordinate().getCoordinate().getZ())
-                .abs()
-                .compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getZ()
-                        .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())) < 0;
+                .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())
+                .compareTo(block2.getWorldCoordinate().getCoordinate().getZ()) > 0
+                && block2.getWorldCoordinate().getCoordinate().getZ()
+                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getZ())
+                .compareTo(block1.getWorldCoordinate().getCoordinate().getZ()) > 0;
+//        return block1.getWorldCoordinate().getCoordinate().getZ()
+//                .subtract(block1.getWorldCoordinate().getCoordinate().getZ())
+//                .abs()
+//                .compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getZ()
+//                        .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())) < 0;
     }
 
     public static boolean checkBlockTypeRegistrable(int blockType) {
@@ -602,7 +608,7 @@ public class BlockUtil {
      * Positive object's material VS. Negative object's material
      * @param structureMaterial1 Positive object's material
      * @param structureMaterial2 Negative object's material
-     * @return
+     * @return boolean
      */
     public static boolean checkMaterialCollision(int structureMaterial1, int structureMaterial2) {
         switch (structureMaterial1) {
