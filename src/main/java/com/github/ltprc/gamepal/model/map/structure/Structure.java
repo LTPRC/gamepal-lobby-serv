@@ -14,6 +14,10 @@ public class Structure {
     private Shape shape = new Shape();
     private PlanarCoordinate imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
 
+    public Structure(Structure structure) {
+        this(structure.material, structure.layer, structure.shape, structure.imageSize);
+    }
+
     public Structure(Integer material, Integer layer) {
         this.material = material;
         this.layer = layer;

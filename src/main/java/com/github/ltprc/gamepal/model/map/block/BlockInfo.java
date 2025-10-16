@@ -24,7 +24,7 @@ public class BlockInfo {
         type = blockInfo.type;
         id = blockInfo.id;
         code = blockInfo.code;
-        structure = blockInfo.structure;
+        structure = new Structure(blockInfo.structure);
         hpMax = blockInfo.hpMax;
         hp = blockInfo.hp;
     }

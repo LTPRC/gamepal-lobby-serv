@@ -796,7 +796,6 @@ public class SceneManagerImpl implements SceneManager {
     public JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
                                                     final boolean useWorldCoordinate) {
         JSONObject rst = new JSONObject();
-        rst.putAll(JSON.parseObject(JSON.toJSONString(block.getBlockInfo())));
         if (useWorldCoordinate) {
             rst.putAll(JSON.parseObject(JSON.toJSONString(block.getWorldCoordinate())));
         } else {
@@ -829,6 +828,12 @@ public class SceneManagerImpl implements SceneManager {
                 WorldCoordinate to = world.getTeleportMap().get(block.getBlockInfo().getId());
                 rst.put("to", to);
                 break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))
+                        && BlockConstants.BLOCK_CODE_MINE == block.getBlockInfo().getCode()) {
+                    block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG);
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
                 rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
                 break;
@@ -839,13 +844,10 @@ public class SceneManagerImpl implements SceneManager {
                 FarmInfo farmInfo = world.getFarmMap().get(block.getBlockInfo().getId());
                 rst.put("farmInfo", farmInfo);
                 break;
-            case BlockConstants.BLOCK_TYPE_FLOOR:
-                break;
-            case BlockConstants.BLOCK_TYPE_WALL:
-                break;
             default:
                 break;
         }
+        rst.putAll(JSON.parseObject(JSON.toJSONString(block.getBlockInfo())));
         return rst;
     }
 
