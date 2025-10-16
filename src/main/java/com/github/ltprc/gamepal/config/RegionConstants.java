@@ -16,6 +16,8 @@ public class RegionConstants {
     public static final BigDecimal SCENE_ALTITUDE_DEFAULT = BigDecimal.ZERO;
     public static final int REGION_TYPE_EMPTY = 0;
     public static final int REGION_TYPE_ISLAND = 10;
+    public static final int REGION_TYPE_CHANNEL = 11;
+    public static final int REGION_TYPE_ISLANDS = 12;
     public static final int REGION_TYPE_ALL_DIRT = BlockConstants.BLOCK_CODE_DIRT;
     public static final int REGION_TYPE_ALL_SAND = BlockConstants.BLOCK_CODE_SAND;
     public static final int REGION_TYPE_ALL_GRASS = BlockConstants.BLOCK_CODE_GRASS;
