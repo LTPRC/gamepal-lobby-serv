@@ -9,7 +9,7 @@
     </appender>
 
     <!-- 设置根logger的日志级别为DEBUG，并将其与STDOUT appender关联 -->
-    <root level="INFO">
+    <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
 

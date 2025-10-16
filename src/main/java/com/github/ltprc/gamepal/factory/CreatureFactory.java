@@ -10,6 +10,7 @@ import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -32,6 +33,7 @@ public class CreatureFactory {
         playerInfo.setVpMax(1000);
         playerInfo.setVp(playerInfo.getVpMax() / 2);
         playerInfo.setHungerMax(1000);
+
         playerInfo.setHunger(playerInfo.getHungerMax() / 2);
         playerInfo.setThirstMax(1000);
         playerInfo.setThirst(playerInfo.getThirstMax() / 2);
@@ -52,6 +54,7 @@ public class CreatureFactory {
             randomlyPersonalizeAnimalInfo(playerInfo, PlayerInfoUtil.generateGender());
         }
         playerInfo.setRespawnPoint(GamePalConstants.DEFAULT_BIRTHPLACE);
+        playerInfo.setMissions(new ArrayList<>());
         return playerInfo;
     }
 

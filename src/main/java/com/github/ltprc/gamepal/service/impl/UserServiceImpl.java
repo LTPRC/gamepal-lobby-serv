@@ -2,18 +2,27 @@ package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.MissionConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.model.QwenResponse;
+import com.github.ltprc.gamepal.model.creature.MissionInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.WebSocketService;
+import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WebService;
 import com.github.ltprc.gamepal.service.WorldService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -27,7 +36,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.ltprc.gamepal.repository.entity.UserInfo;
 import com.github.ltprc.gamepal.repository.UserInfoRepository;
-import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 
@@ -43,7 +51,7 @@ public class UserServiceImpl implements UserService {
     private WorldService worldService;
 
     @Autowired
-    private WebSocketService webSocketService;
+    private WebService webService;
 
     @Autowired
     private UserInfoRepository userInfoRepository;
@@ -134,6 +142,14 @@ public class UserServiceImpl implements UserService {
         if (!world.getCreatureMap().containsKey(userCode)) {
             world.getCreatureMap().put(userCode, npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_HUMAN,
                     CreatureConstants.CREATURE_TYPE_HUMAN, userCode));
+            // Initiate missions
+            QwenResponse qwenResponse = webService.callQwenApi(
+                    "qwen-plus", "以JSON数组的结构生成随机1到5个字符串，内容是编造的游戏任务条目。");
+            List<MissionInfo> missions = JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class)
+                    .stream()
+                    .map(content -> new MissionInfo(MissionConstants.MISSION_STATUS_INITIATED, content))
+                    .collect(Collectors.toList());
+            world.getPlayerInfoMap().get(userCode).getMissions().addAll(missions);
         }
         Block player = world.getCreatureMap().get(userCode);
         npcManager.putCreature(world, userCode, player.getWorldCoordinate());

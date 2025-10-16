@@ -67,4 +67,5 @@ public class PlayerInfo {
     private String bossId;
     private String topBossId;
     private WorldCoordinate respawnPoint;
+    private List<MissionInfo> missions;
 }
