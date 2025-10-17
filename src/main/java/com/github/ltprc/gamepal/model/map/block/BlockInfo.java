@@ -2,20 +2,21 @@ package com.github.ltprc.gamepal.model.map.block;
 
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Data
-@NoArgsConstructor
+@Getter
 public class BlockInfo {
-    int type;
-    String id;
-    int code;
-    Structure structure;
-    AtomicInteger hpMax = new AtomicInteger(BlockConstants.HP_DEFAULT);
-    AtomicInteger hp = new AtomicInteger(BlockConstants.HP_DEFAULT);
+
+    private int type;
+    private String id;
+    private int code;
+    private Structure structure;
+    private AtomicInteger hpMax = new AtomicInteger(BlockConstants.HP_DEFAULT);
+    private AtomicInteger hp = new AtomicInteger(BlockConstants.HP_DEFAULT);
+    private long timeCreated;
+    private long timeUpdated;
 
     public BlockInfo(BlockInfo blockInfo) {
         if (null == blockInfo) {
@@ -27,13 +28,55 @@ public class BlockInfo {
         structure = new Structure(blockInfo.structure);
         hpMax = blockInfo.hpMax;
         hp = blockInfo.hp;
+        timeCreated = blockInfo.timeCreated;
+        timeUpdated = blockInfo.timeUpdated;
     }
 
-    public BlockInfo(Integer type, String id, int code, Structure structure) {
+    public BlockInfo(Integer type, String id, int code, Structure structure, long timestamp) {
         this.type = type;
         this.id = id;
         this.code = code;
         this.structure = new Structure(structure.getMaterial(), structure.getLayer(), structure.getShape(),
                 structure.getImageSize());
+        setTimeCreated(timestamp);
+        setTimeUpdated(timestamp);
+    }
+
+    public void setType(int type, long timestamp) {
+        this.type = type;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setId(String id, long timestamp) {
+        this.id = id;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setCode(int code, long timestamp) {
+        this.code = code;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setStructure(Structure structure, long timestamp) {
+        this.structure = structure;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setHpMax(AtomicInteger hpMax, long timestamp) {
+        this.hpMax = hpMax;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setHp(AtomicInteger hp, long timestamp) {
+        this.hp = hp;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setTimeCreated(long timeCreated) {
+        this.timeCreated = timeCreated;
+    }
+
+    public void setTimeUpdated(long timeUpdated) {
+        this.timeUpdated = timeUpdated;
     }
 }

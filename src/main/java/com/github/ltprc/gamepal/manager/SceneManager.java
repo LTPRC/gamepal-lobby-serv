@@ -20,7 +20,7 @@ public interface SceneManager {
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
     BigDecimal[][] collectAltitudesByUserCode(final String userCode, final int sceneScanRadius);
     JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
-                                             final boolean useWorldCoordinate);
+                                             final boolean useWorldCoordinate, final long timestamp);
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);
     Block addTeleportBlock(final GameWorld world, final int code, final WorldCoordinate worldCoordinate,

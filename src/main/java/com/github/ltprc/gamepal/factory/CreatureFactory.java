@@ -9,7 +9,6 @@ import com.github.ltprc.gamepal.util.PlayerInfoUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -25,7 +24,7 @@ public class CreatureFactory {
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setPlayerType(playerType);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-        long timestamp = Instant.now().getEpochSecond();
+        long timestamp = System.currentTimeMillis();
         playerInfo.setTimeCreated(timestamp);
         playerInfo.setTimeUpdated(timestamp);
 //        playerInfo.setHpMax(1000);
@@ -33,7 +32,6 @@ public class CreatureFactory {
         playerInfo.setVpMax(1000);
         playerInfo.setVp(playerInfo.getVpMax() / 2);
         playerInfo.setHungerMax(1000);
-
         playerInfo.setHunger(playerInfo.getHungerMax() / 2);
         playerInfo.setThirstMax(1000);
         playerInfo.setThirst(playerInfo.getThirstMax() / 2);

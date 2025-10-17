@@ -677,7 +677,7 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_DROP:
                 rankingQueue.add(new Block(block.getWorldCoordinate(),
                     BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_WAVE),
-                    BlockUtil.createMovementInfoByCode(BlockConstants.BLOCK_CODE_WAVE)));
+                        new MovementInfo()));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
@@ -695,7 +695,7 @@ public class SceneManagerImpl implements SceneManager {
                 if (null != crackCode) {
                     rankingQueue.add(new Block(block.getWorldCoordinate(),
                             BlockUtil.createBlockInfoByCode(crackCode),
-                            BlockUtil.createMovementInfoByCode(crackCode)));
+                            new MovementInfo()));
                 }
                 break;
             default:
@@ -794,7 +794,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,
-                                                    final boolean useWorldCoordinate) {
+                                                    final boolean useWorldCoordinate, final long timestamp) {
         JSONObject rst = new JSONObject();
         if (useWorldCoordinate) {
             rst.putAll(JSON.parseObject(JSON.toJSONString(block.getWorldCoordinate())));
@@ -807,8 +807,6 @@ public class SceneManagerImpl implements SceneManager {
             rst.putAll(JSON.parseObject(JSON.toJSONString(coordinate)));
         }
         rst.putAll(JSON.parseObject(JSON.toJSONString(block.getMovementInfo())));
-        rst.put("frame", block.getMovementInfo().getFrame());
-        rst.put("period", block.getMovementInfo().getPeriod());
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
@@ -831,7 +829,7 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_TRAP:
                 if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))
                         && BlockConstants.BLOCK_CODE_MINE == block.getBlockInfo().getCode()) {
-                    block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG);
+                    block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG, timestamp);
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
@@ -861,7 +859,7 @@ public class SceneManagerImpl implements SceneManager {
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_DEFAULT);
-        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(BlockConstants.BLOCK_CODE_DROP_DEFAULT);
+        MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         updateAltitude(world, block);
         registerBlock(world, block);
@@ -875,7 +873,7 @@ public class SceneManagerImpl implements SceneManager {
     @Override
     public Block addTeleportBlock(GameWorld world, final int code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(code);
-        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(code);
+        MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         updateAltitude(world, block);
         registerBlock(world, block);
@@ -887,10 +885,11 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode) {
+        long timestamp = System.currentTimeMillis();
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(blockCode);
         String id = UUID.randomUUID().toString();
-        blockInfo.setId(id);
-        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(blockCode);
+        blockInfo.setId(id, timestamp);
+        MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         updateAltitude(world, block);
         registerBlock(world, block);

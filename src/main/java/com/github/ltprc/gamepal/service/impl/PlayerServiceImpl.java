@@ -3,14 +3,29 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.MessageConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.manager.BuffManager;
+import com.github.ltprc.gamepal.manager.EventManager;
+import com.github.ltprc.gamepal.manager.ItemManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.creature.*;
-import com.github.ltprc.gamepal.model.item.*;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
+import com.github.ltprc.gamepal.model.creature.NpcBrain;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.Skill;
+import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
@@ -18,7 +33,6 @@ import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.*;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.StateMachineService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
@@ -34,8 +48,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -57,9 +74,6 @@ public class PlayerServiceImpl implements PlayerService {
     private WorldService worldService;
 
     @Autowired
-    private StateMachineService stateMachineService;
-
-    @Autowired
     private MovementManager movementManager;
 
     @Autowired
@@ -73,9 +87,6 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Autowired
     private EventManager eventManager;
-
-    @Autowired
-    private FarmManager farmManager;
 
     @Autowired
     private ItemManager itemManager;
@@ -609,7 +620,7 @@ public class PlayerServiceImpl implements PlayerService {
                         player.getWorldCoordinate().getCoordinate().getZ()));
                 Block fakeBuilding = new Block(buildingWorldCoordinate,
                         BlockUtil.createBlockInfoByCode(blockInfo1.get().getCode()),
-                        BlockUtil.createMovementInfoByCode(blockInfo1.get().getCode()));
+                        new MovementInfo());
                 if (!sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
                     return false;
                 }
@@ -1305,7 +1316,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public void updateTimestamp(PlayerInfo playerInfo) {
-        long timestamp = Instant.now().getEpochSecond();
+        long timestamp = System.currentTimeMillis();
         playerInfo.setTimeUpdated(timestamp);
     }
 }

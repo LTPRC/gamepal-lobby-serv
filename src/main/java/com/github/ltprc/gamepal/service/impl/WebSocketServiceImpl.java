@@ -292,6 +292,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     public void communicate(String userCode, int webStage, JSONObject functions) {
         JSONObject rst = ContentUtil.generateRst();
+        long timestamp = System.currentTimeMillis();
 
         // Static information
         if (webStage == GamePalConstants.WEB_STAGE_START) {
@@ -352,12 +353,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .filter(player1 -> StringUtils.equals(userCode, player1.getBlockInfo().getId())
                         || world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
-                        sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true)));
+                        sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true, timestamp)));
         creatureMap.values().stream()
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), 2))
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
-                        sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true)));
+                        sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true, timestamp)));
 
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
         if (world.getInteractionInfoMap().containsKey(userCode)) {
@@ -422,9 +423,9 @@ public class WebSocketServiceImpl implements WebSocketService {
             Block block = blockQueue.poll();
             if (null != block && block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
                 playerInfos.put(block.getBlockInfo().getId(),
-                        sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true));
+                        sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true, timestamp));
             }
-            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, block, false);
+            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, block, false, timestamp);
             if (null != convertedBlock) {
                 blocks.add(convertedBlock);
             }

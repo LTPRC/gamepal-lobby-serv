@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.util.BlockUtil;
@@ -109,7 +110,7 @@ public class FarmManagerImpl implements FarmManager {
         }
         return null != cropCode ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
                 BlockUtil.createBlockInfoByCode(cropCode),
-                BlockUtil.createMovementInfoByCode(cropCode)))
+                new MovementInfo()))
                 : Optional.empty();
     }
 }

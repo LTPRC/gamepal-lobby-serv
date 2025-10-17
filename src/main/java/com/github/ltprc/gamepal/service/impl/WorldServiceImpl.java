@@ -10,7 +10,12 @@ import com.github.ltprc.gamepal.config.RegionConstants;
 import com.github.ltprc.gamepal.factory.RegionFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
-import com.github.ltprc.gamepal.model.item.*;
+import com.github.ltprc.gamepal.model.item.Consumable;
+import com.github.ltprc.gamepal.model.item.Item;
+import com.github.ltprc.gamepal.model.item.Junk;
+import com.github.ltprc.gamepal.model.item.Outfit;
+import com.github.ltprc.gamepal.model.item.Recipe;
+import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
@@ -18,7 +23,6 @@ import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
 import com.github.ltprc.gamepal.model.map.world.*;
-import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
@@ -32,8 +36,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -50,9 +57,6 @@ public class WorldServiceImpl implements WorldService {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private PlayerService playerService;
 
     @Autowired
     private SceneManager sceneManager;
@@ -325,7 +329,7 @@ public class WorldServiceImpl implements WorldService {
 
     @Override
     public void registerOnline(GameWorld world, String id) {
-        long timestamp = Instant.now().getEpochSecond();
+        long timestamp = System.currentTimeMillis();
         world.getOnlineMap().put(id, timestamp);
     }
 

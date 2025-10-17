@@ -6,7 +6,7 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 
 public interface EventManager {
     void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate);
-    void updateEvent(GameWorld world, Block eventBlock);
+    void updateEvent(GameWorld world, Block eventBlock, long timestamp);
     void affectBlock(GameWorld world, Block eventBlock, Block targetBlock);
     void changeHp(GameWorld world, Block block, int value, boolean isAbsolute);
 }

@@ -15,6 +15,7 @@ import com.github.ltprc.gamepal.model.map.structure.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.*;
 
 public class BlockUtil {
@@ -906,7 +907,8 @@ public class BlockUtil {
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
         }
-        BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, structure);
+        long timestamp = System.currentTimeMillis();
+        BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, structure, timestamp);
         initializeBlockInfoHp(blockInfo);
         return blockInfo;
     }
@@ -924,61 +926,40 @@ public class BlockUtil {
         blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 
-    public static MovementInfo createMovementInfoByCode(final int blockCode) {
-        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
-        int period;
-        switch (blockType) {
+    public static int defineFrameMax(BlockInfo blockInfo) {
+        int frameMax;
+        switch (blockInfo.getType()) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
-                switch (blockCode) {
+                switch (blockInfo.getCode()) {
                     case BlockConstants.BLOCK_CODE_SPARK_SHORT:
-                        period = 5;
+                        frameMax = 5;
                         break;
                     case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
-                        period = 6;
+                        frameMax = 6;
                         break;
                     case BlockConstants.BLOCK_CODE_SHOCK:
-                        period = 10;
+                        frameMax = 10;
                         break;
                     case BlockConstants.BLOCK_CODE_DECAY:
                     case BlockConstants.BLOCK_CODE_CHEER:
                     case BlockConstants.BLOCK_CODE_CURSE:
-                        period = 50;
+                        frameMax = 50;
                         break;
                     case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-                        period = 250;
+                        frameMax = 250;
                         break;
                     default:
-                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                         break;
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
-                period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+                frameMax = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
                 break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
-                switch (blockCode) {
+                switch (blockInfo.getCode()) {
                     case BlockConstants.BLOCK_CODE_FIRE:
-                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
-                        break;
-                    default:
-                        period = BlockConstants.PERIOD_STATIC_DEFAULT;
-                        break;
-                }
-                break;
-            default:
-                period = BlockConstants.PERIOD_STATIC_DEFAULT;
-                break;
-        }
-        int frameMax;
-        switch (blockType) {
-            case BlockConstants.BLOCK_TYPE_EFFECT:
-            case BlockConstants.BLOCK_TYPE_DROP:
-                frameMax = period;
-                break;
-            case BlockConstants.BLOCK_TYPE_PLASMA:
-                switch (blockCode) {
-                    case BlockConstants.BLOCK_CODE_FIRE:
-                        frameMax = period * 5;
+                        frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 5;
                         break;
                     default:
                         frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
@@ -989,13 +970,78 @@ public class BlockUtil {
                 frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                 break;
         }
-        return new MovementInfo(new Coordinate(),
-                BlockConstants.MAX_SPEED_DEFAULT,
-                BlockConstants.MAX_SPEED_DEFAULT.multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO),
-                BlockConstants.FACE_DIRECTION_DEFAULT,
-                BlockConstants.FLOOR_CODE_DEFAULT,
-                BlockConstants.FRAME_DEFAULT,
-                frameMax,
-                period);
+        return frameMax;
     }
+
+//    public static MovementInfo createMovementInfoByCode(final int blockCode) {
+//        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
+//        int period;
+//        switch (blockType) {
+//            case BlockConstants.BLOCK_TYPE_EFFECT:
+//                switch (blockCode) {
+//                    case BlockConstants.BLOCK_CODE_SPARK_SHORT:
+//                        period = 5;
+//                        break;
+//                    case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
+//                        period = 6;
+//                        break;
+//                    case BlockConstants.BLOCK_CODE_SHOCK:
+//                        period = 10;
+//                        break;
+//                    case BlockConstants.BLOCK_CODE_DECAY:
+//                    case BlockConstants.BLOCK_CODE_CHEER:
+//                    case BlockConstants.BLOCK_CODE_CURSE:
+//                        period = 50;
+//                        break;
+//                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+//                        period = 250;
+//                        break;
+//                    default:
+//                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+//                        break;
+//                }
+//                break;
+//            case BlockConstants.BLOCK_TYPE_DROP:
+//                period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+//                break;
+//            case BlockConstants.BLOCK_TYPE_PLASMA:
+//                switch (blockCode) {
+//                    case BlockConstants.BLOCK_CODE_FIRE:
+//                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+//                        break;
+//                    default:
+//                        period = BlockConstants.PERIOD_STATIC_DEFAULT;
+//                        break;
+//                }
+//                break;
+//            default:
+//                period = BlockConstants.PERIOD_STATIC_DEFAULT;
+//                break;
+//        }
+//        int frameMax;
+//        switch (blockType) {
+//            case BlockConstants.BLOCK_TYPE_EFFECT:
+//            case BlockConstants.BLOCK_TYPE_DROP:
+//                frameMax = period;
+//                break;
+//            case BlockConstants.BLOCK_TYPE_PLASMA:
+//                switch (blockCode) {
+//                    case BlockConstants.BLOCK_CODE_FIRE:
+//                        frameMax = period * 5;
+//                        break;
+//                    default:
+//                        frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
+//                        break;
+//                }
+//                break;
+//            default:
+//                frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
+//                break;
+//        }
+//        return new MovementInfo(new Coordinate(),
+//                BlockConstants.MAX_SPEED_DEFAULT,
+//                BlockConstants.MAX_SPEED_DEFAULT.multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO),
+//                BlockConstants.FACE_DIRECTION_DEFAULT,
+//                BlockConstants.FLOOR_CODE_DEFAULT);
+//    }
 }

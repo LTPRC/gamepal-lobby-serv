@@ -59,16 +59,17 @@ public class NpcManagerImpl implements NpcManager {
 
     @Override
     public Block createCreature(GameWorld world, final int playerType, final int creatureType, String userCode) {
+        long timestamp = System.currentTimeMillis();
 
         WorldCoordinate worldCoordinate = new WorldCoordinate();
         BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
 
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_PLAYER_DEFAULT);
 
-        MovementInfo movementInfo = BlockUtil.createMovementInfoByCode(BlockConstants.BLOCK_CODE_PLAYER_DEFAULT);
+        MovementInfo movementInfo = new MovementInfo();
 
         Block player = new Block(worldCoordinate, blockInfo, movementInfo);
-        player.getBlockInfo().setId(userCode);
+        player.getBlockInfo().setId(userCode, timestamp);
         player.getMovementInfo().setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         PlayerInfo playerInfo = CreatureFactory.createCreatureInstance(playerType, creatureType);
         playerInfo.setTopBossId(userCode);

@@ -353,47 +353,90 @@ public class EventManagerImpl implements EventManager {
         addEvent(world, eventCode, fromCreature.getBlockInfo().getId(), bulletBlock.getWorldCoordinate());
     }
 
+//    @Override
+//    public void updateEvent(GameWorld world, Block eventBlock) {
+//        if (eventBlock.getMovementInfo().getPeriod() == BlockConstants.PERIOD_STATIC_DEFAULT) {
+//            return;
+//        }
+//        eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() + 1);
+//        updateEventLocation(world, eventBlock);
+//        if (eventBlock.getMovementInfo().getFrameMax() != BlockConstants.FRAME_MAX_INFINITE_DEFAULT
+//                && eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getFrameMax()) {
+//            sceneManager.removeBlock(world, eventBlock, false);
+//            return;
+//        }
+//        if (eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getPeriod()) {
+//            eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame()
+//                    - eventBlock.getMovementInfo().getPeriod());
+//            eventBlock.getMovementInfo().setFrameMax(Math.max(0,
+//                    eventBlock.getMovementInfo().getFrameMax() - eventBlock.getMovementInfo().getPeriod()));
+//        }
+//        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA) {
+////            triggerTrap(world, eventBlock);
+//            if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE) {
+//                // Burn grid
+//                if (sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
+//                        || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
+//                    sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
+//                }
+//                // Burn collected blocks 25/02/03
+//                Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
+//                rankingQueue.stream()
+//                        .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
+//                                || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
+//                        .filter(targetBlock -> {
+//                            BigDecimal distance = BlockUtil.calculateDistance(
+//                                    world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
+//                                    eventBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
+//                            return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
+//                        })
+//                        .forEach(targetBlock -> {
+//                            affectBlock(world, eventBlock, targetBlock);
+//                        });
+//            }
+//        }
+//    }
+
     @Override
-    public void updateEvent(GameWorld world, Block eventBlock) {
-        if (eventBlock.getMovementInfo().getPeriod() == BlockConstants.PERIOD_STATIC_DEFAULT) {
+    public void updateEvent(GameWorld world, Block eventBlock, long timestamp) {
+        int frameMax = BlockUtil.defineFrameMax(eventBlock.getBlockInfo());
+        if (frameMax == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
             return;
         }
-        eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame() + 1);
-        updateEventLocation(world, eventBlock);
-        if (eventBlock.getMovementInfo().getFrameMax() != BlockConstants.FRAME_MAX_INFINITE_DEFAULT
-                && eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getFrameMax()) {
+        if ((timestamp - eventBlock.getBlockInfo().getTimeUpdated()) / 1000 * GamePalConstants.FRAME_PER_SECOND
+                >= frameMax) {
             sceneManager.removeBlock(world, eventBlock, false);
             return;
         }
-        if (eventBlock.getMovementInfo().getFrame() >= eventBlock.getMovementInfo().getPeriod()) {
-            eventBlock.getMovementInfo().setFrame(eventBlock.getMovementInfo().getFrame()
-                    - eventBlock.getMovementInfo().getPeriod());
-            eventBlock.getMovementInfo().setFrameMax(Math.max(0,
-                    eventBlock.getMovementInfo().getFrameMax() - eventBlock.getMovementInfo().getPeriod()));
-        }
-        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA) {
-//            triggerTrap(world, eventBlock);
-            if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE) {
-                // Burn grid
-                if (sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
-                        || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
-                    sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
+        switch (eventBlock.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                updateEventLocation(world, eventBlock);
+                break;
+            case BlockConstants.BLOCK_TYPE_PLASMA:
+                switch (eventBlock.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_FIRE:
+                        // Burn grid
+                        if (sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_GRASS
+                                || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
+                            sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
+                        }
+                        // Burn collected blocks 25/02/03
+                        Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
+                        rankingQueue.stream()
+                                .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
+                                        || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
+                                .filter(targetBlock -> {
+                                    BigDecimal distance = BlockUtil.calculateDistance(
+                                            world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
+                                            eventBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
+                                    return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
+                                })
+                                .forEach(targetBlock -> {
+                                    affectBlock(world, eventBlock, targetBlock);
+                                });
+                        break;
                 }
-                // Burn collected blocks 25/02/03
-                Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
-                rankingQueue.stream()
-                        .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
-                                || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
-                        .filter(targetBlock -> {
-                            BigDecimal distance = BlockUtil.calculateDistance(
-                                    world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
-                                    eventBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
-                            return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
-                        })
-                        .forEach(targetBlock -> {
-                            affectBlock(world, eventBlock, targetBlock);
-                        });
-            }
+                break;
         }
     }
 
@@ -404,10 +447,10 @@ public class EventManagerImpl implements EventManager {
         if (!world.getCreatureMap().containsKey(fromId)) {
             return;
         }
-        if (eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_BLOCK
-                || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_HEAL
-                || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_SACRIFICE
-                || eventBlock.getBlockInfo().getCode() ==  BlockConstants.BLOCK_CODE_DECAY) {
+        if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_BLOCK
+                || eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HEAL
+                || eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_SACRIFICE
+                || eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_DECAY) {
             movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(),
                     false);
         }

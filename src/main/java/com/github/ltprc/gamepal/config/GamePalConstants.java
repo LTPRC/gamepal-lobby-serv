@@ -24,7 +24,7 @@ public class GamePalConstants {
 
     // Backend constants
 
-    public static final long PLAYER_LOGOFF_THRESHOLD_IN_SECOND = 300L;
+    public static final long PLAYER_LOGOFF_THRESHOLD_IN_MILLISECOND = 300_000L;
     public static final int DROP_DISAPPEAR_THRESHOLD_IN_FRAME = 60 * FRAME_PER_SECOND;
     public static final WorldCoordinate DEFAULT_BIRTHPLACE = new WorldCoordinate(1,
             new IntegerCoordinate(0, 0), new Coordinate(BigDecimal.valueOf(5D), BigDecimal.valueOf(5D), BigDecimal.ZERO));

@@ -1,7 +1,16 @@
 package com.github.ltprc.gamepal.task;
 
-import com.github.ltprc.gamepal.config.*;
-import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.manager.BuffManager;
+import com.github.ltprc.gamepal.manager.EventManager;
+import com.github.ltprc.gamepal.manager.FarmManager;
+import com.github.ltprc.gamepal.manager.InteractionManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -20,7 +29,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -70,6 +78,7 @@ public class TimedEventTask {
 
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
+        long timestamp = System.currentTimeMillis();
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
 
@@ -104,7 +113,7 @@ public class TimedEventTask {
                     Scene scene = region.getScenes().get(sceneCoordinate);
                     scene.getBlocks().values().forEach(block -> {
                         // Update events
-                        eventManager.updateEvent(world, block);
+                        eventManager.updateEvent(world, block, timestamp);
                     });
                 });
             });
@@ -270,6 +279,7 @@ public class TimedEventTask {
 
     @Scheduled(fixedRate = 1000)
     public void executeBy1s() {
+        long timestamp = System.currentTimeMillis();
         for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
             GameWorld world = entry.getValue();
             Map<String, Long> onlineMap = world.getOnlineMap();
@@ -289,7 +299,6 @@ public class TimedEventTask {
                         }
                     });
             // Check timeout
-            long timestamp = Instant.now().getEpochSecond();
 //            onlineMap.forEach((blockInfo, oldTimestamp) -> {
 //                long timeThreshold = BlockConstants.BLOCK_TYPE_TIMEOUT_MAP.getOrDefault(blockInfo.getType(), 0L);
 //                if (timestamp - oldTimestamp > timeThreshold) {
@@ -305,7 +314,7 @@ public class TimedEventTask {
 //                }
 //            });
             onlineMap.forEach((id, oldTimestamp) -> {
-                if (timestamp - oldTimestamp > GamePalConstants.PLAYER_LOGOFF_THRESHOLD_IN_SECOND
+                if (timestamp - oldTimestamp > GamePalConstants.PLAYER_LOGOFF_THRESHOLD_IN_MILLISECOND
                         && (playerInfoMap.get(id).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)) {
                     // NPC is exempted 25/02/01
                     userService.logoff(id, "", false);
