@@ -127,6 +127,7 @@ public class WorldServiceImpl implements WorldService {
         world.setDropMap(new ConcurrentHashMap<>());
         world.setTeleportMap(new ConcurrentHashMap<>());
         world.setFarmMap(new ConcurrentHashMap<>());
+        world.setPlayerBlockMap(new ConcurrentHashMap<>());
         loadScenes(world);
     }
 

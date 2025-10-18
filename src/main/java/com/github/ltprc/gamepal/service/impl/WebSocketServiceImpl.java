@@ -4,12 +4,24 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.MessageConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.manager.CommandManager;
+import com.github.ltprc.gamepal.manager.InteractionManager;
+import com.github.ltprc.gamepal.manager.ItemManager;
+import com.github.ltprc.gamepal.manager.MiniMapManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.*;
+import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
@@ -18,8 +30,11 @@ import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.SceneInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
-import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.model.Message;
+import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WebSocketService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -35,7 +50,11 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class WebSocketServiceImpl implements WebSocketService {
@@ -50,9 +69,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private WorldService worldService;
-
-    @Autowired
-    private StateMachineService stateMachineService;
 
     @Autowired
     private SceneManager sceneManager;
@@ -80,12 +96,14 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         world.getSessionMap().put(userCode, session);
+        resetPlayerBlockMap(userCode);
         logger.info("建立连接成功");
         communicate(userCode, GamePalConstants.WEB_STAGE_START, null);
     }
 
     @Override
     public void onClose(String userCode) {
+        resetPlayerBlockMap(userCode);
         logger.info("断开连接成功");
         userService.logoff(userCode, "", false);
     }
@@ -415,23 +433,40 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("altitudes", altitudes);
 
         // Collect blocks
-        // Old block format 24/09/30
         Queue<Block> blockQueue = sceneManager.collectSurroundingBlocks(world, player, 2);
-        // Poll all blocks
+        // Remove not detected blocks
+        Map<String, Block> userPlayerBlockMap = world.getPlayerBlockMap().get(userCode);
+        Set<String> queueIds = blockQueue.stream()
+                .map(Block::getBlockInfo)
+                .map(BlockInfo::getId)
+                .collect(Collectors.toSet());
+        userPlayerBlockMap.keySet().removeIf(blockId -> !queueIds.contains(blockId));
+        // Traverse every collected block
         JSONArray blocks = new JSONArray();
+        JSONArray blockIdList = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
             Block block = blockQueue.poll();
-            if (null != block && block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
+            if (null != block.getBlockInfo() && StringUtils.isNotBlank(block.getBlockInfo().getId())) {
+                blockIdList.add(block.getBlockInfo().getId());
+            }
+            if (block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
                 playerInfos.put(block.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true, timestamp));
             }
             JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, block, false, timestamp);
-            if (null != convertedBlock) {
+            // Filter blocks to be updated and transmitted
+            if (null != convertedBlock
+                    && (BlockConstants.BLOCK_TYPE_PLAYER == block.getBlockInfo().getType()
+                    || !userPlayerBlockMap.containsKey(block.getBlockInfo().getId())
+                    || userPlayerBlockMap.get(block.getBlockInfo().getId()).getBlockInfo().getTimeUpdated()
+                    != block.getBlockInfo().getTimeUpdated())) {
                 blocks.add(convertedBlock);
+                userPlayerBlockMap.put(block.getBlockInfo().getId(), block);
             }
         }
         rst.put("playerInfos", playerInfos);
         rst.put("blocks", blocks);
+        rst.put("blockIdList", blockIdList);
 
         // Response of functions 24/03/17
         JSONObject functionsResponse = new JSONObject();
@@ -508,5 +543,11 @@ public class WebSocketServiceImpl implements WebSocketService {
             totalLength += length;
         }
         logger.info("Total length of all values: " + totalLength);
+    }
+
+    @Override
+    public void resetPlayerBlockMap(String userCode) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        world.getPlayerBlockMap().put(userCode, new HashMap<>());
     }
 }

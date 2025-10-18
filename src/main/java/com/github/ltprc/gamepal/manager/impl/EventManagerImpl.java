@@ -1,6 +1,10 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
@@ -22,7 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
@@ -403,8 +412,8 @@ public class EventManagerImpl implements EventManager {
         if (frameMax == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
             return;
         }
-        if ((timestamp - eventBlock.getBlockInfo().getTimeUpdated()) / 1000 * GamePalConstants.FRAME_PER_SECOND
-                >= frameMax) {
+        if ((timestamp - eventBlock.getBlockInfo().getTimeUpdated()) * GamePalConstants.FRAME_PER_SECOND
+                >= frameMax * 1000L) {
             sceneManager.removeBlock(world, eventBlock, false);
             return;
         }
@@ -431,9 +440,7 @@ public class EventManagerImpl implements EventManager {
                                             eventBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
                                     return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
                                 })
-                                .forEach(targetBlock -> {
-                                    affectBlock(world, eventBlock, targetBlock);
-                                });
+                                .forEach(targetBlock -> affectBlock(world, eventBlock, targetBlock));
                         break;
                 }
                 break;

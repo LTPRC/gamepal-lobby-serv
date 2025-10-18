@@ -17,6 +17,7 @@ import com.github.ltprc.gamepal.model.map.scene.Scene;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -47,6 +48,9 @@ public class MovementManagerImpl implements MovementManager {
 
     @Autowired
     private EventManager eventManager;
+
+    @Autowired
+    private WebSocketService webSocketService;
 
     @Override
     public void speedUpBlock(GameWorld world, Block block, Coordinate deltaSpeed) {
@@ -255,6 +259,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
                 // Check location change
                 if (isSceneChanged) {
+                    webSocketService.resetPlayerBlockMap(worldMovingBlock.getBlockInfo().getId());
                     Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
                     playerService.generateNotificationMessage(worldMovingBlock.getBlockInfo().getId(),
                             "来到【" + region.getName() + "-" + scene.getName() + "】");

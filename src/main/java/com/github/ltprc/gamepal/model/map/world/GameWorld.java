@@ -34,9 +34,10 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, Terminal> terminalMap; // interactionId, terminal
     private Map<String, NpcBrain> npcBrainMap; // userCode, npcBrain
     private Map<String, Long> eventMap; // id, frame length
+    private Map<String, Map<String, Block>> playerBlockMap; // userCode, blockId, transmitted block 无需保留探测顺序，只需保留id对应关系便于查询
 
     // Special block info maps
-    private Map<String, Block> blockMap; // code, non-creature block
+    private Map<String, Block> blockMap; // id, non-creature block
     private Map<String, String> sourceMap; // id, sourceId
     private Map<String, Block> creatureMap; // code, creature block
     private Map<String, PlayerInfo> playerInfoMap; // code, creature block
