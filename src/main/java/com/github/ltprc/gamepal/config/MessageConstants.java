@@ -10,6 +10,7 @@ public class MessageConstants {
     public static final int SCOPE_TEAMMATE = 1;
     public static final int SCOPE_INDIVIDUAL = 2;
     public static final int SCOPE_SELF = 3;
+    public static final int SCOPE_NEARBY = 4;
 
     // Backend constants
 

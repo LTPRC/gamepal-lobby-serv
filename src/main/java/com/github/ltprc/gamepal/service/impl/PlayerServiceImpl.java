@@ -108,92 +108,119 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        boolean hasChange = false;
         Integer playerStatus = req.getInteger("playerStatus");
-        if (null != playerStatus) {
+        if (null != playerStatus && playerInfo.getPlayerStatus() != playerStatus) {
             playerInfo.setPlayerStatus(playerStatus);
+            hasChange = true;
         }
         String firstName = req.getString("firstName");
-        if (StringUtils.isNotBlank(firstName)) {
+        if (StringUtils.isNotBlank(firstName) && !StringUtils.equals(playerInfo.getFirstName(), firstName)) {
             playerInfo.setFirstName(firstName);
+            hasChange = true;
         }
         String lastName = req.getString("lastName");
-        if (StringUtils.isNotBlank(lastName)) {
+        if (StringUtils.isNotBlank(lastName) && !StringUtils.equals(playerInfo.getLastName(), lastName)) {
             playerInfo.setLastName(lastName);
+            hasChange = true;
         }
         String nickname = req.getString("nickname");
-        if (StringUtils.isNotBlank(nickname)) {
+        if (StringUtils.isNotBlank(nickname) && !StringUtils.equals(playerInfo.getNickname(), nickname)) {
             playerInfo.setNickname(nickname);
+            hasChange = true;
         }
         String nameColor = req.getString("nameColor");
-        if (StringUtils.isNotBlank(nameColor)) {
+        if (StringUtils.isNotBlank(nameColor) && !StringUtils.equals(playerInfo.getNameColor(), nameColor)) {
             playerInfo.setNameColor(nameColor);
+            hasChange = true;
         }
         Integer creatureType = req.getInteger("creatureType");
-        if (null != creatureType) {
+        if (null != creatureType && playerInfo.getCreatureType() != creatureType) {
             playerInfo.setCreatureType(creatureType);
+            hasChange = true;
         }
         Integer gender = req.getInteger("gender");
-        if (null != gender) {
+        if (null != gender && playerInfo.getGender() != gender) {
             playerInfo.setGender(gender);
+            hasChange = true;
         }
         Integer skinColor = req.getInteger("skinColor");
-        if (null != skinColor) {
+        if (null != skinColor && playerInfo.getSkinColor() != skinColor) {
             playerInfo.setSkinColor(skinColor);
+            hasChange = true;
         }
         Integer breastType = req.getInteger("breastType");
-        if (null != breastType) {
+        if (null != breastType && playerInfo.getBreastType() != breastType) {
             playerInfo.setBreastType(breastType);
+            hasChange = true;
         }
         Integer accessories = req.getInteger("accessories");
-        if (null != accessories) {
+        if (null != accessories && playerInfo.getAccessories() != accessories) {
             playerInfo.setAccessories(accessories);
+            hasChange = true;
         }
         Integer hairstyle = req.getInteger("hairstyle");
-        if (null != hairstyle) {
+        if (null != hairstyle && playerInfo.getHairstyle() != hairstyle) {
             playerInfo.setHairstyle(hairstyle);
+            hasChange = true;
         }
         String hairColor = req.getString("hairColor");
-        if (StringUtils.isNotBlank(hairColor)) {
+        if (StringUtils.isNotBlank(hairColor) && !StringUtils.equals(playerInfo.getHairColor(), hairColor)) {
             playerInfo.setHairColor(hairColor);
+            hasChange = true;
         }
         Integer eyes = req.getInteger("eyes");
-        if (null != eyes) {
+        if (null != eyes && playerInfo.getEyes() != eyes) {
             playerInfo.setEyes(eyes);
+            hasChange = true;
         }
         Integer nose = req.getInteger("nose");
-        if (null != nose) {
+        if (null != nose && playerInfo.getNose() != nose) {
             playerInfo.setNose(nose);
+            hasChange = true;
         }
         Integer mouth = req.getInteger("mouth");
-        if (null != mouth) {
+        if (null != mouth && playerInfo.getMouth() != mouth) {
             playerInfo.setMouth(mouth);
+            hasChange = true;
         }
         Integer tongue = req.getInteger("tongue");
-        if (null != tongue) {
+        if (null != tongue && playerInfo.getTongue() != tongue) {
             playerInfo.setTongue(tongue);
+            hasChange = true;
         }
         Integer eyebrows = req.getInteger("eyebrows");
-        if (null != eyebrows) {
+        if (null != eyebrows && playerInfo.getEyebrows() != eyebrows) {
             playerInfo.setEyebrows(eyebrows);
+            hasChange = true;
         }
         Integer moustache = req.getInteger("moustache");
-        if (null != moustache) {
+        if (null != moustache && playerInfo.getMoustache() != moustache) {
             playerInfo.setMoustache(moustache);
+            hasChange = true;
         }
         Integer beard = req.getInteger("beard");
-        if (null != beard) {
+        if (null != beard && playerInfo.getBeard() != beard) {
             playerInfo.setBeard(beard);
+            hasChange = true;
         }
         JSONArray faceCoefs = req.getJSONArray("faceCoefs");
         if (null != faceCoefs) {
             playerInfo.setFaceCoefs(new int[CreatureConstants.FACE_COEFS_LENGTH]);
             for (int i = 0; i < CreatureConstants.FACE_COEFS_LENGTH; i++) {
-                playerInfo.getFaceCoefs()[i] = faceCoefs.getInteger(i);
+                if (playerInfo.getFaceCoefs()[i] != faceCoefs.getInteger(i)) {
+                    playerInfo.getFaceCoefs()[i] = faceCoefs.getInteger(i);
+                }
             }
+            hasChange = true;
         }
         String avatar = req.getString("avatar");
-        if (StringUtils.isNotBlank(avatar)) {
+        if (StringUtils.isNotBlank(avatar) && !StringUtils.equals(playerInfo.getAvatar(), avatar)) {
             playerInfo.setAvatar(avatar);
+            hasChange = true;
+        }
+        if (hasChange) {
+            updateTimestamp(userCode);
         }
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -896,7 +923,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = BuffConstants.BUFF_DEFAULT_FRAME_KNOCKED;
         }
-        updateTimestamp(playerInfo);
+        updateTimestamp(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -933,7 +960,7 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
         }
-        updateTimestamp(playerInfo);
+        updateTimestamp(userCode);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1315,8 +1342,10 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public void updateTimestamp(PlayerInfo playerInfo) {
+    public void updateTimestamp(String userCode) {
+        GameWorld world = userService.getWorldByUserCode(userCode);
+        Block player = world.getCreatureMap().get(userCode);
         long timestamp = System.currentTimeMillis();
-        playerInfo.setTimeUpdated(timestamp);
+        player.getBlockInfo().setTimeUpdated(timestamp);
     }
 }

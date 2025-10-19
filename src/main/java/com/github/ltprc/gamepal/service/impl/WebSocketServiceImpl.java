@@ -35,6 +35,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -124,6 +125,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         Block player = world.getCreatureMap().get(userCode);
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         // Update onlineMap
         worldService.registerOnline(world, userCode);
 
@@ -134,7 +136,6 @@ public class WebSocketServiceImpl implements WebSocketService {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
-                playerService.updateTimestamp(playerInfo);
             }
             if (functions.containsKey("settleCoordinate")
                     && !world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT]) {
@@ -238,6 +239,15 @@ public class WebSocketServiceImpl implements WebSocketService {
                     }
                 } else if (MessageConstants.SCOPE_SELF == msg.getScope()) {
                     messageMap.get(msg.getFromUserCode()).add(msg);
+                } else if (MessageConstants.SCOPE_NEARBY == msg.getScope()) {
+                    messageMap.entrySet().stream()
+                            .filter(entry -> {
+                                BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+                                        world.getCreatureMap().get(entry.getKey()).getWorldCoordinate());
+                                return null != distance
+                                        && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;
+                            })
+                            .forEach(entry -> entry.getValue().add(msg));
                 }
             }
             JSONArray drops = functions.getJSONArray("addDrops");
@@ -372,11 +382,13 @@ public class WebSocketServiceImpl implements WebSocketService {
                         || world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true, timestamp)));
+//                        world.getPlayerInfoMap().get(player1.getBlockInfo().getId())));
         creatureMap.values().stream()
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), 2))
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, player1, true, timestamp)));
+//                        world.getPlayerInfoMap().get(player1.getBlockInfo().getId())));
 
         rst.put("bagInfo", world.getBagInfoMap().get(userCode));
         if (world.getInteractionInfoMap().containsKey(userCode)) {
@@ -457,6 +469,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             // Filter blocks to be updated and transmitted
             if (null != convertedBlock
                     && (BlockConstants.BLOCK_TYPE_PLAYER == block.getBlockInfo().getType()
+                    || BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT == block.getBlockInfo().getCode()
                     || !userPlayerBlockMap.containsKey(block.getBlockInfo().getId())
                     || userPlayerBlockMap.get(block.getBlockInfo().getId()).getBlockInfo().getTimeUpdated()
                     != block.getBlockInfo().getTimeUpdated())) {

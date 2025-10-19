@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -10,8 +11,11 @@ import javax.websocket.Session;
 
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.MessageConstants;
+import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,10 +65,12 @@ public class MessageServiceImpl implements MessageService {
                     fromUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
         }
         GameWorld world = userService.getWorldByUserCode(fromUserCode);
+        Block player = world.getCreatureMap().get(fromUserCode);
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (MessageConstants.SCOPE_GLOBAL == scope) {
             world.getPlayerInfoMap().entrySet().stream()
                     .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
-                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
+//                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
                     .forEach(entry -> {
                 if (!entry.getKey().equals(fromUserCode)) {
                     String toUserCode = entry.getKey();
@@ -78,7 +84,7 @@ public class MessageServiceImpl implements MessageService {
         } else if (MessageConstants.SCOPE_TEAMMATE == scope) {
             world.getPlayerInfoMap().entrySet().stream()
                     .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
-                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
+//                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
                     .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
                             playerService.findTopBossId(fromUserCode)))
                     .forEach(entry -> {
@@ -101,6 +107,26 @@ public class MessageServiceImpl implements MessageService {
                 sendMessage(toUserCode, msg);
             }
         } else if (scope == MessageConstants.SCOPE_SELF) {
+            sendMessage(fromUserCode, msg);
+        } else if (scope == MessageConstants.SCOPE_NEARBY) {
+            world.getPlayerInfoMap().entrySet().stream()
+                    .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                    .filter(entry -> {
+                        BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+                                world.getCreatureMap().get(entry.getKey()).getWorldCoordinate());
+                        return null != distance
+                                && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;
+                    })
+                    .forEach(entry -> {
+                        if (!entry.getKey().equals(fromUserCode)) {
+                            String toUserCode = entry.getKey();
+                            if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
+                                sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                                        fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
+                            }
+                            sendMessage(toUserCode, msg);
+                        }
+                    });
             sendMessage(fromUserCode, msg);
         }
         return ResponseEntity.ok().body(rst.toString());

@@ -53,5 +53,5 @@ public interface PlayerService {
 
     boolean validateActiveness(final GameWorld world, final String id);
 
-    void updateTimestamp(PlayerInfo playerInfo);
+    void updateTimestamp(String userCode);
 }

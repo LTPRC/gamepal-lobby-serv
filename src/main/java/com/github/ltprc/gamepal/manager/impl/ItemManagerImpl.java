@@ -62,11 +62,11 @@ public class ItemManagerImpl implements ItemManager {
         switch (itemNo.charAt(0)) {
             case ItemConstants.ITEM_CHARACTER_TOOL:
                 useTools(world, userCode, itemNo);
-                playerService.updateTimestamp(playerInfo);
+                playerService.updateTimestamp(userCode);
                 break;
             case ItemConstants.ITEM_CHARACTER_OUTFIT:
                 useOutfits(world, userCode, itemNo);
-                playerService.updateTimestamp(playerInfo);
+                playerService.updateTimestamp(userCode);
                 break;
             case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(world, userCode, itemNo, itemAmount);
