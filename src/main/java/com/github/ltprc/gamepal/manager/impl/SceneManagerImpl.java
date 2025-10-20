@@ -28,13 +28,16 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.util.*;
+import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerInfoUtil;
+import com.github.ltprc.gamepal.util.SceneUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -871,12 +874,8 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Block addTeleportBlock(GameWorld world, final int code, WorldCoordinate worldCoordinate, WorldCoordinate to) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(code);
-        MovementInfo movementInfo = new MovementInfo();
-        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        updateAltitude(world, block);
-        registerBlock(world, block);
+    public Block addTeleportBlock(GameWorld world, WorldCoordinate worldCoordinate, final int blockCode, WorldCoordinate to) {
+        Block block = addOtherBlock(world, worldCoordinate, blockCode);
         if (null != to) {
             world.getTeleportMap().put(block.getBlockInfo().getId(), to);
         }
@@ -884,11 +883,17 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
+    public Block addTextDisplayBlock(GameWorld world, WorldCoordinate worldCoordinate, int blockCode, String textDisplay) {
+        Block block = addOtherBlock(world, worldCoordinate, blockCode);
+        if (StringUtils.isNotBlank(textDisplay)) {
+            world.getTextDisplayMap().put(block.getBlockInfo().getId(), textDisplay);
+        }
+        return block;
+    }
+
+    @Override
     public Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode) {
-        long timestamp = System.currentTimeMillis();
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(blockCode);
-        String id = UUID.randomUUID().toString();
-        blockInfo.setId(id, timestamp);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         updateAltitude(world, block);
@@ -899,14 +904,13 @@ public class SceneManagerImpl implements SceneManager {
             BagInfo bagInfo = new BagInfo();
             bagInfo.setId(block.getBlockInfo().getId());
             world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
-            userService.addUserIntoWorldMap(id, world.getId());
+            userService.addUserIntoWorldMap(block.getBlockInfo().getId(), world.getId());
         } else if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_FARM) {
             world.getFarmMap().put(block.getBlockInfo().getId(), new FarmInfo());
         }
         return block;
     }
 
-    @Transactional
     private Block registerBlock(GameWorld world, Block block) {
 //        switch (eventCode) {
 //            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
@@ -952,7 +956,6 @@ public class SceneManagerImpl implements SceneManager {
         unregisterBlock(world, block);
     }
 
-    @Transactional
     private void unregisterBlock(GameWorld world, Block block) {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
@@ -978,6 +981,9 @@ public class SceneManagerImpl implements SceneManager {
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 world.getFarmMap().remove(block.getBlockInfo().getId());
+                break;
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                world.getTextDisplayMap().remove(block.getBlockInfo().getId());
                 break;
             default:
                 break;
@@ -1008,8 +1014,8 @@ public class SceneManagerImpl implements SceneManager {
                                             BigDecimal.valueOf(random.nextDouble() * 360),
                                             BlockConstants.DROP_THROW_RADIUS));
                         });
-                switch (block.getBlockInfo().getCode()) {
-                    case BlockConstants.BLOCK_CODE_BOX:
+                switch (block.getBlockInfo().getType()) {
+                    case BlockConstants.BLOCK_TYPE_CONTAINER:
                         for (int i = 0; i < 1 + random.nextInt(3); i++) {
                             drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
                             movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
@@ -1017,10 +1023,10 @@ public class SceneManagerImpl implements SceneManager {
                                     BlockConstants.DROP_THROW_RADIUS));
                         }
                         break;
-                    case BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT:
+                    case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
                         world.getPlayerInfoMap().remove(block.getBlockInfo().getId());
                         break;
-                    case BlockConstants.BLOCK_CODE_ANIMAL_REMAIN_DEFAULT:
+                    case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
                     default:
                         break;
                 }

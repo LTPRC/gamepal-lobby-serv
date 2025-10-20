@@ -517,11 +517,11 @@ public class BlockUtil {
 //                        .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())) < 0;
     }
 
-    public static boolean checkBlockTypeRegistrable(int blockType) {
-        return checkBlockTypeInteractive(blockType)
-                || blockType == BlockConstants.BLOCK_TYPE_DROP
-                || blockType == BlockConstants.BLOCK_TYPE_TELEPORT;
-    }
+//    public static boolean checkBlockTypeRegistrable(int blockType) {
+//        return checkBlockTypeInteractive(blockType)
+//                || blockType == BlockConstants.BLOCK_TYPE_DROP
+//                || blockType == BlockConstants.BLOCK_TYPE_TELEPORT;
+//    }
 
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
@@ -540,6 +540,7 @@ public class BlockUtil {
 //            case BlockConstants.BLOCK_TYPE_CEILING:
 //            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
             case BlockConstants.BLOCK_TYPE_PLASMA:
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
                 return false;
             default:
                 return true;
@@ -657,7 +658,8 @@ public class BlockUtil {
 
     public static BlockInfo createBlockInfoByCode(int blockCode) {
         int blockType = BlockUtil.convertBlockCode2Type(blockCode);
-        String id = BlockUtil.checkBlockTypeRegistrable(blockType) ? UUID.randomUUID().toString() : "";
+//        String id = BlockUtil.checkBlockTypeRegistrable(blockType) ? UUID.randomUUID().toString() : "";
+        String id = UUID.randomUUID().toString();
         Structure structure;
         int structureMaterial;
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
@@ -900,6 +902,10 @@ public class BlockUtil {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                        BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
+                break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -965,6 +971,9 @@ public class BlockUtil {
                         frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                         break;
                 }
+                break;
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
                 break;
             default:
                 frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;

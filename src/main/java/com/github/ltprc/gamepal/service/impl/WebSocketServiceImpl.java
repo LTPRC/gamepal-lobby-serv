@@ -248,6 +248,10 @@ public class WebSocketServiceImpl implements WebSocketService {
                                         && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;
                             })
                             .forEach(entry -> entry.getValue().add(msg));
+                    WorldCoordinate textDisplayWc = new WorldCoordinate(player.getWorldCoordinate());
+                    textDisplayWc.getCoordinate().setZ(textDisplayWc.getCoordinate().getZ().add(BigDecimal.ONE));
+                    sceneManager.addTextDisplayBlock(world, textDisplayWc,
+                            BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg.getContent());
                 }
             }
             JSONArray drops = functions.getJSONArray("addDrops");
@@ -361,6 +365,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }
+        rst.put("textDisplayMap", world.getTextDisplayMap());
 
         rst.put("flags", world.getFlagMap().get(userCode));
         // Clear flags
@@ -461,7 +466,8 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (null != block.getBlockInfo() && StringUtils.isNotBlank(block.getBlockInfo().getId())) {
                 blockIdList.add(block.getBlockInfo().getId());
             }
-            if (block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT) {
+            if (null != block.getBlockInfo()
+                    && block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER) {
                 playerInfos.put(block.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true, timestamp));
             }
@@ -469,7 +475,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             // Filter blocks to be updated and transmitted
             if (null != convertedBlock
                     && (BlockConstants.BLOCK_TYPE_PLAYER == block.getBlockInfo().getType()
-                    || BlockConstants.BLOCK_CODE_HUMAN_REMAIN_DEFAULT == block.getBlockInfo().getCode()
+                    || BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER == block.getBlockInfo().getType()
                     || !userPlayerBlockMap.containsKey(block.getBlockInfo().getId())
                     || userPlayerBlockMap.get(block.getBlockInfo().getId()).getBlockInfo().getTimeUpdated()
                     != block.getBlockInfo().getTimeUpdated())) {

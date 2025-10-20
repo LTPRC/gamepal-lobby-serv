@@ -48,7 +48,7 @@ public class ServerController {
      */
     @RequestMapping(value = "/sendmsg", method = RequestMethod.POST)
     public ResponseEntity<String> sendMessage(HttpServletRequest request) {
-        return messageService.sendMessage(request);
+        return messageService.receiveMessage(request);
     }
 
     @RequestMapping(value = "/getworldnames", method = RequestMethod.POST)

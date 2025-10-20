@@ -118,6 +118,8 @@ public class WorldServiceImpl implements WorldService {
         world.setFlagMap(new ConcurrentHashMap<>());
         world.setTerminalMap(new ConcurrentHashMap<>());
         world.setNpcBrainMap(new ConcurrentHashMap<>());
+
+        world.setPlayerBlockMap(new ConcurrentHashMap<>());
         world.setBlockMap(new ConcurrentSkipListMap<>());
         world.setSourceMap(new ConcurrentHashMap<>());
         world.setCreatureMap(new ConcurrentHashMap<>());
@@ -127,7 +129,7 @@ public class WorldServiceImpl implements WorldService {
         world.setDropMap(new ConcurrentHashMap<>());
         world.setTeleportMap(new ConcurrentHashMap<>());
         world.setFarmMap(new ConcurrentHashMap<>());
-        world.setPlayerBlockMap(new ConcurrentHashMap<>());
+        world.setTextDisplayMap(new ConcurrentHashMap<>());
         loadScenes(world);
     }
 
@@ -202,7 +204,7 @@ public class WorldServiceImpl implements WorldService {
                                 if (null != toRegion) {
                                     toAltitude = toRegion.getAltitude();
                                 }
-                                block = sceneManager.addTeleportBlock(world, blockRow.getInteger(1), worldCoordinate, new WorldCoordinate(blockRow.getInteger(4),
+                                block = sceneManager.addTeleportBlock(world, worldCoordinate, blockRow.getInteger(1), new WorldCoordinate(blockRow.getInteger(4),
                                         new IntegerCoordinate(blockRow.getInteger(5),
                                                 blockRow.getInteger(6)),
                                         new Coordinate(

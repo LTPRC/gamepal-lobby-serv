@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -286,7 +285,6 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     @Override
-    @Transactional
     public void syncFloorCode(GameWorld world, Block worldMovingBlock) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         if (null == region) {

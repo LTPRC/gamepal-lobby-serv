@@ -23,8 +23,10 @@ public interface SceneManager {
                                              final boolean useWorldCoordinate, final long timestamp);
     Block addDropBlock(final GameWorld world, final WorldCoordinate worldCoordinate,
                        final Map.Entry<String, Integer> drop);
-    Block addTeleportBlock(final GameWorld world, final int code, final WorldCoordinate worldCoordinate,
+    Block addTeleportBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode,
                            final WorldCoordinate to);
+    Block addTextDisplayBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode,
+                              final String textDisplay);
     Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode);
     boolean checkBlockSpace2Build(final GameWorld world, final Block block);
     void removeBlock(GameWorld world, Block block, boolean isDestroyed);

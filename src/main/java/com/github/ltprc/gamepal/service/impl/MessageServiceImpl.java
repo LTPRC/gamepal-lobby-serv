@@ -49,7 +49,7 @@ public class MessageServiceImpl implements MessageService {
      * @return
      */
     @Override
-    public ResponseEntity<String> sendMessage(HttpServletRequest request) {
+    public ResponseEntity<String> receiveMessage(HttpServletRequest request) {
         JSONObject rst = ContentUtil.generateRst();
         JSONObject req = null;
         try {
@@ -61,7 +61,7 @@ public class MessageServiceImpl implements MessageService {
         int scope = msg.getScope();
         String fromUserCode = msg.getFromUserCode();
         if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-            sendMessage(fromUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope, fromUserCode,
+            receiveMessage(fromUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope, fromUserCode,
                     fromUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
         }
         GameWorld world = userService.getWorldByUserCode(fromUserCode);
@@ -75,10 +75,10 @@ public class MessageServiceImpl implements MessageService {
                 if (!entry.getKey().equals(fromUserCode)) {
                     String toUserCode = entry.getKey();
                     if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-                        sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                        receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
                                 fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
                     }
-                    sendMessage(toUserCode, msg);
+                    receiveMessage(toUserCode, msg);
                 }
             });
         } else if (MessageConstants.SCOPE_TEAMMATE == scope) {
@@ -91,23 +91,23 @@ public class MessageServiceImpl implements MessageService {
                 if (!entry.getKey().equals(fromUserCode)) {
                     String toUserCode = entry.getKey();
                     if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-                        sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                        receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
                                 fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
                     }
-                    sendMessage(toUserCode, msg);
+                    receiveMessage(toUserCode, msg);
                 }
             });
         } else if (scope == MessageConstants.SCOPE_INDIVIDUAL) {
             String toUserCode = msg.getToUserCode();
             if (toUserCode.equals(fromUserCode) || userService.getWorldByUserCode(toUserCode) == world) {
                 if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-                    sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                    receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
                             fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
                 }
-                sendMessage(toUserCode, msg);
+                receiveMessage(toUserCode, msg);
             }
         } else if (scope == MessageConstants.SCOPE_SELF) {
-            sendMessage(fromUserCode, msg);
+            receiveMessage(fromUserCode, msg);
         } else if (scope == MessageConstants.SCOPE_NEARBY) {
             world.getPlayerInfoMap().entrySet().stream()
                     .filter(entry -> entry.getValue().getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
@@ -121,24 +121,24 @@ public class MessageServiceImpl implements MessageService {
                         if (!entry.getKey().equals(fromUserCode)) {
                             String toUserCode = entry.getKey();
                             if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-                                sendMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
+                                receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
                                         fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
                             }
-                            sendMessage(toUserCode, msg);
+                            receiveMessage(toUserCode, msg);
                         }
                     });
-            sendMessage(fromUserCode, msg);
+            receiveMessage(fromUserCode, msg);
         }
         return ResponseEntity.ok().body(rst.toString());
     }
 
     /**
-     * 发送消息
+     * Receive message
      *
      * @param userCode
      * @param message
      */
-    public ResponseEntity<String> sendMessage(String userCode, Message message) {
+    public ResponseEntity<String> receiveMessage(String userCode, Message message) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
         Session session = world.getSessionMap().get(userCode);
@@ -146,7 +146,6 @@ public class MessageServiceImpl implements MessageService {
             logger.warn(ErrorUtil.ERROR_1009 + "userCode: " + userCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1009));
         }
-        // These messages are shown back to the sender (human-only) 24/08/09
         if (world.getPlayerInfoMap().get(userCode).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             if (!messageMap.containsKey(userCode)) {

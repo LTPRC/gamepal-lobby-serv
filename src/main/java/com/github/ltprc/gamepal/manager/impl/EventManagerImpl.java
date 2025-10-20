@@ -482,7 +482,6 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
-    @Transactional
     public void changeHp(GameWorld world, Block block, int value, boolean isAbsolute) {
         int oldHp = block.getBlockInfo().getHp().get();
         int newHp = isAbsolute ? value : oldHp + value;

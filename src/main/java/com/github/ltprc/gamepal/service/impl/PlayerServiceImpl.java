@@ -250,7 +250,7 @@ public class PlayerServiceImpl implements PlayerService {
         message.setScope(MessageConstants.SCOPE_SELF);
         message.setToUserCode(userCode);
         message.setContent(content);
-        return messageService.sendMessage(userCode, message);
+        return messageService.receiveMessage(userCode, message);
     }
 
     @Override
