@@ -483,6 +483,7 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void changeHp(GameWorld world, Block block, int value, boolean isAbsolute) {
+        long timestamp = System.currentTimeMillis();
         int oldHp = block.getBlockInfo().getHp().get();
         int newHp = isAbsolute ? value : oldHp + value;
         if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
@@ -505,7 +506,7 @@ public class EventManagerImpl implements EventManager {
                     return;
                 }
             }
-            block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
+            block.getBlockInfo().setHp(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())), timestamp);
             if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0) {
                 playerService.knockPlayer(block.getBlockInfo().getId());
             }
@@ -513,7 +514,7 @@ public class EventManagerImpl implements EventManager {
             if (newHp < oldHp) {
                 addEvent(world, BlockConstants.BLOCK_CODE_DISINTEGRATE, block.getBlockInfo().getId(), block.getWorldCoordinate());
             }
-            block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
+            block.getBlockInfo().setHp(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())), timestamp);
             if (block.getBlockInfo().getHp().get() <= 0) {
                 addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, block.getBlockInfo().getId(), block.getWorldCoordinate());
                 sceneManager.removeBlock(world, block, true);

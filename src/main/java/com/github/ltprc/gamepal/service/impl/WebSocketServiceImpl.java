@@ -249,7 +249,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                             })
                             .forEach(entry -> entry.getValue().add(msg));
                     WorldCoordinate textDisplayWc = new WorldCoordinate(player.getWorldCoordinate());
-                    textDisplayWc.getCoordinate().setZ(textDisplayWc.getCoordinate().getZ().add(BigDecimal.ONE));
+                    textDisplayWc.getCoordinate().setZ(textDisplayWc.getCoordinate().getZ().add(BigDecimal.valueOf(200)));
                     sceneManager.addTextDisplayBlock(world, textDisplayWc,
                             BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg.getContent());
                 }

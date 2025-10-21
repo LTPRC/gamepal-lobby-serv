@@ -915,11 +915,11 @@ public class BlockUtil {
         }
         long timestamp = System.currentTimeMillis();
         BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, structure, timestamp);
-        initializeBlockInfoHp(blockInfo);
+        initializeBlockInfoHp(blockInfo, timestamp);
         return blockInfo;
     }
 
-    public static void initializeBlockInfoHp(BlockInfo blockInfo) {
+    public static void initializeBlockInfoHp(BlockInfo blockInfo, long timestamp) {
         int hpMax = BlockConstants.HP_DEFAULT;
         switch (blockInfo.getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
@@ -928,7 +928,7 @@ public class BlockUtil {
             default:
                 break;
         }
-        blockInfo.getHpMax().set(hpMax);
+        blockInfo.setHpMax(hpMax, timestamp);
         blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 
