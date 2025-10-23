@@ -366,6 +366,7 @@ public class NpcManagerImpl implements NpcManager {
                             .filter(player1 -> PlayerInfoUtil.checkPerceptionCondition(
                                     world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()), player,
                                     world.getPlayerInfoMap().get(npcUserCode).getPerceptionInfo(), player1))
+                            .filter(player1 -> playerService.getRelationMapByUserCode(entry2.getKey()).get(player1.getBlockInfo().getId()) < 0)
                             .min((player1, player2) -> {
                                 BigDecimal distance1 = BlockUtil.calculateDistance
                                         (world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),

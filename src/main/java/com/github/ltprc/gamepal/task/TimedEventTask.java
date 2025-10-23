@@ -23,6 +23,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.PlayerInfoUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -257,6 +258,14 @@ public class TimedEventTask {
                                                     BigDecimal.valueOf(Math.random()
                                                             * BlockConstants.BUBBLE_THROW_RADIUS.doubleValue())));
                                 }
+                            }
+
+                            // Check relation with boss
+                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN
+                                    && StringUtils.isNotBlank(playerInfo.getBossId())
+                                    && playerService.getRelationMapByUserCode(id)
+                                    .get(playerInfo.getBossId()) <= CreatureConstants.RELATION_MIN) {
+                                playerService.setMember(playerInfo.getBossId(), id, "");
                             }
                         }
 

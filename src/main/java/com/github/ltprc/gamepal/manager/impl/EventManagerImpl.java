@@ -151,13 +151,20 @@ public class EventManagerImpl implements EventManager {
                 }
                 affectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
                 updateBullet(world, eventBlock, fromCreature, affectedBlocks);
-                WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                        world.getRegionMap().get(fromCreature.getWorldCoordinate().getRegionNo()),
-                        fromCreature.getWorldCoordinate(),
-                        fromCreature.getMovementInfo().getFaceDirection().add(BigDecimal.valueOf(
-                                SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
-                                        * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SPARK_SHORT);
-                addEvent(world, BlockConstants.BLOCK_CODE_SPARK_SHORT, fromCreature.getBlockInfo().getId(), sparkWc);
+                if (BlockConstants.BLOCK_CODE_MELEE_HIT != eventBlock.getBlockInfo().getCode()) {
+                    WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
+                            world.getRegionMap().get(fromCreature.getWorldCoordinate().getRegionNo()),
+                            fromCreature.getWorldCoordinate(),
+                            fromCreature.getMovementInfo().getFaceDirection().add(BigDecimal.valueOf(
+                                    SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
+                                            * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SPARK_SHORT);
+                    addEvent(world, BlockConstants.BLOCK_CODE_SPARK_SHORT, fromCreature.getBlockInfo().getId(), sparkWc);
+                }
+                break;
+            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
+                affectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
+                updateBullet(world, eventBlock, fromCreature, affectedBlocks);
+                addEvent(world, BlockConstants.BLOCK_CODE_DISINTEGRATE, fromCreature.getBlockInfo().getId(), worldCoordinate);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
                 tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
@@ -278,6 +285,7 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
                 rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
                         && null != fromDistance
                         && fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
@@ -305,7 +313,6 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
             case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
-            case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
                 addEvent(world, BlockConstants.BLOCK_CODE_NOISE, fromCreature.getBlockInfo().getId(), fromCreature.getWorldCoordinate());
                 break;
             case BlockConstants.BLOCK_CODE_EXPLODE:

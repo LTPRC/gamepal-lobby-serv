@@ -32,6 +32,7 @@ public class BlockConstants {
     public static final int BLOCK_CODE_SHOOT_ROCKET = 121;
     public static final int BLOCK_CODE_SHOOT_FIRE = 128;
     public static final int BLOCK_CODE_SHOOT_SPRAY = 129;
+    public static final int BLOCK_CODE_SHOOT_THROW_JUNK = 142;
     public static final int BLOCK_CODE_SPARK = 125;
     public static final int BLOCK_CODE_NOISE = 126;
     public static final int BLOCK_CODE_MINE = 127;
@@ -324,6 +325,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SHOOT_ROCKET, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SHOOT_FIRE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SHOOT_SPRAY, BLOCK_TYPE_EFFECT);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SHOOT_THROW_JUNK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPARK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NOISE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_MINE, BLOCK_TYPE_TRAP);

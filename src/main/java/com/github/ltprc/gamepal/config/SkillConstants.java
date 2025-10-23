@@ -28,6 +28,7 @@ public class SkillConstants {
     public static final int SKILL_CODE_SHOOT_ROCKET = 26;
     public static final int SKILL_CODE_SHOOT_FIRE = 27;
     public static final int SKILL_CODE_SHOOT_SPRAY = 28;
+    public static final int SKILL_CODE_SHOOT_THROW_JUNK = 29;
     public static final int SKILL_CODE_BUILD = 32;
     public static final int SKILL_CODE_FISH = 34;
     public static final int SKILL_CODE_SHOVEL = 35;
@@ -52,6 +53,8 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_SHOOT_FIRE_MIN = BigDecimal.valueOf(1);
     public static final BigDecimal SKILL_RANGE_SHOOT_FIRE_MAX = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_SHOOT_SPRAY = BigDecimal.ONE;
+    public static final double SKILL_RANGE_SHOOT_THROW_JUNK_MIN = 1D;
+    public static final double SKILL_RANGE_SHOOT_THROW_JUNK_MAX = 5D;
     public static final BigDecimal SKILL_RANGE_EXPLODE = BigDecimal.valueOf(2);
     public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);

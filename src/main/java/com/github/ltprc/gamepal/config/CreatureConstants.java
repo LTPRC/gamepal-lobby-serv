@@ -80,4 +80,7 @@ public class CreatureConstants {
     public static final int BEARD_LENGTH = 6;
 
     public static final int CAPACITY_MAX = 50;
+    public static final int RELATION_INIT = 0;
+    public static final int RELATION_MIN = -100;
+    public static final int RELATION_MAX = 100;
 }

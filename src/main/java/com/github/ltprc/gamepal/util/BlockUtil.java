@@ -676,6 +676,7 @@ public class BlockUtil {
                     case BlockConstants.BLOCK_CODE_SHOOT_HIT:
                     case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
                     case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+                    case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
                         structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
                         break;
                     case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:

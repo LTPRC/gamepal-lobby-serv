@@ -1,6 +1,9 @@
 package com.github.ltprc.gamepal.manager;
 
+import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
+
+import java.util.Optional;
 
 public interface ItemManager {
     boolean useItem(GameWorld world, String userCode, String itemNo, int itemAmount);
@@ -12,4 +15,5 @@ public interface ItemManager {
     boolean useTools(GameWorld world, String userCode, String itemNo);
     boolean useOutfits(GameWorld world, String userCode, String itemNo);
     boolean useConsumable(GameWorld world, String userCode, String itemNo, int itemAmount);
+    Optional<Junk> peekRandomJunk(GameWorld world, String userCode);
 }

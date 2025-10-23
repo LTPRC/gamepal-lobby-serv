@@ -1,17 +1,27 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.item.*;
+import com.github.ltprc.gamepal.model.item.Consumable;
+import com.github.ltprc.gamepal.model.item.Item;
+import com.github.ltprc.gamepal.model.item.Junk;
+import com.github.ltprc.gamepal.model.item.Outfit;
+import com.github.ltprc.gamepal.model.item.Recipe;
+import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import lombok.var;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,14 +29,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 @Component
 public class ItemManagerImpl implements ItemManager {
 
     private static final Log logger = LogFactory.getLog(ItemManagerImpl.class);
+    private static final Random random = new Random();
 
     @Autowired
     private PlayerService playerService;
@@ -451,5 +462,20 @@ public class ItemManagerImpl implements ItemManager {
                 break;
         }
         return getItem(world, userCode, itemNo, -1 * itemAmount);
+    }
+
+    @Override
+    public Optional<Junk> peekRandomJunk(GameWorld world, String userCode) {
+        Map<String, BagInfo> bagInfoMap = world.getBagInfoMap();
+        if (!bagInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return Optional.empty();
+        }
+        BagInfo bagInfo = bagInfoMap.get(userCode);
+        var junks = bagInfo.getItems().keySet().stream()
+                .map(itemNo -> worldService.getItemMap().get(itemNo))
+                .filter(item -> ItemConstants.ITEM_CHARACTER_JUNK == item.getItemNo().charAt(0))
+                .collect(Collectors.toList());
+        return Optional.of((Junk) junks.get(random.nextInt(junks.size())));
     }
 }

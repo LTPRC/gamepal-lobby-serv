@@ -22,6 +22,7 @@ import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
+import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
@@ -58,9 +59,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
-    private static final Integer RELATION_INIT = 0;
-    private static final Integer RELATION_MIN = -100;
-    private static final Integer RELATION_MAX = 100;
     private static final Log logger = LogFactory.getLog(PlayerServiceImpl.class);
     private static final Random random = new Random();
 
@@ -260,6 +258,12 @@ public class PlayerServiceImpl implements PlayerService {
             logger.error(ErrorUtil.ERROR_1016 + " userCode: " + userCode);
             return new ConcurrentHashMap<>();
         }
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
+                && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(userCode).getCreatureType()) {
+            logger.error(ErrorUtil.ERROR_1037 + "userCode: " + userCode);
+            return new ConcurrentHashMap<>();
+        }
         Map<String, Map<String, Integer>> relationMap = world.getRelationMap();
         if (!relationMap.containsKey(userCode)) {
             relationMap.put(userCode, new ConcurrentHashMap<>());
@@ -267,6 +271,14 @@ public class PlayerServiceImpl implements PlayerService {
         return relationMap.get(userCode);
     }
 
+    /**
+     * Only human player has relation records
+     * @param userCode
+     * @param nextUserCode
+     * @param newRelation
+     * @param isAbsolute
+     * @return :
+     */
     @Override
     public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
         JSONObject rst = ContentUtil.generateRst();
@@ -296,6 +308,13 @@ public class PlayerServiceImpl implements PlayerService {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
+        if ((CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
+                && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(userCode).getCreatureType())
+                || (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(nextUserCode).getPlayerType()
+                && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(nextUserCode).getCreatureType())) {
+            logger.error(ErrorUtil.ERROR_1037 + "userCode: " + nextUserCode);
+            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1037));
+        }
         if (!relationMap.containsKey(userCode)) {
             relationMap.put(userCode, new ConcurrentHashMap<>());
         }
@@ -303,15 +322,15 @@ public class PlayerServiceImpl implements PlayerService {
             relationMap.put(nextUserCode, new ConcurrentHashMap<>());
         }
         if (!relationMap.get(userCode).containsKey(nextUserCode)) {
-            relationMap.get(userCode).put(nextUserCode, RELATION_INIT);
+            relationMap.get(userCode).put(nextUserCode, CreatureConstants.RELATION_INIT);
         }
         if (!relationMap.get(nextUserCode).containsKey(userCode)) {
-            relationMap.get(nextUserCode).put(userCode, RELATION_INIT);
+            relationMap.get(nextUserCode).put(userCode, CreatureConstants.RELATION_INIT);
         }
         if (!isAbsolute) {
             newRelation += relationMap.get(userCode).get(nextUserCode);
         }
-        newRelation = Math.min(RELATION_MAX, Math.max(RELATION_MIN, newRelation));
+        newRelation = Math.min(CreatureConstants.RELATION_MAX, Math.max(CreatureConstants.RELATION_MIN, newRelation));
         if (newRelation != relationMap.get(userCode).get(nextUserCode)) {
             generateNotificationMessage(userCode, "你将对"
                     + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
@@ -443,6 +462,10 @@ public class PlayerServiceImpl implements PlayerService {
         BagInfo bagInfo = world.getBagInfoMap().get(userCode);
         String ammoCode = playerInfo.getSkills().get(skillNo).getAmmoCode();
         if (StringUtils.isNotBlank(ammoCode) && bagInfo.getItems().getOrDefault(ammoCode, 0) == 0) {
+            return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1040));
+        }
+        if (SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK == skillNo
+                && !itemManager.peekRandomJunk(world, userCode).isPresent()) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1040));
         }
         if (isDown) {
@@ -619,6 +642,17 @@ public class PlayerServiceImpl implements PlayerService {
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_SPRAY, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                 direction.add(shakingAngle), SkillConstants.SKILL_RANGE_SHOOT_SPRAY));
+                break;
+            case SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK:
+                Optional<Junk> junk = itemManager.peekRandomJunk(world, userCode);
+                if (junk.isPresent()) {
+                    itemManager.getItem(world, userCode, junk.get().getItemNo(), -1);
+                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK, userCode,
+                            BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                                    direction.add(shakingAngle), SkillUtil.calculateThrowJunkDistance(junk.get())));
+                } else {
+                    return false;
+                }
                 break;
             case SkillConstants.SKILL_CODE_BUILD:
             case SkillConstants.SKILL_CODE_PLOW:
@@ -804,6 +838,11 @@ public class PlayerServiceImpl implements PlayerService {
                     return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
                 }
                 nextUserCodeBossId = playerInfoMap.get(nextUserCodeBossId).getBossId();
+            }
+            if (random.nextInt(CreatureConstants.RELATION_MAX) > getRelationMapByUserCode(userCode).get(userCode2)) {
+                generateNotificationMessage(userCode, playerInfoMap.get(userCode2).getNickname()
+                        + "经过短暂思考，认为你不可以为其效忠。");
+                return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
             }
             generateNotificationMessage(userCode, "你向" + playerInfoMap.get(userCode2).getNickname()
                     + "屈从了，自此为其效忠。");

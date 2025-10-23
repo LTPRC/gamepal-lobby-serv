@@ -3,6 +3,7 @@ package com.github.ltprc.gamepal.util;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
@@ -30,8 +31,9 @@ public class SkillUtil {
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 25, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.add(new Skill(SkillConstants.SKILL_CODE_CURSE, SkillConstants.SKILL_MODE_AUTO, 0,
-                25, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
+        skills.add(new Skill(SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK, SkillConstants.SKILL_MODE_AUTO, 0,
+                50, SkillConstants.SKILL_TYPE_ATTACK,
+                SkillConstants.SKILL_RANGE_SHOOT, null));
         skills.add(new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
                 25, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
         playerInfo.setSkills(skills);
@@ -180,6 +182,7 @@ public class SkillUtil {
                 hp = -100 - random.nextInt(100);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
                 hp = -110 - random.nextInt(20);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
@@ -210,5 +213,12 @@ public class SkillUtil {
             default:
                 return true;
         }
+    }
+
+    public static BigDecimal calculateThrowJunkDistance(Junk junk) {
+        double k = 0.5;   // 衰减速度
+        return BigDecimal.valueOf(SkillConstants.SKILL_RANGE_SHOOT_THROW_JUNK_MAX
+                + (SkillConstants.SKILL_RANGE_SHOOT_THROW_JUNK_MIN
+                - SkillConstants.SKILL_RANGE_SHOOT_THROW_JUNK_MAX) * Math.exp(-k * junk.getWeight().doubleValue()));
     }
 }
