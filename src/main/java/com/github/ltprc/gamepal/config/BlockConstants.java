@@ -277,6 +277,7 @@ public class BlockConstants {
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal BLEED_RADIUS_MAX = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal DODGE_RADIUS = BigDecimal.valueOf(-0.5D);
 
     public static final int HP_DEFAULT = 100;
     public static final BigDecimal HP_PULL_RATIO = BigDecimal.valueOf(0.1D);

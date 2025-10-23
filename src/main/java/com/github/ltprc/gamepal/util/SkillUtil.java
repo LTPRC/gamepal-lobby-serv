@@ -31,11 +31,12 @@ public class SkillUtil {
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_KICK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 25, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.add(new Skill(SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK, SkillConstants.SKILL_MODE_AUTO, 0,
+        skills.add(new Skill(SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 50, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_SHOOT, null));
-        skills.add(new Skill(SkillConstants.SKILL_CODE_CHEER, SkillConstants.SKILL_MODE_AUTO, 0,
-                25, SkillConstants.SKILL_TYPE_DEFAULT, BigDecimal.ZERO, null));
+        skills.add(new Skill(SkillConstants.SKILL_CODE_DODGE, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                15, SkillConstants.SKILL_TYPE_DEFAULT,
+                BigDecimal.ZERO, null));
         playerInfo.setSkills(skills);
     }
 
@@ -50,9 +51,9 @@ public class SkillUtil {
         skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
                 15, SkillConstants.SKILL_TYPE_ATTACK,
                 SkillConstants.SKILL_RANGE_MELEE, null));
-        skills.add(new Skill(SkillConstants.SKILL_CODE_MELEE_HIT, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
-                15, SkillConstants.SKILL_TYPE_ATTACK,
-                SkillConstants.SKILL_RANGE_MELEE, null));
+        skills.add(new Skill(SkillConstants.SKILL_CODE_DODGE, SkillConstants.SKILL_MODE_SEMI_AUTO, 0,
+                15, SkillConstants.SKILL_TYPE_DEFAULT,
+                BigDecimal.ZERO, null));
         switch (playerInfo.getSkinColor()) {
             case CreatureConstants.SKIN_COLOR_PAOFU:
             case CreatureConstants.SKIN_COLOR_CAT:

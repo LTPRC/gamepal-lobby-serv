@@ -717,6 +717,12 @@ public class PlayerServiceImpl implements PlayerService {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_WATER_SHALLOW);
                 }
                 break;
+            case SkillConstants.SKILL_CODE_DODGE:
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode, worldCoordinate);
+                movementManager.speedUpBlock(world, player, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                        new Coordinate(), direction, BlockConstants.DODGE_RADIUS));
+                player.getMovementInfo().setFaceDirection(direction);
+                break;
             case SkillConstants.SKILL_CODE_LAY_MINE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MINE, userCode,
                         BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),

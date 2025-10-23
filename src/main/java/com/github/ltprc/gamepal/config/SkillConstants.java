@@ -33,6 +33,7 @@ public class SkillConstants {
     public static final int SKILL_CODE_FISH = 34;
     public static final int SKILL_CODE_SHOVEL = 35;
     public static final int SKILL_CODE_PLOW = 37;
+    public static final int SKILL_CODE_DODGE = 38;
     public static final int SKILL_CODE_LAY_MINE = 41;
     public static final int SKILL_CODE_LAY_BARRIER = 42;
     public static final int SKILL_CODE_LAY_WIRE_NETTING = 43;
