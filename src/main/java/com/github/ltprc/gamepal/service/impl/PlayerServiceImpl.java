@@ -261,7 +261,6 @@ public class PlayerServiceImpl implements PlayerService {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
                 && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(userCode).getCreatureType()) {
-            logger.error(ErrorUtil.ERROR_1037 + "userCode: " + userCode);
             return new ConcurrentHashMap<>();
         }
         Map<String, Map<String, Integer>> relationMap = world.getRelationMap();

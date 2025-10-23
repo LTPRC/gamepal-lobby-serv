@@ -63,12 +63,12 @@ public class BlockInfo {
     }
 
     public void setHpMax(int hpMax, long timestamp) {
-        this.hpMax = new AtomicInteger(hpMax);
+        this.hpMax.set(hpMax);
         setTimeUpdated(timestamp);
     }
 
     public void setHp(int hp, long timestamp) {
-        this.hp = new AtomicInteger(hp);
+        this.hp.set(hp);
         setTimeUpdated(timestamp);
     }
 

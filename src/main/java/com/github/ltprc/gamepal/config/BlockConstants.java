@@ -46,6 +46,7 @@ public class BlockConstants {
     public static final int BLOCK_CODE_BUBBLE = 139;
     public static final int BLOCK_CODE_SHOCK = 140;
     public static final int BLOCK_CODE_TEXT_DISPLAY = 141;
+    public static final int BLOCK_CODE_TIMED_BOMB = 143;
     public static final int BLOCK_CODE_NO_RESOURCE = 1000;
     public static final int BLOCK_CODE_BLACK = 1001;
     public static final int BLOCK_CODE_WHITE = 1002;
@@ -296,6 +297,7 @@ public class BlockConstants {
     public static final int MOVEMENT_MODE_DEFAULT = 0;
     public static final int MOVEMENT_MODE_STAND_GROUND = 1;
     public static final int MOVEMENT_MODE_WALK = 2;
+    public static final int TIMED_BOMB_FRAME_MAX_MAX = 150;
 
     public static Map<Integer, Integer> BLOCK_CODE_TYPE_MAP = new HashMap<>();
     public static Map<Integer, Color> BLOCK_CODE_COLOR_MAP = new HashMap<>();
@@ -340,6 +342,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BUBBLE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SHOCK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_TEXT_DISPLAY, BLOCK_TYPE_TEXT_DISPLAY);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_TIMED_BOMB, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NO_RESOURCE, BLOCK_TYPE_FLOOR);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLACK, BLOCK_TYPE_WALL);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WHITE, BLOCK_TYPE_FLOOR);

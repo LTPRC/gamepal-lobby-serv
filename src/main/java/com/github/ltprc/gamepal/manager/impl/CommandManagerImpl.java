@@ -2,18 +2,26 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.manager.BuffManager;
+import com.github.ltprc.gamepal.manager.CommandManager;
+import com.github.ltprc.gamepal.manager.EventManager;
+import com.github.ltprc.gamepal.manager.ItemManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +30,14 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 
 @Component
 public class CommandManagerImpl implements CommandManager {
+
+    private static final Random random = new Random();
 
     @Autowired
     private PlayerService playerService;
@@ -61,6 +72,7 @@ public class CommandManagerImpl implements CommandManager {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         Block player = creatureMap.get(userCode);
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         switch (commandContent) {
             case "nwcagents":
                 playerService.generateNotificationMessage(userCode, "特工们，准备战斗。");
@@ -183,7 +195,15 @@ public class CommandManagerImpl implements CommandManager {
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 break;
             case "nwcignoranceisbliss":
-                playerService.generateNotificationMessage(userCode, "（暂无效果）");
+                playerService.generateNotificationMessage(userCode, "无知是福，不要抬头。");
+                for (int i = 0; i < 10; i++) {
+                    WorldCoordinate timedBombWc = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                            player.getWorldCoordinate(),
+                            BigDecimal.valueOf(random.nextDouble() * 360),
+                            BigDecimal.valueOf(random.nextDouble() * 10));
+                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_TIMED_BOMB, userCode, timedBombWc);
+
+                }
                 break;
             case "nwctheconstruct":
                 playerService.generateNotificationMessage(userCode, "财源滚滚。");

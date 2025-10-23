@@ -248,9 +248,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                                         && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;
                             })
                             .forEach(entry -> entry.getValue().add(msg));
-                    WorldCoordinate textDisplayWc = new WorldCoordinate(player.getWorldCoordinate());
-                    textDisplayWc.getCoordinate().setZ(textDisplayWc.getCoordinate().getZ().add(BigDecimal.valueOf(200)));
-                    sceneManager.addTextDisplayBlock(world, textDisplayWc,
+                    sceneManager.addTextDisplayBlock(world, player.getWorldCoordinate(),
                             BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg.getContent());
                 }
             }

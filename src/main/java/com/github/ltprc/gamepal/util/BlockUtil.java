@@ -658,8 +658,6 @@ public class BlockUtil {
 
     public static BlockInfo createBlockInfoByCode(int blockCode) {
         int blockType = BlockUtil.convertBlockCode2Type(blockCode);
-//        String id = BlockUtil.checkBlockTypeRegistrable(blockType) ? UUID.randomUUID().toString() : "";
-        String id = UUID.randomUUID().toString();
         Structure structure;
         int structureMaterial;
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
@@ -915,6 +913,7 @@ public class BlockUtil {
                 break;
         }
         long timestamp = System.currentTimeMillis();
+        String id = UUID.randomUUID().toString();
         BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, structure, timestamp);
         initializeBlockInfoHp(blockInfo, timestamp);
         return blockInfo;
@@ -954,6 +953,9 @@ public class BlockUtil {
                         break;
                     case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
                         frameMax = 250;
+                        break;
+                    case BlockConstants.BLOCK_CODE_TIMED_BOMB:
+                        frameMax = blockInfo.getId().hashCode() % BlockConstants.TIMED_BOMB_FRAME_MAX_MAX;
                         break;
                     default:
                         frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;

@@ -8,10 +8,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.RegionConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
-import com.github.ltprc.gamepal.manager.FarmManager;
-import com.github.ltprc.gamepal.manager.MovementManager;
-import com.github.ltprc.gamepal.manager.NpcManager;
-import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -65,6 +62,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private FarmManager farmManager;
+
+    @Autowired
+    private EventManager eventManager;
 
     @Override
     public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
@@ -960,11 +960,14 @@ public class SceneManagerImpl implements SceneManager {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
-        scene.getBlocks().remove(block.getBlockInfo().getId());
-        world.getBlockMap().remove(block.getBlockInfo().getId());
-//        worldService.registerOffline(world, block.getBlockInfo().getId());
-        world.getSourceMap().remove(block.getBlockInfo().getId());
         switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                switch (block.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_TIMED_BOMB:
+                        eventManager.addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, world.getSourceMap().get(block.getBlockInfo().getId()), worldCoordinate);
+                        break;
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 playerService.destroyPlayer(block.getBlockInfo().getId());
                 break;
@@ -988,6 +991,10 @@ public class SceneManagerImpl implements SceneManager {
             default:
                 break;
         }
+        scene.getBlocks().remove(block.getBlockInfo().getId());
+        world.getBlockMap().remove(block.getBlockInfo().getId());
+//        worldService.registerOffline(world, block.getBlockInfo().getId());
+        world.getSourceMap().remove(block.getBlockInfo().getId());
     }
 
     private void destroyBlock(GameWorld world, Block block) {
