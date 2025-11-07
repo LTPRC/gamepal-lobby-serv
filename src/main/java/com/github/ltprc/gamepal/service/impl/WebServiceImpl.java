@@ -3,10 +3,13 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.github.ltprc.gamepal.model.QwenResponse;
 import com.github.ltprc.gamepal.service.WebService;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,6 +17,8 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class WebServiceImpl implements WebService {
+
+    private static final Log logger = LogFactory.getLog(WebServiceImpl.class);
     private static final String API_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation";
     private static final String API_KEY = "Bearer sk-cf4a21c79ccf42149e67ee67cf49d7e0";
     private final OkHttpClient client = new OkHttpClient();
@@ -44,18 +49,16 @@ public class WebServiceImpl implements WebService {
 
         try (okhttp3.Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                System.err.println("HTTP Error: " + response.code() + " - " + response.body().string());
+                logger.error(ErrorUtil.ERROR_1044);
                 return null;
             }
 
             assert response.body() != null;
             String responseBody = response.body().string();
-            // ✅ 使用 Fastjson 解析
             return JSON.parseObject(responseBody, QwenResponse.class);
 
         } catch (IOException e) {
-            System.err.println("请求失败: " + e.getMessage());
-            e.printStackTrace();
+            logger.error(ErrorUtil.ERROR_1044 + " message: " + e.getMessage());
             return null;
         }
     }

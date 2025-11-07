@@ -3,13 +3,7 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.BuffConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.FlagConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.MessageConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
@@ -18,10 +12,8 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.creature.BagInfo;
-import com.github.ltprc.gamepal.model.creature.NpcBrain;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.creature.Skill;
+import com.github.ltprc.gamepal.model.creature.*;
+import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.item.Tool;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -31,7 +23,7 @@ import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
-import com.github.ltprc.gamepal.model.map.world.*;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -240,15 +232,16 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         // Only human can receive message 24/09/30
-        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (playerInfo.getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1039));
         }
         Message message = new Message();
         message.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
         message.setScope(MessageConstants.SCOPE_SELF);
+        message.setFromUserCode(userCode);
         message.setToUserCode(userCode);
         message.setContent(content);
-        return messageService.receiveMessage(userCode, message);
+        return messageService.collectMessage(userCode, message);
     }
 
     @Override
@@ -259,7 +252,7 @@ public class PlayerServiceImpl implements PlayerService {
             return new ConcurrentHashMap<>();
         }
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
+        if (GamePalConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
                 && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(userCode).getCreatureType()) {
             return new ConcurrentHashMap<>();
         }
@@ -279,7 +272,8 @@ public class PlayerServiceImpl implements PlayerService {
      * @return :
      */
     @Override
-    public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute) {
+    public ResponseEntity<String> setRelation(String userCode, String nextUserCode, int newRelation, boolean isAbsolute,
+                                              boolean isNotified) {
         JSONObject rst = ContentUtil.generateRst();
         if (userService.getWorldByUserCode(userCode) != userService.getWorldByUserCode(nextUserCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1017));
@@ -307,9 +301,9 @@ public class PlayerServiceImpl implements PlayerService {
             logger.error(ErrorUtil.ERROR_1007 + "userCode: " + nextUserCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-        if ((CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
+        if ((GamePalConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(userCode).getPlayerType()
                 && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(userCode).getCreatureType())
-                || (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(nextUserCode).getPlayerType()
+                || (GamePalConstants.PLAYER_TYPE_HUMAN != playerInfoMap.get(nextUserCode).getPlayerType()
                 && CreatureConstants.CREATURE_TYPE_HUMAN != playerInfoMap.get(nextUserCode).getCreatureType())) {
             logger.error(ErrorUtil.ERROR_1037 + "userCode: " + nextUserCode);
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1037));
@@ -331,13 +325,15 @@ public class PlayerServiceImpl implements PlayerService {
         }
         newRelation = Math.min(CreatureConstants.RELATION_MAX, Math.max(CreatureConstants.RELATION_MIN, newRelation));
         if (newRelation != relationMap.get(userCode).get(nextUserCode)) {
-            generateNotificationMessage(userCode, "你将对"
-                    + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
-                    + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
-                    + "为" + newRelation);
-            generateNotificationMessage(nextUserCode, playerInfoMap.get(userCode).getNickname()
-                    + "将对你的关系" + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
-                    + "为" + newRelation);
+            if (isNotified) {
+                generateNotificationMessage(userCode, "你将对"
+                        + playerInfoMap.get(nextUserCode).getNickname() + "的关系"
+                        + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
+                        + "为" + newRelation);
+                generateNotificationMessage(nextUserCode, playerInfoMap.get(userCode).getNickname()
+                        + "将对你的关系" + (newRelation > relationMap.get(userCode).get(nextUserCode) ? "提高" : "降低")
+                        + "为" + newRelation);
+            }
             relationMap.get(userCode).put(nextUserCode, newRelation);
             relationMap.get(nextUserCode).put(userCode, newRelation);
         }
@@ -811,7 +807,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public ResponseEntity<String> setMember(String userCode, String userCode1, String userCode2) {
+    public ResponseEntity<String> setMember(String userCode, String userCode1, String userCode2, boolean isNotified) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode1);
         if (null == world) {
@@ -827,7 +823,9 @@ public class PlayerServiceImpl implements PlayerService {
         }
         if (userCode.equals(userCode1)) {
             if (StringUtils.isBlank(userCode2)) {
-                generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
+                if (isNotified) {
+                    generateNotificationMessage(userCode, "你自立了，自此不为任何人效忠。");
+                }
                 playerInfoMap.get(userCode).setBossId(null);
                 playerInfoMap.get(userCode).setTopBossId(findTopBossId(userCode));
                 return ResponseEntity.ok().body(rst.toString());
@@ -838,36 +836,48 @@ public class PlayerServiceImpl implements PlayerService {
             String nextUserCodeBossId = userCode2;
             while (StringUtils.isNotBlank(nextUserCodeBossId)) {
                 if (nextUserCodeBossId.equals(userCode)) {
-                    generateNotificationMessage(userCode, playerInfoMap.get(userCode2).getNickname()
-                            + "是你的下级，你不可以为其效忠。");
+                    if (isNotified) {
+                        generateNotificationMessage(userCode, playerInfoMap.get(userCode2).getNickname()
+                                + "是你的下级，你不可以为其效忠。");
+                    }
                     return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
                 }
                 nextUserCodeBossId = playerInfoMap.get(nextUserCodeBossId).getBossId();
             }
-            if (random.nextInt(CreatureConstants.RELATION_MAX) > getRelationMapByUserCode(userCode).get(userCode2)) {
-                generateNotificationMessage(userCode, playerInfoMap.get(userCode2).getNickname()
-                        + "经过短暂思考，认为你不可以为其效忠。");
+            if (random.nextInt(CreatureConstants.RELATION_MAX) > getRelationMapByUserCode(userCode).getOrDefault(userCode2, 0)) {
+                if (isNotified) {
+                    generateNotificationMessage(userCode, playerInfoMap.get(userCode2).getNickname()
+                            + "经过短暂思考，认为你不可以为其效忠。");
+                }
                 return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
             }
-            generateNotificationMessage(userCode, "你向" + playerInfoMap.get(userCode2).getNickname()
-                    + "屈从了，自此为其效忠。");
+            if (isNotified) {
+                generateNotificationMessage(userCode, "你向" + playerInfoMap.get(userCode2).getNickname()
+                        + "屈从了，自此为其效忠。");
+            }
             playerInfoMap.get(userCode).setBossId(userCode2);
             playerInfoMap.get(userCode).setTopBossId(findTopBossId(userCode));
         } else {
             PlayerInfo playerInfo1 = playerInfoMap.get(userCode1);
             if (!playerInfo1.getBossId().equals(userCode)) {
-                generateNotificationMessage(userCode, "你无法驱逐" + playerInfo1.getNickname()
-                        + "，这不是你的直属下级。");
+                if (isNotified) {
+                    generateNotificationMessage(userCode, "你无法驱逐" + playerInfo1.getNickname()
+                            + "，这不是你的直属下级。");
+                }
                 return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
             } else if (StringUtils.isNotBlank(userCode2)) {
-                generateNotificationMessage(userCode, "你无法指派你的直属下级" + playerInfo1.getNickname()
-                        + "向他人效忠。");
+                if (isNotified) {
+                    generateNotificationMessage(userCode, "你无法指派你的直属下级" + playerInfo1.getNickname()
+                            + "向他人效忠。");
+                }
                 return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1033));
             } else {
                 playerInfo1.setBossId("");
                 playerInfo1.setTopBossId(findTopBossId(userCode1));
-                generateNotificationMessage(userCode, "你驱逐了" + playerInfo1.getNickname()
-                        + "，对你的效忠就此终止。");
+                if (isNotified) {
+                    generateNotificationMessage(userCode, "你驱逐了" + playerInfo1.getNickname()
+                            + "，对你的效忠就此终止。");
+                }
             }
         }
         return ResponseEntity.ok().body(rst.toString());
@@ -959,7 +969,7 @@ public class PlayerServiceImpl implements PlayerService {
                 playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrameMax());
             }
         }
-        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (playerInfo.getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN) {
             npcManager.resetNpcBrainQueues(userCode);
         }
         if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_ONE_HIT] != 0) {
@@ -1260,7 +1270,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
+        if (GamePalConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
             NpcBrain npcBrain = world.getNpcBrainMap().get(userCode);
             if (null != npcBrain) {
                 npcBrain.getGreenQueue().clear();
@@ -1286,12 +1296,12 @@ public class PlayerServiceImpl implements PlayerService {
                 .filter(entry -> !entry.getKey().equals(userCode))
                 .filter(entry -> StringUtils.isNotBlank(entry.getValue().getBossId()))
                 .filter(entry -> entry.getValue().getBossId().equals(userCode))
-                .forEach(entry -> setMember(entry.getKey(), entry.getKey(), ""));
+                .forEach(entry -> setMember(entry.getKey(), entry.getKey(), "", false));
         // TODO Game-over display
         userService.logoff(userCode, "", false);
         world.getCreatureMap().remove(userCode);
         world.getPlayerInfoMap().remove(userCode);
-        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
+        if (GamePalConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
             world.getNpcBrainMap().remove(userCode);
         }
         return ResponseEntity.ok().body(rst.toString());
@@ -1391,5 +1401,235 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = world.getCreatureMap().get(userCode);
         long timestamp = System.currentTimeMillis();
         player.getBlockInfo().setTimeUpdated(timestamp);
+    }
+
+    @Override
+    public String toReadableString(Block player, PlayerInfo playerInfo) {
+        JSONObject rst = toReadableJson(playerInfo);
+        rst.put("ID", player.getBlockInfo().getId());
+        rst.put("生命值", player.getBlockInfo().getHp() + "/" + player.getBlockInfo().getHpMax());
+        String str = JSON.toJSONString(rst.toString());
+        return str.substring(1, str.length() - 1);
+    }
+
+    @Override
+    public String toReadableString(PlayerInfo playerInfo) {
+        String str = JSON.toJSONString(toReadableJson(playerInfo).toString());
+        return str.substring(1, str.length() - 1);
+    }
+
+    private JSONObject toReadableJson(PlayerInfo playerInfo) {
+        JSONObject rst = new JSONObject();
+        switch (playerInfo.getPlayerType()) {
+            case GamePalConstants.PLAYER_TYPE_HUMAN:
+                rst.put("玩家类型", "真人");
+                break;
+            case GamePalConstants.PLAYER_TYPE_NPC:
+                rst.put("玩家类型", "人工智能");
+                break;
+        }
+        switch (playerInfo.getPlayerStatus()) {
+            case GamePalConstants.PLAYER_STATUS_INIT:
+                rst.put("玩家状态", "未初始化");
+                break;
+            case GamePalConstants.PLAYER_STATUS_RUNNING:
+                rst.put("玩家类型", "正常");
+                break;
+        }
+        // TODO 头像
+        rst.put("名", playerInfo.getFirstName());
+        rst.put("姓", playerInfo.getLastName());
+        rst.put("昵称", playerInfo.getNickname());
+        rst.put("姓名背景色字符串", playerInfo.getNameColor());
+        switch (playerInfo.getCreatureType()) {
+            case CreatureConstants.CREATURE_TYPE_HUMAN:
+                rst.put("生物类型", "人类");
+                rst.put("肤色（从0到100代表白种-亚裔-拉丁-非裔）", playerInfo.getSkinColor());
+                break;
+            case CreatureConstants.CREATURE_TYPE_ANIMAL:
+                switch (playerInfo.getSkinColor()) {
+                    case 1:
+                        rst.put("生物类型", "英短和折耳混血猫-香香软软的小泡芙");
+                        break;
+                    case 2:
+                        rst.put("生物类型", "青蛙");
+                        break;
+                    case 3:
+                        rst.put("生物类型", "猴子");
+                        break;
+                    case 4:
+                        rst.put("生物类型", "浣熊");
+                        break;
+                    case 5:
+                        rst.put("生物类型", "鸡");
+                        break;
+                    case 6:
+                        rst.put("生物类型", "牛");
+                        break;
+                    case 7:
+                        rst.put("生物类型", "狐狸");
+                        break;
+                    case 8:
+                        rst.put("生物类型", "北极熊");
+                        break;
+                    case 9:
+                        rst.put("生物类型", "绵羊");
+                        break;
+                    case 10:
+                        rst.put("生物类型", "老虎");
+                        break;
+                    case 11:
+                        rst.put("生物类型", "猫");
+                        break;
+                    case 12:
+                        rst.put("生物类型", "狗");
+                        break;
+                    case 13:
+                        rst.put("生物类型", "狼");
+                        break;
+                    case 14:
+                        rst.put("生物类型", "野猪");
+                        break;
+                    case 15:
+                        rst.put("生物类型", "马");
+                        break;
+                    default:
+                        rst.put("生物类型", "动物");
+                        break;
+                }
+                break;
+        }
+        switch (playerInfo.getGender()) {
+            case CreatureConstants.GENDER_MALE:
+                rst.put("性别", "男");
+                break;
+            case CreatureConstants.GENDER_FEMALE:
+                rst.put("性别", "女");
+                break;
+        }
+        // TODO 人体细节参数
+        String buffStr = "";
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0) {
+            buffStr += "死亡 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0) {
+            buffStr += "昏迷 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLEEDING] != 0) {
+            buffStr += "流血 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] != 0) {
+            buffStr += "疾病 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0) {
+            buffStr += "骨折 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] != 0) {
+            buffStr += "饥饿 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] != 0) {
+            buffStr += "口渴 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
+            buffStr += "疲惫 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLIND] != 0) {
+            buffStr += "失明 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_INVINCIBLE] != 0) {
+            buffStr += "无敌 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_ONE_HIT] != 0) {
+            buffStr += "一击 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_REALISTIC] != 0) {
+            buffStr += "写实 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] != 0) {
+            buffStr += "掉落 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLOCKED] != 0) {
+            buffStr += "格挡 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_HAPPY] != 0) {
+            buffStr += "愉悦 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SAD] != 0) {
+            buffStr += "沮丧 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_RECOVERING] != 0) {
+            buffStr += "康复 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0) {
+            buffStr += "超重 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+            buffStr += "濒死 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_REVIVED] != 0) {
+            buffStr += "急救 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DIVING] != 0) {
+            buffStr += "潜水 ";
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DROWNING] != 0) {
+            buffStr += "溺水 ";
+        }
+        rst.put("buff", buffStr);
+        // TODO skills, perception
+        rst.put("活力值", playerInfo.getVp() + "/" + playerInfo.getVpMax());
+        rst.put("饮食值", playerInfo.getHunger() + "/" + playerInfo.getHungerMax());
+        rst.put("饮水值", playerInfo.getThirst() + "/" + playerInfo.getThirstMax());
+        rst.put("精准度", playerInfo.getPrecision() + "/" + playerInfo.getPrecisionMax());
+        rst.put("等级", playerInfo.getLevel());
+        rst.put("经验", playerInfo.getExp() + "/" + playerInfo.getExpMax());
+        rst.put("金钱", playerInfo.getMoney());
+        StringBuilder toolsStr = new StringBuilder();
+        for (String toolCode : playerInfo.getTools()) {
+            Item tool = worldService.getItemMap().get(toolCode);
+            toolsStr.append(tool.getName());
+            toolsStr.append(" ");
+        }
+        rst.put("工具", toolsStr.toString());
+        StringBuilder outfitsStr = new StringBuilder();
+        for (String outfitCode : playerInfo.getOutfits()) {
+            Item outfit = worldService.getItemMap().get(outfitCode);
+            outfitsStr.append(outfit.getName());
+            outfitsStr.append(" ");
+        }
+        rst.put("服装", outfitsStr.toString());
+        Optional.ofNullable(playerInfo.getBossId())
+                .filter(StringUtils::isNotBlank)
+                .map(bossId -> userService.getWorldByUserCode(bossId))
+                .map(world -> world.getPlayerInfoMap().get(playerInfo.getBossId()))
+                .map(PlayerInfo::getNickname)
+                .ifPresent(bossNickName -> {
+                    rst.put("直属上级ID", playerInfo.getBossId());
+                    rst.put("直属上级昵称", bossNickName);
+                });
+        Optional.ofNullable(playerInfo.getTopBossId())
+                .filter(StringUtils::isNotBlank)
+                .map(topBossId -> userService.getWorldByUserCode(topBossId))
+                .map(world -> world.getPlayerInfoMap().get(playerInfo.getTopBossId()))
+                .map(PlayerInfo::getNickname)
+                .ifPresent(topBossNickName -> {
+                    rst.put("最高上级ID", playerInfo.getTopBossId());
+                    rst.put("最高上级昵称", topBossNickName);
+                });
+        StringBuilder missionStr = new StringBuilder();
+        for (MissionInfo missionInfo : playerInfo.getMissions()) {
+            switch (missionInfo.getStatus()) {
+                case MissionConstants.MISSION_STATUS_INITIATED:
+                    missionStr.append("[进行中]");
+                    break;
+                case MissionConstants.MISSION_STATUS_COMPLETED:
+                    missionStr.append("[已完成]");
+                    break;
+            }
+            missionStr.append(missionInfo.getContent());
+            missionStr.append(" ");
+        }
+        rst.put("任务", missionStr.toString());
+        return rst;
     }
 }

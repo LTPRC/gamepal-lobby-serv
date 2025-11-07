@@ -91,7 +91,7 @@ public class InteractionManagerImpl implements InteractionManager {
                 }
                 PlayerInfo playerInfo = playerInfoMap.get(blockInfo.getId());
                 if (playerService.validateActiveness(world, blockInfo.getId())) {
-                    if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                    if (CreatureConstants.CREATURE_TYPE_HUMAN == playerInfo.getCreatureType()) {
                         list.add(InteractionConstants.INTERACTION_TALK);
                         list.add(InteractionConstants.INTERACTION_SUCCUMB);
                         list.add(InteractionConstants.INTERACTION_EXPEL);

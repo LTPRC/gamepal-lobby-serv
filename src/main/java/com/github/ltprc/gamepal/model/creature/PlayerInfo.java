@@ -19,8 +19,6 @@ public class PlayerInfo {
     // Basic properties
     private int playerType; // 0-human 1-AI
     private int playerStatus;
-//    private long timeCreated;
-//    private long timeUpdated;
 
     // Character properties
     private String avatar;

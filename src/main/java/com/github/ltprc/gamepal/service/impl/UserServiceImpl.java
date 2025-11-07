@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.MissionConstants;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.QwenResponse;
@@ -137,7 +138,7 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         if (!world.getCreatureMap().containsKey(userCode)) {
-            world.getCreatureMap().put(userCode, npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_HUMAN,
+            world.getCreatureMap().put(userCode, npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_HUMAN,
                     CreatureConstants.CREATURE_TYPE_HUMAN, userCode));
             // Initiate missions
             QwenResponse qwenResponse = webService.callQwenApi(
@@ -155,13 +156,10 @@ public class UserServiceImpl implements UserService {
         world.getTokenMap().put(userCode, token);
         rst.put("userCode", userCode);
         rst.put("token", world.getTokenMap().get(userCode));
-        // Register on message map
-        world.getMessageMap().put(userCode, new LinkedBlockingDeque<>());
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> logoff(HttpServletRequest request) {
         JSONObject req = null;
         try {

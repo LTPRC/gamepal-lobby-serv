@@ -42,7 +42,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
@@ -111,11 +110,11 @@ public class NpcManagerImpl implements NpcManager {
         sceneManager.updateAltitude(world, player);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), player.getWorldCoordinate());
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
-                playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
+                playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
         worldService.registerOnline(world, userCode);
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         userService.addUserIntoWorldMap(userCode, world.getId());
-        if (CreatureConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
+        if (GamePalConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
             NpcBrain npcBrain = generateNpcBrain();
             world.getNpcBrainMap().put(userCode, npcBrain);
             JSONObject behaviorRequest = new JSONObject();
@@ -281,28 +280,31 @@ public class NpcManagerImpl implements NpcManager {
         switch (role) {
             case CreatureConstants.NPC_ROLE_PEER:
                 player = putSpecificCreature(world, userCode, worldCoordinate, BigDecimal.ONE,
-                        CreatureConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
+                        GamePalConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
                         CreatureConstants.NPC_BEHAVIOR_MOVE, CreatureConstants.STANCE_DEFENSIVE,
                         new boolean[]{false, false, true, false});
                 PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
+                playerService.setRelation(userCode, player.getBlockInfo().getId(), CreatureConstants.RELATION_MAX, true, false);
                 if (StringUtils.isBlank(playerInfo.getBossId())) {
-                    playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(), userCode);
+                    playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(), userCode,
+                            false);
                 } else {
                     playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(),
-                            playerInfo.getBossId());
+                            playerInfo.getBossId(), false);
                 }
                 break;
             case CreatureConstants.NPC_ROLE_MINION:
                 player = putSpecificCreature(world, userCode, worldCoordinate, BigDecimal.ONE,
-                        CreatureConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
+                        GamePalConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
                         CreatureConstants.NPC_BEHAVIOR_FOLLOW, CreatureConstants.STANCE_DEFENSIVE,
                         new boolean[]{false, false, true, false});
-                playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(), userCode);
+                playerService.setRelation(userCode, player.getBlockInfo().getId(), CreatureConstants.RELATION_MAX, true, false);
+                playerService.setMember(player.getBlockInfo().getId(), player.getBlockInfo().getId(), userCode, false);
                 break;
             default:
             case CreatureConstants.NPC_ROLE_INDIVIDUAL:
                 player = putSpecificCreature(world, userCode, worldCoordinate, BigDecimal.ONE,
-                        CreatureConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
+                        GamePalConstants.PLAYER_TYPE_NPC, CreatureConstants.CREATURE_TYPE_HUMAN,
                         CreatureConstants.NPC_BEHAVIOR_IDLE, CreatureConstants.STANCE_DEFENSIVE,
                         new boolean[]{false, false, true, false});
                 break;
@@ -320,7 +322,7 @@ public class NpcManagerImpl implements NpcManager {
         npcBrainMap.entrySet().stream()
                 // Filtered NPCs not detected by human players 24/08/01
                 .filter(entry2 -> creatureMap.entrySet().stream()
-                        .filter(entry3 -> CreatureConstants.PLAYER_TYPE_HUMAN == world.getPlayerInfoMap().get(entry3.getKey()).getPlayerType())
+                        .filter(entry3 -> GamePalConstants.PLAYER_TYPE_HUMAN == world.getPlayerInfoMap().get(entry3.getKey()).getPlayerType())
                         .anyMatch(entry3 -> SkillUtil.isSceneDetected(entry3.getValue(),
                                 creatureMap.get(entry3.getKey()).getWorldCoordinate(), 1)))
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
@@ -409,7 +411,7 @@ public class NpcManagerImpl implements NpcManager {
                 });
         // Settle NPC speed
         creatureMap.entrySet().stream()
-                .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN)
+                .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN)
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
                 .forEach(entry2 -> movementManager.settleSpeedAndCoordinate(world, entry2.getValue(), 1));
     }
@@ -446,7 +448,7 @@ public class NpcManagerImpl implements NpcManager {
         Block fromPlayer = world.getCreatureMap().get(fromUserCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(fromUserCode);
         NpcBrain npcBrain = world.getNpcBrainMap().get(fromUserCode);
-        if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN || null == npcBrain) {
+        if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN || null == npcBrain) {
             logger.warn(ErrorUtil.ERROR_1039);
             return false;
         }

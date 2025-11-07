@@ -583,7 +583,7 @@ public class SceneManagerImpl implements SceneManager {
             if (randomInt < weightList.get(i).getValue()
                     && BlockConstants.BLOCK_CODE_BLACK != weightList.get(i).getKey()) {
                 String animalUserCode = UUID.randomUUID().toString();
-                Block animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                Block animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
                 PlayerInfo playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
                 playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);

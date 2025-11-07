@@ -476,6 +476,9 @@ public class ItemManagerImpl implements ItemManager {
                 .map(itemNo -> worldService.getItemMap().get(itemNo))
                 .filter(item -> ItemConstants.ITEM_CHARACTER_JUNK == item.getItemNo().charAt(0))
                 .collect(Collectors.toList());
+        if (junks.isEmpty()) {
+            return Optional.empty();
+        }
         return Optional.of((Junk) junks.get(random.nextInt(junks.size())));
     }
 }

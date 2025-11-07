@@ -189,7 +189,7 @@ public class BuffManagerImpl implements BuffManager {
     public void initializeBuff(PlayerInfo playerInfo) {
         validateBuffArray(playerInfo);
         resetBuff(playerInfo);
-        if (playerInfo.getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+        if (playerInfo.getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_ONE_HIT] = -1;
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] = -1;
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_REALISTIC] = -1;

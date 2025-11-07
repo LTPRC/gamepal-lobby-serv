@@ -9,10 +9,8 @@ import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.MessageConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
-import com.github.ltprc.gamepal.manager.CommandManager;
 import com.github.ltprc.gamepal.manager.InteractionManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.manager.MiniMapManager;
@@ -31,11 +29,7 @@ import com.github.ltprc.gamepal.model.map.scene.SceneInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.UserService;
-import com.github.ltprc.gamepal.service.WebSocketService;
-import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.service.*;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -75,9 +69,6 @@ public class WebSocketServiceImpl implements WebSocketService {
     private SceneManager sceneManager;
 
     @Autowired
-    private CommandManager commandManager;
-
-    @Autowired
     private MiniMapManager MiniMapManager;
 
     @Autowired
@@ -88,6 +79,9 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Autowired
     private InteractionManager interactionManager;
+
+    @Autowired
+    private MessageService messageService;
 
     @Override
     public void onOpen(Session session, String userCode) {
@@ -125,13 +119,12 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         Block player = world.getCreatureMap().get(userCode);
-        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         // Update onlineMap
         worldService.registerOnline(world, userCode);
 
         // Check functions
         JSONObject functions = null;
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(player.getBlockInfo().getId());
         if (jsonObject.containsKey("functions")) {
             functions = jsonObject.getJSONObject("functions");
             if (functions.containsKey("updatePlayerInfoCharacter")) {
@@ -213,45 +206,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                     itemManager.useRecipe(world, userCode, recipeNo, recipeAmount);
                 });
             }
-            // Check incoming messages
-            // These messages are shown to the receiver 24/08/09
+            // Collect incoming messages
             JSONArray messages = functions.getJSONArray("addMessages");
-            Map<String, Queue<Message>> messageMap = world.getMessageMap();
-            for (Object obj : messages) {
-                Message msg = JSON.parseObject(String.valueOf(obj), Message.class);
-                if (null != msg.getContent() && msg.getContent().indexOf(MessageConstants.COMMAND_PREFIX) == 0) {
-                    // Command detected
-                    String commandContent = StringUtils.trim(msg.getContent().substring(1));
-                    if (StringUtils.isNotBlank(commandContent)) {
-                        commandManager.useCommand(userCode, commandContent);
-                    }
-                } else if (MessageConstants.SCOPE_GLOBAL == msg.getScope()) {
-                    messageMap.forEach((key, value) -> value.add(msg));
-                } else if (MessageConstants.SCOPE_TEAMMATE == msg.getScope()) {
-                    messageMap.entrySet().stream()
-                            .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
-                                    playerService.findTopBossId(msg.getFromUserCode())))
-                            .forEach(entry -> entry.getValue().add(msg));
-                } else if (MessageConstants.SCOPE_INDIVIDUAL == msg.getScope()) {
-                    if (messageMap.containsKey(msg.getToUserCode())) {
-                        messageMap.get(msg.getFromUserCode()).add(msg);
-                        messageMap.get(msg.getToUserCode()).add(msg);
-                    }
-                } else if (MessageConstants.SCOPE_SELF == msg.getScope()) {
-                    messageMap.get(msg.getFromUserCode()).add(msg);
-                } else if (MessageConstants.SCOPE_NEARBY == msg.getScope()) {
-                    messageMap.entrySet().stream()
-                            .filter(entry -> {
-                                BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
-                                        world.getCreatureMap().get(entry.getKey()).getWorldCoordinate());
-                                return null != distance
-                                        && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;
-                            })
-                            .forEach(entry -> entry.getValue().add(msg));
-                    sceneManager.addTextDisplayBlock(world, player.getWorldCoordinate(),
-                            BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg.getContent());
-                }
-            }
+            messages.stream()
+                    .map(obj -> JSON.parseObject(String.valueOf(obj), Message.class))
+                    .forEach(msg -> messageService.collectMessage(userCode, msg));
             JSONArray drops = functions.getJSONArray("addDrops");
             drops.forEach(obj -> {
                 String itemNo = ((JSONObject) obj).getString("itemNo");
@@ -271,7 +230,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 String userCode2 = setRelation.getString("nextUserCode");
                 int newRelation = setRelation.getInteger("newRelation");
                 boolean isAbsolute = setRelation.getBoolean("isAbsolute");
-                val setRelationRst = playerService.setRelation(userCode1, userCode2, newRelation, isAbsolute);
+                val setRelationRst = playerService.setRelation(userCode1, userCode2, newRelation, isAbsolute, true);
                 if (setRelationRst.getStatusCode().isError()) {
                     logger.warn(setRelationRst);
                 }
@@ -313,7 +272,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 JSONObject setMember = functions.getJSONObject("setMember");
                 String userCode1 = setMember.getString("userCode");
                 String userCode2 = setMember.getString("nextUserCode");
-                playerService.setMember(userCode, userCode1, userCode2);
+                playerService.setMember(userCode, userCode1, userCode2, true);
             }
         }
         // Reply automatically
@@ -351,6 +310,10 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Return worldInfo
         JSONObject worldInfo = new JSONObject();
         worldInfo.put("worldTime", world.getWorldTime());
+        worldInfo.put("worldTimeSunriseBegin", GamePalConstants.WORLD_TIME_SUNRISE_BEGIN);
+        worldInfo.put("worldTimeSunriseEnd", GamePalConstants.WORLD_TIME_SUNRISE_END);
+        worldInfo.put("worldTimeSunsetBegin", GamePalConstants.WORLD_TIME_SUNSET_BEGIN);
+        worldInfo.put("worldTimeSunsetEnd", GamePalConstants.WORLD_TIME_SUNSET_END);
         worldInfo.put("windDirection", world.getWindDirection());
         worldInfo.put("windSpeed", world.getWindSpeed());
         rst.put("worldInfo", worldInfo);
@@ -380,7 +343,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         Block player = creatureMap.get(userCode);
         JSONObject playerInfos = new JSONObject();
         creatureMap.values().stream()
-                .filter(player1 -> world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)
+                .filter(player1 -> world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN)
                 .filter(player1 -> StringUtils.equals(userCode, player1.getBlockInfo().getId())
                         || world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
                 .forEach(player1 -> playerInfos.put(player1.getBlockInfo().getId(),
@@ -491,7 +454,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         if (null != functions) {
             if (Boolean.TRUE.equals(functions.getBoolean("createPlayerInfoInstance"))) {
                 functionsResponse.put("createPlayerInfoInstance", CreatureFactory.createCreatureInstance(
-                        CreatureConstants.PLAYER_TYPE_HUMAN, CreatureConstants.CREATURE_TYPE_HUMAN));
+                        GamePalConstants.PLAYER_TYPE_HUMAN, CreatureConstants.CREATURE_TYPE_HUMAN));
             }
             if (Boolean.TRUE.equals(functions.getBoolean("updateMiniMap"))) {
                 JSONArray background = MiniMapManager.generateMiniMapBackground(region,

@@ -49,6 +49,8 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1041 = new GamepalError("1041", "Invalid sceneNo.");
     public static final GamepalError ERROR_1042 = new GamepalError("1042", "Invalid cropCode.");
     public static final GamepalError ERROR_1043 = new GamepalError("1043", "Limited by knocked buff.");
+    public static final GamepalError ERROR_1044 = new GamepalError("1044", "Webservice failed.");
+    public static final GamepalError ERROR_1045 = new GamepalError("1045", "Invalid command.");
 
     public static final GamepalError ERROR_1101 = new GamepalError("1101", "Invalid gameNo.");
     public static final GamepalError ERROR_1102 = new GamepalError("1102", "Invalid playerCount.");

@@ -1,9 +1,6 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.BuffConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -252,7 +249,7 @@ public class MovementManagerImpl implements MovementManager {
         BlockUtil.fixWorldCoordinate(region, worldMovingBlock.getWorldCoordinate());
         syncFloorCode(world, worldMovingBlock);
         if (worldMovingBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
-            if (world.getPlayerInfoMap().get(worldMovingBlock.getBlockInfo().getId()).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+            if (world.getPlayerInfoMap().get(worldMovingBlock.getBlockInfo().getId()).getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
                 if (isTeleport) {
                     world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
                 }

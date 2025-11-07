@@ -6,8 +6,6 @@ public class CreatureConstants {
 
     private CreatureConstants() {}
 
-    public static final int PLAYER_TYPE_HUMAN = 0;
-    public static final int PLAYER_TYPE_NPC = 1;
     public static final int CREATURE_TYPE_HUMAN = 1;
     public static final int CREATURE_TYPE_ANIMAL = 2;
     public static final int FACE_COEFS_LENGTH = 14;

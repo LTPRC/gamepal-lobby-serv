@@ -24,6 +24,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -142,7 +143,7 @@ public class CommandManagerImpl implements CommandManager {
             case "nwcoracle":
                 playerService.generateNotificationMessage(userCode, "先知带你看世界。");
                 String animalUserCode = UUID.randomUUID().toString();
-                Block animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                Block animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
                 playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
                 playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
@@ -155,7 +156,7 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getZ()));
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 animalUserCode = UUID.randomUUID().toString();
-                animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
                 playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
                 playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
@@ -168,7 +169,7 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getZ()));
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 animalUserCode = UUID.randomUUID().toString();
-                animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
                 playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
                 playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
@@ -181,7 +182,7 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getZ()));
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 animalUserCode = UUID.randomUUID().toString();
-                animal = npcManager.createCreature(world, CreatureConstants.PLAYER_TYPE_NPC,
+                animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
                 playerInfo = world.getPlayerInfoMap().get(animal.getBlockInfo().getId());
                 playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_RUNNING);
@@ -232,6 +233,9 @@ public class CommandManagerImpl implements CommandManager {
                 movementManager.settleCoordinate(world, player,
                         world.getPlayerInfoMap().get(userCode).getRespawnPoint(), true);
                 break;
+            default:
+                playerService.generateNotificationMessage(userCode, "无效指令。");
+                return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1045));
         }
         return ResponseEntity.ok().body(rst.toString());
     }

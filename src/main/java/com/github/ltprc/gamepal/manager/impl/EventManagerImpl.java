@@ -164,7 +164,8 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
                 affectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
                 updateBullet(world, eventBlock, fromCreature, affectedBlocks);
-                addEvent(world, BlockConstants.BLOCK_CODE_DISINTEGRATE, fromCreature.getBlockInfo().getId(), worldCoordinate);
+                addEvent(world, BlockConstants.BLOCK_CODE_DISINTEGRATE, fromCreature.getBlockInfo().getId(),
+                        eventBlock.getWorldCoordinate());
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
                 tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
@@ -427,7 +428,6 @@ public class EventManagerImpl implements EventManager {
     }
 
     @Override
-    @Transactional
     public void affectBlock(GameWorld world, Block eventBlock, Block targetBlock) {
         int changedHp = SkillUtil.calculateChangedHp(eventBlock.getBlockInfo().getCode(),
                 targetBlock.getBlockInfo().getType());
@@ -437,7 +437,7 @@ public class EventManagerImpl implements EventManager {
             changedHp /= 2;
         }
         if (targetBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN
+                && world.getPlayerInfoMap().get(targetBlock.getBlockInfo().getId()).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN
                 && !world.getNpcBrainMap().get(targetBlock.getBlockInfo().getId()).getExemption()[CreatureConstants.NPC_EXEMPTION_ALL]) {
             npcManager.prepare2Attack(world, targetBlock.getBlockInfo().getId(), world.getSourceMap().get(eventBlock.getBlockInfo().getId()));
         }

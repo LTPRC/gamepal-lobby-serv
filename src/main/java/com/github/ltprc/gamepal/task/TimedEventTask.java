@@ -180,7 +180,7 @@ public class TimedEventTask {
                             playerService.changeVp(id, newVp, false);
 
                             // Change hunger
-                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                            if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
                                 randomNumber = Math.random();
                                 if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
                                         || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
@@ -193,7 +193,7 @@ public class TimedEventTask {
                             }
 
                             // Change thirst
-                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                            if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
                                 randomNumber = Math.random();
                                 if (Math.abs(movementInfo.getSpeed().getX().doubleValue()) > 0
                                         || Math.abs(movementInfo.getSpeed().getY().doubleValue()) > 0
@@ -234,7 +234,7 @@ public class TimedEventTask {
                             }
 
                             // Update possible interacted blocks
-                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN) {
+                            if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
                                 interactionManager.searchInteraction(world, id);
                             }
 
@@ -261,11 +261,11 @@ public class TimedEventTask {
                             }
 
                             // Check relation with boss
-                            if (playerInfo.getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN
+                            if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN
                                     && StringUtils.isNotBlank(playerInfo.getBossId())
                                     && playerService.getRelationMapByUserCode(id)
                                     .get(playerInfo.getBossId()) <= CreatureConstants.RELATION_MIN) {
-                                playerService.setMember(playerInfo.getBossId(), id, "");
+                                playerService.setMember(playerInfo.getBossId(), id, "", true);
                             }
                         }
 
@@ -313,7 +313,7 @@ public class TimedEventTask {
 //                if (timestamp - oldTimestamp > timeThreshold) {
 //                    if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_PLAYER
 //                            && creatureMap.containsKey(blockInfo.getId())
-//                            && playerInfoMap.get(blockInfo.getId()).getPlayerType() != CreatureConstants.PLAYER_TYPE_HUMAN) {
+//                            && playerInfoMap.get(blockInfo.getId()).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN) {
 //                        // NPC is exempted 24/10/20
 //                        userService.logoff(blockInfo.getId(), "", false);
 //                    }
@@ -324,7 +324,7 @@ public class TimedEventTask {
 //            });
             onlineMap.forEach((id, oldTimestamp) -> {
                 if (timestamp - oldTimestamp > GamePalConstants.PLAYER_LOGOFF_THRESHOLD_IN_MILLISECOND
-                        && (playerInfoMap.get(id).getPlayerType() == CreatureConstants.PLAYER_TYPE_HUMAN)) {
+                        && (playerInfoMap.get(id).getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN)) {
                     // NPC is exempted 25/02/01
                     userService.logoff(id, "", false);
                 }

@@ -15,6 +15,8 @@ public class GamePalConstants {
     public static final int WEB_STAGE_START = 0;
     public static final int WEB_STAGE_INITIALIZING = 1;
     public static final int WEB_STAGE_INITIALIZED = 2;
+    public static final int PLAYER_TYPE_HUMAN = 0;
+    public static final int PLAYER_TYPE_NPC = 1;
     public static final int PLAYER_STATUS_INIT = 0;
     public static final int PLAYER_STATUS_RUNNING = 1;
     public static final int FRAME_PER_SECOND = 25;
