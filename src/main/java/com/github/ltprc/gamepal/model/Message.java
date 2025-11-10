@@ -13,4 +13,12 @@ public class Message {
     private String fromUserCode;
     private String toUserCode;
     private String content;
+
+    public Message(Message message) {
+        this.type = message.getType();
+        this.scope = message.getScope();
+        this.fromUserCode = message.getFromUserCode();
+        this.toUserCode = message.getToUserCode();
+        this.content = message.getContent();
+    }
 }

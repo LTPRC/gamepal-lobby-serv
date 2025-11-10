@@ -53,7 +53,10 @@ public class WebServiceImpl implements WebService {
                 return null;
             }
 
-            assert response.body() != null;
+            if (null == response.body()) {
+                logger.error(ErrorUtil.ERROR_1046);
+                return null;
+            }
             String responseBody = response.body().string();
             return JSON.parseObject(responseBody, QwenResponse.class);
 

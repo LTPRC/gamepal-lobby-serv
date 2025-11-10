@@ -4,12 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.BuffConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.FlagConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.InteractionManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
@@ -45,11 +40,9 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class WebSocketServiceImpl implements WebSocketService {
@@ -322,7 +315,25 @@ public class WebSocketServiceImpl implements WebSocketService {
         Map<String, Queue<Message>> messageMap = world.getMessageMap();
         if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
             JSONArray messages = new JSONArray();
-            messages.addAll(messageMap.get(userCode));
+            messages.addAll(messageMap.get(userCode).stream()
+                    .flatMap(message -> {
+                        String content = message.getContent();
+                        if (null == content || content.length() <= MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX) {
+                            return Stream.of(new Message(message));
+                        } else {
+                            // 需要拆分 content
+                            List<Message> parts = new ArrayList<>();
+                            for (int i = 0; i < content.length(); i += MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX) {
+                                int end = Math.min(i + MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX, content.length());
+                                String subContent = content.substring(i, end);
+                                Message part = new Message(message);
+                                part.setContent(subContent);
+                                parts.add(part);
+                            }
+                            return parts.stream();
+                        }
+                    })
+                    .collect(Collectors.toList()));
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }

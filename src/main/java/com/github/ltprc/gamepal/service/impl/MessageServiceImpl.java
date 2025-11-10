@@ -2,9 +2,7 @@ package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +13,7 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.MessageConstants;
 import com.github.ltprc.gamepal.manager.CommandManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
+import com.github.ltprc.gamepal.model.QwenResponse;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -234,7 +233,8 @@ public class MessageServiceImpl implements MessageService {
             return;
         }
         StringBuilder messageSb = new StringBuilder();
-        messageSb.append("以JSON数组的结构，返回消息的回答，每个字符串元素不超过60字符长度。 ");
+        messageSb.append("回答" + world.getPlayerInfoMap().get(msg.getFromUserCode()).getNickname()
+                + "向你" + world.getPlayerInfoMap().get(userCode).getNickname() + "发来的消息。");
         messageSb.append("消息范围:");
         switch (msg.getType()) {
             case MessageConstants.SCOPE_GLOBAL:
@@ -253,29 +253,70 @@ public class MessageServiceImpl implements MessageService {
                 messageSb.append("附近的人 ");
                 break;
         }
-        messageSb.append("消息内容:\\\"" + msg.getContent() + "\\\" ");
-        messageSb.append("接收者个人信息:" + playerService.toReadableString(
-                world.getCreatureMap().get(userCode),
-                world.getPlayerInfoMap().get(userCode)) + " ");
-        messageSb.append("发送者个人信息:" + playerService.toReadableString(
-                world.getCreatureMap().get(msg.getFromUserCode()),
-                world.getPlayerInfoMap().get(msg.getFromUserCode())) + " ");
-        messageSb.append("接受者和发送者友好度(" + CreatureConstants.RELATION_MIN + "至"
-                + CreatureConstants.RELATION_MAX + "):"
-                + world.getRelationMap().get(userCode).get(msg.getFromUserCode()));
+        messageSb.append("消息内容:\\\"")
+                .append(msg.getContent())
+                .append("\\\" ");
+        messageSb.append("你的个人信息:")
+                .append(playerService.toReadableString(world.getCreatureMap().get(userCode),
+                        world.getPlayerInfoMap().get(userCode)))
+                .append(" ");
+        messageSb.append("对方个人信息:")
+                .append(playerService.toReadableString(world.getCreatureMap().get(msg.getFromUserCode()),
+                        world.getPlayerInfoMap().get(msg.getFromUserCode())))
+                .append(" ");
+        messageSb.append("你们之间的友好度(整数取值范围" + CreatureConstants.RELATION_MIN)
+                .append("至" + CreatureConstants.RELATION_MAX + "):")
+                .append(world.getRelationMap().get(userCode).get(msg.getFromUserCode()))
+                .append(" ");
+        messageSb.append("以JSON数组的结构返回结果。");
+        messageSb.append("第一项代表回答以后你们之间的友好度(整数取值范围" + CreatureConstants.RELATION_MIN + "至"
+                        + CreatureConstants.RELATION_MAX + ")");
+        messageSb.append("第二项代表回答回答内容。 ");
         webService.callQwenApiAsync("qwen-plus", messageSb.toString())
                 .thenAccept(qwenResponse -> {
+                    Optional.ofNullable(qwenResponse)
+                            .map(QwenResponse::getOutput)
+                            .map(QwenResponse.Output::getText)
+                            .filter(text -> !text.trim().isEmpty())
+                            .map(text -> {
+                                try {
+                                    return JSON.parseArray(text).toJavaList(String.class);
+                                } catch (Exception e) {
+                                    logger.error(ErrorUtil.ERROR_1046 + "userCode: " + userCode);
+                                    return null;
+                                }
+                            })
+                            .filter(list -> list.size() >= 2)
+                            .ifPresent(qwenResponseList -> {
+                                try {
+                                    int newRelation = Integer.parseInt(qwenResponseList.get(0));
+                                    playerService.setRelation(userCode, msg.getFromUserCode(), newRelation, true, true);
+                                } catch (NumberFormatException e) {
+                                    logger.error(ErrorUtil.ERROR_1046 + "userCode: " + userCode);
+                                    return;
+                                }
+                                String content = qwenResponseList.get(1);
+                                Message returnedMessage = new Message();
+                                returnedMessage.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
+                                returnedMessage.setScope(MessageConstants.SCOPE_INDIVIDUAL);
+                                returnedMessage.setFromUserCode(userCode);
+                                returnedMessage.setToUserCode(msg.getFromUserCode());
+                                returnedMessage.setContent(content);
+                                collectMessage(msg.getFromUserCode(), returnedMessage);
+                            });
                     if (null != qwenResponse && null != qwenResponse.getOutput()) {
-                        JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class)
-                                .forEach(content -> {
-                                    Message returnedMessage = new Message();
-                                    returnedMessage.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
-                                    returnedMessage.setScope(MessageConstants.SCOPE_INDIVIDUAL);
-                                    returnedMessage.setFromUserCode(userCode);
-                                    returnedMessage.setToUserCode(msg.getFromUserCode());
-                                    returnedMessage.setContent(content);
-                                    collectMessage(msg.getFromUserCode(), returnedMessage);
-                                });
+                        List<String> qwenResponseList
+                                = JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class);
+                        int newRelation = Integer.parseInt(qwenResponseList.get(0));
+                        playerService.setRelation(userCode, msg.getFromUserCode(), newRelation, true, true);
+                        String content = qwenResponseList.get(1);
+                        Message returnedMessage = new Message();
+                        returnedMessage.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
+                        returnedMessage.setScope(MessageConstants.SCOPE_INDIVIDUAL);
+                        returnedMessage.setFromUserCode(userCode);
+                        returnedMessage.setToUserCode(msg.getFromUserCode());
+                        returnedMessage.setContent(content);
+                        collectMessage(msg.getFromUserCode(), returnedMessage);
                     }
                 })
                 .exceptionally(throwable -> {

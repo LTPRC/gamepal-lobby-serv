@@ -51,6 +51,7 @@ public class ErrorUtil {
     public static final GamepalError ERROR_1043 = new GamepalError("1043", "Limited by knocked buff.");
     public static final GamepalError ERROR_1044 = new GamepalError("1044", "Webservice failed.");
     public static final GamepalError ERROR_1045 = new GamepalError("1045", "Invalid command.");
+    public static final GamepalError ERROR_1046 = new GamepalError("1046", "Invalid webservice response.");
 
     public static final GamepalError ERROR_1101 = new GamepalError("1101", "Invalid gameNo.");
     public static final GamepalError ERROR_1102 = new GamepalError("1102", "Invalid playerCount.");
