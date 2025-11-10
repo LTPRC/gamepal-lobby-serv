@@ -612,6 +612,22 @@ public class BlockUtil {
      * @param structureMaterial2 Negative object's material
      * @return boolean
      */
+    public static boolean checkMaterialStopMovement(int structureMaterial1, int structureMaterial2) {
+        switch (structureMaterial1) {
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
+            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
+                return false;
+            default:
+                return checkMaterialCollision(structureMaterial1, structureMaterial2);
+        }
+    }
+
+    /**
+     * Positive object's material VS. Negative object's material
+     * @param structureMaterial1 Positive object's material
+     * @param structureMaterial2 Negative object's material
+     * @return boolean
+     */
     public static boolean checkMaterialCollision(int structureMaterial1, int structureMaterial2) {
         switch (structureMaterial1) {
             case BlockConstants.STRUCTURE_MATERIAL_ALL:

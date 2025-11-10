@@ -63,11 +63,6 @@ public class EventManagerImpl implements EventManager {
         correctTarget(world, eventBlock, fromCreature);
         // Unified directions of event block and origin block
         eventBlock.getMovementInfo().setFaceDirection(fromCreature.getMovementInfo().getFaceDirection());
-        // STRUCTURE_MATERIAL_PARTICLE_NO_FLESH is for piercing creatures
-        // STRUCTURE_MATERIAL_PARTICLE is for hitting creatures
-        if (eventBlock.getBlockInfo().getStructure().getMaterial() == BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH) {
-            eventBlock.getBlockInfo().getStructure().setMaterial(BlockConstants.STRUCTURE_MATERIAL_PARTICLE);
-        }
         activateEvent(world, eventBlock, fromCreature);
     }
 
@@ -93,7 +88,10 @@ public class EventManagerImpl implements EventManager {
                         eventBlock.getBlockInfo().getStructure().getMaterial(),
                         blocker.getBlockInfo().getStructure().getMaterial()))
                 .forEach(blocker ->
-                        BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, true)
+                        BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker,
+                                BlockUtil.checkMaterialStopMovement(
+                                        eventBlock.getBlockInfo().getStructure().getMaterial(),
+                                        blocker.getBlockInfo().getStructure().getMaterial()))
                 );
     }
 
