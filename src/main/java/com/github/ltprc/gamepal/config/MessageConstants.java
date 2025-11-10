@@ -22,5 +22,5 @@ public class MessageConstants {
     public static final String TRANSACTION_TYPE_UPDATE_HUNGER = "UPDATE_HUNGER";
     public static final String TRANSACTION_TYPE_UPDATE_THIRST = "UPDATE_THIRST";
 
-    public static final int CHAT_DISPLAY_LINE_CHAR_SIZE_MAX = 50;
+    public static final int CHAT_DISPLAY_LINE_CHAR_SIZE_MAX = 20;
 }
