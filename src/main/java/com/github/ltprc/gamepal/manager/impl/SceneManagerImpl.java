@@ -21,10 +21,13 @@ import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.GravitatedStack;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.PlayerInfoUtil;
@@ -65,6 +68,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private EventManager eventManager;
+
+    @Autowired
+    private WorldService worldService;
 
     @Override
     public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
@@ -616,7 +622,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = BlockFactory.createYRankingQueue(region);
+        Queue<Block> rankingQueue = createYRankingQueue(region);
         IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
@@ -652,7 +658,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = BlockFactory.createYRankingQueue(region);
+        Queue<Block> rankingQueue = createYRankingQueue(region);
         // Collect detected creature blocks
         Map<String, Block> creatureMap = world.getCreatureMap();
         creatureMap.values().stream()
@@ -706,6 +712,32 @@ public class SceneManagerImpl implements SceneManager {
         }
     }
 
+    private Queue<Block> createYRankingQueue(final RegionInfo regionInfo) {
+        return new PriorityQueue<>((o1, o2) -> {
+            Map<Integer, Structure> structureMap = worldService.getStructureMap();
+            int layer1 = structureMap.getOrDefault(o1.getBlockInfo().getCode(), new Structure()).getLayer();
+            int layer2 = structureMap.getOrDefault(o2.getBlockInfo().getCode(), new Structure()).getLayer();
+            if (layer1 / 10 != layer2 / 10) {
+                return layer1 / 10 - layer2 / 10;
+            }
+            BigDecimal verticalDistance = BlockUtil.calculateVerticalDistance(regionInfo, o1.getWorldCoordinate(),
+                    o2.getWorldCoordinate());
+            if (null != verticalDistance && !verticalDistance.equals(BigDecimal.ZERO)) {
+                return BigDecimal.ZERO.compareTo(verticalDistance);
+            }
+            BigDecimal horizontalDistance = BlockUtil.calculateHorizontalDistance(regionInfo, o1.getWorldCoordinate(),
+                    o2.getWorldCoordinate());
+            if (null != horizontalDistance && !horizontalDistance.equals(BigDecimal.ZERO)) {
+                return BigDecimal.ZERO.compareTo(horizontalDistance);
+            }
+            int layerDiff = layer1 % 10 - layer2 % 10;
+            if (layerDiff != 0) {
+                return layerDiff;
+            }
+            return o1.getBlockInfo().getCode() - o2.getBlockInfo().getCode();
+        });
+    }
+
     @Override
     public List<Block> collectLinearBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate,
                                            Block eventBlock, String sourceId) {
@@ -717,22 +749,29 @@ public class SceneManagerImpl implements SceneManager {
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         Set<IntegerCoordinate> preSelectedSceneCoordinates =
                 BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         // Pre-select blocks including creatures
         List<Block> preSelectedBlocks = world.getCreatureMap().values().stream()
                 .filter(creature -> !StringUtils.equals(creature.getBlockInfo().getId(), sourceId))
                 .filter(creature -> creature.getWorldCoordinate().getRegionNo() == region.getRegionNo())
                 .filter(creature -> preSelectedSceneCoordinates.contains(creature.getWorldCoordinate().getSceneCoordinate()))
                 .filter(creature -> playerService.validateActiveness(world, creature.getBlockInfo().getId()))
-                .filter(creature ->  BlockUtil.checkMaterialCollision(eventBlock.getBlockInfo().getStructure().getMaterial(),
-                        creature.getBlockInfo().getStructure().getMaterial()))
-                .filter(creature -> BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, creature, false))
+                .filter(creature -> structureMap.containsKey(eventBlock.getBlockInfo().getCode())
+                        && structureMap.containsKey(creature.getBlockInfo().getCode())
+                        && BlockUtil.checkMaterialCollision(
+                                structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
+                        structureMap.get(creature.getBlockInfo().getCode()).getMaterial()))
+                .filter(creature -> movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, creature, false))
                 .collect(Collectors.toList());
         // Collect all collided blocks
         preSelectedSceneCoordinates.forEach(sceneCoordinate ->
                 region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
-                        .filter(blocker ->  BlockUtil.checkMaterialCollision(eventBlock.getBlockInfo().getStructure().getMaterial(),
-                                blocker.getBlockInfo().getStructure().getMaterial()))
-                        .filter(blocker -> BlockUtil.detectLineCollision(region, fromWorldCoordinate, eventBlock, blocker, false))
+                        .filter(blocker -> structureMap.containsKey(eventBlock.getBlockInfo().getCode())
+                                && structureMap.containsKey(blocker.getBlockInfo().getCode())
+                                && BlockUtil.checkMaterialCollision(
+                                        structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
+                                structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
+                        .filter(blocker -> movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, blocker, false))
                         .forEach(preSelectedBlocks::add));
         return preSelectedBlocks;
     }
@@ -861,14 +900,14 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_DEFAULT);
-        MovementInfo movementInfo = new MovementInfo();
-        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        updateAltitude(world, block);
-        registerBlock(world, block);
+        Block block = addOtherBlock(world, worldCoordinate, BlockConstants.BLOCK_CODE_DROP_DEFAULT);
+//        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_DEFAULT);
+//        MovementInfo movementInfo = new MovementInfo();
+//        Block block = new Block(worldCoordinate, blockInfo, movementInfo);
+//        updateBlockAltitude(world, block);
+//        registerBlock(world, block);
         if (null != drop) {
             world.getDropMap().put(block.getBlockInfo().getId(), drop);
-//            worldService.registerOnline(world, blockInfo.getId());
         }
         return block;
     }
@@ -896,40 +935,35 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(blockCode);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
-        updateAltitude(world, block);
-        registerBlock(world, block);
-        if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_CONTAINER
-                || blockInfo.getType() == BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER
-                || blockInfo.getType() == BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER) {
-            BagInfo bagInfo = new BagInfo();
-            bagInfo.setId(block.getBlockInfo().getId());
-            world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
-            userService.addUserIntoWorldMap(block.getBlockInfo().getId(), world.getId());
-        } else if (blockInfo.getType() == BlockConstants.BLOCK_TYPE_FARM) {
-            world.getFarmMap().put(block.getBlockInfo().getId(), new FarmInfo());
+        switch (blockInfo.getType()) {
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
+                BagInfo bagInfo = new BagInfo();
+                bagInfo.setId(block.getBlockInfo().getId());
+                world.getBagInfoMap().put(block.getBlockInfo().getId(), bagInfo);
+                userService.addUserIntoWorldMap(block.getBlockInfo().getId(), world.getId());
+                break;
+            case BlockConstants.BLOCK_TYPE_FARM:
+                world.getFarmMap().put(block.getBlockInfo().getId(), new FarmInfo());
+                break;
+            case BlockConstants.BLOCK_TYPE_FLOOR:
+            case BlockConstants.BLOCK_TYPE_WALL:
+                addBlockIntoGravitatedStack(world, block);
+                break;
+            default:
+                break;
         }
+        updateBlockAltitude(world, block);
+        registerBlock(world, block);
         return block;
     }
 
     private Block registerBlock(GameWorld world, Block block) {
-//        switch (eventCode) {
-//            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
-//            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
-//            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
-//            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-//            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-//            case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
-//            case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
-//                break;
-//            default:
-//                registerBlock(world, block);
-//                break;
-//        }
         Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         Scene scene = region.getScenes().get(block.getWorldCoordinate().getSceneCoordinate());
         scene.getBlocks().put(block.getBlockInfo().getId(), block);
         world.getBlockMap().put(block.getBlockInfo().getId(), block);
-        // TODO Register gravitatedStack
         return block;
     }
 
@@ -941,17 +975,29 @@ public class SceneManagerImpl implements SceneManager {
         if (!SkillUtil.blockCode2Build(getGridBlockCode(world, worldCoordinate))) {
             return false;
         }
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         return scene.getBlocks().values().stream()
                 .filter(blocker -> !StringUtils.equals(block.getBlockInfo().getId(), blocker.getBlockInfo().getId()))
-                .filter(blocker -> BlockUtil.detectCollision(region, block, blocker))
-                .noneMatch(blocker -> BlockUtil.checkMaterialCollision(block.getBlockInfo().getStructure().getMaterial(),
-                        blocker.getBlockInfo().getStructure().getMaterial()));
+                .filter(blocker -> movementManager.detectCollision(world, block, blocker))
+                .noneMatch(blocker -> structureMap.containsKey(block.getBlockInfo().getCode())
+                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
+                        && BlockUtil.checkMaterialCollision(
+                                structureMap.get(block.getBlockInfo().getCode()).getMaterial(),
+                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()));
     }
 
     @Override
     public void removeBlock(GameWorld world, Block block, boolean isDestroyed) {
         if (isDestroyed) {
             destroyBlock(world, block);
+        }
+        switch (block.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_FLOOR:
+            case BlockConstants.BLOCK_TYPE_WALL:
+                removeBlockFromGravitatedStack(world, block);
+                break;
+            default:
+                break;
         }
         unregisterBlock(world, block);
     }
@@ -993,7 +1039,6 @@ public class SceneManagerImpl implements SceneManager {
         }
         scene.getBlocks().remove(block.getBlockInfo().getId());
         world.getBlockMap().remove(block.getBlockInfo().getId());
-//        worldService.registerOffline(world, block.getBlockInfo().getId());
         world.getSourceMap().remove(block.getBlockInfo().getId());
     }
 
@@ -1178,21 +1223,23 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public BigDecimal getAltitude(GameWorld world, WorldCoordinate worldCoordinate) {
-        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
         return null == gravitatedStack ? region.getAltitude() : gravitatedStack.getMaxAltitude();
     }
 
     @Override
-    public void updateAltitude(GameWorld world, Block block) {
-        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
-        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
-        worldCoordinate.getCoordinate().setZ(null == gravitatedStack ? worldCoordinate.getCoordinate().getZ() : gravitatedStack.getMaxAltitude());
+    public void updateBlockAltitude(GameWorld world, Block block) {
+        block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate()));
+//        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
+//        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+//        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
+//        worldCoordinate.getCoordinate().setZ(null == gravitatedStack ? worldCoordinate.getCoordinate().getZ() : gravitatedStack.getMaxAltitude());
     }
 
     private GravitatedStack locateGravitatedStack(GameWorld world, WorldCoordinate worldCoordinate) {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-        IntegerCoordinate altitudeCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
+        IntegerCoordinate altitudeCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
         WorldCoordinate locatedWorldCoordinate = new WorldCoordinate(worldCoordinate.getRegionNo(),
                 worldCoordinate.getSceneCoordinate(),
                 new Coordinate(BigDecimal.valueOf(altitudeCoordinate.getX()),
@@ -1204,5 +1251,47 @@ public class SceneManagerImpl implements SceneManager {
         }
         Scene scene = region.getScenes().get(locatedWorldCoordinate.getSceneCoordinate());
         return scene.getGravitatedStacks()[locatedWorldCoordinate.getCoordinate().getX().intValue()][locatedWorldCoordinate.getCoordinate().getY().intValue()];
+    }
+
+    private void addBlockIntoGravitatedStack(final GameWorld world, Block block) {
+        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
+        if (gravitatedStack.getStack().stream()
+                .noneMatch(block1 -> StringUtils.equals(block.getBlockInfo().getId(), block1.getBlockInfo().getId()))) {
+            gravitatedStack.getStack().push(block);
+            block.getWorldCoordinate().getCoordinate()
+                    .setZ(BigDecimal.valueOf(gravitatedStack.getMaxAltitude().intValue()));
+            Map<Integer, Structure> structureMap = worldService.getStructureMap();
+            BigDecimal height = structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
+                    .getShape().getRadius().getZ();
+            gravitatedStack.setMaxAltitude(block.getWorldCoordinate().getCoordinate().getZ().add(height));
+        }
+    }
+
+    private void removeBlockFromGravitatedStack(final GameWorld world, Block block) {
+        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
+        Stack<Block> tempStack = new Stack<>();
+        Block topBlock = null;
+        if (null == gravitatedStack) {
+            logger.error(worldCoordinate.getRegionNo() + ":" + worldCoordinate.getSceneCoordinate().getX() + "," + worldCoordinate.getSceneCoordinate().getY());
+        }
+        while (!gravitatedStack.getStack().empty()) {
+            topBlock = gravitatedStack.getStack().pop();
+            if (StringUtils.equals(block.getBlockInfo().getId(), topBlock.getBlockInfo().getId())) {
+                Map<Integer, Structure> structureMap = worldService.getStructureMap();
+                BigDecimal height = structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
+                        .getShape().getRadius().getZ();
+                gravitatedStack.setMaxAltitude(block.getWorldCoordinate().getCoordinate().getZ().subtract(height));
+                break;
+            } else {
+                tempStack.push(topBlock);
+            }
+        }
+        while (!tempStack.empty()) {
+            gravitatedStack.getStack().push(tempStack.pop());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.github.ltprc.gamepal.model.map.structure;
 
+import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,8 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 public class Structure {
-    private Integer material;
-    private Integer layer;
+    private Integer material = BlockConstants.STRUCTURE_MATERIAL_ALL;
+    private Integer layer = BlockConstants.STRUCTURE_LAYER_MIDDLE;
     private Shape shape = new Shape();
     private PlanarCoordinate imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
 

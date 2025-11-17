@@ -1,22 +1,26 @@
 package com.github.ltprc.gamepal.util;
 
-import com.github.ltprc.gamepal.config.*;
-import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
-import com.github.ltprc.gamepal.model.map.structure.*;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class BlockUtil {
 
@@ -43,48 +47,49 @@ public class BlockUtil {
      * @param worldCoordinate
      */
     public static void fixWorldCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
-        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(-1)) < 0) {
-            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
-            worldCoordinate.getCoordinate()
-                    .setY(worldCoordinate.getCoordinate().getY().add(new BigDecimal(regionInfo.getHeight())));
-        }
-        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(regionInfo.getHeight() - 1)) >= 0) {
-            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
-            worldCoordinate.getCoordinate()
-                    .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(regionInfo.getHeight())));
-        }
-        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(-0.5D)) < 0) {
-            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
-            worldCoordinate.getCoordinate()
-                    .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(regionInfo.getWidth())));
-        }
-        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth() - 0.5)) >= 0) {
-            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
-            worldCoordinate.getCoordinate()
-                    .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(regionInfo.getWidth())));
-        }
+        fixWorldCoordinateReal(regionInfo, worldCoordinate);
+//        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.valueOf(-1)) < 0) {
+//            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
+//            worldCoordinate.getCoordinate()
+//                    .setY(worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(regionInfo.getHeight())));
+//        }
+//        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.valueOf(regionInfo.getHeight() - 1)) >= 0) {
+//            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
+//            worldCoordinate.getCoordinate()
+//                    .setY(worldCoordinate.getCoordinate().getY().subtract(BigDecimal.valueOf(regionInfo.getHeight())));
+//        }
+//        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(-0.5D)) < 0) {
+//            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
+//            worldCoordinate.getCoordinate()
+//                    .setX(worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(regionInfo.getWidth())));
+//        }
+//        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth() - 0.5)) >= 0) {
+//            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
+//            worldCoordinate.getCoordinate()
+//                    .setX(worldCoordinate.getCoordinate().getX().subtract(BigDecimal.valueOf(regionInfo.getWidth())));
+//        }
     }
 
     public static void fixWorldCoordinateReal(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
         while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.ZERO) < 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
             worldCoordinate.getCoordinate()
-                    .setY(worldCoordinate.getCoordinate().getY().add(new BigDecimal(regionInfo.getHeight())));
+                    .setY(worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(regionInfo.getHeight())));
         }
-        while (worldCoordinate.getCoordinate().getY().compareTo(new BigDecimal(regionInfo.getHeight())) >= 0) {
+        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.valueOf(regionInfo.getHeight())) >= 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
             worldCoordinate.getCoordinate()
-                    .setY(worldCoordinate.getCoordinate().getY().subtract(new BigDecimal(regionInfo.getHeight())));
+                    .setY(worldCoordinate.getCoordinate().getY().subtract(BigDecimal.valueOf(regionInfo.getHeight())));
         }
         while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.ZERO) < 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
             worldCoordinate.getCoordinate()
-                    .setX(worldCoordinate.getCoordinate().getX().add(new BigDecimal(regionInfo.getWidth())));
+                    .setX(worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(regionInfo.getWidth())));
         }
         while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth())) >= 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
             worldCoordinate.getCoordinate()
-                    .setX(worldCoordinate.getCoordinate().getX().subtract(new BigDecimal(regionInfo.getWidth())));
+                    .setX(worldCoordinate.getCoordinate().getX().subtract(BigDecimal.valueOf(regionInfo.getWidth())));
         }
     }
 
@@ -337,47 +342,13 @@ public class BlockUtil {
     }
 
     /**
-     *
-     * @param regionInfo
-     * @param from
-     * @param block1
-     * @param block2
-     * @param correctBlock1
-     * @return
-     */
-    public static boolean detectLineCollision(RegionInfo regionInfo, WorldCoordinate from, Block block1,
-                                              Block block2, boolean correctBlock1) {
-        if (from.getRegionNo() != regionInfo.getRegionNo()
-                || block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        Coordinate coordinate0 = convertWorldCoordinate2Coordinate(regionInfo, from);
-        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
-        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        Coordinate coordinate3 = findClosestPoint(coordinate0, coordinate1, coordinate2);
-        Block block3 = new Block(block1);
-        WorldCoordinate worldCoordinate3 = BlockUtil.locateCoordinateWithDirectionAndDistance(regionInfo,
-                block1.getWorldCoordinate(),
-                BlockUtil.calculateAngle(coordinate1, coordinate3), BlockUtil.calculateDistance(coordinate1, coordinate3));
-        BlockUtil.copyWorldCoordinate(worldCoordinate3, block3.getWorldCoordinate());
-        if (detectCollision(regionInfo, block3, block2)) {
-            if (correctBlock1) {
-                BlockUtil.copyWorldCoordinate(worldCoordinate3, block1.getWorldCoordinate());
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * 通义千问
      * @param coordinate0
      * @param coordinate1
      * @param coordinate2
      * @return
      */
-    private static Coordinate findClosestPoint(Coordinate coordinate0, Coordinate coordinate1, Coordinate coordinate2) {
+    public static Coordinate findClosestPoint(Coordinate coordinate0, Coordinate coordinate1, Coordinate coordinate2) {
         Coordinate segmentVector = new Coordinate(coordinate1.getX().subtract(coordinate0.getX()),
                 coordinate1.getY().subtract(coordinate0.getY()), coordinate1.getZ().subtract(coordinate0.getZ()));
         Coordinate pointVector = new Coordinate(coordinate2.getX().subtract(coordinate0.getX()),
@@ -419,27 +390,8 @@ public class BlockUtil {
         return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
     }
 
-    /**
-     * Z-axis added
-     * @param regionInfo
-     * @param block1
-     * @param block2
-     * @return
-     */
-    public static boolean detectCollision(RegionInfo regionInfo, Block block1, Block block2) {
-        return detectPlanarCollision(regionInfo, block1, block2)
-                && detectZCollision(regionInfo, block1, block2);
-    }
-
-    private static boolean detectPlanarCollision(RegionInfo regionInfo, Block block1, Block block2) {
-        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        Coordinate coordinate1 = convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
-        Coordinate coordinate2 = convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        Shape shape1 = block1.getBlockInfo().getStructure().getShape();
-        Shape shape2 = block2.getBlockInfo().getStructure().getShape();
+    public static boolean detectPlanarCollision(Coordinate coordinate1, Coordinate coordinate2, Shape shape1,
+                                                Shape shape2) {
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape1.getShapeType()) {
             shape1.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
             shape1.getRadius().setY(shape1.getRadius().getX());
@@ -464,7 +416,7 @@ public class BlockUtil {
         }
         // Round vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
-            return detectCollision(regionInfo, block2, block1);
+            return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
         }
         boolean isInsideRectangle1 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
@@ -499,30 +451,6 @@ public class BlockUtil {
         return isInsideRectangle1 || isInsideRectangle2 || isInsideRound1 || isInsideRound2 || isInsideRound3 || isInsideRound4;
     }
 
-    private static boolean detectZCollision(RegionInfo regionInfo, Block block1, Block block2) {
-        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        return block1.getWorldCoordinate().getCoordinate().getZ()
-                .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())
-                .compareTo(block2.getWorldCoordinate().getCoordinate().getZ()) > 0
-                && block2.getWorldCoordinate().getCoordinate().getZ()
-                .add(block2.getBlockInfo().getStructure().getShape().getRadius().getZ())
-                .compareTo(block1.getWorldCoordinate().getCoordinate().getZ()) > 0;
-//        return block1.getWorldCoordinate().getCoordinate().getZ()
-//                .subtract(block1.getWorldCoordinate().getCoordinate().getZ())
-//                .abs()
-//                .compareTo(block1.getBlockInfo().getStructure().getShape().getRadius().getZ()
-//                        .add(block1.getBlockInfo().getStructure().getShape().getRadius().getZ())) < 0;
-    }
-
-//    public static boolean checkBlockTypeRegistrable(int blockType) {
-//        return checkBlockTypeInteractive(blockType)
-//                || blockType == BlockConstants.BLOCK_TYPE_DROP
-//                || blockType == BlockConstants.BLOCK_TYPE_TELEPORT;
-//    }
-
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_NORMAL:
@@ -537,8 +465,6 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
             case BlockConstants.BLOCK_TYPE_WALL:
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
-//            case BlockConstants.BLOCK_TYPE_CEILING:
-//            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
             case BlockConstants.BLOCK_TYPE_PLASMA:
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
                 return false;
@@ -600,7 +526,7 @@ public class BlockUtil {
                 layer = BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
                 break;
             default:
-                layer = BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION;
+                layer = BlockConstants.STRUCTURE_LAYER_MIDDLE;
                 break;
         }
         return layer;
@@ -672,9 +598,9 @@ public class BlockUtil {
         return BlockConstants.BLOCK_CODE_TYPE_MAP.getOrDefault(blockCode, BlockConstants.BLOCK_TYPE_FLOOR);
     }
 
-    public static BlockInfo createBlockInfoByCode(int blockCode) {
-        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
+    public static Structure createStructureByCode(int blockCode) {
         Structure structure;
+        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
         int structureMaterial;
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
@@ -905,14 +831,6 @@ public class BlockUtil {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
                 break;
-//            case BlockConstants.BLOCK_TYPE_CEILING:
-//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                        BlockConstants.STRUCTURE_LAYER_TOP);
-//                break;
-//            case BlockConstants.BLOCK_TYPE_CEILING_DECORATION:
-//                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-//                        BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
-//                break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
@@ -928,9 +846,14 @@ public class BlockUtil {
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
         }
+        return structure;
+    }
+
+    public static BlockInfo createBlockInfoByCode(int blockCode) {
+        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
         long timestamp = System.currentTimeMillis();
         String id = UUID.randomUUID().toString();
-        BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, structure, timestamp);
+        BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, timestamp);
         initializeBlockInfoHp(blockInfo, timestamp);
         return blockInfo;
     }

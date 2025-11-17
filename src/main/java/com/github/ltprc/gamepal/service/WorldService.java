@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.service;
 
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Recipe;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,13 @@ public interface WorldService {
 
     Map<String, Recipe> getRecipeMap();
 
+    Map<Integer, Structure> getStructureMap();
+
     void loadItems();
 
     void loadRecipes();
+
+    void loadStructures();
 
     void expandByCoordinate(GameWorld world, WorldCoordinate fromWorldCoordinate, WorldCoordinate toWorldCoordinate,
                             int depth);

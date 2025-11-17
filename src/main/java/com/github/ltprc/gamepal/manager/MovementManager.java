@@ -12,4 +12,6 @@ public interface MovementManager {
     void settleCoordinate(GameWorld world, Block block, final WorldCoordinate newWorldCoordinate, boolean isTeleport);
     void syncFloorCode(GameWorld world, Block block);
     void updateCreatureMaxSpeed(GameWorld world, String userCode);
+    boolean detectCollision(GameWorld world, Block block1, Block block2);
+    boolean detectLineCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2, boolean correctBlock1);
 }

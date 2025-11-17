@@ -285,6 +285,13 @@ public class WebSocketServiceImpl implements WebSocketService {
             JSONObject recipesObj = new JSONObject();
             recipesObj.putAll(worldService.getRecipeMap());
             staticDataObj.put("recipes", recipesObj);
+            JSONObject structuresObj = new JSONObject();
+            structuresObj.putAll(worldService.getStructureMap().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            entry -> String.valueOf(entry.getKey()),
+                            Map.Entry::getValue
+                    )));
+            staticDataObj.put("structures", structuresObj);
             rst.put("staticData", staticDataObj);
         }
 

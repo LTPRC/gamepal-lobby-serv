@@ -10,8 +10,10 @@ import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,9 @@ public class InteractionManagerImpl implements InteractionManager {
     @Autowired
     private FarmManager farmManager;
 
+    @Autowired
+    private WorldService worldService;
+
     @Override
     public void searchInteraction(GameWorld world, String userCode) {
         Map<String, Block> creatureMap = world.getCreatureMap();
@@ -51,6 +56,7 @@ public class InteractionManagerImpl implements InteractionManager {
         Block player = creatureMap.get(userCode);
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         Queue<Block> rankingQueue = BlockFactory.createDistanceRankingQueue(region, player.getWorldCoordinate());
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         sceneManager.collectSurroundingBlocks(world, player, 1).stream()
                 .filter(block -> null != BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
                         block.getWorldCoordinate()))
@@ -62,10 +68,11 @@ public class InteractionManagerImpl implements InteractionManager {
                                 block.getWorldCoordinate()).doubleValue(),
                                 player.getMovementInfo().getFaceDirection().doubleValue())
                         < InteractionConstants.MAX_INTERACTION_ANGLE.doubleValue())
-                .filter(block -> BlockUtil.checkMaterialCollision(
-                        player.getBlockInfo().getStructure().getMaterial(),
-                        block.getBlockInfo().getStructure().getMaterial())
-                        || BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType()))
+                .filter(block -> structureMap.containsKey(player.getBlockInfo().getCode())
+                        && structureMap.containsKey(block.getBlockInfo().getCode())
+                        && BlockUtil.checkMaterialCollision(
+                                structureMap.get(player.getBlockInfo().getCode()).getMaterial(),
+                        structureMap.get(block.getBlockInfo().getCode()).getMaterial()))
                 .filter(block -> !StringUtils.equals(block.getBlockInfo().getId(), userCode))
                 .forEach(rankingQueue::add);
         if (!rankingQueue.isEmpty() && BlockUtil.checkBlockTypeInteractive(rankingQueue.peek().getBlockInfo().getType())) {

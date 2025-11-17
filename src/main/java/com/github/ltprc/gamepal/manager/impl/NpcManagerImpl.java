@@ -107,7 +107,7 @@ public class NpcManagerImpl implements NpcManager {
         Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         BlockUtil.copyWorldCoordinate(worldCoordinate, player.getWorldCoordinate());
-        sceneManager.updateAltitude(world, player);
+        sceneManager.updateBlockAltitude(world, player);
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), player.getWorldCoordinate());
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
                 playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN ? 1 : 0);

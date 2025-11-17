@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 public class Shape {
     // Default square
     private int shapeType = BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE;
-    // Two-direction horizontal radius, two-direction vertical radius, One-direction Z-axis radius
     Coordinate radius = new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D), BlockConstants.Z_DEFAULT);
 
     public Shape(Shape shape) {

@@ -10,7 +10,10 @@ import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
+import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -156,24 +159,27 @@ public class MovementManagerImpl implements MovementManager {
                 expectedNewBlockX, fromId));
         preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
                 expectedNewBlockY, fromId));
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         preSelectedBlocks.stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
-                .filter(blocker -> BlockUtil.checkMaterialCollision(
-                        worldMovingBlock.getBlockInfo().getStructure().getMaterial(),
-                        blocker.getBlockInfo().getStructure().getMaterial()))
-                .filter(blocker -> BlockUtil.detectLineCollision(region, worldMovingBlock.getWorldCoordinate(),
+                .filter(blocker -> structureMap.containsKey(worldMovingBlock.getBlockInfo().getCode())
+                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
+                        && BlockUtil.checkMaterialCollision(
+                                structureMap.get(worldMovingBlock.getBlockInfo().getCode()).getMaterial(),
+                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
+                .filter(blocker -> detectLineCollision(world, worldMovingBlock.getWorldCoordinate(),
                         expectedNewBlockXY, blocker, false))
                 .collect(Collectors.toList());
 
         for (Block block : preSelectedBlocks) {
-            if (BlockUtil.detectCollision(region, worldMovingBlock, block)) {
+            if (detectCollision(world, worldMovingBlock, block)) {
                 continue;
             }
             if (xCollision && yCollision) {
                 break;
             }
             if (!xCollision) {
-                if (BlockUtil.detectCollision(region, expectedNewBlockX, block)) {
+                if (detectCollision(world, expectedNewBlockX, block)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -183,7 +189,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
             }
             if (!yCollision) {
-                if (BlockUtil.detectCollision(region, expectedNewBlockY, block)) {
+                if (detectCollision(world, expectedNewBlockY, block)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -193,7 +199,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
             }
             if (!xCollision && !yCollision) {
-                if (BlockUtil.detectCollision(region, expectedNewBlockXY, block)) {
+                if (detectCollision(world, expectedNewBlockXY, block)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -294,27 +300,8 @@ public class MovementManagerImpl implements MovementManager {
         }
         Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
         if (null != scene.getGrid() && null != scene.getGrid()[0]) {
-            WorldCoordinate worldCoordinate = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
-            BlockUtil.fixWorldCoordinateReal(region, worldCoordinate);
-            IntegerCoordinate gridCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
-//            int floorCode;
-//            floorCode = scene.getGrid()
-//                    [gridCoordinate.getX() + worldCoordinate.getCoordinate().getX().doubleValue() % 1 < 0.5 ? 0 : 1]
-//                    [gridCoordinate.getY() + worldCoordinate.getCoordinate().getY().doubleValue() % 1 < 0.5 ? 0 : 1];
-//            int code1 = scene.getGrid()[gridCoordinate.getX()][gridCoordinate.getY()];
-//            int code2 = scene.getGrid()[gridCoordinate.getX() + 1][gridCoordinate.getY()];
-//            int code3 = scene.getGrid()[gridCoordinate.getX()][gridCoordinate.getY() + 1];
-//            int code4 = scene.getGrid()[gridCoordinate.getX() + 1][gridCoordinate.getY() + 1];
-//            if (code1 == BlockConstants.BLOCK_CODE_WATER_SHALLOW && code2 == BlockConstants.BLOCK_CODE_WATER_SHALLOW
-//                    && code3 == BlockConstants.BLOCK_CODE_WATER_SHALLOW && code4 == BlockConstants.BLOCK_CODE_WATER_SHALLOW) {
-//                worldMovingBlock.getMovementInfo().setFloorCode(BlockConstants.BLOCK_CODE_WATER_SHALLOW);
-//                return;
-//            }
             int code = sceneManager.getGridBlockCode(world, worldMovingBlock.getWorldCoordinate());
             worldMovingBlock.getMovementInfo().setFloorCode(code);
-//            if (code != BlockConstants.BLOCK_CODE_WATER_SHALLOW) {
-//                worldMovingBlock.getMovementInfo().setFloorCode(code);
-//            }
         }
     }
 
@@ -418,5 +405,70 @@ public class MovementManagerImpl implements MovementManager {
         }
         player.getMovementInfo().setMaxSpeed(BlockConstants.MAX_SPEED_DEFAULT.multiply(BigDecimal.valueOf(maxSpeedCoef)));
         player.getMovementInfo().setAcceleration(player.getMovementInfo().getMaxSpeed().multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO));
+    }
+
+    @Override
+    public boolean detectCollision(GameWorld world, Block block1, Block block2) {
+        Region region = world.getRegionMap().get(block1.getWorldCoordinate().getRegionNo());
+        return detectPlanarCollision(region, block1, block2) && detectZCollision(block1, block2);
+    }
+
+    private boolean detectPlanarCollision(RegionInfo regionInfo, Block block1, Block block2) {
+        if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        if (!structureMap.containsKey(block1.getBlockInfo().getCode())
+                || !structureMap.containsKey(block2.getBlockInfo().getCode())) {
+            return false;
+        }
+        Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
+        Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
+        Shape shape1 = structureMap.get(block1.getBlockInfo().getCode()).getShape();
+        Shape shape2 = structureMap.get(block2.getBlockInfo().getCode()).getShape();
+        return BlockUtil.detectPlanarCollision(coordinate1, coordinate2, shape1, shape2);
+    }
+
+    private boolean detectZCollision(Block block1, Block block2) {
+        if (block1.getWorldCoordinate().getRegionNo() != block2.getWorldCoordinate().getRegionNo()) {
+            return false;
+        }
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        if (!structureMap.containsKey(block1.getBlockInfo().getCode())
+                || !structureMap.containsKey(block2.getBlockInfo().getCode())) {
+            return false;
+        }
+        return block1.getWorldCoordinate().getCoordinate().getZ()
+                .add(structureMap.get(block1.getBlockInfo().getCode()).getShape().getRadius().getZ())
+                .compareTo(block2.getWorldCoordinate().getCoordinate().getZ()) > 0
+                && block2.getWorldCoordinate().getCoordinate().getZ()
+                .add(structureMap.get(block2.getBlockInfo().getCode()).getShape().getRadius().getZ())
+                .compareTo(block1.getWorldCoordinate().getCoordinate().getZ()) > 0;
+    }
+
+    @Override
+    public boolean detectLineCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2, boolean correctBlock1) {
+        Region region = world.getRegionMap().get(from.getRegionNo());
+        if (block1.getWorldCoordinate().getRegionNo() != region.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
+            return false;
+        }
+        Coordinate coordinate0 = BlockUtil.convertWorldCoordinate2Coordinate(region, from);
+        Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(region, block1.getWorldCoordinate());
+        Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(region, block2.getWorldCoordinate());
+        Coordinate coordinate3 = BlockUtil.findClosestPoint(coordinate0, coordinate1, coordinate2);
+        Block block3 = new Block(block1);
+        WorldCoordinate worldCoordinate3 = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                block1.getWorldCoordinate(),
+                BlockUtil.calculateAngle(coordinate1, coordinate3), BlockUtil.calculateDistance(coordinate1, coordinate3));
+        BlockUtil.copyWorldCoordinate(worldCoordinate3, block3.getWorldCoordinate());
+        if (detectCollision(world, block3, block2)) {
+            if (correctBlock1) {
+                BlockUtil.copyWorldCoordinate(worldCoordinate3, block1.getWorldCoordinate());
+            }
+            return true;
+        }
+        return false;
     }
 }

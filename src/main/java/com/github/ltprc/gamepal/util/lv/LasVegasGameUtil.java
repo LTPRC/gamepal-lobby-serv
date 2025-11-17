@@ -37,19 +37,19 @@ public class LasVegasGameUtil {
         }
         Stack<Cash> cashStack = lasVegasGame.getCashStack();
         for (int i = 0; i < 5; i++) {
-            cashStack.push(new Cash(new BigDecimal(60000)));
-            cashStack.push(new Cash(new BigDecimal(70000)));
-            cashStack.push(new Cash(new BigDecimal(80000)));
-            cashStack.push(new Cash(new BigDecimal(90000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(60000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(70000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(80000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(90000)));
         }
         for (int i = 0; i < 6; i++) {
-            cashStack.push(new Cash(new BigDecimal(10000)));
-            cashStack.push(new Cash(new BigDecimal(40000)));
-            cashStack.push(new Cash(new BigDecimal(50000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(10000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(40000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(50000)));
         }
         for (int i = 0; i < 8; i++) {
-            cashStack.push(new Cash(new BigDecimal(20000)));
-            cashStack.push(new Cash(new BigDecimal(30000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(20000)));
+            cashStack.push(new Cash(BigDecimal.valueOf(30000)));
         }
         Collections.shuffle(cashStack);
         return lasVegasGame;

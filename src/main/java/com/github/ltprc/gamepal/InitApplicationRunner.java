@@ -8,8 +8,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 public class InitApplicationRunner implements ApplicationRunner {
 
@@ -25,6 +23,8 @@ public class InitApplicationRunner implements ApplicationRunner {
         logger.info("Item config is loaded.");
         worldService.loadRecipes();
         logger.info("Recipe config is loaded.");
+        worldService.loadStructures();
+        logger.info("Structure config is loaded.");
         worldService.addWorld(defaultWorldName);
         logger.info("World " + defaultWorldName + " is added.");
     }

@@ -22,9 +22,11 @@ import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
-import com.github.ltprc.gamepal.model.map.world.*;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
+import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
+import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SceneUtil;
@@ -54,6 +56,7 @@ public class WorldServiceImpl implements WorldService {
     private Map<String, GameWorld> worldMap = new LinkedHashMap<>(); // worldCode, world (We only allow 1 world now 24/02/16)
     private Map<String, Item> itemMap = new HashMap<>(); // itemNo, item
     private Map<String, Recipe> recipeMap = new HashMap<>(); // recipeNo, recipe
+    private Map<Integer, Structure> structureMap = new HashMap<>(); // blockCode, structure
 
     @Autowired
     private UserService userService;
@@ -99,6 +102,11 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public Map<String, Recipe> getRecipeMap() {
         return recipeMap;
+    }
+
+    @Override
+    public Map<Integer, Structure> getStructureMap() {
+        return structureMap;
     }
 
     private void initiateWorld(GameWorld world) {
@@ -270,6 +278,12 @@ public class WorldServiceImpl implements WorldService {
                 .map(recipeObj -> ((JSONObject) recipeObj).toJavaObject(Recipe.class))
                 .sorted((recipe1, recipe2) -> StringUtils.compare(recipe1.getRecipeNo(), recipe2.getRecipeNo()))
                 .forEach(recipe -> recipeMap.put(recipe.getRecipeNo(), recipe));
+    }
+
+    @Override
+    public void loadStructures() {
+        BlockConstants.BLOCK_CODE_TYPE_MAP.keySet()
+                .forEach(code -> structureMap.put(code, BlockUtil.createStructureByCode(code)));
     }
 
     @Override

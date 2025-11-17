@@ -33,5 +33,5 @@ public interface SceneManager {
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
     BigDecimal getAltitude(final GameWorld world, final WorldCoordinate worldCoordinate);
-    void updateAltitude(final GameWorld world, Block block);
+    void updateBlockAltitude(final GameWorld world, Block block);
 }
