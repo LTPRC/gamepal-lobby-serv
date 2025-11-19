@@ -1230,22 +1230,20 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public void updateBlockAltitude(GameWorld world, Block block) {
-        block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate()));
-//        WorldCoordinate worldCoordinate = block.getWorldCoordinate();
-//        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-//        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
-//        worldCoordinate.getCoordinate().setZ(null == gravitatedStack ? worldCoordinate.getCoordinate().getZ() : gravitatedStack.getMaxAltitude());
+        if (BlockUtil.checkBlockTypeGravity(block.getBlockInfo().getType())) {
+            block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate()));
+        }
     }
 
     private GravitatedStack locateGravitatedStack(GameWorld world, WorldCoordinate worldCoordinate) {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
-        IntegerCoordinate altitudeCoordinate = BlockUtil.convertCoordinate2BasicIntegerCoordinate(worldCoordinate);
+        IntegerCoordinate altitudeCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
         WorldCoordinate locatedWorldCoordinate = new WorldCoordinate(worldCoordinate.getRegionNo(),
                 worldCoordinate.getSceneCoordinate(),
                 new Coordinate(BigDecimal.valueOf(altitudeCoordinate.getX()),
                         BigDecimal.valueOf(altitudeCoordinate.getY()),
                         worldCoordinate.getCoordinate().getZ()));
-        BlockUtil.fixWorldCoordinateReal(region, locatedWorldCoordinate);
+        BlockUtil.fixWorldCoordinate(region, locatedWorldCoordinate);
         if (!region.getScenes().containsKey(locatedWorldCoordinate.getSceneCoordinate())) {
             fillScene(world, region, locatedWorldCoordinate.getSceneCoordinate());
         }
@@ -1255,7 +1253,6 @@ public class SceneManagerImpl implements SceneManager {
 
     private void addBlockIntoGravitatedStack(final GameWorld world, Block block) {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
-        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
         if (gravitatedStack.getStack().stream()
                 .noneMatch(block1 -> StringUtils.equals(block.getBlockInfo().getId(), block1.getBlockInfo().getId()))) {
@@ -1271,19 +1268,18 @@ public class SceneManagerImpl implements SceneManager {
 
     private void removeBlockFromGravitatedStack(final GameWorld world, Block block) {
         WorldCoordinate worldCoordinate = block.getWorldCoordinate();
-        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
         Stack<Block> tempStack = new Stack<>();
         Block topBlock = null;
         if (null == gravitatedStack) {
             logger.error(worldCoordinate.getRegionNo() + ":" + worldCoordinate.getSceneCoordinate().getX() + "," + worldCoordinate.getSceneCoordinate().getY());
         }
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        BigDecimal height = structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
+                .getShape().getRadius().getZ();
         while (!gravitatedStack.getStack().empty()) {
             topBlock = gravitatedStack.getStack().pop();
             if (StringUtils.equals(block.getBlockInfo().getId(), topBlock.getBlockInfo().getId())) {
-                Map<Integer, Structure> structureMap = worldService.getStructureMap();
-                BigDecimal height = structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
-                        .getShape().getRadius().getZ();
                 gravitatedStack.setMaxAltitude(block.getWorldCoordinate().getCoordinate().getZ().subtract(height));
                 break;
             } else {
@@ -1293,5 +1289,22 @@ public class SceneManagerImpl implements SceneManager {
         while (!tempStack.empty()) {
             gravitatedStack.getStack().push(tempStack.pop());
         }
+        // Update creatures altitude
+        world.getCreatureMap().values().stream()
+                .filter(block1 -> BlockUtil.checkBlockTypeGravity(block1.getBlockInfo().getType()))
+                .filter(block1 -> block1.getWorldCoordinate().getRegionNo() == worldCoordinate.getRegionNo())
+                .filter(block1 -> block1.getWorldCoordinate().getSceneCoordinate() == worldCoordinate.getSceneCoordinate())
+                .filter(block1 -> BlockUtil.convertCoordinate2ClosestIntegerCoordinate(block1.getWorldCoordinate())
+                        .equals(BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate)))
+                .forEach(block1 -> block1.getWorldCoordinate().getCoordinate().setZ(
+                        block.getWorldCoordinate().getCoordinate().getZ().subtract(height)));
+        // Update blocks altitude
+        Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
+        region.getScenes().get(worldCoordinate.getSceneCoordinate()).getBlocks().values().stream()
+                .filter(block1 -> BlockUtil.checkBlockTypeGravity(block1.getBlockInfo().getType()))
+                .filter(block1 -> BlockUtil.convertCoordinate2ClosestIntegerCoordinate(block1.getWorldCoordinate())
+                        .equals(BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate)))
+                .forEach(block1 -> block1.getWorldCoordinate().getCoordinate().setZ(
+                        block.getWorldCoordinate().getCoordinate().getZ().subtract(height)));
     }
 }

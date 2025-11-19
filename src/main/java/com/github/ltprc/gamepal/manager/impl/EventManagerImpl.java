@@ -370,7 +370,6 @@ public class EventManagerImpl implements EventManager {
                 case BlockConstants.BLOCK_TYPE_TREE:
                 case BlockConstants.BLOCK_TYPE_WALL:
                 case BlockConstants.BLOCK_TYPE_FLOOR:
-//                case BlockConstants.BLOCK_TYPE_CEILING:
                     eventCode = BlockConstants.BLOCK_CODE_LIGHT_SMOKE;
                     break;
                 default:

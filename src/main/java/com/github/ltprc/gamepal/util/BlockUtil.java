@@ -43,50 +43,57 @@ public class BlockUtil {
 
     /**
      * Keep the coordinate inside the range of width multiply height based on its sceneCoordinate.
+     * X-Y block coordinate is valued from [-0.5, 9.5)
      * @param regionInfo
      * @param worldCoordinate
      */
     public static void fixWorldCoordinate(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
-        fixWorldCoordinateReal(regionInfo, worldCoordinate);
-//        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.valueOf(-1)) < 0) {
-//            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
-//            worldCoordinate.getCoordinate()
-//                    .setY(worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(regionInfo.getHeight())));
-//        }
-//        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.valueOf(regionInfo.getHeight() - 1)) >= 0) {
-//            worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
-//            worldCoordinate.getCoordinate()
-//                    .setY(worldCoordinate.getCoordinate().getY().subtract(BigDecimal.valueOf(regionInfo.getHeight())));
-//        }
-//        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(-0.5D)) < 0) {
-//            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
-//            worldCoordinate.getCoordinate()
-//                    .setX(worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(regionInfo.getWidth())));
-//        }
-//        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth() - 0.5)) >= 0) {
-//            worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
-//            worldCoordinate.getCoordinate()
-//                    .setX(worldCoordinate.getCoordinate().getX().subtract(BigDecimal.valueOf(regionInfo.getWidth())));
-//        }
+        fixWorldCoordinateWithThreshold(regionInfo, worldCoordinate, BigDecimal.valueOf(-0.5D),
+                BigDecimal.valueOf(regionInfo.getWidth() - 0.5D), BigDecimal.valueOf(-0.5D),
+                BigDecimal.valueOf(regionInfo.getHeight() - 0.5D));
     }
 
+    /**
+     * Keep the coordinate inside the range of width multiply height based on its sceneCoordinate.
+     * X-Y block coordinate is valued from [0, 10)
+     * @param regionInfo
+     * @param worldCoordinate
+     */
+    @Deprecated
     public static void fixWorldCoordinateReal(RegionInfo regionInfo, WorldCoordinate worldCoordinate) {
-        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.ZERO) < 0) {
+        fixWorldCoordinateWithThreshold(regionInfo, worldCoordinate, BigDecimal.ZERO,
+                BigDecimal.valueOf(regionInfo.getWidth()), BigDecimal.ZERO, BigDecimal.valueOf(regionInfo.getHeight()));
+    }
+
+    /**
+     * Keep the coordinate inside the range of width multiply height based on its sceneCoordinate.
+     * X-Y block coordinate is valued from [xMin, xMax) and [xMin, xMax)
+     * @param regionInfo
+     * @param worldCoordinate
+     * @param xMin
+     * @param xMax
+     * @param yMin
+     * @param yMax
+     */
+    private static void fixWorldCoordinateWithThreshold(RegionInfo regionInfo, WorldCoordinate worldCoordinate,
+                                                        BigDecimal xMin, BigDecimal xMax,
+                                                        BigDecimal yMin, BigDecimal yMax) {
+        while (worldCoordinate.getCoordinate().getY().compareTo(yMin) < 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() - 1);
             worldCoordinate.getCoordinate()
                     .setY(worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(regionInfo.getHeight())));
         }
-        while (worldCoordinate.getCoordinate().getY().compareTo(BigDecimal.valueOf(regionInfo.getHeight())) >= 0) {
+        while (worldCoordinate.getCoordinate().getY().compareTo(yMax) >= 0) {
             worldCoordinate.getSceneCoordinate().setY(worldCoordinate.getSceneCoordinate().getY() + 1);
             worldCoordinate.getCoordinate()
                     .setY(worldCoordinate.getCoordinate().getY().subtract(BigDecimal.valueOf(regionInfo.getHeight())));
         }
-        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.ZERO) < 0) {
+        while (worldCoordinate.getCoordinate().getX().compareTo(xMin) < 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() - 1);
             worldCoordinate.getCoordinate()
                     .setX(worldCoordinate.getCoordinate().getX().add(BigDecimal.valueOf(regionInfo.getWidth())));
         }
-        while (worldCoordinate.getCoordinate().getX().compareTo(BigDecimal.valueOf(regionInfo.getWidth())) >= 0) {
+        while (worldCoordinate.getCoordinate().getX().compareTo(xMax) >= 0) {
             worldCoordinate.getSceneCoordinate().setX(worldCoordinate.getSceneCoordinate().getX() + 1);
             worldCoordinate.getCoordinate()
                     .setX(worldCoordinate.getCoordinate().getX().subtract(BigDecimal.valueOf(regionInfo.getWidth())));
@@ -473,6 +480,16 @@ public class BlockUtil {
         }
     }
 
+    public static boolean checkBlockTypeGravity(int blockType) {
+        switch (blockType) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                return false;
+            default:
+                return true;
+        }
+    }
+
     public static WorldCoordinate locateCoordinateWithDirectionAndDistance(RegionInfo regionInfo,
                                                                            WorldCoordinate worldCoordinate,
                                                                            BigDecimal direction, BigDecimal distance) {
@@ -491,6 +508,7 @@ public class BlockUtil {
                 coordinate.getZ());
     }
 
+    @Deprecated
     public static IntegerCoordinate convertCoordinate2BasicIntegerCoordinate(WorldCoordinate worldCoordinate) {
         return new IntegerCoordinate(
                 worldCoordinate.getCoordinate().getX().intValue(),
@@ -542,7 +560,10 @@ public class BlockUtil {
         switch (structureMaterial1) {
             case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
             case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
-                return false;
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET;
             default:
                 return checkMaterialCollision(structureMaterial1, structureMaterial2);
         }
@@ -566,17 +587,13 @@ public class BlockUtil {
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET;
             case BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH:
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
+            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET
                         || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH;
-            case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
-            case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
-                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH
-                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET;
             case BlockConstants.STRUCTURE_MATERIAL_NONE:
             case BlockConstants.STRUCTURE_MATERIAL_TARGET:
             case BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH:

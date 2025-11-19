@@ -227,8 +227,6 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_FLOOR_DECORATION = 32;
     public static final int BLOCK_TYPE_WALL = 33;
     public static final int BLOCK_TYPE_WALL_DECORATION = 34;
-//    public static final int BLOCK_TYPE_CEILING = 35;
-//    public static final int BLOCK_TYPE_CEILING_DECORATION = 36;
     public static final int BLOCK_TYPE_PLASMA = 37;
     public static final int BLOCK_TYPE_HUMAN_REMAIN_CONTAINER = 38;
     public static final int BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER = 39;
