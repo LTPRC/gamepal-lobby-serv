@@ -126,7 +126,7 @@ public class BlockUtil {
         }
     }
 
-    public static BigDecimal calculateHorizontalDistance(RegionInfo regionInfo, WorldCoordinate wc1,
+    public static BigDecimal calculateXDistance(RegionInfo regionInfo, WorldCoordinate wc1,
                                                          WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
@@ -134,14 +134,14 @@ public class BlockUtil {
         }
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        return calculateHorizontalDistance(c1, c2);
+        return calculateXDistance(c1, c2);
     }
 
-    public static BigDecimal calculateHorizontalDistance(Coordinate c1, Coordinate c2) {
+    public static BigDecimal calculateXDistance(Coordinate c1, Coordinate c2) {
         return c2.getX().subtract(c1.getX());
     }
 
-    public static BigDecimal calculateVerticalDistance(RegionInfo regionInfo, WorldCoordinate wc1,
+    public static BigDecimal calculateYDistance(RegionInfo regionInfo, WorldCoordinate wc1,
                                                        WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
@@ -149,10 +149,10 @@ public class BlockUtil {
         }
         Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
         Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
-        return calculateVerticalDistance(c1, c2);
+        return calculateYDistance(c1, c2);
     }
 
-    public static BigDecimal calculateVerticalDistance(Coordinate c1, Coordinate c2) {
+    public static BigDecimal calculateYDistance(Coordinate c1, Coordinate c2) {
         return c2.getY().subtract(c1.getY());
     }
 
@@ -169,7 +169,7 @@ public class BlockUtil {
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        return calculateHorizontalDistance(wc1.getCoordinate(), wc2.getCoordinate());
+        return calculateXDistance(wc1.getCoordinate(), wc2.getCoordinate());
     }
 
     /**
@@ -264,8 +264,8 @@ public class BlockUtil {
         if (amount < 2) {
             return rst;
         }
-        BigDecimal deltaWidth = calculateHorizontalDistance(regionInfo, wc1, wc2);
-        BigDecimal deltaHeight = calculateVerticalDistance(regionInfo, wc1, wc2);
+        BigDecimal deltaWidth = calculateXDistance(regionInfo, wc1, wc2);
+        BigDecimal deltaHeight = calculateYDistance(regionInfo, wc1, wc2);
         BigDecimal deltaZ = calculateZDistance(regionInfo, wc1, wc2);
         if (null == deltaWidth || null == deltaHeight || null == deltaZ) {
             return rst;
@@ -296,9 +296,9 @@ public class BlockUtil {
         if (amount < 2) {
             return rst;
         }
-        BigDecimal deltaWidth = calculateHorizontalDistance(c1, c2)
+        BigDecimal deltaWidth = calculateXDistance(c1, c2)
                 .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
-        BigDecimal deltaHeight = calculateVerticalDistance(c1, c2)
+        BigDecimal deltaHeight = calculateYDistance(c1, c2)
                 .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         BigDecimal deltaZ = calculateZDistance(c1, c2)
                 .divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
@@ -416,22 +416,22 @@ public class BlockUtil {
         // Rectangle vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
                 && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
-            return BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
+            return BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
                     < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                    && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
+                    && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
                     < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
         }
         // Round vs. rectangle
         if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
             return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
         }
-        boolean isInsideRectangle1 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
+        boolean isInsideRectangle1 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
+                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape2.getRadius().getY().doubleValue();
-        boolean isInsideRectangle2 = BlockUtil.calculateHorizontalDistance(coordinate1, coordinate2).abs().doubleValue()
+        boolean isInsideRectangle2 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape2.getRadius().getX().doubleValue()
-                && BlockUtil.calculateVerticalDistance(coordinate1, coordinate2).abs().doubleValue()
+                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
                 < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
         boolean isInsideRound1 = BlockUtil.calculateDistance(coordinate1,
                 new Coordinate(
@@ -832,12 +832,12 @@ public class BlockUtil {
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_GROUND, new Shape(),
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_GROUND_DECORATION);
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
                 break;
             case BlockConstants.BLOCK_TYPE_WALL:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,

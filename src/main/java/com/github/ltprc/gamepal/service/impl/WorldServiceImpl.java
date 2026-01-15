@@ -185,7 +185,9 @@ public class WorldServiceImpl implements WorldService {
                             WorldCoordinate worldCoordinate = new WorldCoordinate(newRegion.getRegionNo(),
                                     newScene.getSceneCoordinate(),
                                     new Coordinate(BigDecimal.valueOf(j), BigDecimal.valueOf(i), newRegion.getAltitude()));
-                            sceneManager.addOtherBlock(world, worldCoordinate, value % 10000);
+                            for (int k = 0; k < value / 10000; k++) {
+                                sceneManager.addOtherBlock(world, worldCoordinate, value % 10000);
+                            }
                         }
                     }
                 }

@@ -1,6 +1,6 @@
 package com.github.ltprc.gamepal.config;
 
-import java.awt.*;
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -242,12 +242,12 @@ public class BlockConstants {
 
     public static final int STRUCTURE_LAYER_GROUND = 10; // Infrastructure objects including floor block
     public static final int STRUCTURE_LAYER_GROUND_DECORATION = 15;
-    public static final int STRUCTURE_LAYER_BOTTOM = 20; // Low-level objects including ash pile, bloodstain
-    public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 25;
-    public static final int STRUCTURE_LAYER_MIDDLE = 30; // Active objects including creature, building
+    public static final int STRUCTURE_LAYER_BOTTOM = 30; // Low-level objects including ash pile, bloodstain
+    public static final int STRUCTURE_LAYER_BOTTOM_DECORATION = 32;
+    public static final int STRUCTURE_LAYER_MIDDLE = 33; // Active objects including creature, building
     public static final int STRUCTURE_LAYER_MIDDLE_DECORATION = 35;
-    public static final int STRUCTURE_LAYER_TOP = 40; // High-level objects including ceiling block
-    public static final int STRUCTURE_LAYER_TOP_DECORATION = 45;
+    public static final int STRUCTURE_LAYER_TOP = 36; // High-level objects including ceiling block
+    public static final int STRUCTURE_LAYER_TOP_DECORATION = 38;
     public static final int STRUCTURE_LAYER_SKY = 50; // Untouchable top-level objects
     public static final int STRUCTURE_LAYER_SKY_DECORATION = 55;
 

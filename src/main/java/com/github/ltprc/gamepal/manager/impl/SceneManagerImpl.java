@@ -6,7 +6,6 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.RegionConstants;
-import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.*;
 import com.github.ltprc.gamepal.model.FarmInfo;
@@ -21,7 +20,6 @@ import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.GravitatedStack;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
@@ -622,7 +620,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = createYRankingQueue(region);
+        Queue<Block> rankingQueue = createRankingQueue(region);
         IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
@@ -658,7 +656,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = createYRankingQueue(region);
+        Queue<Block> rankingQueue = createRankingQueue(region);
         // Collect detected creature blocks
         Map<String, Block> creatureMap = world.getCreatureMap();
         creatureMap.values().stream()
@@ -712,29 +710,39 @@ public class SceneManagerImpl implements SceneManager {
         }
     }
 
-    private Queue<Block> createYRankingQueue(final RegionInfo regionInfo) {
+    private Queue<Block> createRankingQueue(final RegionInfo regionInfo) {
         return new PriorityQueue<>((o1, o2) -> {
+            if (o1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                    || o2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+                return o1.getBlockInfo().getCode() - o2.getBlockInfo().getCode();
+            }
             Map<Integer, Structure> structureMap = worldService.getStructureMap();
-            int layer1 = structureMap.getOrDefault(o1.getBlockInfo().getCode(), new Structure()).getLayer();
-            int layer2 = structureMap.getOrDefault(o2.getBlockInfo().getCode(), new Structure()).getLayer();
+            Structure structure1 = structureMap.getOrDefault(o1.getBlockInfo().getCode(), new Structure());
+            Structure structure2 = structureMap.getOrDefault(o2.getBlockInfo().getCode(), new Structure());
+            int layer1 = structure1.getLayer();
+            int layer2 = structure2.getLayer();
             if (layer1 / 10 != layer2 / 10) {
                 return layer1 / 10 - layer2 / 10;
             }
-            BigDecimal verticalDistance = BlockUtil.calculateVerticalDistance(regionInfo, o1.getWorldCoordinate(),
-                    o2.getWorldCoordinate());
-            if (null != verticalDistance && !verticalDistance.equals(BigDecimal.ZERO)) {
-                return BigDecimal.ZERO.compareTo(verticalDistance);
-            }
-            BigDecimal horizontalDistance = BlockUtil.calculateHorizontalDistance(regionInfo, o1.getWorldCoordinate(),
-                    o2.getWorldCoordinate());
-            if (null != horizontalDistance && !horizontalDistance.equals(BigDecimal.ZERO)) {
-                return BigDecimal.ZERO.compareTo(horizontalDistance);
+            Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, o1.getWorldCoordinate());
+            Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, o2.getWorldCoordinate());
+            BigDecimal minDepth1 = coordinate1.getY()
+                    .add(coordinate1.getZ())
+                    .add(structure1.getShape().getRadius().getY())
+                    .subtract(structure1.getShape().getRadius().getZ());
+            BigDecimal minDepth2 = coordinate2.getY()
+                    .add(coordinate2.getZ())
+                    .add(structure2.getShape().getRadius().getY())
+                    .subtract(structure2.getShape().getRadius().getZ());
+            int compareZ = minDepth1.compareTo(minDepth2);
+            if (compareZ != 0) {
+                return compareZ;
             }
             int layerDiff = layer1 % 10 - layer2 % 10;
             if (layerDiff != 0) {
                 return layerDiff;
             }
-            return o1.getBlockInfo().getCode() - o2.getBlockInfo().getCode();
+            return o1.getBlockInfo().getId().compareTo(o2.getBlockInfo().getId());
         });
     }
 
@@ -935,6 +943,7 @@ public class SceneManagerImpl implements SceneManager {
         BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(blockCode);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
+        updateBlockAltitude(world, block);
         switch (blockInfo.getType()) {
             case BlockConstants.BLOCK_TYPE_CONTAINER:
             case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
@@ -954,7 +963,6 @@ public class SceneManagerImpl implements SceneManager {
             default:
                 break;
         }
-        updateBlockAltitude(world, block);
         registerBlock(world, block);
         return block;
     }

@@ -39,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -493,9 +494,9 @@ public class WebSocketServiceImpl implements WebSocketService {
 
         rst.put("interactionInfo", world.getInteractionInfoMap().get(userCode));
 
-//        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
-//            analyzeJsonContent(rst);
-//        }
+        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
+            analyzeJsonContent(rst);
+        }
         transmit(rst, userCode, world);
     }
 
@@ -519,7 +520,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
     }
 
-    private static void analyzeJsonContent(JSONObject rst) {
+    private static void analyzeJsonContentOld(JSONObject rst) {
         logger.info("Analyze json content now...");
         int totalLength = 0;
         for (String key : rst.keySet()) {
@@ -541,6 +542,37 @@ public class WebSocketServiceImpl implements WebSocketService {
             totalLength += length;
         }
         logger.info("Total length of all values: " + totalLength);
+    }
+
+    private static void analyzeJsonContent(JSONObject rst) {
+        System.out.println("=== JSON 字段尺寸分析 (UTF-8 bytes) ===");
+        long totalBytes = 0;
+
+        for (String key : rst.keySet()) {
+            Object value = rst.get(key);
+            String valueStr = JSONObject.toJSONString(value); // 保持结构
+
+            // 计算 UTF-8 字节长度（这是网络传输的实际大小）
+            int byteSize = valueStr.getBytes(StandardCharsets.UTF_8).length;
+            totalBytes += byteSize;
+
+            System.out.printf("  %-20s : %6d bytes -> %s%n",
+                    ("\"" + key + "\""),
+                    byteSize,
+                    truncate(valueStr, 50)
+            );
+        }
+
+        System.out.println("----------------------------------------");
+        System.out.println("Total size: " + totalBytes + " bytes");
+        System.out.println("Full JSON size: " + rst.toString().getBytes(StandardCharsets.UTF_8).length + " bytes");
+        System.out.println("========================================\n");
+    }
+
+    // 辅助方法：截断长字符串用于显示
+    private static String truncate(String str, int maxLength) {
+        if (str.length() <= maxLength) return str;
+        return str.substring(0, maxLength - 3) + "...";
     }
 
     @Override
