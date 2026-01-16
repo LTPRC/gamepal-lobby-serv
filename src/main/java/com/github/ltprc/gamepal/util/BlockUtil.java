@@ -831,7 +831,7 @@ public class BlockUtil {
                         roundShape);
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;

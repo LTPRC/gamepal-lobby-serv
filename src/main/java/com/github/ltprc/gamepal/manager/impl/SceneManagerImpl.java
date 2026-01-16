@@ -757,28 +757,17 @@ public class SceneManagerImpl implements SceneManager {
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         Set<IntegerCoordinate> preSelectedSceneCoordinates =
                 BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, worldCoordinate);
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         // Pre-select blocks including creatures
         List<Block> preSelectedBlocks = world.getCreatureMap().values().stream()
                 .filter(creature -> !StringUtils.equals(creature.getBlockInfo().getId(), sourceId))
                 .filter(creature -> creature.getWorldCoordinate().getRegionNo() == region.getRegionNo())
                 .filter(creature -> preSelectedSceneCoordinates.contains(creature.getWorldCoordinate().getSceneCoordinate()))
                 .filter(creature -> playerService.validateActiveness(world, creature.getBlockInfo().getId()))
-                .filter(creature -> structureMap.containsKey(eventBlock.getBlockInfo().getCode())
-                        && structureMap.containsKey(creature.getBlockInfo().getCode())
-                        && BlockUtil.checkMaterialCollision(
-                                structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
-                        structureMap.get(creature.getBlockInfo().getCode()).getMaterial()))
                 .filter(creature -> movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, creature, false))
                 .collect(Collectors.toList());
         // Collect all collided blocks
         preSelectedSceneCoordinates.forEach(sceneCoordinate ->
                 region.getScenes().get(sceneCoordinate).getBlocks().values().stream()
-                        .filter(blocker -> structureMap.containsKey(eventBlock.getBlockInfo().getCode())
-                                && structureMap.containsKey(blocker.getBlockInfo().getCode())
-                                && BlockUtil.checkMaterialCollision(
-                                        structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
-                                structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
                         .filter(blocker -> movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, blocker, false))
                         .forEach(preSelectedBlocks::add));
         return preSelectedBlocks;
@@ -983,15 +972,9 @@ public class SceneManagerImpl implements SceneManager {
         if (!SkillUtil.blockCode2Build(getGridBlockCode(world, worldCoordinate))) {
             return false;
         }
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         return scene.getBlocks().values().stream()
                 .filter(blocker -> !StringUtils.equals(block.getBlockInfo().getId(), blocker.getBlockInfo().getId()))
-                .filter(blocker -> movementManager.detectCollision(world, block, blocker))
-                .noneMatch(blocker -> structureMap.containsKey(block.getBlockInfo().getCode())
-                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
-                        && BlockUtil.checkMaterialCollision(
-                                structureMap.get(block.getBlockInfo().getCode()).getMaterial(),
-                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()));
+                .noneMatch(blocker -> movementManager.detectCollision(world, block, blocker));
     }
 
     @Override

@@ -13,12 +13,12 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,7 +80,6 @@ public class EventManagerImpl implements EventManager {
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         List<Block> preSelectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
                 fromCreature.getBlockInfo().getId());
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         preSelectedBlocks.stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
                 .filter(blocker -> BlockUtil.compareAnglesInDegrees(
@@ -89,18 +88,8 @@ public class EventManagerImpl implements EventManager {
                 .filter(blocker -> BlockUtil.compareAnglesInDegrees(
                                 BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
                                 fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D)
-                .filter(blocker -> structureMap.containsKey(eventBlock.getBlockInfo().getCode())
-                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
-                        && BlockUtil.checkMaterialCollision(
-                                structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
-                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
                 .forEach(blocker ->
-                        movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, blocker,
-                                structureMap.containsKey(eventBlock.getBlockInfo().getCode())
-                                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
-                                        && BlockUtil.checkMaterialStopMovement(
-                                                structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
-                                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
+                        movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, blocker, true)
                 );
     }
 
@@ -271,7 +260,6 @@ public class EventManagerImpl implements EventManager {
         BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
         BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
         BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_MELEE_HIT:
             case BlockConstants.BLOCK_CODE_MELEE_KICK:
@@ -302,11 +290,6 @@ public class EventManagerImpl implements EventManager {
                         && null != angle2
                         && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
                         < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                        && structureMap.containsKey(eventBlock.getBlockInfo().getCode())
-                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
-                        && BlockUtil.checkMaterialStopMovement(
-                                structureMap.get(eventBlock.getBlockInfo().getCode()).getMaterial(),
-                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial())
                         && movementManager.detectLineCollision(world, from, eventBlock, blocker, false);
                 break;
             case BlockConstants.BLOCK_CODE_EXPLODE:

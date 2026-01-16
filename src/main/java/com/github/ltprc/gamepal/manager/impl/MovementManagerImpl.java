@@ -409,6 +409,14 @@ public class MovementManagerImpl implements MovementManager {
 
     @Override
     public boolean detectCollision(GameWorld world, Block block1, Block block2) {
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        if (structureMap.containsKey(block1.getBlockInfo().getCode())
+                && structureMap.containsKey(block2.getBlockInfo().getCode())
+                && !BlockUtil.checkMaterialStopMovement(
+                structureMap.get(block1.getBlockInfo().getCode()).getMaterial(),
+                structureMap.get(block2.getBlockInfo().getCode()).getMaterial())) {
+            return false;
+        }
         Region region = world.getRegionMap().get(block1.getWorldCoordinate().getRegionNo());
         return detectPlanarCollision(region, block1, block2) && detectZCollision(block1, block2);
     }
@@ -463,12 +471,12 @@ public class MovementManagerImpl implements MovementManager {
                 block1.getWorldCoordinate(),
                 BlockUtil.calculateAngle(coordinate1, coordinate3), BlockUtil.calculateDistance(coordinate1, coordinate3));
         BlockUtil.copyWorldCoordinate(worldCoordinate3, block3.getWorldCoordinate());
-        if (detectCollision(world, block3, block2)) {
-            if (correctBlock1) {
-                BlockUtil.copyWorldCoordinate(worldCoordinate3, block1.getWorldCoordinate());
-            }
-            return true;
+        if (!detectCollision(world, block3, block2)) {
+            return false;
         }
-        return false;
+        if (correctBlock1) {
+            BlockUtil.copyWorldCoordinate(worldCoordinate3, block1.getWorldCoordinate());
+        }
+        return true;
     }
 }

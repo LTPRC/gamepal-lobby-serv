@@ -1,8 +1,15 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.InteractionConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
-import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.manager.FarmManager;
+import com.github.ltprc.gamepal.manager.InteractionManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
