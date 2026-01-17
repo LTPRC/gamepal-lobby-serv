@@ -369,8 +369,10 @@ public class NpcManagerImpl implements NpcManager {
                             .filter(player1 -> PlayerInfoUtil.checkPerceptionCondition(
                                     world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()), player,
                                     world.getPlayerInfoMap().get(npcUserCode).getPerceptionInfo(), player1))
-                            .filter(player1 -> playerService.getRelationMapByUserCode(entry2.getKey()).containsKey(player1.getBlockInfo().getId())
-                                    && playerService.getRelationMapByUserCode(entry2.getKey()).get(player1.getBlockInfo().getId()) < 0)
+                            .filter(player1 -> world.getPlayerInfoMap().get(npcUserCode).getCreatureType() != CreatureConstants.CREATURE_TYPE_HUMAN
+                                    || world.getPlayerInfoMap().get(player1.getBlockInfo().getId()).getCreatureType() != CreatureConstants.CREATURE_TYPE_HUMAN
+                                    || (playerService.getRelationMapByUserCode(npcUserCode).containsKey(player1.getBlockInfo().getId())
+                                    && playerService.getRelationMapByUserCode(npcUserCode).get(player1.getBlockInfo().getId()) < 0))
                             .min((player1, player2) -> {
                                 BigDecimal distance1 = BlockUtil.calculateDistance
                                         (world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
@@ -388,7 +390,7 @@ public class NpcManagerImpl implements NpcManager {
                     // Remove not alive element from red queue 24/08/08
                     while (!npcBrain.getRedQueue().isEmpty()
                             && (!playerService.validateActiveness(world, npcBrain.getRedQueue().peek().getBlockInfo().getId())
-                            || world.getPlayerInfoMap().get(npcUserCode).getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0)) {
+                            || world.getPlayerInfoMap().get(npcBrain.getRedQueue().peek().getBlockInfo().getId()).getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0)) {
                         npcBrain.getRedQueue().poll();
                     }
                     // Move & Destroy

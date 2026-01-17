@@ -496,9 +496,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Clear flags
         world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
 
-        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
-            analyzeJsonContent(rst);
-        }
+//        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
+//            analyzeJsonContent(rst);
+//        }
         transmit(rst, userCode, world);
     }
 
