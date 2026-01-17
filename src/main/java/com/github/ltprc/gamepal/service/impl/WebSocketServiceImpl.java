@@ -347,10 +347,6 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         rst.put("textDisplayMap", world.getTextDisplayMap());
 
-        rst.put("flags", world.getFlagMap().get(userCode));
-        // Clear flags
-        world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
-
         // Return playerInfos
         // Old block format 24/09/30
         Map<String, Block> creatureMap = world.getCreatureMap();
@@ -424,10 +420,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("sceneInfos", sceneInfos);
 
         // Collect grids and altitudes
-        int[][] grids = sceneManager.collectGridsByUserCode(userCode, 2);
-        rst.put("grids", grids);
-        BigDecimal[][] altitudes = sceneManager.collectAltitudesByUserCode(userCode, 2);
-        rst.put("altitudes", altitudes);
+        if (world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_REGION]) {
+            int[][] grids = sceneManager.collectGridsByUserCode(userCode, 2);
+            rst.put("grids", grids);
+            BigDecimal[][] altitudes = sceneManager.collectAltitudesByUserCode(userCode, 2);
+            rst.put("altitudes", altitudes);
+        }
 
         // Collect blocks
         Queue<Block> blockQueue = sceneManager.collectSurroundingBlocks(world, player, 2);
@@ -493,6 +491,10 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("currentMillisecond", Instant.now().getNano() / 1000_000);
 
         rst.put("interactionInfo", world.getInteractionInfoMap().get(userCode));
+
+        rst.put("flags", world.getFlagMap().get(userCode));
+        // Clear flags
+        world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
 
         if (Instant.now().getNano() / 1000_000 % 10 == 0) {
             analyzeJsonContent(rst);

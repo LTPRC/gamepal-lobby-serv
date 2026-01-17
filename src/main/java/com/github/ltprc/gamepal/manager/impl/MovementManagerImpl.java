@@ -262,6 +262,7 @@ public class MovementManagerImpl implements MovementManager {
                 // Check location change
                 if (isSceneChanged) {
                     webSocketService.resetPlayerBlockMap(worldMovingBlock.getBlockInfo().getId());
+                    world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_REGION] = true;
                     Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
                     playerService.generateNotificationMessage(worldMovingBlock.getBlockInfo().getId(),
                             "来到【" + region.getName() + "-" + scene.getName() + "】");
@@ -371,20 +372,20 @@ public class MovementManagerImpl implements MovementManager {
         double maxSpeedCoef = 1D;
         switch (player.getMovementInfo().getFloorCode()) {
             case BlockConstants.BLOCK_CODE_SWAMP:
-                maxSpeedCoef = Math.min(maxSpeedCoef, 0.2D);
+                maxSpeedCoef = 0.2D;
                 break;
             case BlockConstants.BLOCK_CODE_SAND:
-                maxSpeedCoef = Math.min(maxSpeedCoef, 0.4D);
+                maxSpeedCoef = 0.4D;
                 break;
             case BlockConstants.BLOCK_CODE_SNOW:
             case BlockConstants.BLOCK_CODE_LAVA:
             case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
-                maxSpeedCoef = Math.min(maxSpeedCoef, 0.6D);
+                maxSpeedCoef = 0.6D;
                 break;
             case BlockConstants.BLOCK_CODE_ROUGH:
             case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
             case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
-                maxSpeedCoef = Math.min(maxSpeedCoef, 0.8D);
+                maxSpeedCoef = 0.8D;
                 break;
             case BlockConstants.BLOCK_CODE_BLACK:
             case BlockConstants.BLOCK_CODE_GRASS:
@@ -393,15 +394,15 @@ public class MovementManagerImpl implements MovementManager {
             default:
                 break;
         }
-        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
-                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0
-                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
-            maxSpeedCoef = Math.min(maxSpeedCoef, 0D);
-        }
         if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0
                 || playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0
                 || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
-            maxSpeedCoef = Math.min(maxSpeedCoef, 0.25D);
+            maxSpeedCoef /= 2;
+        }
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+            maxSpeedCoef = 0D;
         }
         player.getMovementInfo().setMaxSpeed(BlockConstants.MAX_SPEED_DEFAULT.multiply(BigDecimal.valueOf(maxSpeedCoef)));
         player.getMovementInfo().setAcceleration(player.getMovementInfo().getMaxSpeed().multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO));

@@ -2,9 +2,11 @@ package com.github.ltprc.gamepal.service.impl;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import com.alibaba.fastjson.JSONArray;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.config.MissionConstants;
+import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.model.QwenResponse;
 import com.github.ltprc.gamepal.model.creature.MissionInfo;
@@ -56,6 +60,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private NpcManager npcManager;
+
+    @Autowired
+    private ItemManager itemManager;
 
     private Map<String, String> userWorldMap = new LinkedHashMap<>(); // userCode, worldId
 
@@ -138,9 +145,32 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1016));
         }
         if (!world.getCreatureMap().containsKey(userCode)) {
+            // Initialize creature info
             world.getCreatureMap().put(userCode, npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_HUMAN,
                     CreatureConstants.CREATURE_TYPE_HUMAN, userCode));
-            // Initiate missions
+        }
+        Block player = world.getCreatureMap().get(userCode);
+        npcManager.putCreature(world, userCode, player.getWorldCoordinate());
+        if (world.getPlayerInfoMap().get(userCode).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_INIT) {
+            // Initialize items
+//            worldService.getItemMap().keySet()
+//                    .forEach(itemNo -> {
+//                        switch (itemNo.charAt(0)) {
+//                            case ItemConstants.ITEM_CHARACTER_TOOL:
+//                            case ItemConstants.ITEM_CHARACTER_OUTFIT:
+//                                itemManager.getItem(world, userCode, itemNo, 1);
+//                                break;
+//                            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
+//                                itemManager.getItem(world, userCode, itemNo, 5);
+//                                break;
+//                            case ItemConstants.ITEM_CHARACTER_AMMO:
+//                                itemManager.getItem(world, userCode, itemNo, 10);
+//                                break;
+//                            default:
+//                                break;
+//                        }
+//                    });
+            // Initialize missions
             QwenResponse qwenResponse = webService.callQwenApi(
                     "qwen-plus", "以JSON数组的结构生成随机1到5个字符串，内容是编造的游戏任务条目。");
             List<MissionInfo> missions = JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class)
@@ -149,8 +179,6 @@ public class UserServiceImpl implements UserService {
                     .collect(Collectors.toList());
             world.getPlayerInfoMap().get(userCode).getMissions().addAll(missions);
         }
-        Block player = world.getCreatureMap().get(userCode);
-        npcManager.putCreature(world, userCode, player.getWorldCoordinate());
         // Update online token
         String token = UUID.randomUUID().toString();
         world.getTokenMap().put(userCode, token);

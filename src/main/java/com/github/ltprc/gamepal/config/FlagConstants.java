@@ -7,7 +7,8 @@ public class FlagConstants {
     public static final int FLAG_UPDATE_INTERACTED_ITEMS = 2;
     public static final int FLAG_UPDATE_RECIPES = 3;
     public static final int FLAG_UPDATE_MOVEMENT = 4;
-    public static final int FLAG_LENGTH = 5;
+    public static final int FLAG_UPDATE_REGION = 5;
+    public static final int FLAG_LENGTH = 6;
 
     private FlagConstants() {}
 }
