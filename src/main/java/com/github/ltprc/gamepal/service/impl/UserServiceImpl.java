@@ -153,23 +153,23 @@ public class UserServiceImpl implements UserService {
         npcManager.putCreature(world, userCode, player.getWorldCoordinate());
         if (world.getPlayerInfoMap().get(userCode).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_INIT) {
             // Initialize items
-//            worldService.getItemMap().keySet()
-//                    .forEach(itemNo -> {
-//                        switch (itemNo.charAt(0)) {
-//                            case ItemConstants.ITEM_CHARACTER_TOOL:
-//                            case ItemConstants.ITEM_CHARACTER_OUTFIT:
-//                                itemManager.getItem(world, userCode, itemNo, 1);
-//                                break;
-//                            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
-//                                itemManager.getItem(world, userCode, itemNo, 5);
-//                                break;
-//                            case ItemConstants.ITEM_CHARACTER_AMMO:
-//                                itemManager.getItem(world, userCode, itemNo, 10);
-//                                break;
-//                            default:
-//                                break;
-//                        }
-//                    });
+            worldService.getItemMap().keySet()
+                    .forEach(itemNo -> {
+                        switch (itemNo.charAt(0)) {
+                            case ItemConstants.ITEM_CHARACTER_TOOL:
+                            case ItemConstants.ITEM_CHARACTER_OUTFIT:
+                                itemManager.getItem(world, userCode, itemNo, 1);
+                                break;
+                            case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
+                                itemManager.getItem(world, userCode, itemNo, 5);
+                                break;
+                            case ItemConstants.ITEM_CHARACTER_AMMO:
+                                itemManager.getItem(world, userCode, itemNo, 10);
+                                break;
+                            default:
+                                break;
+                        }
+                    });
             // Initialize missions
             QwenResponse qwenResponse = webService.callQwenApi(
                     "qwen-plus", "以JSON数组的结构生成随机1到5个字符串，内容是编造的游戏任务条目。");

@@ -347,8 +347,7 @@ public class WorldServiceImpl implements WorldService {
     }
 
     @Override
-    public void registerOnline(GameWorld world, String id) {
-        long timestamp = System.currentTimeMillis();
+    public void registerOnline(GameWorld world, String id, long timestamp) {
         world.getOnlineMap().put(id, timestamp);
     }
 

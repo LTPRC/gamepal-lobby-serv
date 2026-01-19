@@ -167,8 +167,8 @@ public class MovementManagerImpl implements MovementManager {
                         && BlockUtil.checkMaterialCollision(
                                 structureMap.get(worldMovingBlock.getBlockInfo().getCode()).getMaterial(),
                         structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
-                .filter(blocker -> detectLineCollision(world, worldMovingBlock.getWorldCoordinate(),
-                        expectedNewBlockXY, blocker, false))
+//                .filter(blocker -> detectLineCollision(world, worldMovingBlock.getWorldCoordinate(),
+//                        expectedNewBlockXY, blocker, false))
                 .collect(Collectors.toList());
 
         for (Block block : preSelectedBlocks) {
@@ -268,16 +268,6 @@ public class MovementManagerImpl implements MovementManager {
                             "来到【" + region.getName() + "-" + scene.getName() + "】");
                 }
             }
-//            region.getScenes().values().stream()
-//                    .filter(scene -> SkillUtil.isSceneDetected(worldMovingBlock, scene.getSceneCoordinate(), 1))
-//                    .forEach(scene -> scene.getBlocks().values().forEach(block -> {
-//                BigDecimal distance = BlockUtil.calculateDistance(region, worldMovingBlock.getWorldCoordinate(),
-//                        block.getWorldCoordinate());
-//                if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_DROP
-//                        && null != distance && distance.compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0) {
-//                    playerService.useDrop(worldMovingBlock.getBlockInfo().getId(), block.getBlockInfo().getId());
-//                }
-//            }));
         } else if (isSceneChanged) {
             region.getScenes().get(newWorldCoordinate.getSceneCoordinate()).getBlocks()
                     .put(worldMovingBlock.getBlockInfo().getId(), worldMovingBlock);

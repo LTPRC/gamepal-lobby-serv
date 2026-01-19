@@ -104,6 +104,7 @@ public class NpcManagerImpl implements NpcManager {
 
     @Override
     public Block putCreature(GameWorld world, final String userCode, final WorldCoordinate worldCoordinate) {
+        long timestamp = System.currentTimeMillis();
         Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         BlockUtil.copyWorldCoordinate(worldCoordinate, player.getWorldCoordinate());
@@ -111,7 +112,7 @@ public class NpcManagerImpl implements NpcManager {
         BlockUtil.fixWorldCoordinate(world.getRegionMap().get(worldCoordinate.getRegionNo()), player.getWorldCoordinate());
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
                 playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
-        worldService.registerOnline(world, userCode);
+        worldService.registerOnline(world, userCode, timestamp);
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_REGION] = true;
         userService.addUserIntoWorldMap(userCode, world.getId());

@@ -147,7 +147,8 @@ public class EventManagerImpl implements EventManager {
                 }
                 affectedBlocks.forEach(target -> affectBlock(world, eventBlock, target));
                 updateBullet(world, eventBlock, fromCreature, affectedBlocks);
-                if (BlockConstants.BLOCK_CODE_MELEE_HIT != eventBlock.getBlockInfo().getCode()) {
+                if (BlockConstants.BLOCK_CODE_SHOOT_HIT != eventBlock.getBlockInfo().getCode()
+                        && BlockConstants.BLOCK_CODE_SHOOT_ARROW != eventBlock.getBlockInfo().getCode()) {
                     WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                             world.getRegionMap().get(fromCreature.getWorldCoordinate().getRegionNo()),
                             fromCreature.getWorldCoordinate(),
@@ -369,8 +370,8 @@ public class EventManagerImpl implements EventManager {
         if (frameMax == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
             return;
         }
-        if ((timestamp - eventBlock.getBlockInfo().getTimeUpdated()) * GamePalConstants.FRAME_PER_SECOND
-                >= frameMax * 1000L) {
+        if ((timestamp - eventBlock.getBlockInfo().getTimeUpdated()) / 1_000 * GamePalConstants.FRAME_PER_SECOND
+                >= frameMax) {
             sceneManager.removeBlock(world, eventBlock, false);
             return;
         }

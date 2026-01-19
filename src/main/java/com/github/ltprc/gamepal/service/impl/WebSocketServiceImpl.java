@@ -105,6 +105,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         int webStage = jsonObject.getInteger("webStage");
+        long timestamp = System.currentTimeMillis();
 
         // UserCode information
         String userCode = jsonObject.getString("userCode");
@@ -115,7 +116,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         Block player = world.getCreatureMap().get(userCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         // Update onlineMap
-        worldService.registerOnline(world, userCode);
+        worldService.registerOnline(world, userCode, timestamp);
 
         // Check functions
         JSONObject functions = null;
@@ -269,8 +270,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.setMember(userCode, userCode1, userCode2, true);
             }
         }
+//        logger.debug("RSP执行耗时: " + String.format("%.2f", (System.currentTimeMillis() - timestamp) / 1_000_000.0) + " 毫秒");
+
         // Reply automatically
+        long startTime2 = System.currentTimeMillis();
         communicate(userCode, webStage, functions);
+//        logger.debug("COM执行耗时: " + String.format("%.2f", (System.currentTimeMillis() - startTime2) / 1_000_000.0) + " 毫秒");
     }
 
     public void communicate(String userCode, int webStage, JSONObject functions) {
@@ -441,11 +446,14 @@ public class WebSocketServiceImpl implements WebSocketService {
         JSONArray blockIdList = new JSONArray();
         while (!CollectionUtils.isEmpty(blockQueue)) {
             Block block = blockQueue.poll();
-            if (null != block.getBlockInfo() && StringUtils.isNotBlank(block.getBlockInfo().getId())) {
+            if (null == block || null == block.getBlockInfo()) {
+                blockQueue.clear();
+                break;
+            }
+            if (StringUtils.isNotBlank(block.getBlockInfo().getId())) {
                 blockIdList.add(block.getBlockInfo().getId());
             }
-            if (null != block.getBlockInfo()
-                    && block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER) {
+            if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER) {
                 playerInfos.put(block.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true, timestamp));
             }

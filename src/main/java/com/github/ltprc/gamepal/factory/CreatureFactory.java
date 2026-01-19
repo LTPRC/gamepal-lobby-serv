@@ -24,9 +24,6 @@ public class CreatureFactory {
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setPlayerType(playerType);
         playerInfo.setPlayerStatus(GamePalConstants.PLAYER_STATUS_INIT);
-//        long timestamp = System.currentTimeMillis();
-//        playerInfo.setTimeCreated(timestamp);
-//        playerInfo.setTimeUpdated(timestamp);
 //        playerInfo.setHpMax(1000);
 //        playerInfo.setHp(playerInfo.getHpMax() / 2);
         playerInfo.setVpMax(1000);
