@@ -521,6 +521,36 @@ public class BlockUtil {
                 worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
     }
 
+    private static int convertEventCode2Material(int eventCode) {
+        int structureMaterial;
+        switch (eventCode) {
+            case BlockConstants.BLOCK_CODE_MELEE_HIT:
+            case BlockConstants.BLOCK_CODE_MELEE_KICK:
+            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
+            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
+            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
+            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
+                break;
+            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
+            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
+            case BlockConstants.BLOCK_CODE_MELEE_PICK:
+            case BlockConstants.BLOCK_CODE_MELEE_STAB:
+            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+            case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
+            case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH;
+                break;
+            default:
+                structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
+                break;
+        }
+        return structureMaterial;
+    }
+
     private static int convertEventCode2Layer(int eventCode) {
         int layer;
         switch (eventCode) {
@@ -548,6 +578,52 @@ public class BlockUtil {
                 break;
         }
         return layer;
+    }
+
+    private static Shape convertEventCode2Shape(int eventCode) {
+        Shape shape;
+        switch (eventCode) {
+            case BlockConstants.BLOCK_CODE_CHEER:
+            case BlockConstants.BLOCK_CODE_CURSE:
+            case BlockConstants.BLOCK_CODE_NOISE:
+                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.valueOf(5D), BigDecimal.valueOf(5D),
+                                BlockConstants.Z_DEFAULT));
+                break;
+            case BlockConstants.BLOCK_CODE_MINE:
+            case BlockConstants.BLOCK_CODE_SPRAY:
+            case BlockConstants.BLOCK_CODE_SPARK_SHORT:
+                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.ONE, BigDecimal.ONE,
+                                BigDecimal.valueOf(0.1D)));
+                break;
+            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.2D),
+                                BigDecimal.valueOf(0.1D)));
+                break;
+            default:
+                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BlockConstants.EVENT_DEFAULT_RADIUS, BlockConstants.EVENT_DEFAULT_RADIUS,
+                                BlockConstants.Z_DEFAULT));
+                break;
+        }
+        return shape;
+    }
+
+    private static PlanarCoordinate convertEventCode2ImageSize(int eventCode) {
+        PlanarCoordinate imageSize;
+        switch (eventCode) {
+            case BlockConstants.BLOCK_CODE_BLOCK:
+            case BlockConstants.BLOCK_CODE_UPGRADE:
+            case BlockConstants.BLOCK_CODE_SPRAY:
+                imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
+                break;
+            default:
+                imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE);
+                break;
+        }
+        return imageSize;
     }
 
     /**
@@ -603,7 +679,7 @@ public class BlockUtil {
     }
 
     public static String convertBlockInfo2ItemNo(BlockInfo blockInfo) {
-        return ItemConstants.ITEM_PACK_MAP.get(Integer.valueOf(blockInfo.getCode()));
+        return ItemConstants.ITEM_PACK_MAP.get(blockInfo.getCode());
     }
 
     public static BlockInfo convertItemNo2BlockInfo(String itemNo) {
@@ -618,52 +694,15 @@ public class BlockUtil {
     public static Structure createStructureByCode(int blockCode) {
         Structure structure;
         int blockType = BlockUtil.convertBlockCode2Type(blockCode);
-        int structureMaterial;
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
                         BlockConstants.Z_DEFAULT));
-        PlanarCoordinate imageSize;
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
-                switch (blockCode) {
-                    case BlockConstants.BLOCK_CODE_MELEE_HIT:
-                    case BlockConstants.BLOCK_CODE_MELEE_KICK:
-                    case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
-                    case BlockConstants.BLOCK_CODE_MELEE_SMASH:
-                    case BlockConstants.BLOCK_CODE_SHOOT_HIT:
-                    case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
-                    case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
-                    case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
-                        structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE;
-                        break;
-                    case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
-                    case BlockConstants.BLOCK_CODE_MELEE_CHOP:
-                    case BlockConstants.BLOCK_CODE_MELEE_PICK:
-                    case BlockConstants.BLOCK_CODE_MELEE_STAB:
-                    case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-                    case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-                    case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
-                    case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
-                        structureMaterial = BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH;
-                        break;
-                    default:
-                        structureMaterial = BlockConstants.STRUCTURE_MATERIAL_NONE;
-                        break;
-                }
-                switch (blockCode) {
-                    case BlockConstants.BLOCK_CODE_BLOCK:
-                    case BlockConstants.BLOCK_CODE_UPGRADE:
-                    case BlockConstants.BLOCK_CODE_SPRAY:
-                        imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
-                        break;
-                    default:
-                        imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE);
-                        break;
-                }
-                structure = new Structure(structureMaterial, BlockUtil.convertEventCode2Layer(blockCode),
-                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BlockConstants.EVENT_RADIUS, BlockConstants.EVENT_RADIUS,
-                                        BlockConstants.Z_DEFAULT)), imageSize);
+                structure = new Structure(convertEventCode2Material(blockCode),
+                        BlockUtil.convertEventCode2Layer(blockCode),
+                        BlockUtil.convertEventCode2Shape(blockCode),
+                        BlockUtil.convertEventCode2ImageSize(blockCode));
                 break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH,
@@ -795,6 +834,7 @@ public class BlockUtil {
                                         BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
+                PlanarCoordinate imageSize;
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_BIG_PINE:
                     case BlockConstants.BLOCK_CODE_BIG_OAK:

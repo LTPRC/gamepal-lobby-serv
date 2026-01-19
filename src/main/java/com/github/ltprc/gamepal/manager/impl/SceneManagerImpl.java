@@ -726,6 +726,13 @@ public class SceneManagerImpl implements SceneManager {
             }
             Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, o1.getWorldCoordinate());
             Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, o2.getWorldCoordinate());
+            if (coordinate1.getY().equals(coordinate2.getY()) && coordinate1.getZ().equals(coordinate2.getZ())) {
+                int layerDiff = layer1 % 10 - layer2 % 10;
+                if (layerDiff != 0) {
+                    return layerDiff;
+                }
+                return o1.getBlockInfo().getId().compareTo(o2.getBlockInfo().getId());
+            }
             BigDecimal minDepth1 = coordinate1.getY()
                     .add(coordinate1.getZ())
                     .add(structure1.getShape().getRadius().getY())
@@ -734,13 +741,9 @@ public class SceneManagerImpl implements SceneManager {
                     .add(coordinate2.getZ())
                     .add(structure2.getShape().getRadius().getY())
                     .subtract(structure2.getShape().getRadius().getZ());
-            int compareZ = minDepth1.compareTo(minDepth2);
-            if (compareZ != 0) {
-                return compareZ;
-            }
-            int layerDiff = layer1 % 10 - layer2 % 10;
-            if (layerDiff != 0) {
-                return layerDiff;
+            int compareMinDepth = minDepth1.compareTo(minDepth2);
+            if (compareMinDepth != 0) {
+                return compareMinDepth;
             }
             return o1.getBlockInfo().getId().compareTo(o2.getBlockInfo().getId());
         });
