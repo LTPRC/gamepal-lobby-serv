@@ -7,8 +7,6 @@ public class InteractionConstants {
     private InteractionConstants() {}
 
     // Frontend constants
-    public static final BigDecimal MAX_INTERACTION_DISTANCE = BigDecimal.valueOf(2D);
-    public static final BigDecimal MAX_INTERACTION_ANGLE = BigDecimal.valueOf(60D);
     public static final int INTERACTION_USE = 0;
     public static final int INTERACTION_EXCHANGE = 1;
     public static final int INTERACTION_SLEEP = 2;
@@ -24,4 +22,9 @@ public class InteractionConstants {
     public static final int INTERACTION_PLANT = 12;
     public static final int INTERACTION_GATHER = 13;
     public static final int INTERACTION_PULL = 14;
+
+    // Backend constants
+
+    public static final BigDecimal MAX_INTERACTION_DISTANCE = BigDecimal.valueOf(2.5D);
+    public static final BigDecimal MAX_INTERACTION_ANGLE = BigDecimal.valueOf(30D);
 }

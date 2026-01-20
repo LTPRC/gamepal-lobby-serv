@@ -457,8 +457,16 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerInfos.put(block.getBlockInfo().getId(),
                         sceneManager.convertBlock2OldBlockInstance(world, userCode, block, true, timestamp));
             }
-            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, block, false, timestamp);
+
+            // Update blocks to be interacted possibly
+            if (!world.getInteractionInfoMap().containsKey(userCode)
+                    || !StringUtils.equals(block.getBlockInfo().getId(),
+                    world.getInteractionInfoMap().get(userCode).getId())) {
+                interactionManager.focusOnBlock(world, userCode, block);
+            }
+
             // Filter blocks to be updated and transmitted
+            JSONObject convertedBlock = sceneManager.convertBlock2OldBlockInstance(world, userCode, block, false, timestamp);
             if (null != convertedBlock
                     && (BlockConstants.BLOCK_TYPE_PLAYER == block.getBlockInfo().getType()
                     || BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER == block.getBlockInfo().getType()

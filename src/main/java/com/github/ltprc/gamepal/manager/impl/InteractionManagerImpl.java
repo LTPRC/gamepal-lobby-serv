@@ -5,7 +5,6 @@ import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.InteractionConstants;
-import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.manager.InteractionManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
@@ -17,7 +16,6 @@ import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.WorldService;
@@ -31,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InteractionManagerImpl implements InteractionManager {
@@ -54,39 +53,47 @@ public class InteractionManagerImpl implements InteractionManager {
     private WorldService worldService;
 
     @Override
-    public void searchInteraction(GameWorld world, String userCode) {
+    public void focusOnBlocks(GameWorld world, String userCode) {
         Map<String, Block> creatureMap = world.getCreatureMap();
         if (!creatureMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007);
             return;
         }
         Block player = creatureMap.get(userCode);
-        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-        Queue<Block> rankingQueue = BlockFactory.createDistanceRankingQueue(region, player.getWorldCoordinate());
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
-        sceneManager.collectSurroundingBlocks(world, player, 1).stream()
-                .filter(block -> null != BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
-                        block.getWorldCoordinate()))
-                .filter(block -> BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
-                        block.getWorldCoordinate()).doubleValue()
-                        < InteractionConstants.MAX_INTERACTION_DISTANCE.doubleValue())
-                .filter(block -> BlockUtil.compareAnglesInDegrees(
-                        BlockUtil.calculateAngle(region, player.getWorldCoordinate(),
-                                block.getWorldCoordinate()).doubleValue(),
-                                player.getMovementInfo().getFaceDirection().doubleValue())
-                        < InteractionConstants.MAX_INTERACTION_ANGLE.doubleValue())
-                .filter(block -> structureMap.containsKey(player.getBlockInfo().getCode())
-                        && structureMap.containsKey(block.getBlockInfo().getCode())
-                        && BlockUtil.checkMaterialCollision(
-                                structureMap.get(player.getBlockInfo().getCode()).getMaterial(),
-                        structureMap.get(block.getBlockInfo().getCode()).getMaterial()))
-                .filter(block -> !StringUtils.equals(block.getBlockInfo().getId(), userCode))
-                .forEach(rankingQueue::add);
-        if (!rankingQueue.isEmpty() && BlockUtil.checkBlockTypeInteractive(rankingQueue.peek().getBlockInfo().getType())) {
-            world.getInteractionInfoMap().put(userCode, generateInteractionInfo(world, rankingQueue.peek().getBlockInfo()));
-        } else {
-            world.getInteractionInfoMap().remove(userCode);
+        sceneManager.collectSurroundingBlocks(world, player, 1)
+                .forEach(block -> focusOnBlock(world, userCode, block));
+    }
+
+    @Override
+    public void focusOnBlock(GameWorld world, String userCode, Block block) {
+        Map<String, Block> creatureMap = world.getCreatureMap();
+        if (!creatureMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
         }
+        if (null == block) {
+            world.getInteractionInfoMap().remove(userCode);
+            return;
+        }
+        Block player = creatureMap.get(userCode);
+        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
+        if (checkFocusOnBlock(region, player, block)) {
+            world.getInteractionInfoMap().put(userCode, generateInteractionInfo(world, block.getBlockInfo()));
+        }
+    }
+
+    private boolean checkFocusOnBlock(Region region, Block player, Block block) {
+        BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+                block.getWorldCoordinate());
+        BigDecimal angle = BlockUtil.calculateAngle(region, player.getWorldCoordinate(), block.getWorldCoordinate());
+        return BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
+                && !StringUtils.equals(block.getBlockInfo().getId(), player.getBlockInfo().getId())
+                && null != distance
+                && distance.doubleValue() < InteractionConstants.MAX_INTERACTION_DISTANCE.doubleValue()
+                && null != angle
+                && BlockUtil.compareAnglesInDegrees(angle.doubleValue(),
+                player.getMovementInfo().getFaceDirection().doubleValue())
+                < InteractionConstants.MAX_INTERACTION_ANGLE.doubleValue();
     }
 
     private InteractionInfo generateInteractionInfo(GameWorld world, BlockInfo blockInfo) {

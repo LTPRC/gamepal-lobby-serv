@@ -7,7 +7,6 @@ import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.FarmManager;
-import com.github.ltprc.gamepal.manager.InteractionManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -61,9 +60,6 @@ public class TimedEventTask {
 
     @Autowired
     private MovementManager movementManager;
-
-    @Autowired
-    private InteractionManager interactionManager;
 
     @Autowired
     private SceneManager sceneManager;
@@ -231,11 +227,6 @@ public class TimedEventTask {
                             }
                             if (movementInfo.getFloorCode() == BlockConstants.BLOCK_CODE_WATER_DEEP) {
                                 playerInfo.getSkills().get(0).setFrame(playerInfo.getSkills().get(0).getFrameMax());
-                            }
-
-                            // Update possible interacted blocks
-                            if (playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
-                                interactionManager.searchInteraction(world, id);
                             }
 
                             // Add decorating effects
