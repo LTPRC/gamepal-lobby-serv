@@ -11,6 +11,7 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -28,8 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Component
 public class InteractionManagerImpl implements InteractionManager {
@@ -60,7 +64,8 @@ public class InteractionManagerImpl implements InteractionManager {
             return;
         }
         Block player = creatureMap.get(userCode);
-        sceneManager.collectSurroundingBlocks(world, player, 1)
+        sceneManager.collectSurroundingBlocks(world, player, 1).stream()
+                .map(StructuredBlock::getBlock)
                 .forEach(block -> focusOnBlock(world, userCode, block));
     }
 

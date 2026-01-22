@@ -447,7 +447,9 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
-        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
         }
         if (null == playerInfo.getSkills() || playerInfo.getSkills().size() <= skillNo) {
@@ -1063,6 +1065,7 @@ public class PlayerServiceImpl implements PlayerService {
         Block player = creatureMap.get(userCode);
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = 0;
+        playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = 0;
         eventManager.changeHp(world, player, BigDecimal.valueOf(player.getBlockInfo().getHpMax().get())
                 .multiply(BlockConstants.HP_RESPAWN_RATIO).intValue(), true);
         changeVp(userCode, playerInfo.getVpMax(), true);

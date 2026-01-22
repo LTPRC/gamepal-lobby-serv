@@ -7,13 +7,19 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.RegionConstants;
 import com.github.ltprc.gamepal.factory.SceneFactory;
-import com.github.ltprc.gamepal.manager.*;
+import com.github.ltprc.gamepal.manager.EventManager;
+import com.github.ltprc.gamepal.manager.FarmManager;
+import com.github.ltprc.gamepal.manager.InteractionManager;
+import com.github.ltprc.gamepal.manager.MovementManager;
+import com.github.ltprc.gamepal.manager.NpcManager;
+import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.BagInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -39,7 +45,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
+import java.util.Stack;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -69,6 +87,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private WorldService worldService;
+
+    @Autowired
+    private InteractionManager interactionManager;
 
     @Override
     public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
@@ -607,21 +628,22 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public Queue<Block> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius) {
-        Queue<Block> rankingQueue = collectSurroundingBlocksFromScenes(world, player, sceneScanRadius);
+    public Queue<StructuredBlock> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius) {
+        Queue<StructuredBlock> rankingQueue = collectSurroundingBlocksFromScenes(world, player, sceneScanRadius);
         rankingQueue.addAll(collectSurroundingBlocksFromCreatureMap(world, player, sceneScanRadius));
         return rankingQueue;
     }
 
-    private Queue<Block> collectSurroundingBlocksFromScenes(final GameWorld world, final Block player,
+    private Queue<StructuredBlock> collectSurroundingBlocksFromScenes(final GameWorld world, final Block player,
                                                             final int sceneScanRadius) {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = createRankingQueue(region);
+        Queue<StructuredBlock> rankingQueue = createRankingQueue(region);
         IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
         for (int i = sceneCoordinate.getY() - sceneScanRadius;
              i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
@@ -638,8 +660,7 @@ public class SceneManagerImpl implements SceneManager {
                                 player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                                 ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
                                 : null, block)) {
-                            Block newBlock = new Block(block);
-                            rankingQueue.add(newBlock);
+                            rankingQueue.add(new StructuredBlock(block, structureMap.get(block.getBlockInfo().getCode())));
                             collectTransformedBlocks(world, rankingQueue, block);
                         }
                     });
@@ -649,46 +670,48 @@ public class SceneManagerImpl implements SceneManager {
         return rankingQueue;
     }
 
-    private Queue<Block> collectSurroundingBlocksFromCreatureMap(final GameWorld world, final Block player,
+    private Queue<StructuredBlock> collectSurroundingBlocksFromCreatureMap(final GameWorld world, final Block player,
                                                                  final int sceneScanRadius) {
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (null == region) {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<Block> rankingQueue = createRankingQueue(region);
+        Queue<StructuredBlock> rankingQueue = createRankingQueue(region);
         // Collect detected creature blocks
         Map<String, Block> creatureMap = world.getCreatureMap();
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         creatureMap.values().stream()
                 // Creature blocks contain running player or NPC 24/03/25
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
                 .forEach(player1 -> {
-                    Block newBlock = new Block(player1);
                     if (PlayerInfoUtil.checkPerceptionCondition(region, player,
                             player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                                     ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
-                                    : null, newBlock)) {
+                                    : null, player1)) {
 //                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
 //                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
 //                                        player.getWorldCoordinate().getSceneCoordinate()),
 //                                region.getHeight(), region.getWidth());
-                        rankingQueue.add(newBlock);
+                        rankingQueue.add(new StructuredBlock(player1, structureMap.get(player1.getBlockInfo().getCode())));
                     }
                 });
         return rankingQueue;
     }
 
-    private void collectTransformedBlocks(final GameWorld world, Queue<Block> rankingQueue, Block block) {
+    private void collectTransformedBlocks(final GameWorld world, Queue<StructuredBlock> rankingQueue, Block block) {
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_DROP:
-                rankingQueue.add(new Block(block.getWorldCoordinate(),
-                    BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_WAVE),
-                        new MovementInfo()));
+                rankingQueue.add(new StructuredBlock(new Block(block.getWorldCoordinate(),
+                    BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_SHADOW),
+                        new MovementInfo()), structureMap.get(block.getBlockInfo().getCode())));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
-                cropBlock.ifPresent(rankingQueue::add);
+                cropBlock.ifPresent(cropBlock1 -> rankingQueue.add(new StructuredBlock(cropBlock1,
+                        structureMap.get(cropBlock1.getBlockInfo().getCode()))));
                 break;
             case BlockConstants.BLOCK_TYPE_WALL:
                 Integer crackCode = null;
@@ -700,9 +723,9 @@ public class SceneManagerImpl implements SceneManager {
                     crackCode = BlockConstants.BLOCK_CODE_CRACK_1;
                 }
                 if (null != crackCode) {
-                    rankingQueue.add(new Block(block.getWorldCoordinate(),
+                    rankingQueue.add(new StructuredBlock(new Block(block.getWorldCoordinate(),
                             BlockUtil.createBlockInfoByCode(crackCode),
-                            new MovementInfo()));
+                            new MovementInfo()), structureMap.get(block.getBlockInfo().getCode())));
                 }
                 break;
             default:
@@ -710,28 +733,29 @@ public class SceneManagerImpl implements SceneManager {
         }
     }
 
-    private Queue<Block> createRankingQueue(final RegionInfo regionInfo) {
+    private Queue<StructuredBlock> createRankingQueue(final RegionInfo regionInfo) {
         return new PriorityQueue<>((o1, o2) -> {
-            if (o1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                    || o2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-                return o1.getBlockInfo().getCode() - o2.getBlockInfo().getCode();
+            Block block1 = o1.getBlock();
+            Block block2 = o2.getBlock();
+            Structure structure1 = o1.getStructure();
+            Structure structure2 = o2.getStructure();
+            if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
+                    || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
+                return block1.getBlockInfo().getCode() - block2.getBlockInfo().getCode();
             }
-            Map<Integer, Structure> structureMap = worldService.getStructureMap();
-            Structure structure1 = structureMap.getOrDefault(o1.getBlockInfo().getCode(), new Structure());
-            Structure structure2 = structureMap.getOrDefault(o2.getBlockInfo().getCode(), new Structure());
             int layer1 = structure1.getLayer();
             int layer2 = structure2.getLayer();
             if (layer1 / 10 != layer2 / 10) {
                 return layer1 / 10 - layer2 / 10;
             }
-            Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, o1.getWorldCoordinate());
-            Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, o2.getWorldCoordinate());
+            Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
+            Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
             if (coordinate1.getY().equals(coordinate2.getY()) && coordinate1.getZ().equals(coordinate2.getZ())) {
                 int layerDiff = layer1 % 10 - layer2 % 10;
                 if (layerDiff != 0) {
                     return layerDiff;
                 }
-                return o1.getBlockInfo().getId().compareTo(o2.getBlockInfo().getId());
+                return block1.getBlockInfo().getId().compareTo(block2.getBlockInfo().getId());
             }
             BigDecimal minDepth1 = coordinate1.getY()
                     .add(coordinate1.getZ())
@@ -745,7 +769,7 @@ public class SceneManagerImpl implements SceneManager {
             if (compareMinDepth != 0) {
                 return compareMinDepth;
             }
-            return o1.getBlockInfo().getId().compareTo(o2.getBlockInfo().getId());
+            return block1.getBlockInfo().getId().compareTo(block2.getBlockInfo().getId());
         });
     }
 
@@ -1034,6 +1058,11 @@ public class SceneManagerImpl implements SceneManager {
         scene.getBlocks().remove(block.getBlockInfo().getId());
         world.getBlockMap().remove(block.getBlockInfo().getId());
         world.getSourceMap().remove(block.getBlockInfo().getId());
+        if (BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())) {
+            world.getInteractionInfoMap().entrySet().stream()
+                    .filter(entry -> StringUtils.equals(entry.getValue().getId(), block.getBlockInfo().getId()))
+                    .forEach(entry -> interactionManager.focusOnBlock(world, entry.getKey(), null));
+        }
     }
 
     private void destroyBlock(GameWorld world, Block block) {
@@ -1265,9 +1294,6 @@ public class SceneManagerImpl implements SceneManager {
         GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
         Stack<Block> tempStack = new Stack<>();
         Block topBlock = null;
-        if (null == gravitatedStack) {
-            logger.error(worldCoordinate.getRegionNo() + ":" + worldCoordinate.getSceneCoordinate().getX() + "," + worldCoordinate.getSceneCoordinate().getY());
-        }
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
         BigDecimal height = structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
                 .getShape().getRadius().getZ();

@@ -397,67 +397,6 @@ public class BlockUtil {
         return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
     }
 
-    public static boolean detectPlanarCollision(Coordinate coordinate1, Coordinate coordinate2, Shape shape1,
-                                                Shape shape2) {
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape1.getShapeType()) {
-            shape1.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            shape1.getRadius().setY(shape1.getRadius().getX());
-        }
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape2.getShapeType()) {
-            shape2.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            shape2.getRadius().setY(shape2.getRadius().getX());
-        }
-        // Round vs. round
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape1.getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
-            return BlockUtil.calculateDistance(coordinate1, coordinate2).doubleValue()
-                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue();
-        }
-        // Rectangle vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
-            return BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
-                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                    && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
-                    < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
-        }
-        // Round vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
-            return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
-        }
-        boolean isInsideRectangle1 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape2.getRadius().getY().doubleValue();
-        boolean isInsideRectangle2 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape2.getRadius().getX().doubleValue()
-                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
-        boolean isInsideRound1 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(
-                        coordinate2.getX().subtract(shape2.getRadius().getX()),
-                        coordinate2.getY().subtract(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        boolean isInsideRound2 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(
-                        coordinate2.getX().add(shape2.getRadius().getX()),
-                        coordinate2.getY().subtract(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        boolean isInsideRound3 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
-                        coordinate2.getY().add(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        boolean isInsideRound4 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
-                        coordinate2.getY().add(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        return isInsideRectangle1 || isInsideRectangle2 || isInsideRound1 || isInsideRound2 || isInsideRound3 || isInsideRound4;
-    }
-
     public static boolean checkBlockTypeInteractive(int blockType) {
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_NORMAL:
@@ -570,7 +509,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_CODE_UPGRADE:
             case BlockConstants.BLOCK_CODE_SACRIFICE:
             case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-            case BlockConstants.BLOCK_CODE_WAVE:
+            case BlockConstants.BLOCK_CODE_DROP_SHADOW:
                 layer = BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
                 break;
             default:
@@ -601,6 +540,11 @@ public class BlockUtil {
                 shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.2D),
                                 BigDecimal.valueOf(0.1D)));
+                break;
+            case BlockConstants.BLOCK_CODE_SHOCK:
+                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2),
+                                BlockConstants.Z_DEFAULT));
                 break;
             default:
                 shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,

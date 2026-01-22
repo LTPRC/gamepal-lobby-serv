@@ -42,7 +42,7 @@ public class BlockConstants {
     public static final int BLOCK_CODE_LIGHT_SMOKE = 135;
     public static final int BLOCK_CODE_BLEED_SEVERE = 136;
     public static final int BLOCK_CODE_DISINTEGRATE = 137;
-    public static final int BLOCK_CODE_WAVE = 138;
+    public static final int BLOCK_CODE_DROP_SHADOW = 138;
     public static final int BLOCK_CODE_BUBBLE = 139;
     public static final int BLOCK_CODE_SHOCK = 140;
     public static final int BLOCK_CODE_TEXT_DISPLAY = 141;
@@ -337,7 +337,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LIGHT_SMOKE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED_SEVERE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_DISINTEGRATE, BLOCK_TYPE_EFFECT);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_WAVE, BLOCK_TYPE_EFFECT);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_DROP_SHADOW, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BUBBLE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SHOCK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_TEXT_DISPLAY, BLOCK_TYPE_TEXT_DISPLAY);

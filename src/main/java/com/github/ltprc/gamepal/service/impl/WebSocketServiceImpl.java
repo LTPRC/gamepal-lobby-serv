@@ -4,7 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.MessageConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.InteractionManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
@@ -12,10 +17,10 @@ import com.github.ltprc.gamepal.manager.MiniMapManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -24,7 +29,11 @@ import com.github.ltprc.gamepal.model.map.scene.SceneInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.service.*;
+import com.github.ltprc.gamepal.service.MessageService;
+import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WebSocketService;
+import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -41,7 +50,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -231,12 +245,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                 }
             }
 
-            // Lazy updating interactionInfo only
-            InteractionInfo interactionInfo = functions.getObject("updateInteractionInfo", InteractionInfo.class);
-            if (null != interactionInfo) {
-                world.getInteractionInfoMap().put(userCode, interactionInfo);
-            }
-
             if (functions.containsKey("interactBlocks")) {
                 JSONArray interactBlocks = functions.getJSONArray("interactBlocks");
                 interactBlocks.forEach(interactBlock ->
@@ -256,11 +264,9 @@ public class WebSocketServiceImpl implements WebSocketService {
 //                }
 //            }
             if (functions.containsKey("useSkills")) {
-                if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] == 0) {
-                    JSONArray useSkills = functions.getJSONArray("useSkills");
-                    for (int i = 0; i < SkillConstants.SKILL_LENGTH; i++) {
-                        playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
-                    }
+                JSONArray useSkills = functions.getJSONArray("useSkills");
+                for (int i = 0; i < SkillConstants.SKILL_LENGTH; i++) {
+                    playerService.useSkill(userCode, i, (Boolean) useSkills.get(i));
                 }
             }
             if (functions.containsKey("setMember")) {
@@ -270,12 +276,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                 playerService.setMember(userCode, userCode1, userCode2, true);
             }
         }
-//        logger.debug("RSP执行耗时: " + String.format("%.2f", (System.currentTimeMillis() - timestamp) / 1_000_000.0) + " 毫秒");
+//        logger.debug("RSP执行耗时: " + (System.currentTimeMillis() - timestamp) + " 毫秒");
 
         // Reply automatically
         long startTime2 = System.currentTimeMillis();
         communicate(userCode, webStage, functions);
-//        logger.debug("COM执行耗时: " + String.format("%.2f", (System.currentTimeMillis() - startTime2) / 1_000_000.0) + " 毫秒");
+//        logger.debug("COM执行耗时: " + (System.currentTimeMillis() - startTime2) + " 毫秒");
     }
 
     public void communicate(String userCode, int webStage, JSONObject functions) {
@@ -433,10 +439,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         // Collect blocks
-        Queue<Block> blockQueue = sceneManager.collectSurroundingBlocks(world, player, 2);
+        Queue<StructuredBlock> blockQueue = sceneManager.collectSurroundingBlocks(world, player, 2);
         // Remove not detected blocks
         Map<String, Block> userPlayerBlockMap = world.getPlayerBlockMap().get(userCode);
         Set<String> queueIds = blockQueue.stream()
+                .map(StructuredBlock::getBlock)
                 .map(Block::getBlockInfo)
                 .map(BlockInfo::getId)
                 .collect(Collectors.toSet());
@@ -444,8 +451,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Traverse every collected block
         JSONArray blocks = new JSONArray();
         JSONArray blockIdList = new JSONArray();
+        interactionManager.focusOnBlock(world, userCode, null);
         while (!CollectionUtils.isEmpty(blockQueue)) {
-            Block block = blockQueue.poll();
+            Block block = blockQueue.poll().getBlock();
             if (null == block || null == block.getBlockInfo()) {
                 blockQueue.clear();
                 break;
@@ -512,7 +520,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Clear flags
         world.getFlagMap().put(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
 
-//        if (Instant.now().getNano() / 1000_000 % 10 == 0) {
+//        if (timestamp % 10 == 0) {
 //            analyzeJsonContent(rst);
 //        }
         transmit(rst, userCode, world);

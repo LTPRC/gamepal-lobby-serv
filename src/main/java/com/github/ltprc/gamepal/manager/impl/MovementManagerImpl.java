@@ -7,8 +7,8 @@ import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
-import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
@@ -28,7 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -155,10 +159,10 @@ public class MovementManagerImpl implements MovementManager {
         Set<Block> preSelectedBlocks = new HashSet<>();
         preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
                 expectedNewBlockXY, fromId));
-        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockX, fromId));
-        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockY, fromId));
+//        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+//                expectedNewBlockX, fromId));
+//        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+//                expectedNewBlockY, fromId));
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
         preSelectedBlocks.stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
@@ -274,8 +278,8 @@ public class MovementManagerImpl implements MovementManager {
             region.getScenes().get(oldWorldCoordinate.getSceneCoordinate()).getBlocks()
                     .remove(worldMovingBlock.getBlockInfo().getId());
         }
-        Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, worldMovingBlock, 1);
-        rankingQueue.forEach(nearbyBlock -> checkBlockInteraction(world, worldMovingBlock, nearbyBlock));
+        Queue<StructuredBlock> rankingQueue = sceneManager.collectSurroundingBlocks(world, worldMovingBlock, 1);
+        rankingQueue.forEach(nearbyBlock -> checkBlockInteraction(world, worldMovingBlock, nearbyBlock.getBlock()));
     }
 
     @Override
@@ -401,48 +405,97 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public boolean detectCollision(GameWorld world, Block block1, Block block2) {
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
-        if (structureMap.containsKey(block1.getBlockInfo().getCode())
-                && structureMap.containsKey(block2.getBlockInfo().getCode())
-                && !BlockUtil.checkMaterialStopMovement(
-                structureMap.get(block1.getBlockInfo().getCode()).getMaterial(),
-                structureMap.get(block2.getBlockInfo().getCode()).getMaterial())) {
+        Structure structure1 = structureMap.get(block1.getBlockInfo().getCode());
+        Structure structure2 = structureMap.get(block2.getBlockInfo().getCode());
+        if (null == structure1 || null == structure2
+                || !BlockUtil.checkMaterialStopMovement(structure1.getMaterial(), structure2.getMaterial())) {
             return false;
         }
         Region region = world.getRegionMap().get(block1.getWorldCoordinate().getRegionNo());
-        return detectPlanarCollision(region, block1, block2) && detectZCollision(block1, block2);
+        return detectPlanarCollision(region, block1, block2, structure1, structure2)
+                && detectZCollision(block1, block2, structure1, structure2);
     }
 
-    private boolean detectPlanarCollision(RegionInfo regionInfo, Block block1, Block block2) {
+    private boolean detectPlanarCollision(RegionInfo regionInfo, Block block1, Block block2, Structure structure1,
+                                          Structure structure2) {
         if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
                 || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
-        if (!structureMap.containsKey(block1.getBlockInfo().getCode())
-                || !structureMap.containsKey(block2.getBlockInfo().getCode())) {
-            return false;
-        }
         Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
         Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-        Shape shape1 = structureMap.get(block1.getBlockInfo().getCode()).getShape();
-        Shape shape2 = structureMap.get(block2.getBlockInfo().getCode()).getShape();
-        return BlockUtil.detectPlanarCollision(coordinate1, coordinate2, shape1, shape2);
+        Shape shape1 = structure1.getShape();
+        Shape shape2 = structure2.getShape();
+        return detectPlanarCollision(coordinate1, coordinate2, shape1, shape2);
     }
 
-    private boolean detectZCollision(Block block1, Block block2) {
+    private boolean detectPlanarCollision(Coordinate coordinate1, Coordinate coordinate2, Shape shape1, Shape shape2) {
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape1.getShapeType()) {
+            shape1.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            shape1.getRadius().setY(shape1.getRadius().getX());
+        }
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape2.getShapeType()) {
+            shape2.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
+            shape2.getRadius().setY(shape2.getRadius().getX());
+        }
+        // Round vs. round
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape1.getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
+            return BlockUtil.calculateDistance(coordinate1, coordinate2).doubleValue()
+                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue();
+        }
+        // Rectangle vs. rectangle
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
+                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
+            return BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
+                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
+                    && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
+                    < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
+        }
+        // Round vs. rectangle
+        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
+            return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
+        }
+        boolean isInsideRectangle1 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
+                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape2.getRadius().getY().doubleValue();
+        boolean isInsideRectangle2 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape2.getRadius().getX().doubleValue()
+                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
+                < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
+        boolean isInsideRound1 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(
+                        coordinate2.getX().subtract(shape2.getRadius().getX()),
+                        coordinate2.getY().subtract(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        boolean isInsideRound2 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(
+                        coordinate2.getX().add(shape2.getRadius().getX()),
+                        coordinate2.getY().subtract(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        boolean isInsideRound3 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
+                        coordinate2.getY().add(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        boolean isInsideRound4 = BlockUtil.calculateDistance(coordinate1,
+                new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
+                        coordinate2.getY().add(shape2.getRadius().getY()),
+                        coordinate2.getZ())).doubleValue()
+                < shape1.getRadius().getX().doubleValue();
+        return isInsideRectangle1 || isInsideRectangle2 || isInsideRound1 || isInsideRound2 || isInsideRound3 || isInsideRound4;
+    }
+
+    private boolean detectZCollision(Block block1, Block block2, Structure structure1, Structure structure2) {
         if (block1.getWorldCoordinate().getRegionNo() != block2.getWorldCoordinate().getRegionNo()) {
             return false;
         }
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
-        if (!structureMap.containsKey(block1.getBlockInfo().getCode())
-                || !structureMap.containsKey(block2.getBlockInfo().getCode())) {
-            return false;
-        }
-        return block1.getWorldCoordinate().getCoordinate().getZ()
-                .add(structureMap.get(block1.getBlockInfo().getCode()).getShape().getRadius().getZ())
+        return block1.getWorldCoordinate().getCoordinate().getZ().add(structure1.getShape().getRadius().getZ())
                 .compareTo(block2.getWorldCoordinate().getCoordinate().getZ()) > 0
-                && block2.getWorldCoordinate().getCoordinate().getZ()
-                .add(structureMap.get(block2.getBlockInfo().getCode()).getShape().getRadius().getZ())
+                && block2.getWorldCoordinate().getCoordinate().getZ().add(structure2.getShape().getRadius().getZ())
                 .compareTo(block1.getWorldCoordinate().getCoordinate().getZ()) > 0;
     }
 

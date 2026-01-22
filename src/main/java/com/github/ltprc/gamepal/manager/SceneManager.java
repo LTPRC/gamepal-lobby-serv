@@ -1,6 +1,7 @@
 package com.github.ltprc.gamepal.manager;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
@@ -14,7 +15,7 @@ import java.util.Queue;
 
 public interface SceneManager {
     void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate);
-    Queue<Block> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
+    Queue<StructuredBlock> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
     List<Block> collectLinearBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
                                     String sourceId);
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);

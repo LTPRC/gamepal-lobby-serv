@@ -11,6 +11,7 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
+import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -106,6 +107,7 @@ public class EventManagerImpl implements EventManager {
             affectedBlocks = sceneManager.collectSurroundingBlocks(world, eventBlock,
                             SkillConstants.SKILL_RANGE_EXPLODE.divide(BigDecimal.valueOf(Math.max(region.getHeight(),
                                     region.getWidth())), 2, RoundingMode.HALF_UP).intValue()).stream()
+                    .map(StructuredBlock::getBlock)
                     .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
                     .collect(Collectors.toList());
         } else {
@@ -388,8 +390,9 @@ public class EventManagerImpl implements EventManager {
                             sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                         }
                         // Burn collected blocks 25/02/03
-                        Queue<Block> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
+                        Queue<StructuredBlock> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
                         rankingQueue.stream()
+                                .map(StructuredBlock::getBlock)
                                 .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
                                         || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
                                 .filter(targetBlock -> {

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -171,13 +172,37 @@ public class UserServiceImpl implements UserService {
                         }
                     });
             // Initialize missions
-            QwenResponse qwenResponse = webService.callQwenApi(
-                    "qwen-plus", "以JSON数组的结构生成随机1到5个字符串，内容是编造的游戏任务条目。");
-            List<MissionInfo> missions = JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class)
-                    .stream()
-                    .map(content -> new MissionInfo(MissionConstants.MISSION_STATUS_INITIATED, content))
-                    .collect(Collectors.toList());
-            world.getPlayerInfoMap().get(userCode).getMissions().addAll(missions);
+            webService.callQwenApiAsync("qwen-plus",
+                            "严格按照JSON数组的结构生成随机1到5个字符串，内容是编造的游戏任务条目。")
+                    .thenAccept(qwenResponse -> {
+                        Optional.ofNullable(qwenResponse)
+                                .map(QwenResponse::getOutput)
+                                .map(QwenResponse.Output::getText)
+                                .filter(text -> !text.trim().isEmpty())
+                                .map(text -> {
+                                    try {
+                                        return JSON.parseArray(text).toJavaList(String.class);
+                                    } catch (Exception e) {
+                                        logger.error(ErrorUtil.ERROR_1046 + "userCode: " + userCode);
+                                        return null;
+                                    }
+                                })
+                                .ifPresent(qwenResponseList -> {
+                                    try {
+                                        List<MissionInfo> missions = qwenResponseList.stream()
+                                                .map(content -> new MissionInfo(MissionConstants.MISSION_STATUS_INITIATED, content))
+                                                .collect(Collectors.toList());
+                                        world.getPlayerInfoMap().get(userCode).getMissions().addAll(missions);
+                                    } catch (NumberFormatException e) {
+                                        logger.error(ErrorUtil.ERROR_1046 + "userCode: " + userCode);
+                                        return;
+                                    }
+                                });
+                    })
+                    .exceptionally(throwable -> {
+                        logger.error(ErrorUtil.ERROR_1044 + " message: " + throwable.getMessage());
+                        return null;
+                    });
         }
         // Update online token
         String token = UUID.randomUUID().toString();
