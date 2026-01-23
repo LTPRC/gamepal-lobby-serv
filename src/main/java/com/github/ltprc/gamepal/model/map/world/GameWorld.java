@@ -33,7 +33,7 @@ public class GameWorld extends GameWorldInfo {
     private Map<String, boolean[]> flagMap; // userCode, token
     private Map<String, Terminal> terminalMap; // interactionId, terminal
     private Map<String, NpcBrain> npcBrainMap; // userCode, npcBrain
-    private Map<String, Map<String, Block>> playerBlockMap; // userCode, blockId, transmitted block 无需保留探测顺序，只需保留id对应关系便于查询
+    private Map<String, Map<String, Long>> playerBlockMap; // userCode, blockId, timeUpdated
 
     // Special block info maps
     private Map<String, Block> blockMap; // id, non-creature block

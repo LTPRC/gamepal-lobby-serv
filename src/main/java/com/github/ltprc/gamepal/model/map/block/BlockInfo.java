@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.model.map.block;
 
 import com.github.ltprc.gamepal.config.BlockConstants;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,6 +16,9 @@ public class BlockInfo {
     private AtomicInteger hp = new AtomicInteger(BlockConstants.HP_DEFAULT);
     private long timeCreated;
     private long timeUpdated;
+    private int frame;
+    private int frameMax;
+    private int period;
 
     public BlockInfo(BlockInfo blockInfo) {
         if (null == blockInfo) {
@@ -27,6 +31,9 @@ public class BlockInfo {
         hp = blockInfo.hp;
         timeCreated = blockInfo.timeCreated;
         timeUpdated = blockInfo.timeUpdated;
+        frame = blockInfo.getFrame();
+        frameMax = blockInfo.getFrameMax();
+        period = blockInfo.getPeriod();
     }
 
     public BlockInfo(Integer type, String id, int code, long timestamp) {
@@ -68,5 +75,20 @@ public class BlockInfo {
 
     public void setTimeUpdated(long timeUpdated) {
         this.timeUpdated = timeUpdated;
+    }
+
+    public void setFrame(int frame, long timestamp) {
+        this.frame = frame;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setFrameMax(int frameMax, long timestamp) {
+        this.frameMax = frameMax;
+        setTimeUpdated(timestamp);
+    }
+
+    public void setPeriod(int period, long timestamp) {
+        this.period = period;
+        setTimeUpdated(timestamp);
     }
 }

@@ -413,7 +413,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         // Collect blocks
         Queue<StructuredBlock> blockQueue = sceneManager.collectSurroundingBlocks(world, player, 2);
         // Remove not detected blocks
-        Map<String, Block> userPlayerBlockMap = world.getPlayerBlockMap().get(userCode);
+        Map<String, Long> userPlayerBlockMap = world.getPlayerBlockMap().get(userCode);
         Set<String> queueIds = blockQueue.stream()
                 .map(StructuredBlock::getBlock)
                 .map(Block::getBlockInfo)
@@ -451,10 +451,10 @@ public class WebSocketServiceImpl implements WebSocketService {
                     && (BlockConstants.BLOCK_TYPE_PLAYER == block.getBlockInfo().getType()
                     || BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER == block.getBlockInfo().getType()
                     || !userPlayerBlockMap.containsKey(block.getBlockInfo().getId())
-                    || userPlayerBlockMap.get(block.getBlockInfo().getId()).getBlockInfo().getTimeUpdated()
+                    || userPlayerBlockMap.get(block.getBlockInfo().getId())
                     != block.getBlockInfo().getTimeUpdated())) {
                 blocks.add(convertedBlock);
-                userPlayerBlockMap.put(block.getBlockInfo().getId(), block);
+                userPlayerBlockMap.put(block.getBlockInfo().getId(), block.getBlockInfo().getTimeUpdated());
             }
         }
         rst.put("playerInfos", playerInfos);

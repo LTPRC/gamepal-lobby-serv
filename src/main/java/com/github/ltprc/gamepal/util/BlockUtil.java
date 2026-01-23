@@ -881,11 +881,14 @@ public class BlockUtil {
     }
 
     public static BlockInfo createBlockInfoByCode(int blockCode) {
-        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
         long timestamp = System.currentTimeMillis();
+        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
         String id = UUID.randomUUID().toString();
         BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, timestamp);
         initializeBlockInfoHp(blockInfo, timestamp);
+        blockInfo.setFrame(0, timestamp);
+        defineFrameMax(blockInfo, timestamp);
+        definePeriod(blockInfo, timestamp);
         return blockInfo;
     }
 
@@ -902,7 +905,7 @@ public class BlockUtil {
         blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 
-    public static int defineFrameMax(BlockInfo blockInfo) {
+    public static void defineFrameMax(BlockInfo blockInfo, long timestamp) {
         int frameMax;
         switch (blockInfo.getType()) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
@@ -952,78 +955,53 @@ public class BlockUtil {
                 frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                 break;
         }
-        return frameMax;
+        blockInfo.setFrameMax(frameMax, timestamp);
     }
 
-//    public static MovementInfo createMovementInfoByCode(final int blockCode) {
-//        int blockType = BlockUtil.convertBlockCode2Type(blockCode);
-//        int period;
-//        switch (blockType) {
-//            case BlockConstants.BLOCK_TYPE_EFFECT:
-//                switch (blockCode) {
-//                    case BlockConstants.BLOCK_CODE_SPARK_SHORT:
-//                        period = 5;
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
-//                        period = 6;
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_SHOCK:
-//                        period = 10;
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_DECAY:
-//                    case BlockConstants.BLOCK_CODE_CHEER:
-//                    case BlockConstants.BLOCK_CODE_CURSE:
-//                        period = 50;
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-//                        period = 250;
-//                        break;
-//                    default:
-//                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
-//                        break;
-//                }
-//                break;
-//            case BlockConstants.BLOCK_TYPE_DROP:
-//                period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
-//                break;
-//            case BlockConstants.BLOCK_TYPE_PLASMA:
-//                switch (blockCode) {
-//                    case BlockConstants.BLOCK_CODE_FIRE:
-//                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
-//                        break;
-//                    default:
-//                        period = BlockConstants.PERIOD_STATIC_DEFAULT;
-//                        break;
-//                }
-//                break;
-//            default:
-//                period = BlockConstants.PERIOD_STATIC_DEFAULT;
-//                break;
-//        }
-//        int frameMax;
-//        switch (blockType) {
-//            case BlockConstants.BLOCK_TYPE_EFFECT:
-//            case BlockConstants.BLOCK_TYPE_DROP:
-//                frameMax = period;
-//                break;
-//            case BlockConstants.BLOCK_TYPE_PLASMA:
-//                switch (blockCode) {
-//                    case BlockConstants.BLOCK_CODE_FIRE:
-//                        frameMax = period * 5;
-//                        break;
-//                    default:
-//                        frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
-//                        break;
-//                }
-//                break;
-//            default:
-//                frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
-//                break;
-//        }
-//        return new MovementInfo(new Coordinate(),
-//                BlockConstants.MAX_SPEED_DEFAULT,
-//                BlockConstants.MAX_SPEED_DEFAULT.multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO),
-//                BlockConstants.FACE_DIRECTION_DEFAULT,
-//                BlockConstants.FLOOR_CODE_DEFAULT);
-//    }
+    public static void definePeriod(BlockInfo blockInfo, long timestamp) {
+        int period;
+        switch (blockInfo.getType()) {
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_SPARK_SHORT:
+                        period = 5;
+                        break;
+                    case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
+                        period = 6;
+                        break;
+                    case BlockConstants.BLOCK_CODE_SHOCK:
+                        period = 10;
+                        break;
+                    case BlockConstants.BLOCK_CODE_DECAY:
+                    case BlockConstants.BLOCK_CODE_CHEER:
+                    case BlockConstants.BLOCK_CODE_CURSE:
+                        period = 50;
+                        break;
+                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                        period = 250;
+                        break;
+                    default:
+                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_DROP:
+                period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+                break;
+            case BlockConstants.BLOCK_TYPE_PLASMA:
+                switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_FIRE:
+                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                    default:
+                        period = BlockConstants.PERIOD_STATIC_DEFAULT;
+                        break;
+                }
+                break;
+            default:
+                period = BlockConstants.PERIOD_STATIC_DEFAULT;
+                break;
+        }
+        blockInfo.setPeriod(period, timestamp);
+    }
 }

@@ -253,15 +253,16 @@ public class EventManagerImpl implements EventManager {
         addEventNoise(world, eventBlock, fromCreature);
     }
 
-    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
-        boolean rst = false;
+    boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(from.getRegionNo());
-        BigDecimal eventDistance = BlockUtil.calculateDistance(region, eventBlock.getWorldCoordinate(),
-                blocker.getWorldCoordinate());
-        BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
-        BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
-        BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
+
+        // 源对象过滤（所有分支都用）
+        String sourceId = world.getSourceMap().get(eventBlock.getBlockInfo().getId());
+        if (StringUtils.isNotBlank(sourceId) && blocker.getBlockInfo().getId().equals(sourceId)) {
+            return false;
+        }
+
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_MELEE_HIT:
             case BlockConstants.BLOCK_CODE_MELEE_KICK:
@@ -270,38 +271,54 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
             case BlockConstants.BLOCK_CODE_MELEE_CHOP:
             case BlockConstants.BLOCK_CODE_MELEE_PICK:
-            case BlockConstants.BLOCK_CODE_MELEE_STAB:
-                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && null != eventDistance
-                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) <= 0
-                        && null != angle1
-                        && null != angle2
-                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+            case BlockConstants.BLOCK_CODE_MELEE_STAB: {
+                // 只在 melee 分支计算需要的量
+                BigDecimal eventDistance = BlockUtil.calculateDistance(region,
+                        eventBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
+                if (eventDistance == null || eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) > 0) {
+                    return false;
+                }
+                BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
+                BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
+                if (angle1 == null || angle2 == null) {
+                    return false;
+                }
+                return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
                         < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
-                break;
+            }
+
             case BlockConstants.BLOCK_CODE_SHOOT_HIT:
             case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
             case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK:
-                rst = !blocker.getBlockInfo().getId().equals(world.getSourceMap().get(eventBlock.getBlockInfo().getId()))
-                        && null != fromDistance
-                        && fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) <= 0
-                        && null != angle1
-                        && null != angle2
-                        && BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                        && movementManager.detectLineCollision(world, from, eventBlock, blocker, false);
-                break;
-            case BlockConstants.BLOCK_CODE_EXPLODE:
-                rst = null != eventDistance
+            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK: {
+                // 只在 shoot 分支计算需要的量
+                BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
+                if (fromDistance == null || fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) > 0) {
+                    return false;
+                }
+                BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
+                BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
+                if (angle1 == null || angle2 == null) {
+                    return false;
+                }
+                // 关键优化：这里不要再 detectLineCollision 了！
+                // collectLinearBlocks 已经做过线碰撞预选，否则会重复计算导致卡顿
+                return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue();
+            }
+
+            case BlockConstants.BLOCK_CODE_EXPLODE: {
+                BigDecimal eventDistance = BlockUtil.calculateDistance(region,
+                        eventBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
+                return eventDistance != null
                         && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
-                break;
+            }
+
             default:
-                break;
+                return false;
         }
-        return rst;
     }
 
     private void addEventNoise(GameWorld world, Block eventBlock, Block fromCreature) {
@@ -367,12 +384,11 @@ public class EventManagerImpl implements EventManager {
 
     @Override
     public void updateEvent(GameWorld world, Block eventBlock, long timestamp) {
-        int frameMax = BlockUtil.defineFrameMax(eventBlock.getBlockInfo());
-        if (frameMax == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
+        if (eventBlock.getBlockInfo().getFrameMax() == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
             return;
         }
-        if ((timestamp - eventBlock.getBlockInfo().getTimeUpdated()) / 1_000 * GamePalConstants.FRAME_PER_SECOND
-                >= frameMax) {
+        eventBlock.getBlockInfo().setFrame(eventBlock.getBlockInfo().getFrame() + 1, timestamp);
+        if (eventBlock.getBlockInfo().getFrame() >= eventBlock.getBlockInfo().getFrameMax()) {
             sceneManager.removeBlock(world, eventBlock, false);
             return;
         }
