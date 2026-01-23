@@ -55,8 +55,6 @@ public interface PlayerService {
 
     boolean validateActiveness(final GameWorld world, final String id);
 
-    void updateTimestamp(String userCode);
-
     String toReadableString(Block player, PlayerInfo playerInfo);
 
     String toReadableString(PlayerInfo playerInfo);

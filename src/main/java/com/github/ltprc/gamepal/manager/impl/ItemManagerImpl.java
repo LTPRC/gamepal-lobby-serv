@@ -29,7 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
@@ -73,11 +76,9 @@ public class ItemManagerImpl implements ItemManager {
         switch (itemNo.charAt(0)) {
             case ItemConstants.ITEM_CHARACTER_TOOL:
                 useTools(world, userCode, itemNo);
-                playerService.updateTimestamp(userCode);
                 break;
             case ItemConstants.ITEM_CHARACTER_OUTFIT:
                 useOutfits(world, userCode, itemNo);
-                playerService.updateTimestamp(userCode);
                 break;
             case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
                 useConsumable(world, userCode, itemNo, itemAmount);
@@ -344,6 +345,8 @@ public class ItemManagerImpl implements ItemManager {
             playerInfo.getTools().add(itemNo);
         }
         playerService.updateSkillsByTool(userCode);
+        long timestamp = System.currentTimeMillis();
+        player.getBlockInfo().setTimeUpdated(timestamp);
         return true;
     }
 
@@ -379,6 +382,8 @@ public class ItemManagerImpl implements ItemManager {
             playerInfo.getOutfits().add(itemNo);
         }
         playerService.updateSkillsByTool(userCode);
+        long timestamp = System.currentTimeMillis();
+        player.getBlockInfo().setTimeUpdated(timestamp);
         return true;
     }
 

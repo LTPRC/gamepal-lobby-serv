@@ -6,11 +6,9 @@ import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
-import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 
 import java.math.BigDecimal;
 import java.math.MathContext;

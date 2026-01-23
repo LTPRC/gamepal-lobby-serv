@@ -138,8 +138,6 @@ public class SkillUtil {
                 || targetType == BlockConstants.BLOCK_TYPE_DROP
                 || targetType == BlockConstants.BLOCK_TYPE_TELEPORT
                 || targetType == BlockConstants.BLOCK_TYPE_PLASMA
-                || targetType == BlockConstants.BLOCK_TYPE_FLOOR
-                || targetType == BlockConstants.BLOCK_TYPE_WALL
                 || targetType == BlockConstants.BLOCK_TYPE_TEXT_DISPLAY) {
             // No hp effect
             return hp;

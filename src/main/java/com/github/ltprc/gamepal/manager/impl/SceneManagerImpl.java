@@ -713,6 +713,7 @@ public class SceneManagerImpl implements SceneManager {
                 cropBlock.ifPresent(cropBlock1 -> rankingQueue.add(new StructuredBlock(cropBlock1,
                         structureMap.get(cropBlock1.getBlockInfo().getCode()))));
                 break;
+            case BlockConstants.BLOCK_TYPE_FLOOR:
             case BlockConstants.BLOCK_TYPE_WALL:
                 Integer crackCode = null;
                 if (block.getBlockInfo().getHp().get() < block.getBlockInfo().getHpMax().get() * 0.25) {
@@ -723,9 +724,13 @@ public class SceneManagerImpl implements SceneManager {
                     crackCode = BlockConstants.BLOCK_CODE_CRACK_1;
                 }
                 if (null != crackCode) {
-                    rankingQueue.add(new StructuredBlock(new Block(block.getWorldCoordinate(),
-                            BlockFactory.createBlockInfoByCode(crackCode),
-                            new MovementInfo()), structureMap.get(block.getBlockInfo().getCode())));
+                    Block crackBlock = new Block(block.getWorldCoordinate(),
+                            BlockFactory.createBlockInfoByCode(crackCode), new MovementInfo());
+                    crackBlock.getWorldCoordinate().getCoordinate().setZ(
+                            crackBlock.getWorldCoordinate().getCoordinate().getZ()
+                                    .add(structureMap.get(block.getBlockInfo().getCode()).getShape().getRadius().getZ())
+                                    .subtract(BigDecimal.ONE));
+                    rankingQueue.add(new StructuredBlock(crackBlock, structureMap.get(crackCode)));
                 }
                 break;
             default:
@@ -1215,23 +1220,25 @@ public class SceneManagerImpl implements SceneManager {
     public void updateBlockAltitude(GameWorld world, Block block) {
         if (BlockUtil.checkBlockTypeGravity(block.getBlockInfo().getType())) {
             block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate()));
+            long timestamp = System.currentTimeMillis();
+            block.getBlockInfo().setTimeUpdated(timestamp);
         }
     }
 
     private GravitatedStack locateGravitatedStack(GameWorld world, WorldCoordinate worldCoordinate) {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         IntegerCoordinate altitudeCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate);
-        WorldCoordinate locatedWorldCoordinate = new WorldCoordinate(worldCoordinate.getRegionNo(),
-                worldCoordinate.getSceneCoordinate(),
-                new Coordinate(BigDecimal.valueOf(altitudeCoordinate.getX()),
-                        BigDecimal.valueOf(altitudeCoordinate.getY()),
-                        worldCoordinate.getCoordinate().getZ()));
-        BlockUtil.fixWorldCoordinate(region, locatedWorldCoordinate);
-        if (!region.getScenes().containsKey(locatedWorldCoordinate.getSceneCoordinate())) {
-            fillScene(world, region, locatedWorldCoordinate.getSceneCoordinate());
+//        WorldCoordinate locatedWorldCoordinate = new WorldCoordinate(worldCoordinate.getRegionNo(),
+//                worldCoordinate.getSceneCoordinate(),
+//                new Coordinate(BigDecimal.valueOf(altitudeCoordinate.getX()),
+//                        BigDecimal.valueOf(altitudeCoordinate.getY()),
+//                        worldCoordinate.getCoordinate().getZ()));
+//        BlockUtil.fixWorldCoordinate(region, locatedWorldCoordinate);
+        if (!region.getScenes().containsKey(worldCoordinate.getSceneCoordinate())) {
+            fillScene(world, region, worldCoordinate.getSceneCoordinate());
         }
-        Scene scene = region.getScenes().get(locatedWorldCoordinate.getSceneCoordinate());
-        return scene.getGravitatedStacks()[locatedWorldCoordinate.getCoordinate().getX().intValue()][locatedWorldCoordinate.getCoordinate().getY().intValue()];
+        Scene scene = region.getScenes().get(worldCoordinate.getSceneCoordinate());
+        return scene.getGravitatedStacks()[altitudeCoordinate.getX()][altitudeCoordinate.getY()];
     }
 
     private void addBlockIntoGravitatedStack(final GameWorld world, Block block) {
@@ -1260,7 +1267,7 @@ public class SceneManagerImpl implements SceneManager {
         while (!gravitatedStack.getStack().empty()) {
             topBlock = gravitatedStack.getStack().pop();
             if (StringUtils.equals(block.getBlockInfo().getId(), topBlock.getBlockInfo().getId())) {
-                gravitatedStack.setMaxAltitude(block.getWorldCoordinate().getCoordinate().getZ().subtract(height));
+                gravitatedStack.setMaxAltitude(gravitatedStack.getMaxAltitude().subtract(height));
                 break;
             } else {
                 tempStack.push(topBlock);
@@ -1276,15 +1283,15 @@ public class SceneManagerImpl implements SceneManager {
                 .filter(block1 -> block1.getWorldCoordinate().getSceneCoordinate() == worldCoordinate.getSceneCoordinate())
                 .filter(block1 -> BlockUtil.convertCoordinate2ClosestIntegerCoordinate(block1.getWorldCoordinate())
                         .equals(BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate)))
-                .forEach(block1 -> block1.getWorldCoordinate().getCoordinate().setZ(
-                        block.getWorldCoordinate().getCoordinate().getZ().subtract(height)));
+                .forEach(block1 -> updateBlockAltitude(world, block1));
         // Update blocks altitude
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         region.getScenes().get(worldCoordinate.getSceneCoordinate()).getBlocks().values().stream()
+                .filter(block1 -> block1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_FLOOR)
+                .filter(block1 -> block1.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_WALL)
                 .filter(block1 -> BlockUtil.checkBlockTypeGravity(block1.getBlockInfo().getType()))
                 .filter(block1 -> BlockUtil.convertCoordinate2ClosestIntegerCoordinate(block1.getWorldCoordinate())
                         .equals(BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate)))
-                .forEach(block1 -> block1.getWorldCoordinate().getCoordinate().setZ(
-                        block.getWorldCoordinate().getCoordinate().getZ().subtract(height)));
+                .forEach(block1 -> updateBlockAltitude(world, block1));
     }
 }

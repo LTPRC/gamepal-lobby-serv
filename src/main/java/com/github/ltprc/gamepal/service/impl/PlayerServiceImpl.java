@@ -222,7 +222,8 @@ public class PlayerServiceImpl implements PlayerService {
             hasChange = true;
         }
         if (hasChange) {
-            updateTimestamp(userCode);
+            long timestamp = System.currentTimeMillis();
+            player.getBlockInfo().setTimeUpdated(timestamp);
         }
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -991,7 +992,8 @@ public class PlayerServiceImpl implements PlayerService {
         } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = BuffConstants.BUFF_DEFAULT_FRAME_KNOCKED;
         }
-        updateTimestamp(userCode);
+        long timestamp = System.currentTimeMillis();
+        player.getBlockInfo().setTimeUpdated(timestamp);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1028,7 +1030,8 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
         }
-        updateTimestamp(userCode);
+        long timestamp = System.currentTimeMillis();
+        player.getBlockInfo().setTimeUpdated(timestamp);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1408,14 +1411,6 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(id);
         return playerInfo.getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0;
-    }
-
-    @Override
-    public void updateTimestamp(String userCode) {
-        GameWorld world = userService.getWorldByUserCode(userCode);
-        Block player = world.getCreatureMap().get(userCode);
-        long timestamp = System.currentTimeMillis();
-        player.getBlockInfo().setTimeUpdated(timestamp);
     }
 
     @Override
