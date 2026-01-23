@@ -2,6 +2,7 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.manager.FarmManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
@@ -109,7 +110,7 @@ public class FarmManagerImpl implements FarmManager {
             cropCode = BlockConstants.BLOCK_CODE_CROP_0;
         }
         return null != cropCode ? Optional.of(new Block(farmBlock.getWorldCoordinate(),
-                BlockUtil.createBlockInfoByCode(cropCode),
+                BlockFactory.createBlockInfoByCode(cropCode),
                 new MovementInfo()))
                 : Optional.empty();
     }

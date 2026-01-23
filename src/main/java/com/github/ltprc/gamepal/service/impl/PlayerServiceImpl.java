@@ -3,7 +3,15 @@ package com.github.ltprc.gamepal.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.MessageConstants;
+import com.github.ltprc.gamepal.config.MissionConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
@@ -12,7 +20,11 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
-import com.github.ltprc.gamepal.model.creature.*;
+import com.github.ltprc.gamepal.model.creature.BagInfo;
+import com.github.ltprc.gamepal.model.creature.MissionInfo;
+import com.github.ltprc.gamepal.model.creature.NpcBrain;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Junk;
 import com.github.ltprc.gamepal.model.item.Tool;
@@ -677,7 +689,7 @@ public class PlayerServiceImpl implements PlayerService {
                         BigDecimal.valueOf(integerCoordinate.getY()),
                         player.getWorldCoordinate().getCoordinate().getZ()));
                 Block fakeBuilding = new Block(buildingWorldCoordinate,
-                        BlockUtil.createBlockInfoByCode(blockInfo1.get().getCode()),
+                        BlockFactory.createBlockInfoByCode(blockInfo1.get().getCode()),
                         new MovementInfo());
                 if (!sceneManager.checkBlockSpace2Build(world, fakeBuilding)) {
                     return false;

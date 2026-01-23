@@ -6,6 +6,7 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.RegionConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.FarmManager;
@@ -52,7 +53,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -641,7 +641,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<StructuredBlock> rankingQueue = createRankingQueue(region);
+        Queue<StructuredBlock> rankingQueue = BlockFactory.createRankingQueue(region);
         IntegerCoordinate sceneCoordinate = player.getWorldCoordinate().getSceneCoordinate();
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
         // Collect blocks from SCENE_SCAN_RADIUS * SCENE_SCAN_RADIUS scenes 24/03/16
@@ -677,7 +677,7 @@ public class SceneManagerImpl implements SceneManager {
             logger.error(ErrorUtil.ERROR_1027);
             return new LinkedList<>();
         }
-        Queue<StructuredBlock> rankingQueue = createRankingQueue(region);
+        Queue<StructuredBlock> rankingQueue = BlockFactory.createRankingQueue(region);
         // Collect detected creature blocks
         Map<String, Block> creatureMap = world.getCreatureMap();
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
@@ -705,7 +705,7 @@ public class SceneManagerImpl implements SceneManager {
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_DROP:
                 rankingQueue.add(new StructuredBlock(new Block(block.getWorldCoordinate(),
-                    BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_SHADOW),
+                        BlockFactory.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_SHADOW),
                         new MovementInfo()), structureMap.get(block.getBlockInfo().getCode())));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
@@ -724,53 +724,13 @@ public class SceneManagerImpl implements SceneManager {
                 }
                 if (null != crackCode) {
                     rankingQueue.add(new StructuredBlock(new Block(block.getWorldCoordinate(),
-                            BlockUtil.createBlockInfoByCode(crackCode),
+                            BlockFactory.createBlockInfoByCode(crackCode),
                             new MovementInfo()), structureMap.get(block.getBlockInfo().getCode())));
                 }
                 break;
             default:
                 break;
         }
-    }
-
-    private Queue<StructuredBlock> createRankingQueue(final RegionInfo regionInfo) {
-        return new PriorityQueue<>((o1, o2) -> {
-            Block block1 = o1.getBlock();
-            Block block2 = o2.getBlock();
-            Structure structure1 = o1.getStructure();
-            Structure structure2 = o2.getStructure();
-            if (block1.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()
-                    || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
-                return block1.getBlockInfo().getCode() - block2.getBlockInfo().getCode();
-            }
-            int layer1 = structure1.getLayer();
-            int layer2 = structure2.getLayer();
-            if (layer1 / 10 != layer2 / 10) {
-                return layer1 / 10 - layer2 / 10;
-            }
-            Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block1.getWorldCoordinate());
-            Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, block2.getWorldCoordinate());
-            if (coordinate1.getY().equals(coordinate2.getY()) && coordinate1.getZ().equals(coordinate2.getZ())) {
-                int layerDiff = layer1 % 10 - layer2 % 10;
-                if (layerDiff != 0) {
-                    return layerDiff;
-                }
-                return block1.getBlockInfo().getId().compareTo(block2.getBlockInfo().getId());
-            }
-            BigDecimal minDepth1 = coordinate1.getY()
-                    .add(coordinate1.getZ())
-                    .add(structure1.getShape().getRadius().getY())
-                    .subtract(structure1.getShape().getRadius().getZ());
-            BigDecimal minDepth2 = coordinate2.getY()
-                    .add(coordinate2.getZ())
-                    .add(structure2.getShape().getRadius().getY())
-                    .subtract(structure2.getShape().getRadius().getZ());
-            int compareMinDepth = minDepth1.compareTo(minDepth2);
-            if (compareMinDepth != 0) {
-                return compareMinDepth;
-            }
-            return block1.getBlockInfo().getId().compareTo(block2.getBlockInfo().getId());
-        });
     }
 
     @Override
@@ -956,7 +916,7 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public Block addOtherBlock(final GameWorld world, final WorldCoordinate worldCoordinate, final int blockCode) {
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(blockCode);
+        BlockInfo blockInfo = BlockFactory.createBlockInfoByCode(blockCode);
         MovementInfo movementInfo = new MovementInfo();
         Block block = new Block(worldCoordinate, blockInfo, movementInfo);
         updateBlockAltitude(world, block);

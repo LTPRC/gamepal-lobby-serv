@@ -81,6 +81,18 @@ public class InteractionManagerImpl implements InteractionManager {
             return;
         }
         Block player = creatureMap.get(userCode);
+        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
+        if (!playerInfoMap.containsKey(userCode)) {
+            logger.error(ErrorUtil.ERROR_1007);
+            return;
+        }
+        PlayerInfo playerInfo = playerInfoMap.get(userCode);
+        if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_STUNNED] != 0
+                || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
+            world.getInteractionInfoMap().remove(userCode);
+            return;
+        }
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         if (checkFocusOnBlock(region, player, block)) {
             world.getInteractionInfoMap().put(userCode, generateInteractionInfo(world, block.getBlockInfo()));

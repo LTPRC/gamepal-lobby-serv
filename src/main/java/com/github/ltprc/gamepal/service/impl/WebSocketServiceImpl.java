@@ -16,10 +16,9 @@ import com.github.ltprc.gamepal.manager.ItemManager;
 import com.github.ltprc.gamepal.manager.MiniMapManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
-import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
@@ -27,8 +26,6 @@ import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.SceneInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
-import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
-import com.github.ltprc.gamepal.model.Message;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
@@ -100,6 +97,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
         world.getSessionMap().put(userCode, session);
         resetPlayerBlockMap(userCode);
+        interactionManager.focusOnBlock(world, userCode, null);
         logger.info("建立连接成功");
         communicate(userCode, GamePalConstants.WEB_STAGE_START, null);
     }

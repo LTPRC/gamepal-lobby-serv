@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.ItemManager;
@@ -80,7 +81,7 @@ public class NpcManagerImpl implements NpcManager {
         WorldCoordinate worldCoordinate = new WorldCoordinate();
         BlockUtil.copyWorldCoordinate(GamePalConstants.DEFAULT_BIRTHPLACE, worldCoordinate);
 
-        BlockInfo blockInfo = BlockUtil.createBlockInfoByCode(BlockConstants.BLOCK_CODE_PLAYER_DEFAULT);
+        BlockInfo blockInfo = BlockFactory.createBlockInfoByCode(BlockConstants.BLOCK_CODE_PLAYER_DEFAULT);
 
         MovementInfo movementInfo = new MovementInfo();
 

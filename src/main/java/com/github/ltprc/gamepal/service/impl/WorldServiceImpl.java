@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.config.RegionConstants;
+import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.RegionFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -26,7 +27,6 @@ import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SceneUtil;
@@ -285,7 +285,7 @@ public class WorldServiceImpl implements WorldService {
     @Override
     public void loadStructures() {
         BlockConstants.BLOCK_CODE_TYPE_MAP.keySet()
-                .forEach(code -> structureMap.put(code, BlockUtil.createStructureByCode(code)));
+                .forEach(code -> structureMap.put(code, BlockFactory.createStructureByCode(code)));
     }
 
     @Override
