@@ -159,10 +159,10 @@ public class MovementManagerImpl implements MovementManager {
         Set<Block> preSelectedBlocks = new HashSet<>();
         preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
                 expectedNewBlockXY, fromId));
-//        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-//                expectedNewBlockX, fromId));
-//        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-//                expectedNewBlockY, fromId));
+        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockX, fromId));
+        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockY, fromId));
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
         preSelectedBlocks.stream()
                 .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
@@ -171,8 +171,8 @@ public class MovementManagerImpl implements MovementManager {
                         && BlockUtil.checkMaterialCollision(
                                 structureMap.get(worldMovingBlock.getBlockInfo().getCode()).getMaterial(),
                         structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
-//                .filter(blocker -> detectLineCollision(world, worldMovingBlock.getWorldCoordinate(),
-//                        expectedNewBlockXY, blocker, false))
+                .filter(blocker -> detectLineCollision(world, worldMovingBlock.getWorldCoordinate(),
+                        expectedNewBlockXY, blocker, false))
                 .collect(Collectors.toList());
 
         for (Block block : preSelectedBlocks) {
@@ -430,73 +430,75 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     private boolean detectPlanarCollision(Coordinate coordinate1, Coordinate coordinate2, Shape shape1, Shape shape2) {
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape1.getShapeType()) {
-            shape1.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            shape1.getRadius().setY(shape1.getRadius().getX());
+        // ===== 坐标（double）=====
+        final double x1 = coordinate1.getX().doubleValue();
+        final double y1 = coordinate1.getY().doubleValue();
+        final double x2 = coordinate2.getX().doubleValue();
+        final double y2 = coordinate2.getY().doubleValue();
+
+        final double dx = Math.abs(x1 - x2);
+        final double dy = Math.abs(y1 - y2);
+
+        // ===== 类型（只识别 ROUND，其它都当 RECTANGLE）=====
+        final boolean round1 = shape1.getShapeType() == BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND;
+        final boolean round2 = shape2.getShapeType() == BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND;
+
+        // ===== 半径/半边长（double）=====
+        // ROUND: 用 radius.x 作为半径
+        // RECTANGLE: 用 radius.x/radius.y 作为半宽/半高
+        final double r1x = shape1.getRadius().getX().doubleValue();
+        final double r1y = shape1.getRadius().getY().doubleValue();
+        final double r2x = shape2.getRadius().getX().doubleValue();
+        final double r2y = shape2.getRadius().getY().doubleValue();
+
+        // ===== 圆-圆 =====
+        if (round1 && round2) {
+            final double rr = r1x + r2x;
+            return (dx * dx + dy * dy) < (rr * rr); // 用平方避免 sqrt
         }
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE == shape2.getShapeType()) {
-            shape2.setShapeType(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE);
-            shape2.getRadius().setY(shape2.getRadius().getX());
+
+        // ===== 矩形-矩形（或非圆都当矩形）=====
+        if (!round1 && !round2) {
+            return dx < (r1x + r2x) && dy < (r1y + r2y);
         }
-        // Round vs. round
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape1.getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
-            return BlockUtil.calculateDistance(coordinate1, coordinate2).doubleValue()
-                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue();
-        }
-        // Rectangle vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape1.getShapeType()
-                && BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE == shape2.getShapeType()) {
-            return BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
-                    < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                    && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
-                    < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
-        }
-        // Round vs. rectangle
-        if (BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND == shape2.getShapeType()) {
+
+        // ===== 圆-矩形（保证 shape1 是圆，shape2 是矩形）=====
+        if (!round1) {
+            // swap
             return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
         }
-        boolean isInsideRectangle1 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape1.getRadius().getX().add(shape2.getRadius().getX()).doubleValue()
-                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape2.getRadius().getY().doubleValue();
-        boolean isInsideRectangle2 = BlockUtil.calculateXDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape2.getRadius().getX().doubleValue()
-                && BlockUtil.calculateYDistance(coordinate1, coordinate2).abs().doubleValue()
-                < shape1.getRadius().getY().add(shape2.getRadius().getY()).doubleValue();
-        boolean isInsideRound1 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(
-                        coordinate2.getX().subtract(shape2.getRadius().getX()),
-                        coordinate2.getY().subtract(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        boolean isInsideRound2 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(
-                        coordinate2.getX().add(shape2.getRadius().getX()),
-                        coordinate2.getY().subtract(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        boolean isInsideRound3 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(coordinate2.getX().subtract(shape2.getRadius().getX()),
-                        coordinate2.getY().add(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        boolean isInsideRound4 = BlockUtil.calculateDistance(coordinate1,
-                new Coordinate(coordinate2.getX().add(shape2.getRadius().getX()),
-                        coordinate2.getY().add(shape2.getRadius().getY()),
-                        coordinate2.getZ())).doubleValue()
-                < shape1.getRadius().getX().doubleValue();
-        return isInsideRectangle1 || isInsideRectangle2 || isInsideRound1 || isInsideRound2 || isInsideRound3 || isInsideRound4;
+
+        // 现在：shape1 圆，shape2 矩形
+        final double circleR = r1x;
+        final double rectHalfW = r2x;
+        final double rectHalfH = r2y;
+
+        // 快速排除（外接判断）
+        if (dx >= (rectHalfW + circleR) || dy >= (rectHalfH + circleR)) {
+            return false;
+        }
+        // 圆心投影落在矩形范围内 => 必碰
+        if (dx < rectHalfW || dy < rectHalfH) {
+            return true;
+        }
+        // 检查角点
+        final double cornerDx = dx - rectHalfW;
+        final double cornerDy = dy - rectHalfH;
+        return (cornerDx * cornerDx + cornerDy * cornerDy) < (circleR * circleR);
     }
 
     private boolean detectZCollision(Block block1, Block block2, Structure structure1, Structure structure2) {
         if (block1.getWorldCoordinate().getRegionNo() != block2.getWorldCoordinate().getRegionNo()) {
             return false;
         }
-        return block1.getWorldCoordinate().getCoordinate().getZ().add(structure1.getShape().getRadius().getZ())
-                .compareTo(block2.getWorldCoordinate().getCoordinate().getZ()) > 0
-                && block2.getWorldCoordinate().getCoordinate().getZ().add(structure2.getShape().getRadius().getZ())
-                .compareTo(block1.getWorldCoordinate().getCoordinate().getZ()) > 0;
+
+        final double z1 = block1.getWorldCoordinate().getCoordinate().getZ().doubleValue();
+        final double z2 = block2.getWorldCoordinate().getCoordinate().getZ().doubleValue();
+
+        final double h1 = structure1.getShape().getRadius().getZ().doubleValue();
+        final double h2 = structure2.getShape().getRadius().getZ().doubleValue();
+
+        return (z1 + h1) > z2 && (z2 + h2) > z1;
     }
 
     @Override
@@ -506,20 +508,75 @@ public class MovementManagerImpl implements MovementManager {
                 || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
             return false;
         }
-        Coordinate coordinate0 = BlockUtil.convertWorldCoordinate2Coordinate(region, from);
-        Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(region, block1.getWorldCoordinate());
-        Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(region, block2.getWorldCoordinate());
-        Coordinate coordinate3 = BlockUtil.findClosestPoint(coordinate0, coordinate1, coordinate2);
+
+        // ===== 1) 把 world 坐标转成“全局平面坐标”(double)：x + sceneX*height, y + sceneY*width（与你 BlockUtil.adjustCoordinate 保持一致）=====
+        final int h = region.getHeight();
+        final int w = region.getWidth();
+
+        // from
+        final double x0 = from.getCoordinate().getX().doubleValue() + from.getSceneCoordinate().getX() * (double) h;
+        final double y0 = from.getCoordinate().getY().doubleValue() + from.getSceneCoordinate().getY() * (double) w;
+
+        // block1
+        final WorldCoordinate wc1 = block1.getWorldCoordinate();
+        final double x1 = wc1.getCoordinate().getX().doubleValue() + wc1.getSceneCoordinate().getX() * (double) h;
+        final double y1 = wc1.getCoordinate().getY().doubleValue() + wc1.getSceneCoordinate().getY() * (double) w;
+
+        // block2
+        final WorldCoordinate wc2 = block2.getWorldCoordinate();
+        final double x2 = wc2.getCoordinate().getX().doubleValue() + wc2.getSceneCoordinate().getX() * (double) h;
+        final double y2 = wc2.getCoordinate().getY().doubleValue() + wc2.getSceneCoordinate().getY() * (double) w;
+
+        // ===== 2) 线段最近点投影（double）=====
+        final double vx = x1 - x0;
+        final double vy = y1 - y0;
+        final double wx = x2 - x0;
+        final double wy = y2 - y0;
+
+        final double vv = vx * vx + vy * vy;
+        if (vv <= 1e-12) {
+            // from 和 block1 基本重合，退化：最近点就当 x0,y0
+            return false;
+        }
+
+        double t = (wx * vx + wy * vy) / vv;  // 投影参数
+        if (t < 0) t = 0;
+        else if (t > 1) t = 1;
+
+        final double px = x0 + t * vx;
+        final double py = y0 + t * vy;
+
+        // ===== 3) 把最近点 P 写回一个“临时 block3（block1 的复制）”，然后做 detectCollision =====
         Block block3 = new Block(block1);
-        WorldCoordinate worldCoordinate3 = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                block1.getWorldCoordinate(),
-                BlockUtil.calculateAngle(coordinate1, coordinate3), BlockUtil.calculateDistance(coordinate1, coordinate3));
-        BlockUtil.copyWorldCoordinate(worldCoordinate3, block3.getWorldCoordinate());
+        WorldCoordinate wc3 = block3.getWorldCoordinate();
+
+        // 先以 block1 的 scene 为基准写入局部坐标，再 fixWorldCoordinate 纠正跨 scene 的情况（循环次数很少）
+        int baseSceneX = wc1.getSceneCoordinate().getX();
+        int baseSceneY = wc1.getSceneCoordinate().getY();
+
+        double localX = px - baseSceneX * (double) h;
+        double localY = py - baseSceneY * (double) w;
+
+        wc3.setRegionNo(wc1.getRegionNo());
+        wc3.getSceneCoordinate().setX(baseSceneX);
+        wc3.getSceneCoordinate().setY(baseSceneY);
+
+        wc3.getCoordinate().setX(java.math.BigDecimal.valueOf(localX));
+        wc3.getCoordinate().setY(java.math.BigDecimal.valueOf(localY));
+        // Z 不变（沿用 block1 的 Z）
+        wc3.getCoordinate().setZ(wc1.getCoordinate().getZ());
+
+        // 修正 sceneCoordinate/局部坐标到合法范围
+        BlockUtil.fixWorldCoordinate(region, wc3);
+
+        // 精确碰撞检测（这里会用到 structure / material / z 等逻辑）
         if (!detectCollision(world, block3, block2)) {
             return false;
         }
+
+        // 是否把 block1 真正挪到最近点（保持你原语义）
         if (correctBlock1) {
-            BlockUtil.copyWorldCoordinate(worldCoordinate3, block1.getWorldCoordinate());
+            BlockUtil.copyWorldCoordinate(wc3, block1.getWorldCoordinate());
         }
         return true;
     }

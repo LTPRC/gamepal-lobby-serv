@@ -318,19 +318,49 @@ public class BlockUtil {
         if (wc1.getRegionNo() != region.getRegionNo() || wc2.getRegionNo() != region.getRegionNo()) {
             return rst;
         }
-        int x1 = Math.min(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
-        int x2 = Math.max(wc1.getSceneCoordinate().getX(), wc2.getSceneCoordinate().getX());
-        int y1 = Math.min(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
-        int y2 = Math.max(wc1.getSceneCoordinate().getY(), wc2.getSceneCoordinate().getY());
-        for (int i = x1 - 1; i <= x2 + 1; i++) {
-            for (int j = y1 - 1; j <= y2 + 1; j++) {
-                IntegerCoordinate sceneCoordinate = new IntegerCoordinate(i, j);
-                if (region.getScenes().containsKey(sceneCoordinate)) {
-                    rst.add(sceneCoordinate);
-                }
+
+        int x0 = wc1.getSceneCoordinate().getX();
+        int y0 = wc1.getSceneCoordinate().getY();
+        int x1 = wc2.getSceneCoordinate().getX();
+        int y1 = wc2.getSceneCoordinate().getY();
+
+        // ===== Bresenham 走格子线：只加入线经过的 scene =====
+        int dx = Math.abs(x1 - x0);
+        int dy = Math.abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+        int err = dx - dy;
+
+        int x = x0;
+        int y = y0;
+
+        while (true) {
+            rst.add(new IntegerCoordinate(x, y));
+            if (x == x1 && y == y1) {
+                break;
+            }
+            int e2 = err << 1;
+            if (e2 > -dy) {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y += sy;
             }
         }
-        return rst;
+
+        // ===== 扩一圈（保持你原先 -1..+1 的容错范围）=====
+        Set<IntegerCoordinate> expanded = expandSceneCoordinates(rst, 1);
+
+        // ===== 过滤掉 region 不存在的 scene =====
+        Set<IntegerCoordinate> filtered = new HashSet<>();
+        for (IntegerCoordinate sc : expanded) {
+            if (region.getScenes().containsKey(sc)) {
+                filtered.add(sc);
+            }
+        }
+        return filtered;
     }
 
     public static Set<IntegerCoordinate> expandSceneCoordinates(Set<IntegerCoordinate> sceneCoordinates, int range) {

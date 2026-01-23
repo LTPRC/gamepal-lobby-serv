@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class Shape {
     // Default square
-    private int shapeType = BlockConstants.STRUCTURE_SHAPE_TYPE_SQUARE;
+    private int shapeType = BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE;
     Coordinate radius = new Coordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D), BlockConstants.Z_DEFAULT);
 
     public Shape(Shape shape) {

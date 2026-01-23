@@ -128,7 +128,6 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         Block player = world.getCreatureMap().get(userCode);
-        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         // Update onlineMap
         worldService.registerOnline(world, userCode, timestamp);
 
@@ -139,26 +138,6 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
-            if (functions.containsKey("settleCoordinate")
-                    && !world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT]) {
-                JSONObject settleCoordinate = functions.getJSONObject("settleCoordinate");
-                WorldCoordinate worldCoordinate = JSON.toJavaObject(settleCoordinate
-                        .getJSONObject("worldCoordinate"), WorldCoordinate.class);
-                MovementInfo movementInfo = JSON.toJavaObject(settleCoordinate
-                        .getJSONObject("movementInfo"), MovementInfo.class);
-                movementManager.settleCoordinate(world, player, worldCoordinate, false);
-                player.getMovementInfo().setSpeed(movementInfo.getSpeed());
-                player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
-            }
-//            if (functions.containsKey("settleSpeedAndCoordinate")) {
-//                JSONObject settleSpeedAndCoordinate = functions.getJSONObject("settleSpeedAndCoordinate");
-//                MovementInfo movementInfo = JSON.toJavaObject(settleSpeedAndCoordinate
-//                        .getJSONObject("movementInfo"), MovementInfo.class);
-//                player.getMovementInfo().setSpeed(movementInfo.getSpeed());
-//                player.getMovementInfo().setFaceDirection(movementInfo.getFaceDirection());
-//                movementManager.settleSpeedAndCoordinate(world, player, 1);
-//                world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
-//            }
             if (functions.containsKey("settleAcceleration")) {
                 JSONObject settleAcceleration = functions.getJSONObject("settleAcceleration");
                 Coordinate accelerationCoordinate = new Coordinate(settleAcceleration.getBigDecimal("x"),
@@ -228,11 +207,6 @@ public class WebSocketServiceImpl implements WebSocketService {
                     playerService.addDrop(userCode, itemNo, itemAmount);
                 }
             });
-//            if (functions.containsKey("useDrop")) {
-//                JSONObject useDrop = functions.getJSONObject("useDrop");
-//                String id = useDrop.getString("id");
-//                playerService.useDrop(userCode, id);
-//            }
             if (functions.containsKey("setRelation")) {
                 JSONObject setRelation = functions.getJSONObject("setRelation");
                 String userCode1 = setRelation.getString("userCode");
@@ -251,7 +225,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                         interactionManager.interactBlocks(world, userCode,
                                 ((JSONObject) interactBlock).getInteger("interactionCode")));
             }
-//            if (functions.containsKey("terminalInputs")) {
+            if (functions.containsKey("terminalInputs")) {
 //                JSONArray terminalInputs = functions.getJSONArray("terminalInputs");
 //                for (Object terminalInput : terminalInputs) {
 //                    String id = ((JSONObject) terminalInput).getString("id");
@@ -262,7 +236,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 //                        stateMachineService.gameTerminalInput((GameTerminal) terminal, ((JSONObject) terminalInput).getString("content"));
 //                    }
 //                }
-//            }
+            }
             if (functions.containsKey("useSkills")) {
                 JSONArray useSkills = functions.getJSONArray("useSkills");
                 for (int i = 0; i < SkillConstants.SKILL_LENGTH; i++) {
@@ -279,9 +253,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 //        logger.debug("RSP执行耗时: " + (System.currentTimeMillis() - timestamp) + " 毫秒");
 
         // Reply automatically
-        long startTime2 = System.currentTimeMillis();
         communicate(userCode, webStage, functions);
-//        logger.debug("COM执行耗时: " + (System.currentTimeMillis() - startTime2) + " 毫秒");
     }
 
     public void communicate(String userCode, int webStage, JSONObject functions) {
@@ -524,6 +496,8 @@ public class WebSocketServiceImpl implements WebSocketService {
 //            analyzeJsonContent(rst);
 //        }
         transmit(rst, userCode, world);
+
+//        logger.debug("COM执行耗时: " + (System.currentTimeMillis() - timestamp) + " 毫秒");
     }
 
     private void transmit(JSONObject rst, String userCode, GameWorld world) {
