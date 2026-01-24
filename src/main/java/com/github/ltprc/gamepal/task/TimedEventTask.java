@@ -1,9 +1,6 @@
 package com.github.ltprc.gamepal.task;
 
-import com.github.ltprc.gamepal.config.BlockConstants;
-import com.github.ltprc.gamepal.config.BuffConstants;
-import com.github.ltprc.gamepal.config.CreatureConstants;
-import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.*;
 import com.github.ltprc.gamepal.manager.BuffManager;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.FarmManager;
@@ -153,25 +150,14 @@ public class TimedEventTask {
 
                             // Change vp
                             int newVp = 10;
-                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] != 0) {
-                                newVp -= 5;
+                            if (movementInfo.getSpeed().getX().abs().doubleValue() > 0
+                                    || movementInfo.getSpeed().getY().abs().doubleValue() > 0) {
+                                newVp -= 15;
                             }
-                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0) {
+                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] != 0
+                                    || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0
+                                    || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
                                 newVp -= 5;
-                            }
-                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
-                                if (movementInfo.getSpeed().getX().doubleValue() > 0
-                                        || movementInfo.getSpeed().getY().doubleValue() > 0
-                                        || movementInfo.getSpeed().getZ().doubleValue() > 0) {
-                                    newVp -= 15;
-                                }
-                            } else {
-                                if (Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
-                                        + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
-                                        + Math.pow(movementInfo.getSpeed().getZ().doubleValue(), 2)
-                                        > Math.pow(movementInfo.getMaxSpeed().doubleValue() / 2, 2)) {
-                                    newVp -= 15;
-                                }
                             }
                             playerService.changeVp(id, newVp, false);
 
@@ -226,7 +212,10 @@ public class TimedEventTask {
                                 }
                             }
                             if (movementInfo.getFloorCode() == BlockConstants.BLOCK_CODE_WATER_DEEP) {
-                                playerInfo.getSkills().get(0).setFrame(playerInfo.getSkills().get(0).getFrameMax());
+                                // TODO Better deep-water experience
+                                for (int i = 0; i < playerInfo.getSkills().size(); i++) {
+                                    playerInfo.getSkills().get(i).setFrame(playerInfo.getSkills().get(i).getFrameMax());
+                                }
                             }
 
                             // Add decorating effects

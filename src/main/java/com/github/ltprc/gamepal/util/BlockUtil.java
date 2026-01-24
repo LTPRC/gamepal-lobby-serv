@@ -439,6 +439,8 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
             case BlockConstants.BLOCK_TYPE_PLASMA:
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+            case BlockConstants.BLOCK_TYPE_MELEE:
+            case BlockConstants.BLOCK_TYPE_SHOOT:
                 return false;
             default:
                 return true;

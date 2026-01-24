@@ -83,6 +83,21 @@ public class BlockFactory {
             case BlockConstants.BLOCK_TYPE_DROP:
                 frameMax = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
                 break;
+            case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
+                switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                        frameMax = 250;
+                        break;
+                    case BlockConstants.BLOCK_CODE_SPRAY:
+                    case BlockConstants.BLOCK_CODE_DROP_SHADOW:
+                    case BlockConstants.BLOCK_CODE_BUBBLE:
+                        frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                    default:
+                        frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
+                        break;
+                }
+                break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (blockInfo.getCode()) {
                     case BlockConstants.BLOCK_CODE_FIRE:
@@ -92,6 +107,10 @@ public class BlockFactory {
                         frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                         break;
                 }
+                break;
+            case BlockConstants.BLOCK_TYPE_MELEE:
+            case BlockConstants.BLOCK_TYPE_SHOOT:
+                frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                 break;
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
                 frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
@@ -122,9 +141,6 @@ public class BlockFactory {
                     case BlockConstants.BLOCK_CODE_CURSE:
                         period = 50;
                         break;
-                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-                        period = 250;
-                        break;
                     default:
                         period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                         break;
@@ -132,6 +148,21 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
                 period = GamePalConstants.DROP_DISAPPEAR_THRESHOLD_IN_FRAME;
+                break;
+            case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
+                switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                        period = 250;
+                        break;
+                    case BlockConstants.BLOCK_CODE_SPRAY:
+                    case BlockConstants.BLOCK_CODE_DROP_SHADOW:
+                    case BlockConstants.BLOCK_CODE_BUBBLE:
+                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                    default:
+                        period = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
+                        break;
+                }
                 break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (blockInfo.getCode()) {
@@ -152,13 +183,15 @@ public class BlockFactory {
 
     public static Structure createStructureByCode(int blockCode) {
         Structure structure;
+        Shape shape;
+        PlanarCoordinate imageSize;
         int blockType = BlockUtil.convertBlockCode2Type(blockCode);
         Shape roundShape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                 new Coordinate(BlockConstants.ROUND_SCENE_OBJECT_RADIUS, BlockConstants.ROUND_SCENE_OBJECT_RADIUS,
                         BlockConstants.Z_DEFAULT));
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
-                structure = new Structure(convertEventCode2Material(blockCode), convertEventCode2Layer(blockCode),
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE, convertEventCode2Layer(blockCode),
                         convertEventCode2Shape(blockCode), convertEventCode2ImageSize(blockCode));
                 break;
             case BlockConstants.BLOCK_TYPE_PLAYER:
@@ -171,7 +204,10 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D),
+                                        BlockConstants.Z_DEFAULT)),
                         new PlanarCoordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
@@ -291,7 +327,6 @@ public class BlockFactory {
                                         BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
-                PlanarCoordinate imageSize;
                 switch (blockCode) {
                     case BlockConstants.BLOCK_CODE_BIG_PINE:
                     case BlockConstants.BLOCK_CODE_BIG_OAK:
@@ -333,8 +368,19 @@ public class BlockFactory {
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
+                switch (blockCode) {
+                    case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
+                        shape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                                new Coordinate(BigDecimal.valueOf(0.15D), BigDecimal.valueOf(0.3D),
+                                        BigDecimal.valueOf(2)));
+                        break;
+                    default:
+                        shape = new Shape();
+                        break;
+                }
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION, shape,
+                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_WALL:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -353,6 +399,13 @@ public class BlockFactory {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
                 break;
+            case BlockConstants.BLOCK_TYPE_MELEE:
+            case BlockConstants.BLOCK_TYPE_SHOOT:
+                structure = new Structure(convertMeleeShootCode2Material(blockCode),
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BlockConstants.EVENT_DEFAULT_RADIUS, BlockConstants.EVENT_DEFAULT_RADIUS,
+                                BlockConstants.Z_DEFAULT)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
+                break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -363,7 +416,7 @@ public class BlockFactory {
         return structure;
     }
 
-    public static int convertEventCode2Material(int eventCode) {
+    public static int convertMeleeShootCode2Material(int eventCode) {
         int structureMaterial;
         switch (eventCode) {
             case BlockConstants.BLOCK_CODE_MELEE_HIT:
@@ -411,8 +464,6 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_CODE_UPGRADE:
             case BlockConstants.BLOCK_CODE_SACRIFICE:
-            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-            case BlockConstants.BLOCK_CODE_DROP_SHADOW:
                 layer = BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION;
                 break;
             default:
@@ -439,11 +490,6 @@ public class BlockFactory {
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE,
                                 BigDecimal.valueOf(0.1D)));
                 break;
-            case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
-                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BigDecimal.valueOf(0.4D), BigDecimal.valueOf(0.4D),
-                                BigDecimal.valueOf(2)));
-                break;
             case BlockConstants.BLOCK_CODE_SHOCK:
                 shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2),
@@ -463,7 +509,6 @@ public class BlockFactory {
         switch (eventCode) {
             case BlockConstants.BLOCK_CODE_BLOCK:
             case BlockConstants.BLOCK_CODE_UPGRADE:
-            case BlockConstants.BLOCK_CODE_SPRAY:
                 imageSize = new PlanarCoordinate(BigDecimal.ONE, BigDecimal.valueOf(2));
                 break;
             default:
