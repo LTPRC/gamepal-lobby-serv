@@ -82,11 +82,11 @@ public class CommandManagerImpl implements CommandManager {
                             new WorldCoordinate(player.getWorldCoordinate()), CreatureConstants.NPC_ROLE_MINION);
                     PlayerInfo playerInfo = world.getPlayerInfoMap().get(agent.getBlockInfo().getId());
                     CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_MALE);
-                    itemManager.getItem(world, agent.getBlockInfo().getId(), "o005", 1);
+                    itemManager.getItem(world, agent.getBlockInfo().getId(), "o005", 1, false);
                     itemManager.useItem(world, agent.getBlockInfo().getId(), "o005", 1);
-                    itemManager.getItem(world, agent.getBlockInfo().getId(), "t002", 1);
+                    itemManager.getItem(world, agent.getBlockInfo().getId(), "t002", 1, false);
                     itemManager.useItem(world, agent.getBlockInfo().getId(), "t002", 1);
-                    itemManager.getItem(world, agent.getBlockInfo().getId(), "a002", 7);
+                    itemManager.getItem(world, agent.getBlockInfo().getId(), "a002", 7, false);
                 }
                 break;
             case "nwclotsofguns":
@@ -116,11 +116,11 @@ public class CommandManagerImpl implements CommandManager {
                         new WorldCoordinate(player.getWorldCoordinate()), CreatureConstants.NPC_ROLE_PEER);
                 playerInfo = world.getPlayerInfoMap().get(trinity.getBlockInfo().getId());
                 CreatureFactory.randomlyPersonalizePlayerInfo(playerInfo, CreatureConstants.GENDER_FEMALE);
-                itemManager.getItem(world, trinity.getBlockInfo().getId(), "o004", 1);
+                itemManager.getItem(world, trinity.getBlockInfo().getId(), "o004", 1, false);
                 itemManager.useItem(world, trinity.getBlockInfo().getId(), "o004", 1);
-                itemManager.getItem(world, trinity.getBlockInfo().getId(), "t000", 1);
+                itemManager.getItem(world, trinity.getBlockInfo().getId(), "t000", 1, false);
                 itemManager.useItem(world, trinity.getBlockInfo().getId(), "t000", 1);
-                itemManager.getItem(world, trinity.getBlockInfo().getId(), "a001", 20);
+                itemManager.getItem(world, trinity.getBlockInfo().getId(), "a001", 20, false);
                 break;
             case "nwcnebuchadnezzar":
                 playerService.generateNotificationMessage(userCode, "跑得快。");

@@ -488,7 +488,7 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfo.getSkills().get(skillNo).setFrame(playerInfo.getSkills().get(skillNo).getFrameMax());
                     boolean skillResult = generateEventBySkill(userCode, skillNo);
                     if (skillResult && StringUtils.isNotBlank(ammoCode)) {
-                        itemManager.getItem(world, userCode, ammoCode, -1);
+                        itemManager.getItem(world, userCode, ammoCode, -1, false);
                     }
                 } else {
                     logger.warn(ErrorUtil.ERROR_1029 + " skillMode: " + playerInfo.getSkills().get(skillNo).getSkillMode());
@@ -501,7 +501,7 @@ public class PlayerServiceImpl implements PlayerService {
                     playerInfo.getSkills().get(skillNo).setFrame(playerInfo.getSkills().get(skillNo).getFrameMax());
                     boolean skillResult = generateEventBySkill(userCode, skillNo);
                     if (skillResult && StringUtils.isNotBlank(ammoCode)) {
-                        itemManager.getItem(world, userCode, ammoCode, -1);
+                        itemManager.getItem(world, userCode, ammoCode, -1, false);
                     }
                 }
             } else if (playerInfo.getSkills().get(skillNo).getSkillMode() == SkillConstants.SKILL_MODE_AUTO) {
@@ -656,7 +656,7 @@ public class PlayerServiceImpl implements PlayerService {
             case SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK:
                 Optional<Junk> junk = itemManager.peekRandomJunk(world, userCode);
                 if (junk.isPresent()) {
-                    itemManager.getItem(world, userCode, junk.get().getItemNo(), -1);
+                    itemManager.getItem(world, userCode, junk.get().getItemNo(), -1, true);
                     eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK, userCode,
                             BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
                                     direction.add(shakingAngle), SkillUtil.calculateThrowJunkDistance(junk.get())));
@@ -776,19 +776,19 @@ public class PlayerServiceImpl implements PlayerService {
         }
         int randomValue = random.nextInt(100);
         if (randomValue < 5) {
-            itemManager.getItem(world, userCode, "c035", 1);
+            itemManager.getItem(world, userCode, "c035", 1, true);
         } else if (randomValue < 10) {
-            itemManager.getItem(world, userCode, "m006", 1);
+            itemManager.getItem(world, userCode, "m006", 1, true);
         } else if (randomValue < 12) {
-            itemManager.getItem(world, userCode, "j082", 1);
+            itemManager.getItem(world, userCode, "j082", 1, true);
         } else if (randomValue < 15) {
-            itemManager.getItem(world, userCode, "j126", 1);
+            itemManager.getItem(world, userCode, "j126", 1, true);
         } else if (randomValue < 18) {
-            itemManager.getItem(world, userCode, "j135", 1);
+            itemManager.getItem(world, userCode, "j135", 1, true);
         } else if (randomValue < 20) {
-            itemManager.getItem(world, userCode, "j145", 1);
+            itemManager.getItem(world, userCode, "j145", 1, true);
         } else if (randomValue < 22) {
-            itemManager.getItem(world, userCode, "j191", 1);
+            itemManager.getItem(world, userCode, "j191", 1, true);
         } else {
             return false;
         }
@@ -937,7 +937,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         if (world.getDropMap().containsKey(dropId)) {
             Map.Entry<String, Integer> drop = world.getDropMap().get(dropId);
-            itemManager.getItem(world, userCode, drop.getKey(), drop.getValue());
+            itemManager.getItem(world, userCode, drop.getKey(), drop.getValue(), true);
         } else {
             logger.warn(String.valueOf(ErrorUtil.ERROR_1030));
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1030));
@@ -1132,8 +1132,8 @@ public class PlayerServiceImpl implements PlayerService {
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());
             itemsMap.forEach((key, value) -> {
-                itemManager.getItem(world, userCode, key, -value);
-                itemManager.getItem(world, remainId, key, value);
+                itemManager.getItem(world, userCode, key, -value, false);
+                itemManager.getItem(world, remainId, key, value, false);
             });
         }
         switch (playerInfo.getCreatureType()) {
@@ -1143,117 +1143,117 @@ public class PlayerServiceImpl implements PlayerService {
                 switch (playerInfo.getSkinColor()) {
                     case CreatureConstants.SKIN_COLOR_PAOFU:
                     case CreatureConstants.SKIN_COLOR_CAT:
-                        itemManager.getItem(world, remainId, "c038", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c038", random.nextInt(2) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_FROG:
                     case CreatureConstants.SKIN_COLOR_MONKEY:
                     case CreatureConstants.SKIN_COLOR_RACOON:
-                        itemManager.getItem(world, remainId, "m004", 1);
+                        itemManager.getItem(world, remainId, "m004", 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_CHICKEN:
                         if (random.nextDouble() < 0.25D) {
-                            itemManager.getItem(world, remainId, "c040", random.nextInt(1) + 1);
+                            itemManager.getItem(world, remainId, "c040", random.nextInt(1) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c031", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c031", random.nextInt(2) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_BUFFALO:
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "j037", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "j037", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c032", random.nextInt(4) + 1);
+                        itemManager.getItem(world, remainId, "c032", random.nextInt(4) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_FOX:
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c037", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c037", random.nextInt(2) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1, false);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1, false);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_SHEEP:
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c034", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c034", random.nextInt(2) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_TIGER:
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1, false);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1, false);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_DOG:
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "j063", 1);
+                            itemManager.getItem(world, remainId, "j063", 1, false);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "j193", 1);
+                            itemManager.getItem(world, remainId, "j193", 1, false);
                         }
                         if (random.nextDouble() < 0.25D) {
-                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1, false);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c037", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c037", random.nextInt(2) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_WOLF:
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1, false);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.2D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c037", random.nextInt(3) + 1);
+                        itemManager.getItem(world, remainId, "c037", random.nextInt(3) + 1, false);
                         break;
                     case CreatureConstants.SKIN_COLOR_BOAR:
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1);
+                            itemManager.getItem(world, remainId, "j191", random.nextInt(4) + 1, false);
                         }
                         if (random.nextDouble() < 0.4D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.5D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(3) + 1, false);
                         }
                         break;
                     case CreatureConstants.SKIN_COLOR_HORSE:
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m006", random.nextInt(2) + 1, false);
                         }
                         if (random.nextDouble() < 0.1D) {
-                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1);
+                            itemManager.getItem(world, remainId, "m004", random.nextInt(2) + 1, false);
                         }
-                        itemManager.getItem(world, remainId, "c036", random.nextInt(2) + 1);
+                        itemManager.getItem(world, remainId, "c036", random.nextInt(2) + 1, false);
                         break;
                     default:
                         return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1038));

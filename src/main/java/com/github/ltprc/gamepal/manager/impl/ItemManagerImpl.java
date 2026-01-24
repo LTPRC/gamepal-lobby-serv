@@ -97,7 +97,7 @@ public class ItemManagerImpl implements ItemManager {
     }
 
     @Override
-    public boolean getItem(GameWorld world, String userCode, String itemNo, int itemAmount) {
+    public boolean getItem(GameWorld world, String userCode, String itemNo, int itemAmount, boolean isNotified) {
         if (itemAmount == 0) {
             logger.warn(ErrorUtil.ERROR_1035);
             return true;
@@ -137,12 +137,14 @@ public class ItemManagerImpl implements ItemManager {
         if (worldService.getItemMap().containsKey(itemNo)) {
             Item item = worldService.getItemMap().get(itemNo);
             bagInfo.setCapacity(capacity.add(item.getWeight().multiply(BigDecimal.valueOf(itemAmount))));
-            if (itemAmount < 0) {
-                playerService.generateNotificationMessage(userCode,
-                        "失去 " + item.getName() + "(" + (-1) * itemAmount + ")");
-            } else {
-                playerService.generateNotificationMessage(userCode,
-                        "获得 " + item.getName() + "(" + itemAmount + ")");
+            if (isNotified) {
+                if (itemAmount < 0) {
+                    playerService.generateNotificationMessage(userCode,
+                            "失去 " + item.getName() + "(" + (-1) * itemAmount + ")");
+                } else {
+                    playerService.generateNotificationMessage(userCode,
+                            "获得 " + item.getName() + "(" + itemAmount + ")");
+                }
             }
         }
         if (world.getFlagMap().containsKey(userCode)) {
@@ -275,9 +277,9 @@ public class ItemManagerImpl implements ItemManager {
         }
         switch (itemNo.charAt(0)) {
             case ItemConstants.ITEM_CHARACTER_JUNK:
-                getItem(world, userCode, itemNo, -1);
+                getItem(world, userCode, itemNo, -1, true);
                 ((Junk) worldService.getItemMap().get(itemNo)).getMaterials()
-                        .forEach((key, value) -> getItem(world, userCode, key, value));
+                        .forEach((key, value) -> getItem(world, userCode, key, value, true));
                 break;
             case ItemConstants.ITEM_CHARACTER_TOOL:
             case ItemConstants.ITEM_CHARACTER_OUTFIT:
@@ -308,8 +310,8 @@ public class ItemManagerImpl implements ItemManager {
             logger.error(ErrorUtil.ERROR_1024);
             return;
         }
-        recipe.getCost().forEach((key1, value1) -> getItem(world, userCode, key1, -value1 * recipeAmount));
-        recipe.getValue().forEach((key, value) -> getItem(world, userCode, key, value * recipeAmount));
+        recipe.getCost().forEach((key1, value1) -> getItem(world, userCode, key1, -value1 * recipeAmount, true));
+        recipe.getValue().forEach((key, value) -> getItem(world, userCode, key, value * recipeAmount, true));
         world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_RECIPES] = true;
     }
 
@@ -466,7 +468,7 @@ public class ItemManagerImpl implements ItemManager {
             default:
                 break;
         }
-        return getItem(world, userCode, itemNo, -1 * itemAmount);
+        return getItem(world, userCode, itemNo, -1 * itemAmount, true);
     }
 
     @Override

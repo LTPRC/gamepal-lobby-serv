@@ -159,13 +159,13 @@ public class UserServiceImpl implements UserService {
                         switch (itemNo.charAt(0)) {
                             case ItemConstants.ITEM_CHARACTER_TOOL:
                             case ItemConstants.ITEM_CHARACTER_OUTFIT:
-                                itemManager.getItem(world, userCode, itemNo, 1);
+                                itemManager.getItem(world, userCode, itemNo, 1, false);
                                 break;
                             case ItemConstants.ITEM_CHARACTER_CONSUMABLE:
-                                itemManager.getItem(world, userCode, itemNo, 5);
+                                itemManager.getItem(world, userCode, itemNo, 5, false);
                                 break;
                             case ItemConstants.ITEM_CHARACTER_AMMO:
-                                itemManager.getItem(world, userCode, itemNo, 10);
+                                itemManager.getItem(world, userCode, itemNo, 10, false);
                                 break;
                             default:
                                 break;

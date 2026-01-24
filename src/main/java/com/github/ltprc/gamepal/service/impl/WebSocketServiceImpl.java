@@ -159,7 +159,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 getItems.forEach(getItem -> {
                     String itemNo = ((JSONObject) getItem).getString("itemNo");
                     int itemAmount = ((JSONObject) getItem).getInteger("itemAmount");
-                    itemManager.getItem(world, userCode, itemNo, itemAmount);
+                    itemManager.getItem(world, userCode, itemNo, itemAmount, true);
                 });
             }
             if (functions.containsKey("getPreservedItems")) {
@@ -203,7 +203,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             drops.forEach(obj -> {
                 String itemNo = ((JSONObject) obj).getString("itemNo");
                 int itemAmount = ((JSONObject) obj).getInteger("itemAmount");
-                if (itemManager.getItem(world, userCode, itemNo, -1 * itemAmount)) {
+                if (itemManager.getItem(world, userCode, itemNo, -1 * itemAmount, true)) {
                     playerService.addDrop(userCode, itemNo, itemAmount);
                 }
             });

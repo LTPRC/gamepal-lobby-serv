@@ -67,7 +67,7 @@ public class FarmManagerImpl implements FarmManager {
             return;
         }
         playerService.generateNotificationMessage(userCode, "种植成功。");
-        itemManager.getItem(world, userCode, cropCode, -1);
+        itemManager.getItem(world, userCode, cropCode, -1, true);
         farmInfo.setCropStatus(BlockConstants.CROP_STATUS_PLANTED);
         Random random = new Random();
         farmInfo.setCropAmount(random.nextInt(3) + 3);
@@ -86,7 +86,7 @@ public class FarmManagerImpl implements FarmManager {
             return;
         }
         playerService.generateNotificationMessage(userCode, "采集成功。");
-        itemManager.getItem(world, userCode, farmInfo.getCropCode(), farmInfo.getCropAmount());
+        itemManager.getItem(world, userCode, farmInfo.getCropCode(), farmInfo.getCropAmount(), true);
         farmInfo.setCropStatus(BlockConstants.CROP_STATUS_GATHERED);
         farmInfo.setCropAmount(0);
     }

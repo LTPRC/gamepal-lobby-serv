@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface ItemManager {
     boolean useItem(GameWorld world, String userCode, String itemNo, int itemAmount);
-    boolean getItem(GameWorld world, String userCode, String itemNo, int itemAmount);
+    boolean getItem(GameWorld world, String userCode, String itemNo, int itemAmount, boolean isNotified);
     boolean getPreservedItem(GameWorld world, String userCode, String itemNo, int itemAmount);
     void getInteractedItem(GameWorld world, String userCode, String itemNo, int itemAmount);
     void recycleItem(GameWorld world, String userCode, String itemNo, int itemAmount);
