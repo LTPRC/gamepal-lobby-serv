@@ -17,6 +17,7 @@ import com.github.ltprc.gamepal.manager.MiniMapManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.Message;
+import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
@@ -126,6 +127,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         Block player = world.getCreatureMap().get(userCode);
+        PlayerInfo playerInfo = world.getPlayerInfoMap().get(userCode);
         // Update onlineMap
         worldService.registerOnline(world, userCode, timestamp);
 

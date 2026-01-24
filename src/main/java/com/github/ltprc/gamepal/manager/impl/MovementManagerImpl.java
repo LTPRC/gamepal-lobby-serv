@@ -330,6 +330,9 @@ public class MovementManagerImpl implements MovementManager {
                         }
                         break;
                     case BlockConstants.BLOCK_CODE_WIRE_NETTING:
+                    case BlockConstants.BLOCK_CODE_CACTUS_1:
+                    case BlockConstants.BLOCK_CODE_CACTUS_2:
+                    case BlockConstants.BLOCK_CODE_CACTUS_3:
                         if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                                 && playerService.validateActiveness(world, block.getBlockInfo().getId())
                                 && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0

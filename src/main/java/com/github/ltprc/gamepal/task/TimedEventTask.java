@@ -115,7 +115,7 @@ public class TimedEventTask {
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))
                     .forEach(id -> {
-                        buffManager.changeBuff(world, id);
+                        buffManager.checkBuff(world, id);
 
                         // Change maxSpeed
                         movementManager.updateCreatureMaxSpeed(world, id);
@@ -150,14 +150,9 @@ public class TimedEventTask {
 
                             // Change vp
                             int newVp = 10;
-                            if (movementInfo.getSpeed().getX().abs().doubleValue() > 0
-                                    || movementInfo.getSpeed().getY().abs().doubleValue() > 0) {
-                                newVp -= 15;
-                            }
-                            if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_SICK] != 0
-                                    || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FRACTURED] != 0
-                                    || playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
-                                newVp -= 5;
+                            if (!movementInfo.getSpeed().getX().equals(BigDecimal.ZERO)
+                                    || !movementInfo.getSpeed().getY().equals(BigDecimal.ZERO)) {
+                                newVp = -10;
                             }
                             playerService.changeVp(id, newVp, false);
 
@@ -250,7 +245,7 @@ public class TimedEventTask {
                         }
 
                         if (creatureMap.containsKey(id)) {
-                            buffManager.changeBuff(world, id);
+                            buffManager.checkBuff(world, id);
                         }
                     });
 

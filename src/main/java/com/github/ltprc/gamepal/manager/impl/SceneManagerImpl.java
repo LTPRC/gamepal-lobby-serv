@@ -858,9 +858,15 @@ public class SceneManagerImpl implements SceneManager {
                 rst.put("to", to);
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
-                if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))
-                        && BlockConstants.BLOCK_CODE_MINE == block.getBlockInfo().getCode()) {
-                    block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG, timestamp);
+                switch (block.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_MINE:
+                        if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))) {
+                            // Only for the master of the mine
+                            block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG, timestamp);
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
@@ -940,6 +946,11 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_FLOOR:
             case BlockConstants.BLOCK_TYPE_WALL:
                 addBlockIntoGravitatedStack(world, block);
+                break;
+            case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
+                Map<Integer, Structure> structureMap = worldService.getStructureMap();
+                block.getWorldCoordinate().getCoordinate().setZ(block.getWorldCoordinate().getCoordinate().getZ()
+                        .subtract(structureMap.get(block.getBlockInfo().getCode()).getShape().getRadius().getZ()));
                 break;
             default:
                 break;

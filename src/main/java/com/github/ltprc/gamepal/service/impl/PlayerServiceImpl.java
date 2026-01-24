@@ -992,8 +992,6 @@ public class PlayerServiceImpl implements PlayerService {
         } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = BuffConstants.BUFF_DEFAULT_FRAME_KNOCKED;
         }
-        long timestamp = System.currentTimeMillis();
-        player.getBlockInfo().setTimeUpdated(timestamp);
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -1030,8 +1028,6 @@ public class PlayerServiceImpl implements PlayerService {
         } else {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] = -1;
         }
-        long timestamp = System.currentTimeMillis();
-        player.getBlockInfo().setTimeUpdated(timestamp);
         return ResponseEntity.ok().body(rst.toString());
     }
 

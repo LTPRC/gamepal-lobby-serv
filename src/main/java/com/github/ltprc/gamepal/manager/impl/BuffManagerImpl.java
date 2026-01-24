@@ -98,7 +98,7 @@ public class BuffManagerImpl implements BuffManager {
      * @param userCode
      */
     @Override
-    public void changeBuff(GameWorld world, String userCode) {
+    public void checkBuff(GameWorld world, String userCode) {
         Map<String, Block> creatureMap = world.getCreatureMap();
         if (!creatureMap.containsKey(userCode)) {
             logger.error(ErrorUtil.ERROR_1007);
@@ -121,7 +121,7 @@ public class BuffManagerImpl implements BuffManager {
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] = -1;
         } else if (playerInfo.getHunger() >= playerInfo.getHungerMax() / 10
-                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] != 0){
+                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] != 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_HUNGRY] = 0;
         }
 
@@ -129,15 +129,16 @@ public class BuffManagerImpl implements BuffManager {
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] = -1;
         } else if (playerInfo.getThirst() >= playerInfo.getThirstMax() / 10
-                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] != 0){
+                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] != 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_THIRSTY] = 0;
         }
 
         if (playerInfo.getVp() == 0
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] = -1;
-        } else if (playerInfo.getVp() > 0
-                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0){
+        } else if (player.getMovementInfo().getSpeed().getX().equals(BigDecimal.ZERO)
+                && player.getMovementInfo().getSpeed().getY().equals(BigDecimal.ZERO)
+                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] != 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_FATIGUED] = 0;
         }
 
@@ -147,7 +148,7 @@ public class BuffManagerImpl implements BuffManager {
                 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] = -1;
         } else if (bagInfo.getCapacity().compareTo(bagInfo.getCapacityMax()) <= 0
-                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0){
+                && playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] != 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_OVERWEIGHTED] = 0;
         }
 
