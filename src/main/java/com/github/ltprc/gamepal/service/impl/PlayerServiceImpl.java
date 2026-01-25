@@ -10,6 +10,7 @@ import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.MessageConstants;
 import com.github.ltprc.gamepal.config.MissionConstants;
+import com.github.ltprc.gamepal.config.MovementConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
@@ -1305,7 +1306,7 @@ public class PlayerServiceImpl implements PlayerService {
             preservedBagInfo.setCapacity(BigDecimal.ZERO);
             preservedBagInfo.setCapacityMax(BigDecimal.valueOf(CreatureConstants.CAPACITY_MAX));
         }
-        player.getMovementInfo().setFaceDirection(BlockConstants.FACE_DIRECTION_DEFAULT);
+        player.getMovementInfo().setFaceDirection(MovementConstants.FACE_DIRECTION_DEFAULT);
         playerInfoMap.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(userCode))
                 .filter(entry -> StringUtils.isNotBlank(entry.getValue().getBossId()))

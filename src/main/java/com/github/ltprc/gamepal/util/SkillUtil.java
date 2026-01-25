@@ -156,6 +156,9 @@ public class SkillUtil {
             case BlockConstants.BLOCK_CODE_MELEE_KICK:
                 hp = -10 - random.nextInt(20);
                 break;
+            case BlockConstants.BLOCK_CODE_CACTUS_1:
+            case BlockConstants.BLOCK_CODE_CACTUS_2:
+            case BlockConstants.BLOCK_CODE_CACTUS_3:
             case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
             case BlockConstants.BLOCK_CODE_WIRE_NETTING:
                 hp = -20 - random.nextInt(60);

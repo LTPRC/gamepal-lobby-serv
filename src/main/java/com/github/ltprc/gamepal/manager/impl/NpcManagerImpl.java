@@ -7,6 +7,7 @@ import com.github.ltprc.gamepal.config.BuffConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.MovementConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
@@ -24,6 +25,7 @@ import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.creature.NpcBrain;
@@ -535,13 +537,12 @@ public class NpcManagerImpl implements NpcManager {
         if (null == distance || null == direction) {
             return rst;
         }
-        int movementMode = distance.doubleValue() <= stopDistance ? BlockConstants.MOVEMENT_MODE_STAND_GROUND
-                : BlockConstants.MOVEMENT_MODE_DEFAULT;
-        Coordinate accelerationCoordinate = new Coordinate(
+        int movementMode = distance.doubleValue() <= stopDistance ? MovementConstants.MOVEMENT_MODE_STAND_GROUND
+                : MovementConstants.MOVEMENT_MODE_DEFAULT;
+        PlanarCoordinate accelerationCoordinate = new PlanarCoordinate(
                 BigDecimal.valueOf(Math.cos(direction.doubleValue() / 180 * Math.PI)),
-                BigDecimal.valueOf(-1 * Math.sin(direction.doubleValue() / 180 * Math.PI)),
-                BigDecimal.ZERO);
-        movementManager.settleAcceleration(world, npcPlayer, accelerationCoordinate, movementMode);
+                BigDecimal.valueOf(-1 * Math.sin(direction.doubleValue() / 180 * Math.PI)));
+        movementManager.settlePlanarAcceleration(world, npcPlayer, accelerationCoordinate, movementMode);
         return rst;
     }
 }

@@ -1,6 +1,10 @@
 package com.github.ltprc.gamepal.manager.impl;
 
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.BuffConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.MovementConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
 import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
@@ -9,6 +13,7 @@ import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
@@ -33,7 +38,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class MovementManagerImpl implements MovementManager {
@@ -61,15 +65,18 @@ public class MovementManagerImpl implements MovementManager {
         movementInfo.getSpeed().setX(movementInfo.getSpeed().getX().add(deltaSpeed.getX()));
         movementInfo.getSpeed().setY(movementInfo.getSpeed().getY().add(deltaSpeed.getY()));
         movementInfo.getSpeed().setZ(movementInfo.getSpeed().getZ().add(deltaSpeed.getZ()));
-        movementInfo.setFaceDirection(BlockUtil.calculateAngle(new Coordinate(), movementInfo.getSpeed()));
+        movementInfo.setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
+                new PlanarCoordinate(movementInfo.getSpeed().getX(), movementInfo.getSpeed().getY())));
         settleSpeedAndCoordinate(world, block, 0);
     }
 
     @Override
-    public void settleAcceleration(GameWorld world, Block block, Coordinate accelerationCoordinate, int movementMode) {
+    public void settlePlanarAcceleration(GameWorld world, Block block, PlanarCoordinate accelerationCoordinate,
+                                         int movementMode) {
         if (accelerationCoordinate.getX().equals(BigDecimal.ZERO)
                 && accelerationCoordinate.getY().equals(BigDecimal.ZERO)) {
-            block.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+            block.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+            block.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
         } else {
             double newSpeed = Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                     + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
@@ -81,27 +88,40 @@ public class MovementManagerImpl implements MovementManager {
                     .add(accelerationCoordinate.getY().pow(2)).doubleValue());
             newSpeed = Math.min(newSpeed, maxSpeed);
             switch (movementMode) {
-                case BlockConstants.MOVEMENT_MODE_STAND_GROUND:
+                case MovementConstants.MOVEMENT_MODE_STAND_GROUND:
                     newSpeed = 0D;
                     break;
-                case BlockConstants.MOVEMENT_MODE_WALK:
+                case MovementConstants.MOVEMENT_MODE_WALK:
                     newSpeed = Math.min(newSpeed, block.getMovementInfo().getMaxSpeed().doubleValue() / 2);
                     break;
-                case BlockConstants.MOVEMENT_MODE_DEFAULT:
+                case MovementConstants.MOVEMENT_MODE_DEFAULT:
                 default:
                     break;
             }
-            block.getMovementInfo().setSpeed(new Coordinate(
-                    BigDecimal.valueOf(newSpeed * accelerationCoordinate.getX().doubleValue()
+            block.getMovementInfo().getSpeed().setX(BigDecimal.valueOf(
+                    newSpeed * accelerationCoordinate.getX().doubleValue()
                             / Math.sqrt(accelerationCoordinate.getX().pow(2)
-                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())),
-                    BigDecimal.valueOf(newSpeed * accelerationCoordinate.getY().doubleValue()
+                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())));
+            block.getMovementInfo().getSpeed().setY(BigDecimal.valueOf(
+                    newSpeed * accelerationCoordinate.getY().doubleValue()
                             / Math.sqrt(accelerationCoordinate.getX().pow(2)
-                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())),
-                    block.getMovementInfo().getSpeed().getZ().add(accelerationCoordinate.getZ())));
-            block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new Coordinate(), accelerationCoordinate));
+                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())));
+            block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
+                    accelerationCoordinate));
         }
         settleSpeedAndCoordinate(world, block, 1);
+    }
+
+    @Override
+    public void settleVerticalAcceleration(GameWorld world, Block block) {
+        BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
+        if (block.getWorldCoordinate().getCoordinate().getZ().compareTo(altitude) > 0) {
+            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ()
+                    .add(MovementConstants.ACCELERATION_Z_DEFAULT));
+        }
+        if (block.getWorldCoordinate().getCoordinate().getZ().compareTo(MovementConstants.MAX_SPEED_Z_DEFAULT) > 0) {
+            block.getMovementInfo().getSpeed().setZ(MovementConstants.MAX_SPEED_Z_DEFAULT);
+        }
     }
 
     @Override
@@ -133,57 +153,54 @@ public class MovementManagerImpl implements MovementManager {
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockX.getWorldCoordinate());
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockY.getWorldCoordinate());
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockXY.getWorldCoordinate());
-        String fromId = world.getSourceMap().containsKey(worldMovingBlock.getBlockInfo().getId())
-                ? world.getSourceMap().get(worldMovingBlock.getBlockInfo().getId())
-                : worldMovingBlock.getBlockInfo().getId();
         boolean xCollision = false;
         boolean yCollision = false;
         if (sceneManager.getAltitude(world, expectedNewBlockX.getWorldCoordinate())
                 .subtract(expectedNewBlockX.getWorldCoordinate().getCoordinate().getZ())
-                .compareTo(BlockConstants.MAX_Z_STEP_DEFAULT) > 0) {
+                .compareTo(MovementConstants.MAX_Z_STEP_DEFAULT) > 0) {
             xCollision = true;
         }
         if (sceneManager.getAltitude(world, expectedNewBlockY.getWorldCoordinate())
                 .subtract(expectedNewBlockY.getWorldCoordinate().getCoordinate().getZ())
-                .compareTo(BlockConstants.MAX_Z_STEP_DEFAULT) > 0) {
+                .compareTo(MovementConstants.MAX_Z_STEP_DEFAULT) > 0) {
             yCollision = true;
         }
         if (sceneManager.getAltitude(world, expectedNewBlockXY.getWorldCoordinate())
                 .subtract(expectedNewBlockXY.getWorldCoordinate().getCoordinate().getZ())
-                .compareTo(BlockConstants.MAX_Z_STEP_DEFAULT) > 0) {
+                .compareTo(MovementConstants.MAX_Z_STEP_DEFAULT) > 0) {
             xCollision = true;
             yCollision = true;
         }
 
         // Linear selection on pre-selected blocks
         Set<Block> preSelectedBlocks = new HashSet<>();
-        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockXY, fromId));
-        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockX, fromId));
-        preSelectedBlocks.addAll(sceneManager.collectLinearBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockY, fromId));
-        Map<Integer, Structure> structureMap = worldService.getStructureMap();
-        preSelectedBlocks.stream()
-                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
-                .filter(blocker -> structureMap.containsKey(worldMovingBlock.getBlockInfo().getCode())
-                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
-                        && BlockUtil.checkMaterialCollision(
-                                structureMap.get(worldMovingBlock.getBlockInfo().getCode()).getMaterial(),
-                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
-                .filter(blocker -> detectLineCollision(world, worldMovingBlock.getWorldCoordinate(),
-                        expectedNewBlockXY, blocker, false))
-                .collect(Collectors.toList());
+        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockXY));
+        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockX));
+        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockY));
+//        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+//        preSelectedBlocks.stream()
+//                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
+//                .filter(blocker -> structureMap.containsKey(worldMovingBlock.getBlockInfo().getCode())
+//                        && structureMap.containsKey(blocker.getBlockInfo().getCode())
+//                        && BlockUtil.checkMaterialCollision(
+//                                structureMap.get(worldMovingBlock.getBlockInfo().getCode()).getMaterial(),
+//                        structureMap.get(blocker.getBlockInfo().getCode()).getMaterial()))
+//                .filter(blocker -> detectLinearCollision(world, worldMovingBlock.getWorldCoordinate(),
+//                        expectedNewBlockXY, blocker, false))
+//                .collect(Collectors.toList());
 
         for (Block block : preSelectedBlocks) {
-            if (detectCollision(world, worldMovingBlock, block)) {
+            if (detectCollision(world, worldMovingBlock, block, false)) {
                 continue;
             }
             if (xCollision && yCollision) {
                 break;
             }
             if (!xCollision) {
-                if (detectCollision(world, expectedNewBlockX, block)) {
+                if (detectCollision(world, expectedNewBlockX, block, false)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -193,7 +210,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
             }
             if (!yCollision) {
-                if (detectCollision(world, expectedNewBlockY, block)) {
+                if (detectCollision(world, expectedNewBlockY, block, false)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -203,7 +220,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
             }
             if (!xCollision && !yCollision) {
-                if (detectCollision(world, expectedNewBlockXY, block)) {
+                if (detectCollision(world, expectedNewBlockXY, block, false)) {
                     if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
                         teleportWc = world.getTeleportMap().get(block.getBlockInfo().getId());
                         break;
@@ -253,6 +270,16 @@ public class MovementManagerImpl implements MovementManager {
                 || !oldWorldCoordinate.getSceneCoordinate().getY()
                 .equals(newWorldCoordinate.getSceneCoordinate().getY());
 
+        BigDecimal altitude = sceneManager.getAltitude(world, newWorldCoordinate);
+        if (newWorldCoordinate.getCoordinate().getZ().compareTo(altitude) < 0) {
+            if (worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
+                    .subtract(MovementConstants.MAX_Z_STEP_DEFAULT).compareTo(altitude) >= 0) {
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_DECAY, worldMovingBlock.getBlockInfo().getId(),
+                        newWorldCoordinate);
+            }
+            newWorldCoordinate.getCoordinate().setZ(altitude);
+            worldMovingBlock.getMovementInfo().getSpeed().setZ(BigDecimal.ZERO);
+        }
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock.getWorldCoordinate());
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         worldMovingBlock.getWorldCoordinate().getCoordinate().setZ(sceneManager.getAltitude(world, worldMovingBlock.getWorldCoordinate()));
@@ -401,17 +428,24 @@ public class MovementManagerImpl implements MovementManager {
                 || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
             maxSpeedCoef = 0D;
         }
-        player.getMovementInfo().setMaxSpeed(BlockConstants.MAX_SPEED_DEFAULT.multiply(BigDecimal.valueOf(maxSpeedCoef)));
-        player.getMovementInfo().setAcceleration(player.getMovementInfo().getMaxSpeed().multiply(BlockConstants.ACCELERATION_MAX_SPEED_RATIO));
+        player.getMovementInfo().setMaxSpeed(MovementConstants.MAX_SPEED_DEFAULT
+                .multiply(BigDecimal.valueOf(maxSpeedCoef)));
+        player.getMovementInfo().setAcceleration(player.getMovementInfo().getMaxSpeed()
+                .multiply(MovementConstants.ACCELERATION_MAX_SPEED_RATIO));
     }
 
     @Override
-    public boolean detectCollision(GameWorld world, Block block1, Block block2) {
+    public boolean detectCollision(GameWorld world, Block block1, Block block2, boolean relocate) {
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
         Structure structure1 = structureMap.get(block1.getBlockInfo().getCode());
         Structure structure2 = structureMap.get(block2.getBlockInfo().getCode());
-        if (null == structure1 || null == structure2
-                || !BlockUtil.checkMaterialStopMovement(structure1.getMaterial(), structure2.getMaterial())) {
+        if (null == structure1 || null == structure2) {
+            return false;
+        }
+        boolean materialCollided = relocate
+                ? BlockUtil.checkMaterialStopMovement(structure1.getMaterial(), structure2.getMaterial())
+                : BlockUtil.checkMaterialCollision(structure1.getMaterial(), structure2.getMaterial());
+        if (!materialCollided) {
             return false;
         }
         Region region = world.getRegionMap().get(block1.getWorldCoordinate().getRegionNo());
@@ -505,10 +539,16 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     @Override
-    public boolean detectLineCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2, boolean correctBlock1) {
+    public boolean detectLinearCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                         boolean relocate) {
         Region region = world.getRegionMap().get(from.getRegionNo());
         if (block1.getWorldCoordinate().getRegionNo() != region.getRegionNo()
                 || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
+            return false;
+        }
+        if (BlockUtil.compareAnglesInDegrees(
+                BlockUtil.calculateAngle(region, from, block2.getWorldCoordinate()).doubleValue(),
+                BlockUtil.calculateAngle(region, from, block1.getWorldCoordinate()).doubleValue()) > 135D) {
             return false;
         }
 
@@ -573,14 +613,116 @@ public class MovementManagerImpl implements MovementManager {
         BlockUtil.fixWorldCoordinate(region, wc3);
 
         // 精确碰撞检测（这里会用到 structure / material / z 等逻辑）
-        if (!detectCollision(world, block3, block2)) {
+        if (!detectCollision(world, block3, block2, relocate)) {
             return false;
         }
 
         // 是否把 block1 真正挪到最近点（保持你原语义）
-        if (correctBlock1) {
+        if (relocate) {
             BlockUtil.copyWorldCoordinate(wc3, block1.getWorldCoordinate());
         }
         return true;
+    }
+
+    @Override
+    public boolean detectSectorInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                         BigDecimal faceDirection, BigDecimal radius, BigDecimal sectorAngle) {
+        Region region = world.getRegionMap().get(from.getRegionNo());
+        if (region == null) return false;
+
+        if (block1.getWorldCoordinate().getRegionNo() != region.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
+            return false;
+        }
+
+        final double r = (radius == null) ? 0D : radius.doubleValue();
+        if (r <= 0D) return false;
+
+        final double angleDeg = (sectorAngle == null) ? 0D : sectorAngle.doubleValue();
+        if (angleDeg <= 0D) return false;
+
+        final int h = region.getHeight();
+        final int w = region.getWidth();
+
+        // ===== 1) 计算全局平面坐标 =====
+        final WorldCoordinate wc1 = block1.getWorldCoordinate();
+        final WorldCoordinate wc2 = block2.getWorldCoordinate();
+
+        final double cx = wc1.getCoordinate().getX().doubleValue()
+                + wc1.getSceneCoordinate().getX() * (double) h;
+        final double cy = wc1.getCoordinate().getY().doubleValue()
+                + wc1.getSceneCoordinate().getY() * (double) w;
+
+        final double tx = wc2.getCoordinate().getX().doubleValue()
+                + wc2.getSceneCoordinate().getX() * (double) h;
+        final double ty = wc2.getCoordinate().getY().doubleValue()
+                + wc2.getSceneCoordinate().getY() * (double) w;
+
+        final double vx = tx - cx;
+        final double vy = ty - cy;
+        final double dist2 = vx * vx + vy * vy;
+
+        // ===== 2) 半径判定（所有情况都要）=====
+        final double rr = r * r;
+        if (dist2 > rr) return false;
+
+        // 圆心命中
+        if (dist2 <= 1e-12) return true;
+
+        // ===== 3) 如果是“整圆扇形”，直接通过（无需角度判断）=====
+        if (angleDeg >= 360D) {
+            return true;
+        }
+
+        // ===== 4) 角度判定（点积）=====
+        final double fd = (faceDirection == null) ? 0D : faceDirection.doubleValue();
+        final double rad = Math.toRadians(fd);
+        final double ux = Math.cos(rad);
+        final double uy = -Math.sin(rad); // y 正向向南
+
+        final double dot = ux * vx + uy * vy;
+        if (dot < 0D) return false;
+
+        final double halfAngleDeg = angleDeg / 2D;
+        final double cosHalf = Math.cos(Math.toRadians(halfAngleDeg));
+        final double cos2 = cosHalf * cosHalf;
+
+        return (dot * dot) >= (dist2 * cos2);
+    }
+
+    @Override
+    public boolean detectSphereInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                         BigDecimal radius) {
+        Region region = world.getRegionMap().get(from.getRegionNo());
+        if (region == null) return false;
+
+        if (block1.getWorldCoordinate().getRegionNo() != region.getRegionNo()
+                || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
+            return false;
+        }
+
+        double r = (radius == null) ? 0D : radius.doubleValue();
+        if (r <= 0) return false;
+
+        final int h = region.getHeight();
+        final int w = region.getWidth();
+
+        final WorldCoordinate wc1 = block1.getWorldCoordinate();
+        final WorldCoordinate wc2 = block2.getWorldCoordinate();
+
+        final double x1 = wc1.getCoordinate().getX().doubleValue() + wc1.getSceneCoordinate().getX() * (double) h;
+        final double y1 = wc1.getCoordinate().getY().doubleValue() + wc1.getSceneCoordinate().getY() * (double) w;
+        final double z1 = wc1.getCoordinate().getZ().doubleValue();
+
+        final double x2 = wc2.getCoordinate().getX().doubleValue() + wc2.getSceneCoordinate().getX() * (double) h;
+        final double y2 = wc2.getCoordinate().getY().doubleValue() + wc2.getSceneCoordinate().getY() * (double) w;
+        final double z2 = wc2.getCoordinate().getZ().doubleValue();
+
+        final double dx = x2 - x1;
+        final double dy = y2 - y1;
+        final double dz = z2 - z1;
+
+        final double rr = r * r;
+        return (dx * dx + dy * dy + dz * dz) <= rr;
     }
 }

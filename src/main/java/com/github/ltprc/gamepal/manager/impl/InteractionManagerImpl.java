@@ -11,7 +11,6 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -55,19 +54,6 @@ public class InteractionManagerImpl implements InteractionManager {
 
     @Autowired
     private WorldService worldService;
-
-    @Override
-    public void focusOnBlocks(GameWorld world, String userCode) {
-        Map<String, Block> creatureMap = world.getCreatureMap();
-        if (!creatureMap.containsKey(userCode)) {
-            logger.error(ErrorUtil.ERROR_1007);
-            return;
-        }
-        Block player = creatureMap.get(userCode);
-        sceneManager.collectSurroundingBlocks(world, player, 1).stream()
-                .map(StructuredBlock::getBlock)
-                .forEach(block -> focusOnBlock(world, userCode, block));
-    }
 
     @Override
     public void focusOnBlock(GameWorld world, String userCode, Block block) {

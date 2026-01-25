@@ -16,8 +16,8 @@ import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
-import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -54,9 +54,6 @@ public class EventManagerImpl implements EventManager {
     @Autowired
     private MovementManager movementManager;
 
-    @Autowired
-    private WorldService worldService;
-
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
         Block eventBlock = sceneManager.addOtherBlock(world, worldCoordinate, eventCode);
@@ -64,57 +61,61 @@ public class EventManagerImpl implements EventManager {
             world.getSourceMap().put(eventBlock.getBlockInfo().getId(), sourceId);
         }
         Block fromCreature = world.getCreatureMap().getOrDefault(sourceId, eventBlock);
-        correctTarget(world, eventBlock, fromCreature);
         // Unified directions of event block and origin block
         eventBlock.getMovementInfo().setFaceDirection(fromCreature.getMovementInfo().getFaceDirection());
+//        correctTarget(world, eventBlock, fromCreature);
+        if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_SHOOT) {
+            sceneManager.collideBlocks(world, fromCreature.getWorldCoordinate(), eventBlock, true);
+        }
         activateEvent(world, eventBlock, fromCreature);
     }
 
-    private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
-        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
-        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
-        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
-            return;
-        }
-        Map<Integer, Region> regionMap = world.getRegionMap();
-        Region region = regionMap.get(worldCoordinate.getRegionNo());
-        List<Block> preSelectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
-                fromCreature.getBlockInfo().getId());
-        preSelectedBlocks.stream()
-                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
-                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-                        BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-                        BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
-                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D)
-                .forEach(blocker ->
-                        movementManager.detectLineCollision(world, fromWorldCoordinate, eventBlock, blocker, true)
-                );
-    }
+//    private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
+//        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
+//        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
+//        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
+//            logger.error(ErrorUtil.ERROR_1027);
+//            return;
+//        }
+//        Map<Integer, Region> regionMap = world.getRegionMap();
+//        Region region = regionMap.get(worldCoordinate.getRegionNo());
+//        sceneManager.collideBlocks(world, fromWorldCoordinate, eventBlock, true);
+//        preSelectedBlocks.stream()
+//                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
+//                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+//                        BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
+//                        BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
+//                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
+//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
+//                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D)
+//                .forEach(blocker ->
+//                        movementManager.detectLinearCollision(world, fromWorldCoordinate, eventBlock, blocker, true)
+//                );
+//    }
 
     private void activateEvent(GameWorld world, Block eventBlock, Block fromCreature) {
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
         WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
         if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
+            logger.error(ErrorUtil.ERROR_1027);
             return;
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        List<Block> affectedBlocks;
-        if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_EXPLODE) {
-            affectedBlocks = sceneManager.collectSurroundingBlocks(world, eventBlock,
-                            SkillConstants.SKILL_RANGE_EXPLODE.divide(BigDecimal.valueOf(Math.max(region.getHeight(),
-                                    region.getWidth())), 2, RoundingMode.HALF_UP).intValue()).stream()
-                    .map(StructuredBlock::getBlock)
-                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
-                    .collect(Collectors.toList());
-        } else {
-            affectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
-                            fromCreature.getBlockInfo().getId()).stream()
-                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
-                    .collect(Collectors.toList());
-        }
+        List<Block> affectedBlocks = sceneManager.collideBlocks(world, fromWorldCoordinate, eventBlock, false);
+//        if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_EXPLODE) {
+//            affectedBlocks = sceneManager.collectSurroundingBlocks(world, eventBlock,
+//                            SkillConstants.SKILL_RANGE_EXPLODE.divide(BigDecimal.valueOf(Math.max(region.getHeight(),
+//                                    region.getWidth())), 2, RoundingMode.HALF_UP).intValue()).stream()
+//                    .map(StructuredBlock::getBlock)
+//                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
+//                    .collect(Collectors.toList());
+//        } else {
+//            affectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
+//                            fromCreature.getBlockInfo().getId()).stream()
+//                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
+//                    .collect(Collectors.toList());
+//        }
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
                 affectBlock(world, eventBlock, fromCreature);
@@ -253,7 +254,7 @@ public class EventManagerImpl implements EventManager {
         addEventNoise(world, eventBlock, fromCreature);
     }
 
-    boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
+    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(from.getRegionNo());
 
@@ -303,8 +304,8 @@ public class EventManagerImpl implements EventManager {
                 if (angle1 == null || angle2 == null) {
                     return false;
                 }
-                // 关键优化：这里不要再 detectLineCollision 了！
-                // collectLinearBlocks 已经做过线碰撞预选，否则会重复计算导致卡顿
+                // 关键优化：这里不要再 detectLinearCollision 了！
+                // collectBlocks 已经做过线碰撞预选，否则会重复计算导致卡顿
                 return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
                         < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue();
             }
@@ -341,7 +342,7 @@ public class EventManagerImpl implements EventManager {
         Region region = world.getRegionMap().get(bulletBlock.getWorldCoordinate().getRegionNo());
         Integer eventCode = null;
         Optional<Block> targetBlock = affectedBlockList.stream()
-                .filter(block -> movementManager.detectCollision(world, bulletBlock, block))
+//                .filter(block -> movementManager.detectCollision(world, bulletBlock, block))
                 .filter(block -> null != BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate()))
                 .min(Comparator.comparing(block -> BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate())));
         switch (bulletBlock.getMovementInfo().getFloorCode()) {
@@ -405,9 +406,9 @@ public class EventManagerImpl implements EventManager {
                             sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                         }
                         // Burn collected blocks 25/02/03
-                        Queue<StructuredBlock> rankingQueue = sceneManager.collectSurroundingBlocks(world, eventBlock, 1);
-                        rankingQueue.stream()
-                                .map(StructuredBlock::getBlock)
+                        List<Block> burntBlocks = sceneManager.collectBlocks(world, eventBlock.getWorldCoordinate(),
+                                eventBlock);
+                        burntBlocks.stream()
                                 .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
                                         || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
                                 .filter(targetBlock -> {

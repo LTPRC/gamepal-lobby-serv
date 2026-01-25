@@ -80,7 +80,7 @@ public class TimedEventTask {
             Map<String, Block> creatureMap = world.getCreatureMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
-            Map<Integer, Set<IntegerCoordinate>> preSelectedSceneCoordinates = new HashMap<>();
+//            Map<Integer, Set<IntegerCoordinate>> preSelectedSceneCoordinates = new HashMap<>();
             onlineMap.keySet().stream()
                     .filter(creatureMap::containsKey)
                     .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
@@ -88,29 +88,30 @@ public class TimedEventTask {
                         Block player = creatureMap.get(id);
                         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
                         // Pre-select scenes for updating events
-                        BlockUtil.preSelectSceneCoordinates(
-                                region, player.getWorldCoordinate(), player.getWorldCoordinate())
-                                .forEach(sceneCoordinate -> {
-                                    if (!region.getScenes().containsKey(sceneCoordinate)) {
-                                        sceneManager.fillScene(world, region, sceneCoordinate);
-                                    }
-                                    preSelectedSceneCoordinates.putIfAbsent(region.getRegionNo(), new HashSet<>());
-                                    preSelectedSceneCoordinates.get(region.getRegionNo()).add(sceneCoordinate);
-                                });
+//                        preSelectedSceneCoordinates.putIfAbsent(region.getRegionNo(), new HashSet<>());
+//                        preSelectedSceneCoordinates.get(region.getRegionNo())
+//                                .add(player.getWorldCoordinate().getSceneCoordinate());
                         // Update buff time
                         buffManager.updateBuffTime(world, id);
+                        movementManager.settleVerticalAcceleration(world, player);
                     });
 
-            preSelectedSceneCoordinates.forEach((regionNo, sceneCoordinates) -> {
-                Region region = world.getRegionMap().get(regionNo);
-                sceneCoordinates.forEach(sceneCoordinate -> {
-                    Scene scene = region.getScenes().get(sceneCoordinate);
-                    scene.getBlocks().values().forEach(block -> {
-                        // Update events
+//            preSelectedSceneCoordinates.forEach((regionNo, sceneCoordinates) -> {
+//                Region region = world.getRegionMap().get(regionNo);
+//                sceneCoordinates.forEach(sceneCoordinate -> {
+//                    Scene scene = region.getScenes().get(sceneCoordinate);
+//                    scene.getBlocks().values().forEach(block -> {
+//                        // Update events
+//                        eventManager.updateEvent(world, block, timestamp);
+//                        movementManager.settleVerticalAcceleration(world, block);
+//                    });
+//                });
+//            });
+            world.getBlockMap().values()
+                    .forEach(block -> {
                         eventManager.updateEvent(world, block, timestamp);
+                        movementManager.settleVerticalAcceleration(world, block);
                     });
-                });
-            });
 
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))
@@ -183,11 +184,12 @@ public class TimedEventTask {
                             }
 
                             // Change precision
-                            playerService.changePrecision(id, 50 - 100
-                                    * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
-                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2)
-                                    + Math.pow(movementInfo.getSpeed().getZ().doubleValue(), 2))
-                                    / movementInfo.getMaxSpeed().doubleValue()), false);
+                            playerService.changePrecision(id, 50
+                                    - 100 * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
+                                    + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
+                                    / movementInfo.getMaxSpeed().doubleValue())
+                                    - 100 * (int) (Math.abs(movementInfo.getSpeed().getZ().doubleValue())
+                                    / MovementConstants.MAX_SPEED_Z_DEFAULT.doubleValue()), false);
 
                             // Change view radius
                             PlayerInfoUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
@@ -276,7 +278,6 @@ public class TimedEventTask {
                         // Add footstep
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
-                                + Math.pow(player.getMovementInfo().getSpeed().getZ().doubleValue(), 2)
                                 > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
                             eventManager.addEvent(world, BlockConstants.BLOCK_CODE_NOISE, id,
                                     player.getWorldCoordinate());

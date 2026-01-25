@@ -15,9 +15,11 @@ import java.util.Queue;
 
 public interface SceneManager {
     void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate);
-    Queue<StructuredBlock> collectSurroundingBlocks(final GameWorld world, final Block player, final int sceneScanRadius);
-    List<Block> collectLinearBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
-                                    String sourceId);
+    Queue<StructuredBlock> collectSurroundingBlocks(final GameWorld world, final Block player,
+                                                    final int sceneScanRadius);
+    List<Block> collideBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
+                              boolean relocate);
+    List<Block> collectBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock);
     int[][] collectGridsByUserCode(final String userCode, final int sceneScanRadius);
     BigDecimal[][] collectAltitudesByUserCode(final String userCode, final int sceneScanRadius);
     JSONObject convertBlock2OldBlockInstance(final GameWorld world, final String userCode, final Block block,

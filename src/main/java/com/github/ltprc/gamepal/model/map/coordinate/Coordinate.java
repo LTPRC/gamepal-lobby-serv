@@ -23,4 +23,10 @@ public class Coordinate {
         y = coordinate.y;
         z = coordinate.z;
     }
+
+    public Coordinate(PlanarCoordinate planarCoordinate) {
+        x = planarCoordinate.getX();
+        y = planarCoordinate.getY();
+        z = BigDecimal.ZERO;
+    }
 }

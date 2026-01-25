@@ -23,6 +23,7 @@ import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
+import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.SceneInfo;
@@ -138,12 +139,12 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
-            if (functions.containsKey("settleAcceleration")) {
-                JSONObject settleAcceleration = functions.getJSONObject("settleAcceleration");
-                Coordinate accelerationCoordinate = new Coordinate(settleAcceleration.getBigDecimal("x"),
-                        settleAcceleration.getBigDecimal("y"), settleAcceleration.getBigDecimal("z"));
+            if (functions.containsKey("settlePlanarAcceleration")) {
+                JSONObject settleAcceleration = functions.getJSONObject("settlePlanarAcceleration");
+                PlanarCoordinate accelerationCoordinate = new PlanarCoordinate(settleAcceleration.getBigDecimal("x"),
+                        settleAcceleration.getBigDecimal("y"));
                 Integer movementMode = settleAcceleration.getInteger("movementMode");
-                movementManager.settleAcceleration(world, player, accelerationCoordinate, movementMode);
+                movementManager.settlePlanarAcceleration(world, player, accelerationCoordinate, movementMode);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
             }
             if (functions.containsKey("useItems")) {

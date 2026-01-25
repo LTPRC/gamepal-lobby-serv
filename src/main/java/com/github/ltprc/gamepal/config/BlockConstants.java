@@ -286,19 +286,10 @@ public class BlockConstants {
     public static final BigDecimal HP_PULL_RATIO = BigDecimal.valueOf(0.1D);
     public static final BigDecimal HP_RESPAWN_RATIO = BigDecimal.ONE;
 
-    public static final BigDecimal Z_SPEED_DEFAULT = BigDecimal.ZERO;
-    public static final BigDecimal MAX_SPEED_DEFAULT = BigDecimal.valueOf(0.2D);
-    public static final BigDecimal ACCELERATION_MAX_SPEED_RATIO = BigDecimal.valueOf(0.1D);
-    public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
-    public static final int FLOOR_CODE_DEFAULT = BLOCK_CODE_BLACK;
-    public static final BigDecimal MAX_Z_STEP_DEFAULT = BigDecimal.valueOf(0.5D);
     public static final int FRAME_DEFAULT = 0;
     public static final int PERIOD_STATIC_DEFAULT = -1;
     public static final int PERIOD_DYNAMIC_DEFAULT = 25;
     public static final int FRAME_MAX_INFINITE_DEFAULT = -1;
-    public static final int MOVEMENT_MODE_DEFAULT = 0;
-    public static final int MOVEMENT_MODE_STAND_GROUND = 1;
-    public static final int MOVEMENT_MODE_WALK = 2;
     public static final int TIMED_BOMB_FRAME_MAX_MAX = 150;
 
     public static Map<Integer, Integer> BLOCK_CODE_TYPE_MAP = new HashMap<>();
@@ -306,7 +297,7 @@ public class BlockConstants {
 
     static {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_UPGRADE, BLOCK_TYPE_EFFECT);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EXPLODE, BLOCK_TYPE_EFFECT);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EXPLODE, BLOCK_TYPE_PLASMA);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLOCK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_HEAL, BLOCK_TYPE_EFFECT);

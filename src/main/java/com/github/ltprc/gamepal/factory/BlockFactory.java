@@ -174,6 +174,9 @@ public class BlockFactory {
                         break;
                 }
                 break;
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                period = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
+                break;
             default:
                 period = BlockConstants.PERIOD_STATIC_DEFAULT;
                 break;
@@ -373,14 +376,23 @@ public class BlockFactory {
                         shape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                 new Coordinate(BigDecimal.valueOf(0.15D), BigDecimal.valueOf(0.3D),
                                         BigDecimal.valueOf(2)));
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                                BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION, shape,
+                                new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        break;
+                    case BlockConstants.BLOCK_CODE_SPRAY:
+                    case BlockConstants.BLOCK_CODE_DROP_SHADOW:
+                    case BlockConstants.BLOCK_CODE_BUBBLE:
+                        shape = new Shape();
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE, shape,
+                                new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                         break;
                     default:
-                        shape = new Shape();
+                        structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                                BlockConstants.STRUCTURE_LAYER_MIDDLE);
                         break;
                 }
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION, shape,
-                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_WALL:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
@@ -486,17 +498,17 @@ public class BlockFactory {
             case BlockConstants.BLOCK_CODE_MINE:
             case BlockConstants.BLOCK_CODE_SPRAY:
             case BlockConstants.BLOCK_CODE_SPARK_SHORT:
-                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                shape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE,
                                 BigDecimal.valueOf(0.1D)));
                 break;
             case BlockConstants.BLOCK_CODE_SHOCK:
-                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                shape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.valueOf(2), BigDecimal.valueOf(2),
                                 BlockConstants.Z_DEFAULT));
                 break;
             default:
-                shape =  new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                shape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BlockConstants.EVENT_DEFAULT_RADIUS, BlockConstants.EVENT_DEFAULT_RADIUS,
                                 BlockConstants.Z_DEFAULT));
                 break;
