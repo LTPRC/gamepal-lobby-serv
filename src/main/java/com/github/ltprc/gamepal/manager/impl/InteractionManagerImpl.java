@@ -11,7 +11,6 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.FarmInfo;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.InteractionInfo;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.block.Block;
@@ -86,7 +85,7 @@ public class InteractionManagerImpl implements InteractionManager {
     }
 
     private boolean checkFocusOnBlock(Region region, Block player, Block block) {
-        BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+        BigDecimal distance = BlockUtil.calculatePlanarDistance(region, player.getWorldCoordinate(),
                 block.getWorldCoordinate());
         BigDecimal angle = BlockUtil.calculateAngle(region, player.getWorldCoordinate(), block.getWorldCoordinate());
         return BlockUtil.checkBlockTypeInteractive(block.getBlockInfo().getType())
@@ -311,9 +310,6 @@ public class InteractionManagerImpl implements InteractionManager {
             case InteractionConstants.INTERACTION_PACK:
                 Block packedDrop = sceneManager.addDropBlock(world, block.getWorldCoordinate(),
                         new AbstractMap.SimpleEntry<>(BlockUtil.convertBlockInfo2ItemNo(block.getBlockInfo()), 1));
-                movementManager.speedUpBlock(world, packedDrop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                        new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                        BlockConstants.DROP_THROW_RADIUS));
                 sceneManager.removeBlock(world, block, false);
                 break;
             case InteractionConstants.INTERACTION_PLANT:

@@ -21,7 +21,6 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.creature.Skill;
 import com.github.ltprc.gamepal.model.item.Item;
 import com.github.ltprc.gamepal.model.item.Tool;
-import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
@@ -350,7 +349,7 @@ public class NpcManagerImpl implements NpcManager {
                     // Old targets
                     WorldCoordinate oldWc = npcBrain.getGreenQueue().peek();
                     if (null != oldWc) {
-                        BigDecimal distance = BlockUtil.calculateDistance(
+                        BigDecimal distance = BlockUtil.calculatePlanarDistance(
                                 world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
                                 player.getWorldCoordinate(), oldWc);
                         if (npcBrain.getBehavior() == CreatureConstants.NPC_BEHAVIOR_PATROL && null != distance
@@ -360,7 +359,7 @@ public class NpcManagerImpl implements NpcManager {
                     }
                     oldWc = npcBrain.getYellowQueue().peek();
                     if (null != oldWc) {
-                        BigDecimal distance = BlockUtil.calculateDistance(
+                        BigDecimal distance = BlockUtil.calculatePlanarDistance(
                                 world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
                                 player.getWorldCoordinate(), oldWc);
                         if (null == distance || distance.compareTo(CreatureConstants.NPC_ARRIVE_DISTANCE) <= 0) {
@@ -378,10 +377,10 @@ public class NpcManagerImpl implements NpcManager {
                                     || (playerService.getRelationMapByUserCode(npcUserCode).containsKey(player1.getBlockInfo().getId())
                                     && playerService.getRelationMapByUserCode(npcUserCode).get(player1.getBlockInfo().getId()) < 0))
                             .min((player1, player2) -> {
-                                BigDecimal distance1 = BlockUtil.calculateDistance
+                                BigDecimal distance1 = BlockUtil.calculatePlanarDistance
                                         (world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
                                                 player.getWorldCoordinate(), player1.getWorldCoordinate());
-                                BigDecimal distance2 = BlockUtil.calculateDistance
+                                BigDecimal distance2 = BlockUtil.calculatePlanarDistance
                                         (world.getRegionMap().get(player.getWorldCoordinate().getRegionNo()),
                                                 player.getWorldCoordinate(), player2.getWorldCoordinate());
                                 assert distance1 != null;
@@ -471,7 +470,7 @@ public class NpcManagerImpl implements NpcManager {
         Block npcPlayer = world.getCreatureMap().get(npcUserCode);
         PlayerInfo playerInfo = world.getPlayerInfoMap().get(npcUserCode);
         NpcBrain npcBrain = world.getNpcBrainMap().get(npcUserCode);
-        BigDecimal distance = BlockUtil.calculateDistance(
+        BigDecimal distance = BlockUtil.calculatePlanarDistance(
                 world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(),
                 npcBrain.getRedQueue().peek().getWorldCoordinate());
         if (null == distance) {
@@ -530,7 +529,7 @@ public class NpcManagerImpl implements NpcManager {
         double stopDistance = request.getDouble("stopDistance");
         GameWorld world = userService.getWorldByUserCode(npcUserCode);
         Block npcPlayer = world.getCreatureMap().get(npcUserCode);
-        BigDecimal distance = BlockUtil.calculateDistance(
+        BigDecimal distance = BlockUtil.calculatePlanarDistance(
                 world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()), npcPlayer.getWorldCoordinate(), wc);
         BigDecimal direction = BlockUtil.calculateAngle(world.getRegionMap().get(npcPlayer.getWorldCoordinate().getRegionNo()),
                 npcPlayer.getWorldCoordinate(), wc);

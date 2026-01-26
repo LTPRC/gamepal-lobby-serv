@@ -913,10 +913,14 @@ public class SceneManagerImpl implements SceneManager {
      */
     @Override
     public Block addDropBlock(GameWorld world, WorldCoordinate worldCoordinate, Map.Entry<String, Integer> drop) {
-        Block block = addOtherBlock(world, worldCoordinate, BlockConstants.BLOCK_CODE_DROP_DEFAULT);
-        if (null != drop) {
-            world.getDropMap().put(block.getBlockInfo().getId(), drop);
+        if (null == drop) {
+            return null;
         }
+        Block block = addOtherBlock(world, worldCoordinate, BlockConstants.BLOCK_CODE_DROP_DEFAULT);
+        world.getDropMap().put(block.getBlockInfo().getId(), drop);
+        Coordinate dropSpeed = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BlockConstants.DROP_THROW_RADIUS);
+        movementManager.speedUpBlock(world, block, BlockUtil.locateCoordinateWithDirectionAndDistance(dropSpeed,
+                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS));
         return block;
     }
 
@@ -1069,9 +1073,6 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_STORAGE:
                 for (int i = 0; i < 1 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_CONTAINER:
@@ -1080,18 +1081,11 @@ public class SceneManagerImpl implements SceneManager {
                 world.getBagInfoMap().get(block.getBlockInfo().getId()).getItems().entrySet()
                         .forEach(entry -> {
                             Block dropFromContainer = addDropBlock(world, block.getWorldCoordinate(), entry);
-                            movementManager.speedUpBlock(world, dropFromContainer,
-                                    BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
-                                            BigDecimal.valueOf(random.nextDouble() * 360),
-                                            BlockConstants.DROP_THROW_RADIUS));
                         });
                 switch (block.getBlockInfo().getType()) {
                     case BlockConstants.BLOCK_TYPE_CONTAINER:
                         for (int i = 0; i < 1 + random.nextInt(3); i++) {
                             drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
-                            movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                    new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                                    BlockConstants.DROP_THROW_RADIUS));
                         }
                         break;
                     case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
@@ -1105,26 +1099,17 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_TOILET:
                 for (int i = 0; i < 3 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m007", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_COOKER:
             case BlockConstants.BLOCK_TYPE_BUILDING:
                 for (int i = 0; i < 1 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m002", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 for (int i = 0; i < random.nextInt(2); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m018", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_SINK:
@@ -1136,33 +1121,21 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
                 for (int i = 0; i < 1 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m001", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_SPEAKER:
                 for (int i = 0; i < 1 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m003", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_TREE:
                 for (int i = 0; i < 1 + random.nextInt(10); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m031", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_ROCK:
                 for (int i = 0; i < 1 + random.nextInt(3); i++) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m002", 1));
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 int randomValue = random.nextInt(100);
                 if (randomValue < 2) {
@@ -1185,11 +1158,6 @@ public class SceneManagerImpl implements SceneManager {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m023", 1 + random.nextInt(2)));
                 } else if (randomValue < 45) {
                     drop = addDropBlock(world, block.getWorldCoordinate(), new AbstractMap.SimpleEntry<>("m001", 1 + random.nextInt(2)));
-                }
-                if (null != drop) {
-                    movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                            new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                            BlockConstants.DROP_THROW_RADIUS));
                 }
                 break;
             default:

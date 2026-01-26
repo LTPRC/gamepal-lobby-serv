@@ -154,6 +154,22 @@ public class BlockUtil {
         return c2.getY().subtract(c1.getY());
     }
 
+    public static BigDecimal calculatePlanarDistance(final RegionInfo regionInfo, final WorldCoordinate wc1,
+                                                     final WorldCoordinate wc2) {
+        if (wc1.getRegionNo() != regionInfo.getRegionNo()
+                || wc2.getRegionNo() != regionInfo.getRegionNo()) {
+            return null;
+        }
+        Coordinate c1 = convertWorldCoordinate2Coordinate(regionInfo, wc1);
+        Coordinate c2 = convertWorldCoordinate2Coordinate(regionInfo, wc2);
+        return calculatePlanarDistance(c1, c2);
+    }
+
+    public static BigDecimal calculatePlanarDistance(final Coordinate c1, final Coordinate c2) {
+        return BigDecimal.valueOf(Math.sqrt(Math.pow(c1.getX().subtract(c2.getX()).doubleValue(), 2)
+                + Math.pow(c1.getY().subtract(c2.getY()).doubleValue(), 2)));
+    }
+
     /**
      * Z-axis added
      * @param regionInfo
@@ -167,7 +183,7 @@ public class BlockUtil {
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
         }
-        return calculateXDistance(wc1.getCoordinate(), wc2.getCoordinate());
+        return calculateZDistance(wc1.getCoordinate(), wc2.getCoordinate());
     }
 
     /**
@@ -177,11 +193,11 @@ public class BlockUtil {
      * @return
      */
     public static BigDecimal calculateZDistance(Coordinate c1, Coordinate c2) {
-        return c2.getY().subtract(c1.getY());
+        return c2.getZ().subtract(c1.getZ());
     }
 
     public static BigDecimal calculateDistance(final RegionInfo regionInfo, final WorldCoordinate wc1,
-                                               final WorldCoordinate wc2) {
+                                                     final WorldCoordinate wc2) {
         if (wc1.getRegionNo() != regionInfo.getRegionNo()
                 || wc2.getRegionNo() != regionInfo.getRegionNo()) {
             return null;
@@ -193,7 +209,8 @@ public class BlockUtil {
 
     public static BigDecimal calculateDistance(final Coordinate c1, final Coordinate c2) {
         return BigDecimal.valueOf(Math.sqrt(Math.pow(c1.getX().subtract(c2.getX()).doubleValue(), 2)
-                + Math.pow(c1.getY().subtract(c2.getY()).doubleValue(), 2)));
+                + Math.pow(c1.getY().subtract(c2.getY()).doubleValue(), 2)
+                + Math.pow(c1.getZ().subtract(c2.getZ()).doubleValue(), 2)));
     }
 
     public static BigDecimal calculateAngle(final RegionInfo regionInfo, final WorldCoordinate wc1,

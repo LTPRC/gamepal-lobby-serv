@@ -80,10 +80,10 @@ public class MovementManagerImpl implements MovementManager {
         } else {
             double newSpeed = Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                     + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-                    + block.getMovementInfo().getAcceleration().doubleValue()
+                    + block.getMovementInfo().getPlanarAcceleration().doubleValue()
                     * Math.sqrt(accelerationCoordinate.getX().pow(2)
                     .add(accelerationCoordinate.getY().pow(2)).doubleValue());
-            double maxSpeed = block.getMovementInfo().getMaxSpeed().doubleValue()
+            double maxSpeed = block.getMovementInfo().getMaxPlanarSpeed().doubleValue()
                     * Math.sqrt(accelerationCoordinate.getX().pow(2)
                     .add(accelerationCoordinate.getY().pow(2)).doubleValue());
             newSpeed = Math.min(newSpeed, maxSpeed);
@@ -92,7 +92,7 @@ public class MovementManagerImpl implements MovementManager {
                     newSpeed = 0D;
                     break;
                 case MovementConstants.MOVEMENT_MODE_WALK:
-                    newSpeed = Math.min(newSpeed, block.getMovementInfo().getMaxSpeed().doubleValue() / 2);
+                    newSpeed = Math.min(newSpeed, block.getMovementInfo().getMaxPlanarSpeed().doubleValue() / 2);
                     break;
                 case MovementConstants.MOVEMENT_MODE_DEFAULT:
                 default:
@@ -117,10 +117,10 @@ public class MovementManagerImpl implements MovementManager {
         BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
         if (block.getWorldCoordinate().getCoordinate().getZ().compareTo(altitude) > 0) {
             block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ()
-                    .add(MovementConstants.ACCELERATION_Z_DEFAULT));
+                    .add(MovementConstants.VERTICAL_ACCELERATION_DEFAULT));
         }
-        if (block.getWorldCoordinate().getCoordinate().getZ().compareTo(MovementConstants.MAX_SPEED_Z_DEFAULT) > 0) {
-            block.getMovementInfo().getSpeed().setZ(MovementConstants.MAX_SPEED_Z_DEFAULT);
+        if (block.getMovementInfo().getSpeed().getZ().compareTo(block.getMovementInfo().getMaxVerticalSpeed()) > 0) {
+            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getMaxVerticalSpeed());
         }
     }
 
@@ -157,17 +157,17 @@ public class MovementManagerImpl implements MovementManager {
         boolean yCollision = false;
         if (sceneManager.getAltitude(world, expectedNewBlockX.getWorldCoordinate())
                 .subtract(expectedNewBlockX.getWorldCoordinate().getCoordinate().getZ())
-                .compareTo(MovementConstants.MAX_Z_STEP_DEFAULT) > 0) {
+                .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
             xCollision = true;
         }
         if (sceneManager.getAltitude(world, expectedNewBlockY.getWorldCoordinate())
                 .subtract(expectedNewBlockY.getWorldCoordinate().getCoordinate().getZ())
-                .compareTo(MovementConstants.MAX_Z_STEP_DEFAULT) > 0) {
+                .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
             yCollision = true;
         }
         if (sceneManager.getAltitude(world, expectedNewBlockXY.getWorldCoordinate())
                 .subtract(expectedNewBlockXY.getWorldCoordinate().getCoordinate().getZ())
-                .compareTo(MovementConstants.MAX_Z_STEP_DEFAULT) > 0) {
+                .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
             xCollision = true;
             yCollision = true;
         }
@@ -273,7 +273,7 @@ public class MovementManagerImpl implements MovementManager {
         BigDecimal altitude = sceneManager.getAltitude(world, newWorldCoordinate);
         if (newWorldCoordinate.getCoordinate().getZ().compareTo(altitude) < 0) {
             if (worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                    .subtract(MovementConstants.MAX_Z_STEP_DEFAULT).compareTo(altitude) >= 0) {
+                    .subtract(MovementConstants.MAX_VERTICAL_STEP_DEFAULT).compareTo(altitude) >= 0) {
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_DECAY, worldMovingBlock.getBlockInfo().getId(),
                         newWorldCoordinate);
             }
@@ -366,7 +366,7 @@ public class MovementManagerImpl implements MovementManager {
                                 && random.nextDouble()
                                 < Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-                                / block.getMovementInfo().getMaxSpeed().doubleValue()) {
+                                / block.getMovementInfo().getMaxPlanarSpeed().doubleValue()) {
                             eventManager.affectBlock(world, nearbyBlock, block);
                         }
                         break;
@@ -428,10 +428,13 @@ public class MovementManagerImpl implements MovementManager {
                 || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {
             maxSpeedCoef = 0D;
         }
-        player.getMovementInfo().setMaxSpeed(MovementConstants.MAX_SPEED_DEFAULT
+        player.getMovementInfo().setMaxPlanarSpeed(MovementConstants.MAX_PLANAR_SPEED_DEFAULT
                 .multiply(BigDecimal.valueOf(maxSpeedCoef)));
-        player.getMovementInfo().setAcceleration(player.getMovementInfo().getMaxSpeed()
-                .multiply(MovementConstants.ACCELERATION_MAX_SPEED_RATIO));
+        player.getMovementInfo().setPlanarAcceleration(player.getMovementInfo().getMaxPlanarSpeed()
+                .multiply(MovementConstants.MAX_PLANAR_ACCELERATION_SPEED_RATIO));
+
+        player.getMovementInfo().setMaxVerticalSpeed(MovementConstants.MAX_VERTICAL_SPEED_DEFAULT);
+        player.getMovementInfo().setVerticalAcceleration(MovementConstants.VERTICAL_ACCELERATION_DEFAULT);
     }
 
     @Override

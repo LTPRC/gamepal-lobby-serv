@@ -53,7 +53,7 @@ public class PlayerInfoUtil {
                 || block2.getWorldCoordinate().getRegionNo() != regionInfo.getRegionNo()) {
             return false;
         }
-        BigDecimal distance = BlockUtil.calculateDistance(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
+        BigDecimal distance = BlockUtil.calculatePlanarDistance(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
         BigDecimal angle = BlockUtil.calculateAngle(regionInfo, player1.getWorldCoordinate(), block2.getWorldCoordinate());
         if (null == distance || null == angle) {
             return false;

@@ -11,7 +11,6 @@ import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -26,14 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -134,7 +130,7 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
             case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
             case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-                BigDecimal tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
+                BigDecimal tailSmokeLength = BlockUtil.calculatePlanarDistance(regionMap.get(
                         worldCoordinate.getRegionNo()), fromWorldCoordinate, worldCoordinate);
                 if (null != tailSmokeLength) {
                     int tailSmokeAmount = tailSmokeLength.intValue() * 10 + 1;
@@ -167,7 +163,7 @@ public class EventManagerImpl implements EventManager {
                         eventBlock.getWorldCoordinate());
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-                tailSmokeLength = BlockUtil.calculateDistance(regionMap.get(
+                tailSmokeLength = BlockUtil.calculatePlanarDistance(regionMap.get(
                         worldCoordinate.getRegionNo()), fromWorldCoordinate, worldCoordinate);
                 if (null != tailSmokeLength) {
                     int tailSmokeAmount = tailSmokeLength.intValue() * 10 + 1;
@@ -184,7 +180,7 @@ public class EventManagerImpl implements EventManager {
                 addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromCreature.getBlockInfo().getId(), worldCoordinate);
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_FIRE:
-                BigDecimal flameLength = BlockUtil.calculateDistance(regionMap.get(
+                BigDecimal flameLength = BlockUtil.calculatePlanarDistance(regionMap.get(
                         worldCoordinate.getRegionNo()), fromWorldCoordinate, worldCoordinate);
                 if (null != flameLength) {
                     int flameAmount = flameLength.subtract(SkillConstants.SKILL_RANGE_SHOOT_FIRE_MIN).max(BigDecimal.ONE)
@@ -205,7 +201,7 @@ public class EventManagerImpl implements EventManager {
                                 .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA)
                                 .filter(block -> block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE)
                                 .filter(block -> {
-                                    BigDecimal distance = BlockUtil.calculateDistance(
+                                    BigDecimal distance = BlockUtil.calculatePlanarDistance(
                                             world.getRegionMap().get(worldCoordinate.getRegionNo()),
                                             worldCoordinate, block.getWorldCoordinate());
                                     return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;

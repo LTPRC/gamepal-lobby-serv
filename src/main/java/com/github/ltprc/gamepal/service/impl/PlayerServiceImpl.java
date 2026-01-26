@@ -910,22 +910,8 @@ public class PlayerServiceImpl implements PlayerService {
         if (!creatureMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
-//        Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
-//        if (!playerInfoMap.containsKey(userCode)) {
-//            return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
-//        }
         Block player = creatureMap.get(userCode);
-        Block drop = sceneManager.addDropBlock(world, player.getWorldCoordinate(),
-                new AbstractMap.SimpleEntry<>(itemNo, amount));
-        movementManager.speedUpBlock(world, drop, BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
-                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS));
-//        MovementInfo movementInfo = block.getMovementInfo();
-//        dropMovementInfo.setFaceDirection(BigDecimal.valueOf(random.nextDouble() * 360));
-//        Coordinate newSpeed = BlockUtil.locateCoordinateWithDirectionAndDistance(new Coordinate(),
-//                dropMovementInfo.getFaceDirection(), GamePalConstants.DROP_THROW_RADIUS);
-//        dropMovementInfo.setSpeed(newSpeed);
-//        movementManager.settleSpeedAndCoordinate(world, drop, 0);
-//        dropMovementInfo.setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO));
+        sceneManager.addDropBlock(world, player.getWorldCoordinate(), new AbstractMap.SimpleEntry<>(itemNo, amount));
         return ResponseEntity.ok().body(rst.toString());
     }
 

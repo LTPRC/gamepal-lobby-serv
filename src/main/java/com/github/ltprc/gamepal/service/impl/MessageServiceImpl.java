@@ -77,71 +77,6 @@ public class MessageServiceImpl implements MessageService {
             collectMessage(msg.getFromUserCode(), new Message(MessageConstants.MESSAGE_TYPE_PRINTED, msg.getScope(),
                     msg.getFromUserCode(), msg.getToUserCode(), MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
         }
-//        GameWorld world = userService.getWorldByUserCode(fromUserCode);
-//        Block player = world.getCreatureMap().get(fromUserCode);
-//        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-//        if (MessageConstants.SCOPE_GLOBAL == scope) {
-//            world.getPlayerInfoMap().entrySet().stream()
-////                    .filter(entry -> entry.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN)
-////                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
-//                    .forEach(entry -> {
-//                if (!entry.getKey().equals(fromUserCode)) {
-//                    String toUserCode = entry.getKey();
-//                    if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-//                        receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
-//                                fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
-//                    }
-//                    receiveMessage(toUserCode, msg);
-//                }
-//            });
-//        } else if (MessageConstants.SCOPE_TEAMMATE == scope) {
-//            world.getPlayerInfoMap().entrySet().stream()
-////                    .filter(entry -> entry.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN)
-////                    .filter(entry -> playerService.validateActiveness(world, entry.getKey()))
-//                    .filter(entry -> StringUtils.equals(playerService.findTopBossId(entry.getKey()),
-//                            playerService.findTopBossId(fromUserCode)))
-//                    .forEach(entry -> {
-//                if (!entry.getKey().equals(fromUserCode)) {
-//                    String toUserCode = entry.getKey();
-//                    if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-//                        receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
-//                                fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
-//                    }
-//                    receiveMessage(toUserCode, msg);
-//                }
-//            });
-//        } else if (scope == MessageConstants.SCOPE_INDIVIDUAL) {
-//            String toUserCode = msg.getToUserCode();
-//            if (toUserCode.equals(fromUserCode) || userService.getWorldByUserCode(toUserCode) == world) {
-//                if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-//                    receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
-//                            fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
-//                }
-//                receiveMessage(toUserCode, msg);
-//            }
-//        } else if (scope == MessageConstants.SCOPE_SELF) {
-//            receiveMessage(fromUserCode, msg);
-//        } else if (scope == MessageConstants.SCOPE_NEARBY) {
-//            world.getPlayerInfoMap().entrySet().stream()
-////                    .filter(entry -> entry.getValue().getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN)
-//                    .filter(entry -> {
-//                        BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
-//                                world.getCreatureMap().get(entry.getKey()).getWorldCoordinate());
-//                        return null != distance
-//                                && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;
-//                    })
-//                    .forEach(entry -> {
-//                        if (!entry.getKey().equals(fromUserCode)) {
-//                            String toUserCode = entry.getKey();
-//                            if (msg.getType() == MessageConstants.MESSAGE_TYPE_VOICE) {
-//                                receiveMessage(toUserCode, new Message(MessageConstants.MESSAGE_TYPE_PRINTED, scope,
-//                                        fromUserCode, toUserCode, MessageConstants.MESSAGE_PRINTED_CONTENT_VOICE));
-//                            }
-//                            receiveMessage(toUserCode, msg);
-//                        }
-//                    });
-//            receiveMessage(fromUserCode, msg);
-//        }
         collectMessage(msg.getFromUserCode(), msg);
         return ResponseEntity.ok().body(rst.toString());
     }
@@ -180,7 +115,7 @@ public class MessageServiceImpl implements MessageService {
                 world.getOnlineMap().keySet().stream()
                         .filter(id -> !StringUtils.equals(id, userCode))
                         .filter(id -> {
-                            BigDecimal distance = BlockUtil.calculateDistance(region, player.getWorldCoordinate(),
+                            BigDecimal distance = BlockUtil.calculatePlanarDistance(region, player.getWorldCoordinate(),
                                     world.getCreatureMap().get(id).getWorldCoordinate());
                             return null != distance
                                     && distance.compareTo(CreatureConstants.DEFAULT_INDISTINCT_HEARING_RADIUS) <= 0;

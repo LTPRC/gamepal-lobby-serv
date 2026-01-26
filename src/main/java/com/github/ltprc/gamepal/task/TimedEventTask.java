@@ -8,9 +8,7 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
-import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
-import com.github.ltprc.gamepal.model.map.scene.Scene;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
@@ -26,10 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @Component
 public class TimedEventTask {
@@ -118,7 +113,7 @@ public class TimedEventTask {
                     .forEach(id -> {
                         buffManager.checkBuff(world, id);
 
-                        // Change maxSpeed
+                        // Change maxPlanarSpeed
                         movementManager.updateCreatureMaxSpeed(world, id);
 
                         PlayerInfo playerInfo = playerInfoMap.get(id);
@@ -187,9 +182,9 @@ public class TimedEventTask {
                             playerService.changePrecision(id, 50
                                     - 100 * (int) (Math.sqrt(Math.pow(movementInfo.getSpeed().getX().doubleValue(), 2)
                                     + Math.pow(movementInfo.getSpeed().getY().doubleValue(), 2))
-                                    / movementInfo.getMaxSpeed().doubleValue())
+                                    / movementInfo.getMaxPlanarSpeed().doubleValue())
                                     - 100 * (int) (Math.abs(movementInfo.getSpeed().getZ().doubleValue())
-                                    / MovementConstants.MAX_SPEED_Z_DEFAULT.doubleValue()), false);
+                                    / movementInfo.getMaxVerticalSpeed().doubleValue()), false);
 
                             // Change view radius
                             PlayerInfoUtil.updatePerceptionInfo(playerInfo.getPerceptionInfo(), world.getWorldTime());
@@ -278,7 +273,7 @@ public class TimedEventTask {
                         // Add footstep
                         if (Math.pow(player.getMovementInfo().getSpeed().getX().doubleValue(), 2)
                                 + Math.pow(player.getMovementInfo().getSpeed().getY().doubleValue(), 2)
-                                > Math.pow(player.getMovementInfo().getMaxSpeed().doubleValue() / 2, 2)) {
+                                > Math.pow(player.getMovementInfo().getMaxPlanarSpeed().doubleValue() / 2, 2)) {
                             eventManager.addEvent(world, BlockConstants.BLOCK_CODE_NOISE, id,
                                     player.getWorldCoordinate());
                         }

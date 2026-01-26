@@ -202,7 +202,7 @@ public class BlockFactory {
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                 new Coordinate(BlockConstants.PLAYER_RADIUS, BlockConstants.PLAYER_RADIUS,
-                                        BlockConstants.Z_DEFAULT)),
+                                        BlockConstants.PLAYER_HEIGHT)),
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
@@ -565,11 +565,5 @@ public class BlockFactory {
             }
             return block1.getBlockInfo().getId().compareTo(block2.getBlockInfo().getId());
         });
-    }
-
-    public static Queue<Block> createDistanceRankingQueue(final RegionInfo regionInfo,
-                                                          final WorldCoordinate worldCoordinate) {
-        return new PriorityQueue<>(Comparator.comparing(o ->
-                BlockUtil.calculateDistance(regionInfo, worldCoordinate, o.getWorldCoordinate())));
     }
 }
