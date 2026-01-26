@@ -61,6 +61,7 @@ public class BlockFactory {
                     case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
                         frameMax = 6;
                         break;
+                    case BlockConstants.BLOCK_CODE_SPARK:
                     case BlockConstants.BLOCK_CODE_SHOCK:
                         frameMax = 10;
                         break;
@@ -88,7 +89,6 @@ public class BlockFactory {
                     case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
                         frameMax = 250;
                         break;
-                    case BlockConstants.BLOCK_CODE_SPRAY:
                     case BlockConstants.BLOCK_CODE_DROP_SHADOW:
                     case BlockConstants.BLOCK_CODE_BUBBLE:
                         frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
@@ -100,6 +100,10 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_EXPLODE:
+                    case BlockConstants.BLOCK_CODE_SPRAY:
+                        frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
                     case BlockConstants.BLOCK_CODE_FIRE:
                         frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 5;
                         break;
@@ -133,6 +137,7 @@ public class BlockFactory {
                     case BlockConstants.BLOCK_CODE_LIGHT_SMOKE:
                         period = 6;
                         break;
+                    case BlockConstants.BLOCK_CODE_SPARK:
                     case BlockConstants.BLOCK_CODE_SHOCK:
                         period = 10;
                         break;
@@ -154,7 +159,6 @@ public class BlockFactory {
                     case BlockConstants.BLOCK_CODE_BLEED_SEVERE:
                         period = 250;
                         break;
-                    case BlockConstants.BLOCK_CODE_SPRAY:
                     case BlockConstants.BLOCK_CODE_DROP_SHADOW:
                     case BlockConstants.BLOCK_CODE_BUBBLE:
                         period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
@@ -165,14 +169,7 @@ public class BlockFactory {
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
-                switch (blockInfo.getCode()) {
-                    case BlockConstants.BLOCK_CODE_FIRE:
-                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
-                        break;
-                    default:
-                        period = BlockConstants.PERIOD_STATIC_DEFAULT;
-                        break;
-                }
+                period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                 break;
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
                 period = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
@@ -380,7 +377,6 @@ public class BlockFactory {
                                 BlockConstants.STRUCTURE_LAYER_BOTTOM_DECORATION, shape,
                                 new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                         break;
-                    case BlockConstants.BLOCK_CODE_SPRAY:
                     case BlockConstants.BLOCK_CODE_DROP_SHADOW:
                     case BlockConstants.BLOCK_CODE_BUBBLE:
                         shape = new Shape();
@@ -495,8 +491,6 @@ public class BlockFactory {
                         new Coordinate(BigDecimal.valueOf(5D), BigDecimal.valueOf(5D),
                                 BlockConstants.Z_DEFAULT));
                 break;
-            case BlockConstants.BLOCK_CODE_MINE:
-            case BlockConstants.BLOCK_CODE_SPRAY:
             case BlockConstants.BLOCK_CODE_SPARK_SHORT:
                 shape = new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BigDecimal.ONE, BigDecimal.ONE,

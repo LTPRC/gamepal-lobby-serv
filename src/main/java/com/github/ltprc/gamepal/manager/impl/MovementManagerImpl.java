@@ -293,7 +293,7 @@ public class MovementManagerImpl implements MovementManager {
                 // Check location change
                 if (isSceneChanged) {
                     webSocketService.resetPlayerBlockMap(worldMovingBlock.getBlockInfo().getId());
-                    world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_REGION] = true;
+                    world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_GRIDS] = true;
                     Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
                     playerService.generateNotificationMessage(worldMovingBlock.getBlockInfo().getId(),
                             "来到【" + region.getName() + "-" + scene.getName() + "】");
@@ -549,11 +549,11 @@ public class MovementManagerImpl implements MovementManager {
                 || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
             return false;
         }
-        if (BlockUtil.compareAnglesInDegrees(
-                BlockUtil.calculateAngle(region, from, block2.getWorldCoordinate()).doubleValue(),
-                BlockUtil.calculateAngle(region, from, block1.getWorldCoordinate()).doubleValue()) > 135D) {
-            return false;
-        }
+//        if (BlockUtil.compareAnglesInDegrees(
+//                BlockUtil.calculateAngle(region, from, block2.getWorldCoordinate()).doubleValue(),
+//                BlockUtil.calculateAngle(region, from, block1.getWorldCoordinate()).doubleValue()) > 135D) {
+//            return false;
+//        }
 
         // ===== 1) 把 world 坐标转成“全局平面坐标”(double)：x + sceneX*height, y + sceneY*width（与你 BlockUtil.adjustCoordinate 保持一致）=====
         final int h = region.getHeight();

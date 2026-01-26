@@ -116,7 +116,7 @@ public class NpcManagerImpl implements NpcManager {
                 playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
         worldService.registerOnline(world, userCode, timestamp);
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
-        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_REGION] = true;
+        world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_GRIDS] = true;
         userService.addUserIntoWorldMap(userCode, world.getId());
         if (GamePalConstants.PLAYER_TYPE_HUMAN != playerInfo.getPlayerType()) {
             NpcBrain npcBrain = generateNpcBrain();

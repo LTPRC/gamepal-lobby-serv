@@ -273,9 +273,11 @@ public class BlockConstants {
     public static final BigDecimal EVENT_DEFAULT_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal MIN_DROP_INTERACTION_DISTANCE = BigDecimal.valueOf(0.3D);
     public static final BigDecimal ROUND_SCENE_OBJECT_RADIUS = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal EXPLODE_RADIUS = BigDecimal.valueOf(2);
     public static final BigDecimal MINE_RADIUS = BigDecimal.ONE;
     public static final BigDecimal WIRE_NETTING_RADIUS = BigDecimal.valueOf(0.4D);
-    public static final BigDecimal FIRE_RADIUS = BigDecimal.valueOf(0.5D);
+    public static final BigDecimal FIRE_RADIUS = BigDecimal.ONE;
+    public static final BigDecimal SPRAY_RADIUS = BigDecimal.ONE;
     public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
@@ -289,7 +291,7 @@ public class BlockConstants {
 
     public static final int FRAME_DEFAULT = 0;
     public static final int PERIOD_STATIC_DEFAULT = -1;
-    public static final int PERIOD_DYNAMIC_DEFAULT = 25;
+    public static final int PERIOD_DYNAMIC_DEFAULT = 30;
     public static final int FRAME_MAX_INFINITE_DEFAULT = -1;
     public static final int TIMED_BOMB_FRAME_MAX_MAX = 150;
 
@@ -327,7 +329,7 @@ public class BlockConstants {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_NOISE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_MINE, BLOCK_TYPE_TRAP);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_FIRE, BLOCK_TYPE_PLASMA);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPRAY, BLOCK_TYPE_FLOOR_DECORATION);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPRAY, BLOCK_TYPE_PLASMA);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_SPARK_SHORT, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_LIGHT_SMOKE, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED_SEVERE, BLOCK_TYPE_FLOOR_DECORATION);

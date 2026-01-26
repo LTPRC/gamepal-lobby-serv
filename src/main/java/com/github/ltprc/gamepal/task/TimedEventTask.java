@@ -145,10 +145,10 @@ public class TimedEventTask {
                             }
 
                             // Change vp
-                            int newVp = 10;
+                            int newVp = 1;
                             if (!movementInfo.getSpeed().getX().equals(BigDecimal.ZERO)
                                     || !movementInfo.getSpeed().getY().equals(BigDecimal.ZERO)) {
-                                newVp = -10;
+                                newVp = -1;
                             }
                             playerService.changeVp(id, newVp, false);
 

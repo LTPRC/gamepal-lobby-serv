@@ -21,7 +21,6 @@ import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
-import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
@@ -404,7 +403,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         rst.put("sceneInfos", sceneInfos);
 
         // Collect grids and altitudes
-        if (world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_REGION]) {
+        if (world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_GRIDS]) {
             int[][] grids = sceneManager.collectGridsByUserCode(userCode, 2);
             rst.put("grids", grids);
             BigDecimal[][] altitudes = sceneManager.collectAltitudesByUserCode(userCode, 2);

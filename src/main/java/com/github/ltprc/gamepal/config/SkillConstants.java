@@ -56,10 +56,8 @@ public class SkillConstants {
     public static final BigDecimal SKILL_RANGE_SHOOT_SPRAY = BigDecimal.ONE;
     public static final double SKILL_RANGE_SHOOT_THROW_JUNK_MIN = 1D;
     public static final double SKILL_RANGE_SHOOT_THROW_JUNK_MAX = 5D;
-    public static final BigDecimal SKILL_RANGE_EXPLODE = BigDecimal.valueOf(2);
     public static final BigDecimal SKILL_RANGE_CURSE = BigDecimal.valueOf(5);
     public static final BigDecimal SKILL_RANGE_CHEER = BigDecimal.valueOf(5);
-    public static final BigDecimal SKILL_RANGE_FIRE = BigDecimal.valueOf(0.5D);
     public static final BigDecimal SKILL_RANGE_SPARK_SHORT = BigDecimal.valueOf(0.25D);
 
     public static final int SKILL_TYPE_DEFAULT = 0;

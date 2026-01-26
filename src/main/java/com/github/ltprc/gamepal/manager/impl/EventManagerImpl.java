@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -99,19 +100,6 @@ public class EventManagerImpl implements EventManager {
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         List<Block> affectedBlocks = sceneManager.collideBlocks(world, fromWorldCoordinate, eventBlock, false);
-//        if (eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_EXPLODE) {
-//            affectedBlocks = sceneManager.collectSurroundingBlocks(world, eventBlock,
-//                            SkillConstants.SKILL_RANGE_EXPLODE.divide(BigDecimal.valueOf(Math.max(region.getHeight(),
-//                                    region.getWidth())), 2, RoundingMode.HALF_UP).intValue()).stream()
-//                    .map(StructuredBlock::getBlock)
-//                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
-//                    .collect(Collectors.toList());
-//        } else {
-//            affectedBlocks = sceneManager.collectLinearBlocks(world, fromWorldCoordinate, eventBlock,
-//                            fromCreature.getBlockInfo().getId()).stream()
-//                    .filter(blocker -> checkEventCondition(world, fromWorldCoordinate, eventBlock, blocker))
-//                    .collect(Collectors.toList());
-//        }
         switch (eventBlock.getBlockInfo().getCode()) {
             case BlockConstants.BLOCK_CODE_HEAL:
                 affectBlock(world, eventBlock, fromCreature);
@@ -187,26 +175,20 @@ public class EventManagerImpl implements EventManager {
                             .multiply(BigDecimal.valueOf(2)).intValue() + 1;
                     List<WorldCoordinate> equidistantPoints = BlockUtil.collectEquidistantPoints(
                             regionMap.get(worldCoordinate.getRegionNo()), fromWorldCoordinate,
-                            worldCoordinate, flameAmount);
+                            worldCoordinate, flameAmount).stream()
+                            .filter(flameCoordinate -> {
+                                BigDecimal distance = BlockUtil.calculatePlanarDistance(regionMap.get(
+                                        worldCoordinate.getRegionNo()), fromWorldCoordinate, flameCoordinate);
+                                return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) > 0;
+                            })
+                            .collect(Collectors.toList());
+                    equidistantPoints.add(worldCoordinate);
                     equidistantPoints.forEach(flameCoordinate ->
                             sceneManager.addOtherBlock(world, flameCoordinate, BlockConstants.BLOCK_CODE_FIRE));
                 }
                 break;
             case BlockConstants.BLOCK_CODE_SHOOT_SPRAY:
                 addEvent(world, BlockConstants.BLOCK_CODE_SPRAY, fromCreature.getBlockInfo().getId(), worldCoordinate);
-                // Extinguish fire
-                region.getScenes().values().stream()
-                        .filter(scene -> SkillUtil.isSceneDetected(eventBlock, scene.getSceneCoordinate(), 1))
-                        .forEach(scene -> scene.getBlocks().values().stream()
-                                .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA)
-                                .filter(block -> block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE)
-                                .filter(block -> {
-                                    BigDecimal distance = BlockUtil.calculatePlanarDistance(
-                                            world.getRegionMap().get(worldCoordinate.getRegionNo()),
-                                            worldCoordinate, block.getWorldCoordinate());
-                                    return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
-                                })
-                                .forEach(block -> sceneManager.removeBlock(world, block, true)));
                 break;
             case BlockConstants.BLOCK_CODE_EXPLODE:
                 sceneManager.setGridBlockCode(world, worldCoordinate, BlockConstants.BLOCK_CODE_LAVA);
@@ -250,73 +232,73 @@ public class EventManagerImpl implements EventManager {
         addEventNoise(world, eventBlock, fromCreature);
     }
 
-    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
-        Map<Integer, Region> regionMap = world.getRegionMap();
-        Region region = regionMap.get(from.getRegionNo());
-
-        // 源对象过滤（所有分支都用）
-        String sourceId = world.getSourceMap().get(eventBlock.getBlockInfo().getId());
-        if (StringUtils.isNotBlank(sourceId) && blocker.getBlockInfo().getId().equals(sourceId)) {
-            return false;
-        }
-
-        switch (eventBlock.getBlockInfo().getCode()) {
-            case BlockConstants.BLOCK_CODE_MELEE_HIT:
-            case BlockConstants.BLOCK_CODE_MELEE_KICK:
-            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
-            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
-            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
-            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
-            case BlockConstants.BLOCK_CODE_MELEE_PICK:
-            case BlockConstants.BLOCK_CODE_MELEE_STAB: {
-                // 只在 melee 分支计算需要的量
-                BigDecimal eventDistance = BlockUtil.calculateDistance(region,
-                        eventBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
-                if (eventDistance == null || eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) > 0) {
-                    return false;
-                }
-                BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
-                BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
-                if (angle1 == null || angle2 == null) {
-                    return false;
-                }
-                return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
-            }
-
-            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
-            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
-            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
-            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
-            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
-            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK: {
-                // 只在 shoot 分支计算需要的量
-                BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
-                if (fromDistance == null || fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) > 0) {
-                    return false;
-                }
-                BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
-                BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
-                if (angle1 == null || angle2 == null) {
-                    return false;
-                }
-                // 关键优化：这里不要再 detectLinearCollision 了！
-                // collectBlocks 已经做过线碰撞预选，否则会重复计算导致卡顿
-                return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
-                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue();
-            }
-
-            case BlockConstants.BLOCK_CODE_EXPLODE: {
-                BigDecimal eventDistance = BlockUtil.calculateDistance(region,
-                        eventBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
-                return eventDistance != null
-                        && eventDistance.compareTo(SkillConstants.SKILL_RANGE_EXPLODE) <= 0;
-            }
-
-            default:
-                return false;
-        }
-    }
+//    private boolean checkEventCondition(GameWorld world, WorldCoordinate from, Block eventBlock, Block blocker) {
+//        Map<Integer, Region> regionMap = world.getRegionMap();
+//        Region region = regionMap.get(from.getRegionNo());
+//
+//        // 源对象过滤（所有分支都用）
+//        String sourceId = world.getSourceMap().get(eventBlock.getBlockInfo().getId());
+//        if (StringUtils.isNotBlank(sourceId) && blocker.getBlockInfo().getId().equals(sourceId)) {
+//            return false;
+//        }
+//
+//        switch (eventBlock.getBlockInfo().getCode()) {
+//            case BlockConstants.BLOCK_CODE_MELEE_HIT:
+//            case BlockConstants.BLOCK_CODE_MELEE_KICK:
+//            case BlockConstants.BLOCK_CODE_MELEE_SMASH:
+//            case BlockConstants.BLOCK_CODE_MELEE_SCRATCH:
+//            case BlockConstants.BLOCK_CODE_MELEE_CLEAVE:
+//            case BlockConstants.BLOCK_CODE_MELEE_CHOP:
+//            case BlockConstants.BLOCK_CODE_MELEE_PICK:
+//            case BlockConstants.BLOCK_CODE_MELEE_STAB: {
+//                // 只在 melee 分支计算需要的量
+//                BigDecimal eventDistance = BlockUtil.calculateDistance(region,
+//                        eventBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
+//                if (eventDistance == null || eventDistance.compareTo(SkillConstants.SKILL_RANGE_MELEE) > 0) {
+//                    return false;
+//                }
+//                BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
+//                BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
+//                if (angle1 == null || angle2 == null) {
+//                    return false;
+//                }
+//                return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+//                        < SkillConstants.SKILL_ANGLE_MELEE_MAX.doubleValue();
+//            }
+//
+//            case BlockConstants.BLOCK_CODE_SHOOT_HIT:
+//            case BlockConstants.BLOCK_CODE_SHOOT_ARROW:
+//            case BlockConstants.BLOCK_CODE_SHOOT_SLUG:
+//            case BlockConstants.BLOCK_CODE_SHOOT_MAGNUM:
+//            case BlockConstants.BLOCK_CODE_SHOOT_ROCKET:
+//            case BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK: {
+//                // 只在 shoot 分支计算需要的量
+//                BigDecimal fromDistance = BlockUtil.calculateDistance(region, from, blocker.getWorldCoordinate());
+//                if (fromDistance == null || fromDistance.compareTo(SkillConstants.SKILL_RANGE_SHOOT) > 0) {
+//                    return false;
+//                }
+//                BigDecimal angle1 = BlockUtil.calculateAngle(region, from, eventBlock.getWorldCoordinate());
+//                BigDecimal angle2 = BlockUtil.calculateAngle(region, from, blocker.getWorldCoordinate());
+//                if (angle1 == null || angle2 == null) {
+//                    return false;
+//                }
+//                // 关键优化：这里不要再 detectLinearCollision 了！
+//                // collectBlocks 已经做过线碰撞预选，否则会重复计算导致卡顿
+//                return BlockUtil.compareAnglesInDegrees(angle1.doubleValue(), angle2.doubleValue())
+//                        < SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue();
+//            }
+//
+//            case BlockConstants.BLOCK_CODE_EXPLODE: {
+//                BigDecimal eventDistance = BlockUtil.calculateDistance(region,
+//                        eventBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
+//                return eventDistance != null
+//                        && eventDistance.compareTo(BlockConstants.EXPLODE_RADIUS) <= 0;
+//            }
+//
+//            default:
+//                return false;
+//        }
+//    }
 
     private void addEventNoise(GameWorld world, Block eventBlock, Block fromCreature) {
         switch (eventBlock.getBlockInfo().getCode()) {
@@ -353,7 +335,7 @@ public class EventManagerImpl implements EventManager {
             case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
             case BlockConstants.BLOCK_CODE_WATER_MEDIUM:
             case BlockConstants.BLOCK_CODE_WATER_DEEP:
-                eventCode = BlockConstants.BLOCK_CODE_SPRAY;
+                eventCode = BlockConstants.BLOCK_CODE_BUBBLE;
                 break;
             default:
                 eventCode = BlockConstants.BLOCK_CODE_LIGHT_SMOKE;
@@ -401,19 +383,36 @@ public class EventManagerImpl implements EventManager {
                                 || sceneManager.getGridBlockCode(world, eventBlock.getWorldCoordinate()) == BlockConstants.BLOCK_CODE_SNOW) {
                             sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                         }
-                        // Burn collected blocks 25/02/03
+                        // Burn collected blocks
                         List<Block> burntBlocks = sceneManager.collectBlocks(world, eventBlock.getWorldCoordinate(),
                                 eventBlock);
                         burntBlocks.stream()
-                                .filter(targetBlock -> targetBlock.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
-                                        || playerService.validateActiveness(world, targetBlock.getBlockInfo().getId()))
-                                .filter(targetBlock -> {
+                                .filter(block -> block.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
+                                        || playerService.validateActiveness(world, block.getBlockInfo().getId()))
+                                .filter(block -> {
                                     BigDecimal distance = BlockUtil.calculateDistance(
                                             world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
-                                            eventBlock.getWorldCoordinate(), targetBlock.getWorldCoordinate());
+                                            eventBlock.getWorldCoordinate(), block.getWorldCoordinate());
                                     return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
                                 })
                                 .forEach(targetBlock -> affectBlock(world, eventBlock, targetBlock));
+                        break;
+                    case BlockConstants.BLOCK_CODE_SPRAY:
+                        // Extinguish fire
+                        List<Block> extinguishedBlocks = sceneManager.collectBlocks(world,
+                                eventBlock.getWorldCoordinate(), eventBlock);
+                        extinguishedBlocks.stream()
+                                    .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA)
+                                    .filter(block -> block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE)
+                                    .filter(block -> {
+                                        BigDecimal distance = BlockUtil.calculateDistance(
+                                                world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
+                                                eventBlock.getWorldCoordinate(), block.getWorldCoordinate());
+                                        return null != distance && distance.compareTo(BlockConstants.SPRAY_RADIUS) < 0;
+                                    })
+                                    .forEach(block -> sceneManager.removeBlock(world, block, true));
+                        break;
+                    default:
                         break;
                 }
                 break;

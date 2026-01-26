@@ -733,6 +733,7 @@ public class SceneManagerImpl implements SceneManager {
     public List<Block> collideBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
                                      boolean relocate) {
         List<Block> preSelectedBlocks = collectBlocks(world, fromWorldCoordinate, eventBlock);
+        BigDecimal radius;
         switch (eventBlock.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_SHOOT:
                 return preSelectedBlocks.stream()
@@ -741,16 +742,30 @@ public class SceneManagerImpl implements SceneManager {
                         .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_MELEE:
                 BigDecimal faceDirection = eventBlock.getMovementInfo().getFaceDirection();
-                BigDecimal radius = SkillConstants.SKILL_RANGE_MELEE;
+                radius = SkillConstants.SKILL_RANGE_MELEE;
                 BigDecimal sectorAngle = SkillConstants.SKILL_ANGLE_MELEE_MAX;
                 return preSelectedBlocks.stream()
                         .filter(blocker -> movementManager.detectSectorInfluence(world, fromWorldCoordinate, eventBlock,
                                 blocker, faceDirection, radius, sectorAngle))
                         .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_PLASMA:
+                switch (eventBlock.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_EXPLODE:
+                        radius = BlockConstants.EXPLODE_RADIUS;
+                        break;
+                    case BlockConstants.BLOCK_CODE_FIRE:
+                        radius = BlockConstants.FIRE_RADIUS;
+                        break;
+                    case BlockConstants.BLOCK_CODE_SPRAY:
+                        radius = BlockConstants.SPRAY_RADIUS;
+                        break;
+                    default:
+                        radius = BigDecimal.ZERO;
+                        break;
+                }
                 return preSelectedBlocks.stream()
                         .filter(blocker -> movementManager.detectSphereInfluence(world, fromWorldCoordinate, eventBlock,
-                                blocker, SkillConstants.SKILL_RANGE_EXPLODE))
+                                blocker, radius))
                         .collect(Collectors.toList());
             default:
                 return preSelectedBlocks;
@@ -1206,6 +1221,10 @@ public class SceneManagerImpl implements SceneManager {
                 scene.getGrid()[scene.getGrid().length - 1][gridCoordinate.getY()] = code;
             }
 //        }
+        world.getCreatureMap().values().stream()
+                .filter(creature -> creature.getWorldCoordinate().getRegionNo() == worldCoordinate.getRegionNo())
+                .forEach(creature -> world.getFlagMap().get(creature.getBlockInfo().getId())
+                        [FlagConstants.FLAG_UPDATE_GRIDS] = true);
     }
 
     @Override

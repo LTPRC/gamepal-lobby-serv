@@ -289,7 +289,7 @@ public class BlockUtil {
         deltaHeight = deltaHeight.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         deltaZ = deltaZ.divide(BigDecimal.valueOf(amount), 2, RoundingMode.HALF_UP);
         WorldCoordinate wc3 = new WorldCoordinate(wc1);
-        for (int i = 1; i < amount; i++) {
+        for (int i = 1; i < amount - 1; i++) {
             wc3.getCoordinate().setX(wc3.getCoordinate().getX().add(deltaWidth));
             wc3.getCoordinate().setY(wc3.getCoordinate().getY().add(deltaHeight));
             wc3.getCoordinate().setZ(wc3.getCoordinate().getZ().add(deltaZ));
