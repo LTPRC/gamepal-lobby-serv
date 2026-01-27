@@ -741,13 +741,15 @@ public class SceneManagerImpl implements SceneManager {
                                 blocker, relocate))
                         .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_MELEE:
-                BigDecimal faceDirection = eventBlock.getMovementInfo().getFaceDirection();
-                radius = SkillConstants.SKILL_RANGE_MELEE;
                 BigDecimal sectorAngle = SkillConstants.SKILL_ANGLE_MELEE_MAX;
                 return preSelectedBlocks.stream()
-                        .filter(blocker -> movementManager.detectSectorInfluence(world, fromWorldCoordinate, eventBlock,
-                                blocker, faceDirection, radius, sectorAngle))
+                        .filter(blocker -> movementManager.detectSectorCollision(world, fromWorldCoordinate, eventBlock,
+                                blocker, sectorAngle))
                         .collect(Collectors.toList());
+//                return preSelectedBlocks.stream()
+//                        .filter(blocker -> movementManager.detectSphereInfluence(world, fromWorldCoordinate, eventBlock,
+//                                blocker, BlockConstants.MELEE_RADIUS))
+//                        .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (eventBlock.getBlockInfo().getCode()) {
                     case BlockConstants.BLOCK_CODE_EXPLODE:

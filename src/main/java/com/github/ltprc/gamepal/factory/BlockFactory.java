@@ -390,11 +390,6 @@ public class BlockFactory {
                         break;
                 }
                 break;
-            case BlockConstants.BLOCK_TYPE_WALL:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
-                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
-                break;
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE_DECORATION);
@@ -408,13 +403,19 @@ public class BlockFactory {
                         BlockConstants.STRUCTURE_LAYER_TOP_DECORATION);
                 break;
             case BlockConstants.BLOCK_TYPE_MELEE:
+                structure = new Structure(convertMeleeShootCode2Material(blockCode),
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
+                        new Coordinate(BlockConstants.MELEE_RADIUS, BlockConstants.MELEE_RADIUS,
+                                BlockConstants.MELEE_RADIUS)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
+                break;
             case BlockConstants.BLOCK_TYPE_SHOOT:
                 structure = new Structure(convertMeleeShootCode2Material(blockCode),
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                        new Coordinate(BlockConstants.EVENT_DEFAULT_RADIUS, BlockConstants.EVENT_DEFAULT_RADIUS,
-                                BlockConstants.Z_DEFAULT)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
+                        new Coordinate(BlockConstants.SHOOT_RADIUS, BlockConstants.SHOOT_RADIUS,
+                                BlockConstants.SHOOT_RADIUS)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
+            case BlockConstants.BLOCK_TYPE_WALL:
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),

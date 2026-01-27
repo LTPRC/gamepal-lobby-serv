@@ -329,16 +329,16 @@ public class BlockUtil {
 
     public static Set<IntegerCoordinate> preSelectSceneCoordinates(Region region, WorldCoordinate fromWorldCoordinate,
                                                                    Block eventBlock) {
-        switch (eventBlock.getBlockInfo().getType()) {
-            case BlockConstants.BLOCK_TYPE_TRAP:
-            case BlockConstants.BLOCK_TYPE_PLASMA:
-            case BlockConstants.BLOCK_TYPE_MELEE:
-                return BlockUtil.preSelectRoundSceneCoordinates(region, fromWorldCoordinate,
-                        eventBlock.getWorldCoordinate());
-            default:
+//        switch (eventBlock.getBlockInfo().getType()) {
+//            case BlockConstants.BLOCK_TYPE_TRAP:
+//            case BlockConstants.BLOCK_TYPE_PLASMA:
+//            case BlockConstants.BLOCK_TYPE_MELEE:
+//                return BlockUtil.preSelectRoundSceneCoordinates(region, fromWorldCoordinate,
+//                        eventBlock.getWorldCoordinate());
+//            default:
                 return BlockUtil.preSelectLinearSceneCoordinates(region, fromWorldCoordinate,
                         eventBlock.getWorldCoordinate());
-        }
+//        }
     }
 
     private static Set<IntegerCoordinate> preSelectLinearSceneCoordinates(Region region, WorldCoordinate wc1,

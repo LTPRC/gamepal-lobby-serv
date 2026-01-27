@@ -628,16 +628,16 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     @Override
-    public boolean detectSectorInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
-                                         BigDecimal faceDirection, BigDecimal radius, BigDecimal sectorAngle) {
+    public boolean detectSectorCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                         BigDecimal sectorAngle) {
         Region region = world.getRegionMap().get(from.getRegionNo());
         if (region == null) return false;
 
-        if (block1.getWorldCoordinate().getRegionNo() != region.getRegionNo()
-                || block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
+        if (block2.getWorldCoordinate().getRegionNo() != region.getRegionNo()) {
             return false;
         }
 
+        BigDecimal radius = BlockUtil.calculatePlanarDistance(region, from, block1.getWorldCoordinate());
         final double r = (radius == null) ? 0D : radius.doubleValue();
         if (r <= 0D) return false;
 
@@ -647,15 +647,14 @@ public class MovementManagerImpl implements MovementManager {
         final int h = region.getHeight();
         final int w = region.getWidth();
 
-        // ===== 1) 计算全局平面坐标 =====
-        final WorldCoordinate wc1 = block1.getWorldCoordinate();
+        // 圆心改成 from（玩家位置），而不是 block1(eventBlock)
+        final double cx = from.getCoordinate().getX().doubleValue()
+                + from.getSceneCoordinate().getX() * (double) h;
+        final double cy = from.getCoordinate().getY().doubleValue()
+                + from.getSceneCoordinate().getY() * (double) w;
+
+        // block2 center (global)
         final WorldCoordinate wc2 = block2.getWorldCoordinate();
-
-        final double cx = wc1.getCoordinate().getX().doubleValue()
-                + wc1.getSceneCoordinate().getX() * (double) h;
-        final double cy = wc1.getCoordinate().getY().doubleValue()
-                + wc1.getSceneCoordinate().getY() * (double) w;
-
         final double tx = wc2.getCoordinate().getX().doubleValue()
                 + wc2.getSceneCoordinate().getX() * (double) h;
         final double ty = wc2.getCoordinate().getY().doubleValue()
@@ -665,23 +664,19 @@ public class MovementManagerImpl implements MovementManager {
         final double vy = ty - cy;
         final double dist2 = vx * vx + vy * vy;
 
-        // ===== 2) 半径判定（所有情况都要）=====
+        // 半径判定（平方）
         final double rr = r * r;
         if (dist2 > rr) return false;
-
-        // 圆心命中
         if (dist2 <= 1e-12) return true;
 
-        // ===== 3) 如果是“整圆扇形”，直接通过（无需角度判断）=====
-        if (angleDeg >= 360D) {
-            return true;
-        }
+        if (angleDeg >= 360D) return true;
 
-        // ===== 4) 角度判定（点积）=====
+        // faceDirection：0°向右；y 正向向南 => uy = -sin
+        BigDecimal faceDirection = block1.getMovementInfo().getFaceDirection();
         final double fd = (faceDirection == null) ? 0D : faceDirection.doubleValue();
         final double rad = Math.toRadians(fd);
         final double ux = Math.cos(rad);
-        final double uy = -Math.sin(rad); // y 正向向南
+        final double uy = -Math.sin(rad);
 
         final double dot = ux * vx + uy * vy;
         if (dot < 0D) return false;
@@ -690,7 +685,8 @@ public class MovementManagerImpl implements MovementManager {
         final double cosHalf = Math.cos(Math.toRadians(halfAngleDeg));
         final double cos2 = cosHalf * cosHalf;
 
-        return (dot * dot) >= (dist2 * cos2);
+        // 加一点 epsilon，避免贴边抖动
+        return (dot * dot) + 1e-9 >= (dist2 * cos2);
     }
 
     @Override
