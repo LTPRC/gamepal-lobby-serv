@@ -355,7 +355,9 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM,
+                        new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_RECTANGLE,
+                                new Coordinate(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.valueOf(0.1D))));
                 break;
             case BlockConstants.BLOCK_TYPE_ROCK:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
