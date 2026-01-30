@@ -6,7 +6,6 @@ import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.manager.EventManager;
-import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
@@ -47,9 +46,6 @@ public class EventManagerImpl implements EventManager {
 
     @Autowired
     private NpcManager npcManager;
-
-    @Autowired
-    private MovementManager movementManager;
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
@@ -430,8 +426,8 @@ public class EventManagerImpl implements EventManager {
                 || eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_HEAL
                 || eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_SACRIFICE
                 || eventBlock.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_DECAY) {
-            movementManager.settleCoordinate(world, eventBlock, world.getCreatureMap().get(fromId).getWorldCoordinate(),
-                    false);
+            BlockUtil.copyWorldCoordinate(world.getCreatureMap().get(fromId).getWorldCoordinate(),
+                    eventBlock.getWorldCoordinate());
         }
     }
 

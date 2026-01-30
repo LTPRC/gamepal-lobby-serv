@@ -309,204 +309,28 @@ public class SceneManagerImpl implements SceneManager {
                 regionInfo.getAltitude());
         WorldCoordinate worldCoordinate = new WorldCoordinate(regionInfo.getRegionNo(), scene.getSceneCoordinate(),
                 coordinate);
-        Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockConstants.BLOCK_CODE_BLACK, 2000);
+        Map<Integer, Integer> weightMap;
         switch (blockCode) {
             case BlockConstants.BLOCK_CODE_DIRT:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_PINE, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_OAK, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_PINE, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_OAK, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_PALM, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_RAFFLESIA, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_STUMP, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_MOSSY_STUMP, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_HOLLOW_TRUNK, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_FLOWER_BUSH, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BUSH, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_3, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_3, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_1, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_2, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_2, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_3, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_4, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_3, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_1, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_2, 1);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_DIRT;
                 break;
             case BlockConstants.BLOCK_CODE_SAND:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_PINE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_OAK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_PINE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_OAK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_PALM, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_RAFFLESIA, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_STUMP, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_MOSSY_STUMP, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_HOLLOW_TRUNK, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_FLOWER_BUSH, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BUSH, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_3, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_3, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_2, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_3, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_4, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_1, 50);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_2, 50);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_3, 50);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_2, 0);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_SAND;
                 break;
             case BlockConstants.BLOCK_CODE_GRASS:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_PINE, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_OAK, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_PINE, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_OAK, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_PALM, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_RAFFLESIA, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_STUMP, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_MOSSY_STUMP, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_HOLLOW_TRUNK, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_FLOWER_BUSH, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_BUSH, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_1, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_2, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_3, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_1, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_2, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_3, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_1, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_2, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_1, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_2, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_3, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_4, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_3, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_2, 10);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_GRASS;
                 break;
             case BlockConstants.BLOCK_CODE_SWAMP:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_PINE, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_OAK, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_PINE, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_OAK, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_PALM, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_RAFFLESIA, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_STUMP, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_MOSSY_STUMP, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_HOLLOW_TRUNK, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_FLOWER_BUSH, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_BUSH, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_2, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_3, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_2, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_3, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_1, 50);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_2, 50);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_1, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_2, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_3, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_4, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_3, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_2, 10);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_SWAMP;
                 break;
             case BlockConstants.BLOCK_CODE_ROUGH:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_PINE, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_OAK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_PINE, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_OAK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_PALM, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_RAFFLESIA, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_STUMP, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_MOSSY_STUMP, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_HOLLOW_TRUNK, 1);
-                weightMap.put(BlockConstants.BLOCK_CODE_FLOWER_BUSH, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_BUSH, 20);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_1, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_2, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_3, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_1, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_2, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_3, 2);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_3, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_4, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_3, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_1, 50);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_2, 50);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_ROUGH;
                 break;
             case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_PINE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_OAK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_PINE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_OAK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_PALM, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_RAFFLESIA, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_STUMP, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_MOSSY_STUMP, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_HOLLOW_TRUNK, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_FLOWER_BUSH, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_BUSH, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_SMALL_FLOWER_3, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_1, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_2, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_FLOWER_3, 5);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_1, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_MUSHROOM_2, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_1, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_2, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_3, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_GRASS_4, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_1, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_2, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_CACTUS_3, 0);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_1, 100);
-                weightMap.put(BlockConstants.BLOCK_CODE_ROCK_2, 100);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_SUBTERRANEAN;
                 break;
             case BlockConstants.BLOCK_CODE_LAVA:
-                weightMap.put(BlockConstants.BLOCK_CODE_BIG_WITHERED_TREE, 10);
-                weightMap.put(BlockConstants.BLOCK_CODE_WITHERED_TREE, 10);
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_LAVA;
                 break;
             case BlockConstants.BLOCK_CODE_SNOW:
             case BlockConstants.BLOCK_CODE_WATER_SHALLOW:
@@ -514,6 +338,7 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_CODE_WATER_DEEP:
             case BlockConstants.BLOCK_CODE_BLACK:
             default:
+                weightMap = SceneConstants.OBJECT_WEIGHT_MAP_DEFAULT;
                 break;
         }
         int randomInt = random.nextInt(weightMap.values().stream().mapToInt(Integer::intValue).sum());
@@ -555,34 +380,25 @@ public class SceneManagerImpl implements SceneManager {
 
     private void addSceneAnimal(GameWorld world, RegionInfo regionInfo, Scene scene, int blockCode, BigDecimal x,
                                 BigDecimal y) {
-        Map<Integer, Integer> weightMap = new LinkedHashMap<>();
-        weightMap.put(BlockConstants.BLOCK_CODE_BLACK, 10000);
+        Map<Integer, Integer> weightMap;
         switch (blockCode) {
             case BlockConstants.BLOCK_CODE_DIRT:
-                weightMap.put(CreatureConstants.SKIN_COLOR_DOG, 10);
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_DIRT;
                 break;
             case BlockConstants.BLOCK_CODE_GRASS:
-                weightMap.put(CreatureConstants.SKIN_COLOR_MONKEY, 2);
-                weightMap.put(CreatureConstants.SKIN_COLOR_CHICKEN, 20);
-                weightMap.put(CreatureConstants.SKIN_COLOR_BUFFALO, 10);
-                weightMap.put(CreatureConstants.SKIN_COLOR_SHEEP, 20);
-                weightMap.put(CreatureConstants.SKIN_COLOR_CAT, 5);
-                weightMap.put(CreatureConstants.SKIN_COLOR_HORSE, 10);
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_GRASS;
                 break;
             case BlockConstants.BLOCK_CODE_SNOW:
-                weightMap.put(CreatureConstants.SKIN_COLOR_POLAR_BEAR, 10);
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_SNOW;
                 break;
             case BlockConstants.BLOCK_CODE_SWAMP:
-                weightMap.put(CreatureConstants.SKIN_COLOR_FROG, 50);
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_SWAMP;
                 break;
             case BlockConstants.BLOCK_CODE_ROUGH:
-                weightMap.put(CreatureConstants.SKIN_COLOR_FOX, 10);
-                weightMap.put(CreatureConstants.SKIN_COLOR_WOLF, 10);
-                weightMap.put(CreatureConstants.SKIN_COLOR_TIGER, 10);
-                weightMap.put(CreatureConstants.SKIN_COLOR_BOAR, 10);
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_ROUGH;
                 break;
             case BlockConstants.BLOCK_CODE_SUBTERRANEAN:
-                weightMap.put(CreatureConstants.SKIN_COLOR_RACOON, 5);
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_SUBTERRANEAN;
                 break;
             case BlockConstants.BLOCK_CODE_SAND:
             case BlockConstants.BLOCK_CODE_LAVA:
@@ -591,6 +407,7 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_CODE_WATER_DEEP:
             case BlockConstants.BLOCK_CODE_BLACK:
             default:
+                weightMap = SceneConstants.ANIMAL_WEIGHT_MAP_DEFAULT;
                 break;
         }
         int randomInt = random.nextInt(weightMap.values().stream().mapToInt(Integer::intValue).sum());

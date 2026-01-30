@@ -36,6 +36,7 @@ import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.MessageService;
 import com.github.ltprc.gamepal.service.PlayerService;
@@ -525,7 +526,13 @@ public class PlayerServiceImpl implements PlayerService {
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         Block player = creatureMap.get(userCode);
-        WorldCoordinate worldCoordinate = player.getWorldCoordinate();
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        BigDecimal height = structureMap.getOrDefault(player.getBlockInfo().getCode(), new Structure())
+                .getShape().getRadius().getZ();
+        WorldCoordinate bottomWorldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
+        WorldCoordinate middleWorldCoordinate = new WorldCoordinate(player.getWorldCoordinate());
+        middleWorldCoordinate.getCoordinate().setZ(middleWorldCoordinate.getCoordinate().getZ()
+                .add(height.multiply(BigDecimal.valueOf(0.6D))));
         Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
         double gaussianValue = random.nextGaussian();
         // 将生成的值转换成指定的均值和标准差
@@ -539,127 +546,134 @@ public class PlayerServiceImpl implements PlayerService {
                 if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLOCKED] != -1) {
                     playerInfo.getBuff()[BuffConstants.BUFF_CODE_BLOCKED] = BuffConstants.BUFF_DEFAULT_FRAME_BLOCKED;
                 }
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLOCK, userCode, worldCoordinate);
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLOCK, userCode, bottomWorldCoordinate);
                 break;
             case SkillConstants.SKILL_CODE_HEAL:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_HEAL, userCode, worldCoordinate);
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_HEAL, userCode, bottomWorldCoordinate);
                 break;
             case SkillConstants.SKILL_CODE_CHEER:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_CHEER, userCode, worldCoordinate);
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_CHEER, userCode, bottomWorldCoordinate);
                 break;
             case SkillConstants.SKILL_CODE_CURSE:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_CURSE, userCode, worldCoordinate);
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_CURSE, userCode, bottomWorldCoordinate);
                 break;
             case SkillConstants.SKILL_CODE_MELEE_HIT:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_HIT, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_KICK:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_KICK, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_SCRATCH:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_SCRATCH, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_SMASH:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_SMASH, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_CLEAVE:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_CLEAVE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_CHOP:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_CHOP, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_PICK:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_PICK, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_MELEE_STAB:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, player.getWorldCoordinate());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOCK, userCode, middleWorldCoordinate);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_STAB, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_HIT:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_HIT, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                 direction.add(shakingAngle)
                                         .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                        * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT));
+                                        * 2 * (random.nextDouble() - 0.5D))),
+                                playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_ARROW:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_ARROW, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                 direction.add(shakingAngle)
                                         .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                        * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT));
+                                        * 2 * (random.nextDouble() - 0.5D))),
+                                playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_GUN:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_SLUG, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                 direction.add(shakingAngle)
                                         .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                        * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT));
+                                        * 2 * (random.nextDouble() - 0.5D))),
+                                playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_SHOTGUN:
                 for (int i = 0; i < 10; i++) {
                     eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_SLUG, userCode,
-                            BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                            BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                     direction.add(shakingAngle)
                                             .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                            * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT_SHOTGUN));
+                                            * 2 * (random.nextDouble() - 0.5D))),
+                                    playerInfo.getSkills().get(skillNo).getRange()));
                 }
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_MAGNUM:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_MAGNUM, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                 direction.add(shakingAngle)
                                         .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                        * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT));
+                                        * 2 * (random.nextDouble() - 0.5D))),
+                                playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_ROCKET:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_ROCKET, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                 direction.add(shakingAngle)
                                         .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                        * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT));
+                                        * 2 * (random.nextDouble() - 0.5D))),
+                                playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_FIRE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_FIRE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                 direction.add(shakingAngle)
                                         .add(BigDecimal.valueOf(SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue()
-                                        * 2 * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SHOOT_FIRE_MAX));
+                                        * 2 * (random.nextDouble() - 0.5D))),
+                                playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_SPRAY:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_SPRAY, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_SHOOT_SPRAY));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_SHOOT_THROW_JUNK:
                 Optional<Junk> junk = itemManager.peekRandomJunk(world, userCode);
                 if (junk.isPresent()) {
                     itemManager.getItem(world, userCode, junk.get().getItemNo(), -1, true);
                     eventManager.addEvent(world, BlockConstants.BLOCK_CODE_SHOOT_THROW_JUNK, userCode,
-                            BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
+                            BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
                                     direction.add(shakingAngle), SkillUtil.calculateThrowJunkDistance(junk.get())));
                 } else {
                     return false;
@@ -684,12 +698,12 @@ public class PlayerServiceImpl implements PlayerService {
                     return false;
                 }
                 WorldCoordinate buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
+                        player.getWorldCoordinate(), direction, playerInfo.getSkills().get(skillNo).getRange());
                 IntegerCoordinate integerCoordinate = BlockUtil.convertCoordinate2ClosestIntegerCoordinate(buildingWorldCoordinate);
                 buildingWorldCoordinate.setCoordinate(new Coordinate(
                         BigDecimal.valueOf(integerCoordinate.getX()),
                         BigDecimal.valueOf(integerCoordinate.getY()),
-                        player.getWorldCoordinate().getCoordinate().getZ()));
+                        buildingWorldCoordinate.getCoordinate().getZ()));
                 Block fakeBuilding = new Block(buildingWorldCoordinate,
                         BlockFactory.createBlockInfoByCode(blockInfo1.get().getCode()),
                         new MovementInfo());
@@ -697,12 +711,13 @@ public class PlayerServiceImpl implements PlayerService {
                     return false;
                 }
                 sceneManager.setGridBlockCode(world, buildingWorldCoordinate, gridBlockCode);
-                sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get().getCode());
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, userCode, buildingWorldCoordinate);
+                fakeBuilding = sceneManager.addOtherBlock(world, buildingWorldCoordinate, blockInfo1.get().getCode());
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, userCode,
+                        fakeBuilding.getWorldCoordinate());
                 break;
             case SkillConstants.SKILL_CODE_FISH:
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
+                        player.getWorldCoordinate(), direction, playerInfo.getSkills().get(skillNo).getRange());
                 boolean fishingResult = false;
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_SHALLOW
                         || sceneManager.getGridBlockCode(world, buildingWorldCoordinate) == BlockConstants.BLOCK_CODE_WATER_MEDIUM
@@ -718,10 +733,10 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_SHOVEL:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MELEE_SMASH, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, middleWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 buildingWorldCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
-                        player.getWorldCoordinate(), direction, SkillConstants.SKILL_RANGE_BUILD);
+                        player.getWorldCoordinate(), direction, playerInfo.getSkills().get(skillNo).getRange());
                 if (sceneManager.getGridBlockCode(world, buildingWorldCoordinate) != BlockConstants.BLOCK_CODE_DIRT) {
                     sceneManager.setGridBlockCode(world, buildingWorldCoordinate, BlockConstants.BLOCK_CODE_DIRT);
                 } else {
@@ -729,39 +744,36 @@ public class PlayerServiceImpl implements PlayerService {
                 }
                 break;
             case SkillConstants.SKILL_CODE_DODGE:
-                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode, worldCoordinate);
+                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode, bottomWorldCoordinate);
                 movementManager.speedUpBlock(world, player, BlockUtil.locateCoordinateWithDirectionAndDistance(
                         new Coordinate(), direction, BlockConstants.DODGE_RADIUS));
                 player.getMovementInfo().setFaceDirection(direction);
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MINE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, bottomWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, bottomWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_LAY_BARRIER:
                 sceneManager.addOtherBlock(world,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, bottomWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()),
                         BlockConstants.BLOCK_CODE_ASH_PILE);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, bottomWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             case SkillConstants.SKILL_CODE_LAY_WIRE_NETTING:
-//                blockInfo.getStructure().setShape(new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-//                        new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO),
-//                        new Coordinate(BlockConstants.WIRE_NETTING_RADIUS, BlockConstants.WIRE_NETTING_RADIUS)));
                 sceneManager.addOtherBlock(world,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, bottomWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()),
                         BlockConstants.BLOCK_CODE_WIRE_NETTING);
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode,
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, player.getWorldCoordinate(),
-                                direction.add(shakingAngle), SkillConstants.SKILL_RANGE_MELEE));
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(region, bottomWorldCoordinate,
+                                direction.add(shakingAngle), playerInfo.getSkills().get(skillNo).getRange()));
                 break;
             default:
                 break;

@@ -133,58 +133,7 @@ public class NpcManagerImpl implements NpcManager {
                 exemptionJsonArray.add(true);
                 exemptionJsonArray.add(false);
             } else {
-                switch (playerInfo.getSkinColor()) {
-                    case CreatureConstants.SKIN_COLOR_PAOFU:
-                    case CreatureConstants.SKIN_COLOR_MONKEY:
-                    case CreatureConstants.SKIN_COLOR_FOX:
-                    case CreatureConstants.SKIN_COLOR_CAT:
-                    case CreatureConstants.SKIN_COLOR_DOG:
-                        behaviorRequest.put("stance", CreatureConstants.STANCE_DEFENSIVE);
-                        break;
-                    case CreatureConstants.SKIN_COLOR_RACOON:
-                        behaviorRequest.put("stance", CreatureConstants.STANCE_STAND_GROUND);
-                        break;
-                    case CreatureConstants.SKIN_COLOR_FROG:
-                    case CreatureConstants.SKIN_COLOR_CHICKEN:
-                    case CreatureConstants.SKIN_COLOR_SHEEP:
-                    case CreatureConstants.SKIN_COLOR_HORSE:
-                        behaviorRequest.put("stance", CreatureConstants.STANCE_NO_ATTACK);
-                        break;
-                    case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
-                    case CreatureConstants.SKIN_COLOR_TIGER:
-                    case CreatureConstants.SKIN_COLOR_WOLF:
-                    case CreatureConstants.SKIN_COLOR_BOAR:
-                    default:
-                        behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
-                        break;
-                }
-                switch (playerInfo.getSkinColor()) {
-                    case CreatureConstants.SKIN_COLOR_SHEEP:
-                    case CreatureConstants.SKIN_COLOR_HORSE:
-                    case CreatureConstants.SKIN_COLOR_FROG:
-                    case CreatureConstants.SKIN_COLOR_CHICKEN:
-                        exemptionJsonArray.add(true);
-                        exemptionJsonArray.add(true);
-                        break;
-                    case CreatureConstants.SKIN_COLOR_PAOFU:
-                    case CreatureConstants.SKIN_COLOR_MONKEY:
-                    case CreatureConstants.SKIN_COLOR_FOX:
-                    case CreatureConstants.SKIN_COLOR_CAT:
-                    case CreatureConstants.SKIN_COLOR_DOG:
-                    case CreatureConstants.SKIN_COLOR_RACOON:
-                    case CreatureConstants.SKIN_COLOR_BUFFALO:
-                        exemptionJsonArray.add(false);
-                        exemptionJsonArray.add(true);
-                        break;
-                    case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
-                    case CreatureConstants.SKIN_COLOR_TIGER:
-                    case CreatureConstants.SKIN_COLOR_WOLF:
-                    case CreatureConstants.SKIN_COLOR_BOAR:
-                    default:
-                        exemptionJsonArray.add(false);
-                        exemptionJsonArray.add(false);
-                        break;
-                }
+                setNpcBehaviorAndExemptions(playerInfo.getSkinColor(), behaviorRequest, exemptionJsonArray);
                 exemptionJsonArray.add(false);
                 exemptionJsonArray.add(true);
             }
@@ -192,6 +141,61 @@ public class NpcManagerImpl implements NpcManager {
             changeNpcBehavior(behaviorRequest);
         }
         return player;
+    }
+
+    private void setNpcBehaviorAndExemptions(int skinColor, JSONObject behaviorRequest, JSONArray exemptionJsonArray) {
+        switch (skinColor) {
+            case CreatureConstants.SKIN_COLOR_PAOFU:
+            case CreatureConstants.SKIN_COLOR_MONKEY:
+            case CreatureConstants.SKIN_COLOR_FOX:
+            case CreatureConstants.SKIN_COLOR_CAT:
+            case CreatureConstants.SKIN_COLOR_DOG:
+                behaviorRequest.put("stance", CreatureConstants.STANCE_DEFENSIVE);
+                break;
+            case CreatureConstants.SKIN_COLOR_RACOON:
+                behaviorRequest.put("stance", CreatureConstants.STANCE_STAND_GROUND);
+                break;
+            case CreatureConstants.SKIN_COLOR_FROG:
+            case CreatureConstants.SKIN_COLOR_CHICKEN:
+            case CreatureConstants.SKIN_COLOR_SHEEP:
+            case CreatureConstants.SKIN_COLOR_HORSE:
+                behaviorRequest.put("stance", CreatureConstants.STANCE_NO_ATTACK);
+                break;
+            case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
+            case CreatureConstants.SKIN_COLOR_TIGER:
+            case CreatureConstants.SKIN_COLOR_WOLF:
+            case CreatureConstants.SKIN_COLOR_BOAR:
+            default:
+                behaviorRequest.put("stance", CreatureConstants.STANCE_AGGRESSIVE);
+                break;
+        }
+        switch (skinColor) {
+            case CreatureConstants.SKIN_COLOR_SHEEP:
+            case CreatureConstants.SKIN_COLOR_HORSE:
+            case CreatureConstants.SKIN_COLOR_FROG:
+            case CreatureConstants.SKIN_COLOR_CHICKEN:
+                exemptionJsonArray.add(true);
+                exemptionJsonArray.add(true);
+                break;
+            case CreatureConstants.SKIN_COLOR_PAOFU:
+            case CreatureConstants.SKIN_COLOR_MONKEY:
+            case CreatureConstants.SKIN_COLOR_FOX:
+            case CreatureConstants.SKIN_COLOR_CAT:
+            case CreatureConstants.SKIN_COLOR_DOG:
+            case CreatureConstants.SKIN_COLOR_RACOON:
+            case CreatureConstants.SKIN_COLOR_BUFFALO:
+                exemptionJsonArray.add(false);
+                exemptionJsonArray.add(true);
+                break;
+            case CreatureConstants.SKIN_COLOR_POLAR_BEAR:
+            case CreatureConstants.SKIN_COLOR_TIGER:
+            case CreatureConstants.SKIN_COLOR_WOLF:
+            case CreatureConstants.SKIN_COLOR_BOAR:
+            default:
+                exemptionJsonArray.add(false);
+                exemptionJsonArray.add(false);
+                break;
+        }
     }
 
     private NpcBrain generateNpcBrain() {
