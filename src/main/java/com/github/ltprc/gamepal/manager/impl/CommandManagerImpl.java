@@ -142,6 +142,7 @@ public class CommandManagerImpl implements CommandManager {
                 }
             case "nwcoracle":
                 playerService.generateNotificationMessage(userCode, "先知带你看世界。");
+
                 String animalUserCode = UUID.randomUUID().toString();
                 Block animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
@@ -154,7 +155,9 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getX().add(BigDecimal.valueOf(3)),
                                 player.getWorldCoordinate().getCoordinate().getY(),
                                 player.getWorldCoordinate().getCoordinate().getZ()));
+                BlockUtil.fixWorldCoordinate(region, worldCoordinate);
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
+
                 animalUserCode = UUID.randomUUID().toString();
                 animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
@@ -167,7 +170,9 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getX(),
                                 player.getWorldCoordinate().getCoordinate().getY().add(BigDecimal.valueOf(3)),
                                 player.getWorldCoordinate().getCoordinate().getZ()));
+                BlockUtil.fixWorldCoordinate(region, worldCoordinate);
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
+
                 animalUserCode = UUID.randomUUID().toString();
                 animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
@@ -180,7 +185,9 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getX().subtract(BigDecimal.valueOf(3)),
                                 player.getWorldCoordinate().getCoordinate().getY(),
                                 player.getWorldCoordinate().getCoordinate().getZ()));
+                BlockUtil.fixWorldCoordinate(region, worldCoordinate);
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
+
                 animalUserCode = UUID.randomUUID().toString();
                 animal = npcManager.createCreature(world, GamePalConstants.PLAYER_TYPE_NPC,
                         CreatureConstants.CREATURE_TYPE_ANIMAL, animalUserCode);
@@ -193,6 +200,7 @@ public class CommandManagerImpl implements CommandManager {
                                 player.getWorldCoordinate().getCoordinate().getX(),
                                 player.getWorldCoordinate().getCoordinate().getY().subtract(BigDecimal.valueOf(3)),
                                 player.getWorldCoordinate().getCoordinate().getZ()));
+                BlockUtil.fixWorldCoordinate(region, worldCoordinate);
                 npcManager.putCreature(world, animalUserCode, worldCoordinate);
                 break;
             case "nwcignoranceisbliss":

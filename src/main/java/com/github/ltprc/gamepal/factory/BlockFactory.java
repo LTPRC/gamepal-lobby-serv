@@ -408,7 +408,7 @@ public class BlockFactory {
                 structure = new Structure(convertMeleeShootCode2Material(blockCode),
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                         new Coordinate(BlockConstants.MELEE_RADIUS, BlockConstants.MELEE_RADIUS,
-                                BlockConstants.MELEE_RADIUS)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
+                                BlockConstants.MELEE_HEIGHT)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_SHOOT:
                 structure = new Structure(convertMeleeShootCode2Material(blockCode),

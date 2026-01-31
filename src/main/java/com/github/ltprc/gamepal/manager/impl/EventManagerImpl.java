@@ -461,12 +461,12 @@ public class EventManagerImpl implements EventManager {
                     return;
                 }
                 Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
-                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(),
-                        BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                region, block.getWorldCoordinate(),
-                                BigDecimal.valueOf(random.nextDouble() * 360),
-                                BlockConstants.BLEED_RADIUS_MAX.multiply(
-                                        BigDecimal.valueOf(random.nextDouble()))));
+//                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(),
+//                        BlockUtil.locateCoordinateWithDirectionAndDistance(
+//                                region, block.getWorldCoordinate(),
+//                                BigDecimal.valueOf(random.nextDouble() * 360),
+//                                BlockConstants.BLEED_RADIUS_MAX.multiply(
+//                                        BigDecimal.valueOf(random.nextDouble()))));
             } else if (newHp > oldHp) {
                 if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
                         || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {

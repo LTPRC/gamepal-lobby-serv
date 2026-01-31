@@ -564,6 +564,8 @@ public class BlockUtil {
         switch (blockType) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+            case BlockConstants.BLOCK_TYPE_MELEE:
+            case BlockConstants.BLOCK_TYPE_SHOOT:
                 return false;
             default:
                 return true;

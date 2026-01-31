@@ -283,8 +283,10 @@ public class BlockConstants {
     public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal BLEED_RADIUS_MAX = BigDecimal.valueOf(0.1D);
     public static final BigDecimal DODGE_RADIUS = BigDecimal.valueOf(-0.5D);
-    public static final BigDecimal TEXT_DISPLAY_SHIFT_DISTANCE = BigDecimal.ONE;
+    public static final BigDecimal TEXT_DISPLAY_PLANAR_DISTANCE = BigDecimal.ONE;
+    public static final BigDecimal TEXT_DISPLAY_VERTICAL_DISTANCE = BigDecimal.ONE;
     public static final BigDecimal MELEE_RADIUS = BigDecimal.ONE;
+    public static final BigDecimal MELEE_HEIGHT = BigDecimal.valueOf(0.25D);
     public static final BigDecimal SHOOT_RADIUS = BigDecimal.valueOf(0.25D);
 
     public static final int HP_DEFAULT = 100;

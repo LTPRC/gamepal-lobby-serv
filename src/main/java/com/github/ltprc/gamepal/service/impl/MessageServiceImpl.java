@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.IntStream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -98,12 +99,12 @@ public class MessageServiceImpl implements MessageService {
         switch (msg.getScope()) {
             case MessageConstants.SCOPE_GLOBAL:
                 world.getOnlineMap().keySet().stream()
-                        .filter(id -> !StringUtils.equals(id, userCode))
+                        .filter(id -> !StringUtils.equals(id, msg.getFromUserCode()))
                         .forEach(id -> saveMessage(id, msg));
                 break;
             case MessageConstants.SCOPE_TEAMMATE:
                 world.getOnlineMap().keySet().stream()
-                        .filter(id -> !StringUtils.equals(id, userCode))
+                        .filter(id -> !StringUtils.equals(id, msg.getFromUserCode()))
                         .filter(id -> StringUtils.equals(playerService.findTopBossId(id),
                                 playerService.findTopBossId(msg.getFromUserCode())))
                         .forEach(id -> saveMessage(id, msg));
@@ -113,7 +114,7 @@ public class MessageServiceImpl implements MessageService {
                 break;
             case MessageConstants.SCOPE_NEARBY:
                 world.getOnlineMap().keySet().stream()
-                        .filter(id -> !StringUtils.equals(id, userCode))
+                        .filter(id -> !StringUtils.equals(id, msg.getFromUserCode()))
                         .filter(id -> {
                             BigDecimal distance = BlockUtil.calculatePlanarDistance(region, player.getWorldCoordinate(),
                                     world.getCreatureMap().get(id).getWorldCoordinate());
@@ -126,7 +127,9 @@ public class MessageServiceImpl implements MessageService {
             default:
                 break;
         }
-        saveMessage(msg.getFromUserCode(), msg);
+        if (!StringUtils.equals(msg.getFromUserCode(), msg.getToUserCode())) {
+            saveMessage(msg.getFromUserCode(), msg);
+        }
         return ResponseEntity.ok().body(rst.toString());
     }
 
@@ -140,20 +143,32 @@ public class MessageServiceImpl implements MessageService {
         if (GamePalConstants.PLAYER_TYPE_HUMAN == world.getPlayerInfoMap().get(userCode).getPlayerType()) {
             Map<String, Queue<Message>> messageMap = world.getMessageMap();
             messageMap.putIfAbsent(userCode, new LinkedBlockingDeque<>());
-            messageMap.get(userCode).add(msg);
             Map<String, Block> creatureMap = world.getCreatureMap();
             if (!creatureMap.containsKey(userCode)) {
                 logger.error(ErrorUtil.ERROR_1007 + "userCode: " + userCode);
                 return;
             }
-            if (MessageConstants.SCOPE_SELF != msg.getScope()) {
-                WorldCoordinate senderWc = creatureMap.get(msg.getFromUserCode()).getWorldCoordinate();
-                sceneManager.addTextDisplayBlock(world, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                        world.getRegionMap().get(senderWc.getRegionNo()), senderWc,
-                        BigDecimal.valueOf(random.nextDouble() * 360),
-                        BlockConstants.TEXT_DISPLAY_SHIFT_DISTANCE),
-                        BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg.getContent());
-            }
+            WorldCoordinate senderWc = creatureMap.get(msg.getFromUserCode()).getWorldCoordinate();
+            // Split long message
+            IntStream.range(0, msg.getContent().length() / MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX + 1)
+                    .mapToObj(i -> msg.getContent().substring(
+                            i * MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX,
+                            Math.min((i + 1) * MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX, msg.getContent().length())
+                    ))
+                    .map(content -> new Message(msg.getType(), msg.getScope(), msg.getFromUserCode(), msg.getToUserCode(), content))
+                    .forEach(msg1 -> {
+                        messageMap.get(userCode).add(msg1);
+                        if (MessageConstants.SCOPE_SELF != msg1.getScope()) {
+                            WorldCoordinate textBlockCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                    world.getRegionMap().get(senderWc.getRegionNo()), senderWc,
+                                    BigDecimal.valueOf(random.nextDouble() * 360),
+                                    BlockConstants.TEXT_DISPLAY_PLANAR_DISTANCE);
+                            textBlockCoordinate.getCoordinate().setZ(textBlockCoordinate.getCoordinate().getZ()
+                                    .add(BlockConstants.TEXT_DISPLAY_VERTICAL_DISTANCE));
+                            sceneManager.addTextDisplayBlock(world, textBlockCoordinate,
+                                    BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg1.getContent());
+                        }
+                    });
         } else if (GamePalConstants.PLAYER_TYPE_NPC == world.getPlayerInfoMap().get(userCode).getPlayerType()
                 && CreatureConstants.CREATURE_TYPE_HUMAN == world.getPlayerInfoMap().get(userCode).getCreatureType()
                 && !StringUtils.equals(userCode, msg.getFromUserCode())) {
@@ -239,20 +254,20 @@ public class MessageServiceImpl implements MessageService {
                                 returnedMessage.setContent(content);
                                 collectMessage(msg.getFromUserCode(), returnedMessage);
                             });
-                    if (null != qwenResponse && null != qwenResponse.getOutput()) {
-                        List<String> qwenResponseList
-                                = JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class);
-                        int newRelation = Integer.parseInt(qwenResponseList.get(0));
-                        playerService.setRelation(userCode, msg.getFromUserCode(), newRelation, true, true);
-                        String content = qwenResponseList.get(1);
-                        Message returnedMessage = new Message();
-                        returnedMessage.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
-                        returnedMessage.setScope(MessageConstants.SCOPE_INDIVIDUAL);
-                        returnedMessage.setFromUserCode(userCode);
-                        returnedMessage.setToUserCode(msg.getFromUserCode());
-                        returnedMessage.setContent(content);
-                        collectMessage(msg.getFromUserCode(), returnedMessage);
-                    }
+//                    if (null != qwenResponse && null != qwenResponse.getOutput()) {
+//                        List<String> qwenResponseList
+//                                = JSON.parseArray(qwenResponse.getOutput().getText()).toJavaList(String.class);
+//                        int newRelation = Integer.parseInt(qwenResponseList.get(0));
+//                        playerService.setRelation(userCode, msg.getFromUserCode(), newRelation, true, true);
+//                        String content = qwenResponseList.get(1);
+//                        Message returnedMessage = new Message();
+//                        returnedMessage.setType(MessageConstants.MESSAGE_TYPE_PRINTED);
+//                        returnedMessage.setScope(MessageConstants.SCOPE_INDIVIDUAL);
+//                        returnedMessage.setFromUserCode(userCode);
+//                        returnedMessage.setToUserCode(msg.getFromUserCode());
+//                        returnedMessage.setContent(content);
+//                        collectMessage(msg.getFromUserCode(), returnedMessage);
+//                    }
                 })
                 .exceptionally(throwable -> {
                     logger.error(ErrorUtil.ERROR_1044 + " message: " + throwable.getMessage());

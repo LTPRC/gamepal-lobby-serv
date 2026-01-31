@@ -306,25 +306,26 @@ public class WebSocketServiceImpl implements WebSocketService {
         Map<String, Queue<Message>> messageMap = world.getMessageMap();
         if (messageMap.containsKey(userCode) && !messageMap.get(userCode).isEmpty()) {
             JSONArray messages = new JSONArray();
-            messages.addAll(messageMap.get(userCode).stream()
-                    .flatMap(message -> {
-                        String content = message.getContent();
-                        if (null == content || content.length() <= MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX) {
-                            return Stream.of(new Message(message));
-                        } else {
-                            // 需要拆分 content
-                            List<Message> parts = new ArrayList<>();
-                            for (int i = 0; i < content.length(); i += MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX) {
-                                int end = Math.min(i + MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX, content.length());
-                                String subContent = content.substring(i, end);
-                                Message part = new Message(message);
-                                part.setContent(subContent);
-                                parts.add(part);
-                            }
-                            return parts.stream();
-                        }
-                    })
-                    .collect(Collectors.toList()));
+//            messages.addAll(messageMap.get(userCode).stream()
+//                    .flatMap(message -> {
+//                        String content = message.getContent();
+//                        if (null == content || content.length() <= MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX) {
+//                            return Stream.of(new Message(message));
+//                        } else {
+//                            // 需要拆分 content
+//                            List<Message> parts = new ArrayList<>();
+//                            for (int i = 0; i < content.length(); i += MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX) {
+//                                int end = Math.min(i + MessageConstants.CHAT_DISPLAY_LINE_CHAR_SIZE_MAX, content.length());
+//                                String subContent = content.substring(i, end);
+//                                Message part = new Message(message);
+//                                part.setContent(subContent);
+//                                parts.add(part);
+//                            }
+//                            return parts.stream();
+//                        }
+//                    })
+//                    .collect(Collectors.toList()));
+            messages.addAll(messageMap.get(userCode));
             messageMap.get(userCode).clear();
             rst.put("messages", messages);
         }
