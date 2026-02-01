@@ -179,7 +179,7 @@ public class EventManagerImpl implements EventManager {
                             .filter(flameCoordinate -> {
                                 BigDecimal distance = BlockUtil.calculatePlanarDistance(regionMap.get(
                                         worldCoordinate.getRegionNo()), fromWorldCoordinate, flameCoordinate);
-                                return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) > 0;
+                                return null != distance && distance.compareTo(BlockConstants.FLAME_FIRE_DISTANCE) > 0;
                             })
                             .collect(Collectors.toList());
                     equidistantPoints.add(worldCoordinate);

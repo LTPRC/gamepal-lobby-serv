@@ -559,7 +559,8 @@ public class SceneManagerImpl implements SceneManager {
     public List<Block> collideBlocks(final GameWorld world, WorldCoordinate fromWorldCoordinate, Block eventBlock,
                                      boolean relocate) {
         List<Block> preSelectedBlocks = collectBlocks(world, fromWorldCoordinate, eventBlock);
-        BigDecimal radius;
+        BigDecimal planarDistance;
+        BigDecimal verticalDistance;
         switch (eventBlock.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_SHOOT:
                 return preSelectedBlocks.stream()
@@ -572,28 +573,28 @@ public class SceneManagerImpl implements SceneManager {
                         .filter(blocker -> movementManager.detectSectorCollision(world, fromWorldCoordinate, eventBlock,
                                 blocker, sectorAngle))
                         .collect(Collectors.toList());
-//                return preSelectedBlocks.stream()
-//                        .filter(blocker -> movementManager.detectSphereInfluence(world, fromWorldCoordinate, eventBlock,
-//                                blocker, BlockConstants.MELEE_RADIUS))
-//                        .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (eventBlock.getBlockInfo().getCode()) {
                     case BlockConstants.BLOCK_CODE_EXPLODE:
-                        radius = BlockConstants.EXPLODE_RADIUS;
+                        planarDistance = BlockConstants.EXPLODE_RADIUS;
+                        verticalDistance = BlockConstants.EXPLODE_RADIUS;
                         break;
                     case BlockConstants.BLOCK_CODE_FIRE:
-                        radius = BlockConstants.FIRE_RADIUS;
+                        planarDistance = BlockConstants.FIRE_PLANAR_DISTANCE;
+                        verticalDistance = BlockConstants.FIRE_VERTICAL_DISTANCE;
                         break;
                     case BlockConstants.BLOCK_CODE_SPRAY:
-                        radius = BlockConstants.SPRAY_RADIUS;
+                        planarDistance = BlockConstants.SPRAY_PLANAR_DISTANCE;
+                        verticalDistance = BlockConstants.SPRAY_VERTICAL_DISTANCE;
                         break;
                     default:
-                        radius = BigDecimal.ZERO;
+                        planarDistance = BigDecimal.ZERO;
+                        verticalDistance = BigDecimal.ZERO;
                         break;
                 }
                 return preSelectedBlocks.stream()
-                        .filter(blocker -> movementManager.detectSphereInfluence(world, fromWorldCoordinate, eventBlock,
-                                blocker, radius))
+                        .filter(blocker -> movementManager.detectCylinderInfluence(world, fromWorldCoordinate, eventBlock,
+                                blocker, planarDistance, verticalDistance))
                         .collect(Collectors.toList());
             default:
                 return preSelectedBlocks;

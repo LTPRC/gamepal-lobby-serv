@@ -416,7 +416,11 @@ public class WebSocketServiceImpl implements WebSocketService {
                 .map(Block::getBlockInfo)
                 .map(BlockInfo::getId)
                 .collect(Collectors.toSet());
-        userPlayerBlockMap.keySet().removeIf(blockId -> !queueIds.contains(blockId));
+        // Create a copy of keys to avoid ConcurrentModificationException
+        Set<String> keysToRemove = userPlayerBlockMap.keySet().stream()
+                .filter(blockId -> !queueIds.contains(blockId))
+                .collect(Collectors.toSet());
+        userPlayerBlockMap.keySet().removeAll(keysToRemove);
         // Traverse every collected block
         JSONArray blocks = new JSONArray();
         JSONArray blockIdList = new JSONArray();

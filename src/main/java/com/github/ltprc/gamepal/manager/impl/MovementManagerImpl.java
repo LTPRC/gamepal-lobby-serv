@@ -686,12 +686,22 @@ public class MovementManagerImpl implements MovementManager {
         final double cos2 = cosHalf * cosHalf;
 
         // 加一点 epsilon，避免贴边抖动
-        return (dot * dot) + 1e-9 >= (dist2 * cos2);
+        return (dot * dot) + 1e-9 >= (dist2 * cos2) && detectCollision(world, block1, block2, false);
     }
 
+    /**
+     * No material check, no structure check
+     * @param world
+     * @param from
+     * @param block1
+     * @param block2
+     * @param planarDistance
+     * @param verticalDistance
+     * @return
+     */
     @Override
-    public boolean detectSphereInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
-                                         BigDecimal radius) {
+    public boolean detectCylinderInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                           BigDecimal planarDistance, BigDecimal verticalDistance) {
         Region region = world.getRegionMap().get(from.getRegionNo());
         if (region == null) return false;
 
@@ -700,8 +710,10 @@ public class MovementManagerImpl implements MovementManager {
             return false;
         }
 
-        double r = (radius == null) ? 0D : radius.doubleValue();
-        if (r <= 0) return false;
+        double pd = (planarDistance == null) ? 0D : planarDistance.doubleValue();
+        if (pd <= 0) return false;
+        double vd = (verticalDistance == null) ? 0D : verticalDistance.doubleValue();
+        if (vd <= 0) return false;
 
         final int h = region.getHeight();
         final int w = region.getWidth();
@@ -721,7 +733,6 @@ public class MovementManagerImpl implements MovementManager {
         final double dy = y2 - y1;
         final double dz = z2 - z1;
 
-        final double rr = r * r;
-        return (dx * dx + dy * dy + dz * dz) <= rr;
+        return (dx * dx + dy * dy) <= pd * pd && Math.abs(dz) <= vd;
     }
 }

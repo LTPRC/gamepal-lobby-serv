@@ -20,5 +20,6 @@ public interface MovementManager {
     boolean detectLinearCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2, boolean relocate);
     boolean detectSectorCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2,
                                   BigDecimal sectorAngle);
-    boolean detectSphereInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2, BigDecimal radius);
+    boolean detectCylinderInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                    BigDecimal planarDistance, BigDecimal verticalDistance);
 }
