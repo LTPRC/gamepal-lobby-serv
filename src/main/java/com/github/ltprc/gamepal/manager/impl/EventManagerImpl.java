@@ -380,32 +380,32 @@ public class EventManagerImpl implements EventManager {
                             sceneManager.setGridBlockCode(world, eventBlock.getWorldCoordinate(), BlockConstants.BLOCK_CODE_DIRT);
                         }
                         // Burn collected blocks
-                        List<Block> burntBlocks = sceneManager.collectBlocks(world, eventBlock.getWorldCoordinate(),
-                                eventBlock);
+                        List<Block> burntBlocks = sceneManager.collideBlocks(world, eventBlock.getWorldCoordinate(),
+                                eventBlock, false);
                         burntBlocks.stream()
                                 .filter(block -> block.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_PLAYER
                                         || playerService.validateActiveness(world, block.getBlockInfo().getId()))
-                                .filter(block -> {
-                                    BigDecimal distance = BlockUtil.calculateDistance(
-                                            world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
-                                            eventBlock.getWorldCoordinate(), block.getWorldCoordinate());
-                                    return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
-                                })
+//                                .filter(block -> {
+//                                    BigDecimal distance = BlockUtil.calculateDistance(
+//                                            world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
+//                                            eventBlock.getWorldCoordinate(), block.getWorldCoordinate());
+//                                    return null != distance && distance.compareTo(BlockConstants.FIRE_RADIUS) < 0;
+//                                })
                                 .forEach(targetBlock -> affectBlock(world, eventBlock, targetBlock));
                         break;
                     case BlockConstants.BLOCK_CODE_SPRAY:
                         // Extinguish fire
-                        List<Block> extinguishedBlocks = sceneManager.collectBlocks(world,
-                                eventBlock.getWorldCoordinate(), eventBlock);
+                        List<Block> extinguishedBlocks = sceneManager.collideBlocks(world,
+                                eventBlock.getWorldCoordinate(), eventBlock, false);
                         extinguishedBlocks.stream()
                                     .filter(block -> block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLASMA)
                                     .filter(block -> block.getBlockInfo().getCode() == BlockConstants.BLOCK_CODE_FIRE)
-                                    .filter(block -> {
-                                        BigDecimal distance = BlockUtil.calculateDistance(
-                                                world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
-                                                eventBlock.getWorldCoordinate(), block.getWorldCoordinate());
-                                        return null != distance && distance.compareTo(BlockConstants.SPRAY_RADIUS) < 0;
-                                    })
+//                                    .filter(block -> {
+//                                        BigDecimal distance = BlockUtil.calculateDistance(
+//                                                world.getRegionMap().get(eventBlock.getWorldCoordinate().getRegionNo()),
+//                                                eventBlock.getWorldCoordinate(), block.getWorldCoordinate());
+//                                        return null != distance && distance.compareTo(BlockConstants.SPRAY_RADIUS) < 0;
+//                                    })
                                     .forEach(block -> sceneManager.removeBlock(world, block, true));
                         break;
                     default:
@@ -461,12 +461,12 @@ public class EventManagerImpl implements EventManager {
                     return;
                 }
                 Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
-//                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(),
-//                        BlockUtil.locateCoordinateWithDirectionAndDistance(
-//                                region, block.getWorldCoordinate(),
-//                                BigDecimal.valueOf(random.nextDouble() * 360),
-//                                BlockConstants.BLEED_RADIUS_MAX.multiply(
-//                                        BigDecimal.valueOf(random.nextDouble()))));
+                addEvent(world, BlockConstants.BLOCK_CODE_BLEED, block.getBlockInfo().getId(),
+                        BlockUtil.locateCoordinateWithDirectionAndDistance(
+                                region, block.getWorldCoordinate(),
+                                BigDecimal.valueOf(random.nextDouble() * 360),
+                                BlockConstants.BLEED_RADIUS_MAX.multiply(
+                                        BigDecimal.valueOf(random.nextDouble()))));
             } else if (newHp > oldHp) {
                 if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] != 0
                         || playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] != 0) {

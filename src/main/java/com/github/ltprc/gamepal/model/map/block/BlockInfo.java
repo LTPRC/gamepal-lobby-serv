@@ -66,7 +66,7 @@ public class BlockInfo {
 
     public void setHp(int hp, long timestamp) {
         this.hp.set(hp);
-        setTimeUpdated(timestamp);
+//        setTimeUpdated(timestamp);
     }
 
     public void setTimeCreated(long timeCreated) {

@@ -276,7 +276,7 @@ public class BlockConstants {
     public static final BigDecimal EXPLODE_RADIUS = BigDecimal.valueOf(2);
     public static final BigDecimal MINE_RADIUS = BigDecimal.ONE;
     public static final BigDecimal WIRE_NETTING_RADIUS = BigDecimal.valueOf(0.4D);
-    public static final BigDecimal FIRE_RADIUS = BigDecimal.ONE;
+    public static final BigDecimal FIRE_RADIUS = BigDecimal.valueOf(0.75D);
     public static final BigDecimal SPRAY_RADIUS = BigDecimal.ONE;
     public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.1D);
