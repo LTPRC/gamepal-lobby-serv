@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -579,7 +580,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Override
     public void resetPlayerBlockMapByUser(String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
-        world.getPlayerBlockMap().put(userCode, new HashMap<>());
+        world.getPlayerBlockMap().put(userCode, new ConcurrentHashMap<>());
     }
 
     @Override

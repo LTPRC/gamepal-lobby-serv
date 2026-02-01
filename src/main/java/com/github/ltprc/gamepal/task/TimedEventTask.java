@@ -75,38 +75,18 @@ public class TimedEventTask {
             Map<String, Block> creatureMap = world.getCreatureMap();
             Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
 
-//            Map<Integer, Set<IntegerCoordinate>> preSelectedSceneCoordinates = new HashMap<>();
             onlineMap.keySet().stream()
                     .filter(creatureMap::containsKey)
                     .filter(id -> playerInfoMap.get(id).getPlayerStatus() == GamePalConstants.PLAYER_STATUS_RUNNING)
-                    .forEach(id -> {
-                        Block player = creatureMap.get(id);
-                        Region region = world.getRegionMap().get(player.getWorldCoordinate().getRegionNo());
-                        // Pre-select scenes for updating events
-//                        preSelectedSceneCoordinates.putIfAbsent(region.getRegionNo(), new HashSet<>());
-//                        preSelectedSceneCoordinates.get(region.getRegionNo())
-//                                .add(player.getWorldCoordinate().getSceneCoordinate());
-                        // Update buff time
-                        buffManager.updateBuffTime(world, id);
-                        movementManager.settleVerticalAcceleration(world, player);
-                    });
+                    .forEach(id -> buffManager.updateBuffTime(world, id));
 
-//            preSelectedSceneCoordinates.forEach((regionNo, sceneCoordinates) -> {
-//                Region region = world.getRegionMap().get(regionNo);
-//                sceneCoordinates.forEach(sceneCoordinate -> {
-//                    Scene scene = region.getScenes().get(sceneCoordinate);
-//                    scene.getBlocks().values().forEach(block -> {
-//                        // Update events
-//                        eventManager.updateEvent(world, block, timestamp);
-//                        movementManager.settleVerticalAcceleration(world, block);
-//                    });
-//                });
-//            });
             world.getBlockMap().values()
                     .forEach(block -> {
                         eventManager.updateEvent(world, block, timestamp);
                         movementManager.settleVerticalAcceleration(world, block);
                     });
+            world.getCreatureMap().values()
+                    .forEach(player -> movementManager.settleVerticalAcceleration(world, player));
 
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))

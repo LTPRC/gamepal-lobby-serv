@@ -112,6 +112,9 @@ public class MessageServiceImpl implements MessageService {
             case MessageConstants.SCOPE_INDIVIDUAL:
                 saveMessage(msg.getToUserCode(), msg);
                 break;
+            case MessageConstants.SCOPE_SELF:
+                saveMessage(msg.getFromUserCode(), msg);
+                break;
             case MessageConstants.SCOPE_NEARBY:
                 world.getOnlineMap().keySet().stream()
                         .filter(id -> !StringUtils.equals(id, msg.getFromUserCode()))
@@ -123,7 +126,6 @@ public class MessageServiceImpl implements MessageService {
                         })
                         .forEach(id -> saveMessage(id, msg));
                 break;
-            case MessageConstants.SCOPE_SELF:
             default:
                 break;
         }

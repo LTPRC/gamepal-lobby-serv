@@ -478,7 +478,8 @@ public class SceneManagerImpl implements SceneManager {
                                 player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
                                 ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
                                 : null, block)) {
-                            rankingQueue.add(new StructuredBlock(block, structureMap.get(block.getBlockInfo().getCode())));
+                            rankingQueue.add(new StructuredBlock(block,
+                                    structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())));
                             collectTransformedBlocks(world, rankingQueue, block);
                         }
                     });
@@ -512,7 +513,8 @@ public class SceneManagerImpl implements SceneManager {
 //                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
 //                                        player.getWorldCoordinate().getSceneCoordinate()),
 //                                region.getHeight(), region.getWidth());
-                        rankingQueue.add(new StructuredBlock(player1, structureMap.get(player1.getBlockInfo().getCode())));
+                        rankingQueue.add(new StructuredBlock(player1,
+                                structureMap.getOrDefault(player1.getBlockInfo().getCode(), new Structure())));
                     }
                 });
         return rankingQueue;
@@ -523,13 +525,13 @@ public class SceneManagerImpl implements SceneManager {
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_DROP:
                 rankingQueue.add(new StructuredBlock(new Block(block.getWorldCoordinate(),
-                        BlockFactory.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_SHADOW),
-                        new MovementInfo()), structureMap.get(block.getBlockInfo().getCode())));
+                        BlockFactory.createBlockInfoByCode(BlockConstants.BLOCK_CODE_DROP_SHADOW), new MovementInfo()),
+                        structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())));
                 break;
             case BlockConstants.BLOCK_TYPE_FARM:
                 Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
                 cropBlock.ifPresent(cropBlock1 -> rankingQueue.add(new StructuredBlock(cropBlock1,
-                        structureMap.get(cropBlock1.getBlockInfo().getCode()))));
+                        structureMap.getOrDefault(cropBlock1.getBlockInfo().getCode(), new Structure()))));
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
             case BlockConstants.BLOCK_TYPE_WALL:
@@ -546,9 +548,11 @@ public class SceneManagerImpl implements SceneManager {
                             BlockFactory.createBlockInfoByCode(crackCode), new MovementInfo());
                     crackBlock.getWorldCoordinate().getCoordinate().setZ(
                             crackBlock.getWorldCoordinate().getCoordinate().getZ()
-                                    .add(structureMap.get(block.getBlockInfo().getCode()).getShape().getRadius().getZ())
+                                    .add(structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
+                                            .getShape().getRadius().getZ())
                                     .subtract(BigDecimal.ONE));
-                    rankingQueue.add(new StructuredBlock(crackBlock, structureMap.get(crackCode)));
+                    rankingQueue.add(new StructuredBlock(crackBlock,
+                            structureMap.getOrDefault(crackCode, new Structure())));
                 }
                 break;
             default:
@@ -561,6 +565,8 @@ public class SceneManagerImpl implements SceneManager {
         List<Block> preSelectedBlocks = collectBlocks(world, fromWorldCoordinate, eventBlock);
         BigDecimal planarDistance;
         BigDecimal verticalDistance;
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        Structure structure1 = structureMap.getOrDefault(eventBlock.getBlockInfo().getCode(), new Structure());
         switch (eventBlock.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_SHOOT:
                 return preSelectedBlocks.stream()
@@ -570,6 +576,9 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_MELEE:
                 BigDecimal sectorAngle = SkillConstants.SKILL_ANGLE_MELEE_MAX;
                 return preSelectedBlocks.stream()
+                        .filter(blocker -> BlockUtil.checkMaterials(false, structure1.getMaterial(),
+                                structureMap.getOrDefault(blocker.getBlockInfo().getCode(), new Structure())
+                                        .getMaterial()))
                         .filter(blocker -> movementManager.detectSectorCollision(world, fromWorldCoordinate, eventBlock,
                                 blocker, sectorAngle))
                         .collect(Collectors.toList());
@@ -593,6 +602,9 @@ public class SceneManagerImpl implements SceneManager {
                         break;
                 }
                 return preSelectedBlocks.stream()
+                        .filter(blocker -> BlockUtil.checkMaterials(false, structure1.getMaterial(),
+                                structureMap.getOrDefault(blocker.getBlockInfo().getCode(), new Structure())
+                                        .getMaterial()))
                         .filter(blocker -> movementManager.detectCylinderInfluence(world, fromWorldCoordinate, eventBlock,
                                 blocker, planarDistance, verticalDistance))
                         .collect(Collectors.toList());
@@ -764,7 +776,8 @@ public class SceneManagerImpl implements SceneManager {
         }
         Block block = addOtherBlock(world, worldCoordinate, BlockConstants.BLOCK_CODE_DROP_DEFAULT);
         world.getDropMap().put(block.getBlockInfo().getId(), drop);
-        Coordinate dropSpeed = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BlockConstants.DROP_THROW_RADIUS);
+        Coordinate dropSpeed = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.valueOf(random.nextDouble() * BlockConstants.DROP_THROW_HEIGHT_MAX.doubleValue()));
         movementManager.speedUpBlock(world, block, BlockUtil.locateCoordinateWithDirectionAndDistance(dropSpeed,
                 BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS));
         return block;
@@ -820,7 +833,8 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
                 Map<Integer, Structure> structureMap = worldService.getStructureMap();
                 block.getWorldCoordinate().getCoordinate().setZ(block.getWorldCoordinate().getCoordinate().getZ()
-                        .subtract(structureMap.get(block.getBlockInfo().getCode()).getShape().getRadius().getZ()));
+                        .subtract(structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())
+                                .getShape().getRadius().getZ()));
                 break;
             default:
                 break;
@@ -1070,8 +1084,7 @@ public class SceneManagerImpl implements SceneManager {
     public void updateBlockAltitude(GameWorld world, Block block) {
         if (BlockUtil.checkBlockTypeGravity(block.getBlockInfo().getType())) {
             block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate()));
-            long timestamp = System.currentTimeMillis();
-            block.getBlockInfo().setTimeUpdated(timestamp);
+            webSocketService.resetPlayerBlockMapByBlock(world, block.getBlockInfo().getId());
         }
     }
 

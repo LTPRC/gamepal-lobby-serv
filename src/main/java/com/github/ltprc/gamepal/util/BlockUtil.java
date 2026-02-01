@@ -603,6 +603,11 @@ public class BlockUtil {
                 worldCoordinate.getCoordinate().getY().add(BigDecimal.valueOf(0.5D)).intValue());
     }
 
+    public static boolean checkMaterials(boolean relocate, int structureMaterial1, int structureMaterial2) {
+        return relocate ? BlockUtil.checkMaterialStopMovement(structureMaterial1, structureMaterial2)
+                : BlockUtil.checkMaterialCollision(structureMaterial1, structureMaterial2);
+    }
+
     /**
      * Positive object's material VS. Negative object's material
      * @param structureMaterial1 Positive object's material
