@@ -14,6 +14,7 @@ import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.service.PlayerService;
+import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
 import com.github.ltprc.gamepal.util.SkillUtil;
@@ -46,6 +47,9 @@ public class EventManagerImpl implements EventManager {
 
     @Autowired
     private NpcManager npcManager;
+
+    @Autowired
+    private WebSocketService webSocketService;
 
     @Override
     public void addEvent(GameWorld world, int eventCode, String sourceId, WorldCoordinate worldCoordinate) {
@@ -362,7 +366,8 @@ public class EventManagerImpl implements EventManager {
         if (eventBlock.getBlockInfo().getFrameMax() == BlockConstants.FRAME_MAX_INFINITE_DEFAULT) {
             return;
         }
-        eventBlock.getBlockInfo().setFrame(eventBlock.getBlockInfo().getFrame() + 1, timestamp);
+        eventBlock.getBlockInfo().setFrame(eventBlock.getBlockInfo().getFrame() + 1);
+        webSocketService.resetPlayerBlockMapByBlock(world, eventBlock.getBlockInfo().getId());
         if (eventBlock.getBlockInfo().getFrame() >= eventBlock.getBlockInfo().getFrameMax()) {
             sceneManager.removeBlock(world, eventBlock, false);
             return;
@@ -473,7 +478,8 @@ public class EventManagerImpl implements EventManager {
                     return;
                 }
             }
-            block.getBlockInfo().setHp(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())), timestamp);
+            block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
+            webSocketService.resetPlayerBlockMapByBlock(world, block.getBlockInfo().getId());
             if (block.getBlockInfo().getHp().get() <= 0 && playerInfo.getBuff()[BuffConstants.BUFF_CODE_DEAD] == 0) {
                 playerService.knockPlayer(block.getBlockInfo().getId());
             }
@@ -481,7 +487,8 @@ public class EventManagerImpl implements EventManager {
             if (newHp < oldHp) {
                 addEvent(world, BlockConstants.BLOCK_CODE_DISINTEGRATE, block.getBlockInfo().getId(), block.getWorldCoordinate());
             }
-            block.getBlockInfo().setHp(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())), timestamp);
+            block.getBlockInfo().getHp().set(Math.max(0, Math.min(newHp, block.getBlockInfo().getHpMax().get())));
+            webSocketService.resetPlayerBlockMapByBlock(world, block.getBlockInfo().getId());
             if (block.getBlockInfo().getHp().get() <= 0) {
                 addEvent(world, BlockConstants.BLOCK_CODE_TAIL_SMOKE, block.getBlockInfo().getId(), block.getWorldCoordinate());
                 sceneManager.removeBlock(world, block, true);

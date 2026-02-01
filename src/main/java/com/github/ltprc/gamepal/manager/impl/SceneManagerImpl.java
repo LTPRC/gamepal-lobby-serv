@@ -2,7 +2,13 @@ package com.github.ltprc.gamepal.manager.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.github.ltprc.gamepal.config.*;
+import com.github.ltprc.gamepal.config.BlockConstants;
+import com.github.ltprc.gamepal.config.CreatureConstants;
+import com.github.ltprc.gamepal.config.FlagConstants;
+import com.github.ltprc.gamepal.config.GamePalConstants;
+import com.github.ltprc.gamepal.config.RegionConstants;
+import com.github.ltprc.gamepal.config.SceneConstants;
+import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
 import com.github.ltprc.gamepal.factory.SceneFactory;
 import com.github.ltprc.gamepal.manager.EventManager;
@@ -29,6 +35,7 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
+import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.BlockUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
@@ -45,7 +52,6 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +93,9 @@ public class SceneManagerImpl implements SceneManager {
 
     @Autowired
     private InteractionManager interactionManager;
+
+    @Autowired
+    private WebSocketService webSocketService;
 
     @Override
     public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
@@ -714,7 +723,9 @@ public class SceneManagerImpl implements SceneManager {
                     case BlockConstants.BLOCK_CODE_MINE:
                         if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))) {
                             // Only for the master of the mine
-                            block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG, timestamp);
+                            block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG);
+                            webSocketService.resetPlayerBlockMapByUserAndBlock(world, userCode,
+                                    block.getBlockInfo().getId());
                         }
                         break;
                     default:
@@ -897,6 +908,7 @@ public class SceneManagerImpl implements SceneManager {
                     .filter(entry -> StringUtils.equals(entry.getValue().getId(), block.getBlockInfo().getId()))
                     .forEach(entry -> interactionManager.focusOnBlock(world, entry.getKey(), null));
         }
+        webSocketService.resetPlayerBlockMapByBlock(world, block.getBlockInfo().getId());
     }
 
     private void destroyBlock(GameWorld world, Block block) {

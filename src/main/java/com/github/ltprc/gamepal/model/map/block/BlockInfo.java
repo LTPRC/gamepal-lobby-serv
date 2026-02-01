@@ -1,12 +1,11 @@
 package com.github.ltprc.gamepal.model.map.block;
 
 import com.github.ltprc.gamepal.config.BlockConstants;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Getter
+@Data
 public class BlockInfo {
 
     private int type;
@@ -41,54 +40,6 @@ public class BlockInfo {
         this.id = id;
         this.code = code;
         setTimeCreated(timestamp);
-        setTimeUpdated(timestamp);
-    }
-
-    public void setType(int type, long timestamp) {
-        this.type = type;
-        setTimeUpdated(timestamp);
-    }
-
-    public void setId(String id, long timestamp) {
-        this.id = id;
-        setTimeUpdated(timestamp);
-    }
-
-    public void setCode(int code, long timestamp) {
-        this.code = code;
-        setTimeUpdated(timestamp);
-    }
-
-    public void setHpMax(int hpMax, long timestamp) {
-        this.hpMax.set(hpMax);
-        setTimeUpdated(timestamp);
-    }
-
-    public void setHp(int hp, long timestamp) {
-        this.hp.set(hp);
-//        setTimeUpdated(timestamp);
-    }
-
-    public void setTimeCreated(long timeCreated) {
-        this.timeCreated = timeCreated;
-    }
-
-    public void setTimeUpdated(long timeUpdated) {
-        this.timeUpdated = timeUpdated;
-    }
-
-    public void setFrame(int frame, long timestamp) {
-        this.frame = frame;
-        setTimeUpdated(timestamp);
-    }
-
-    public void setFrameMax(int frameMax, long timestamp) {
-        this.frameMax = frameMax;
-        setTimeUpdated(timestamp);
-    }
-
-    public void setPeriod(int period, long timestamp) {
-        this.period = period;
         setTimeUpdated(timestamp);
     }
 }

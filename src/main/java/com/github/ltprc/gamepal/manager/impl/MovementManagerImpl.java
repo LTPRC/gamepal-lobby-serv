@@ -292,7 +292,7 @@ public class MovementManagerImpl implements MovementManager {
                 }
                 // Check location change
                 if (isSceneChanged) {
-                    webSocketService.resetPlayerBlockMap(worldMovingBlock.getBlockInfo().getId());
+                    webSocketService.resetPlayerBlockMapByUser(worldMovingBlock.getBlockInfo().getId());
                     world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_GRIDS] = true;
                     Scene scene = region.getScenes().get(worldMovingBlock.getWorldCoordinate().getSceneCoordinate());
                     playerService.generateNotificationMessage(worldMovingBlock.getBlockInfo().getId(),

@@ -87,7 +87,7 @@ public class NpcManagerImpl implements NpcManager {
         MovementInfo movementInfo = new MovementInfo();
 
         Block player = new Block(worldCoordinate, blockInfo, movementInfo);
-        player.getBlockInfo().setId(userCode, timestamp);
+        player.getBlockInfo().setId(userCode);
         player.getMovementInfo().setFaceDirection(BigDecimal.valueOf(Math.random() * 360D));
         PlayerInfo playerInfo = CreatureFactory.createCreatureInstance(playerType, creatureType);
         playerInfo.setTopBossId(userCode);

@@ -8,7 +8,6 @@ import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.CreatureConstants;
 import com.github.ltprc.gamepal.config.FlagConstants;
 import com.github.ltprc.gamepal.config.GamePalConstants;
-import com.github.ltprc.gamepal.config.MessageConstants;
 import com.github.ltprc.gamepal.config.SkillConstants;
 import com.github.ltprc.gamepal.factory.CreatureFactory;
 import com.github.ltprc.gamepal.manager.InteractionManager;
@@ -48,14 +47,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class WebSocketServiceImpl implements WebSocketService {
@@ -97,7 +93,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             return;
         }
         world.getSessionMap().put(userCode, session);
-        resetPlayerBlockMap(userCode);
+        resetPlayerBlockMapByUser(userCode);
         interactionManager.focusOnBlock(world, userCode, null);
         logger.info("建立连接成功");
         communicate(userCode, GamePalConstants.WEB_STAGE_START, null);
@@ -105,7 +101,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Override
     public void onClose(String userCode) {
-        resetPlayerBlockMap(userCode);
+        resetPlayerBlockMapByUser(userCode);
         logger.info("断开连接成功");
         userService.logoff(userCode, "", false);
     }
@@ -577,8 +573,19 @@ public class WebSocketServiceImpl implements WebSocketService {
     }
 
     @Override
-    public void resetPlayerBlockMap(String userCode) {
+    public void resetPlayerBlockMapByUser(String userCode) {
         GameWorld world = userService.getWorldByUserCode(userCode);
         world.getPlayerBlockMap().put(userCode, new HashMap<>());
+    }
+
+    @Override
+    public void resetPlayerBlockMapByBlock(GameWorld world, String id) {
+        world.getPlayerBlockMap().values()
+                .forEach(playerBlockMap -> playerBlockMap.remove(id));
+    }
+
+    @Override
+    public void resetPlayerBlockMapByUserAndBlock(GameWorld world, String userCode, String id) {
+        world.getPlayerBlockMap().get(userCode).remove(id);
     }
 }

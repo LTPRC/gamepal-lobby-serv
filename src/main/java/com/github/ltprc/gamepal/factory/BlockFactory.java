@@ -31,9 +31,9 @@ public class BlockFactory {
         String id = UUID.randomUUID().toString();
         BlockInfo blockInfo = new BlockInfo(blockType, id, blockCode, timestamp);
         initializeBlockInfoHp(blockInfo, timestamp);
-        blockInfo.setFrame(0, timestamp);
-        defineFrameMax(blockInfo, timestamp);
-        definePeriod(blockInfo, timestamp);
+        blockInfo.setFrame(0);
+        defineFrameMax(blockInfo);
+        definePeriod(blockInfo);
         return blockInfo;
     }
 
@@ -46,11 +46,11 @@ public class BlockFactory {
             default:
                 break;
         }
-        blockInfo.setHpMax(hpMax, timestamp);
+        blockInfo.getHpMax().set(hpMax);
         blockInfo.getHp().set(blockInfo.getHpMax().get());
     }
 
-    public static void defineFrameMax(BlockInfo blockInfo, long timestamp) {
+    public static void defineFrameMax(BlockInfo blockInfo) {
         int frameMax;
         switch (blockInfo.getType()) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
@@ -123,10 +123,10 @@ public class BlockFactory {
                 frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
                 break;
         }
-        blockInfo.setFrameMax(frameMax, timestamp);
+        blockInfo.setFrameMax(frameMax);
     }
 
-    public static void definePeriod(BlockInfo blockInfo, long timestamp) {
+    public static void definePeriod(BlockInfo blockInfo) {
         int period;
         switch (blockInfo.getType()) {
             case BlockConstants.BLOCK_TYPE_EFFECT:
@@ -178,7 +178,7 @@ public class BlockFactory {
                 period = BlockConstants.PERIOD_STATIC_DEFAULT;
                 break;
         }
-        blockInfo.setPeriod(period, timestamp);
+        blockInfo.setPeriod(period);
     }
 
     public static Structure createStructureByCode(int blockCode) {
