@@ -616,6 +616,11 @@ public class BlockUtil {
      */
     public static boolean checkMaterialStopMovement(int structureMaterial1, int structureMaterial2) {
         switch (structureMaterial1) {
+            case BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH:
+                return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_SOLID_FLESH
+                        || structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_TARGET;
             case BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH:
             case BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH:
                 return structureMaterial2 == BlockConstants.STRUCTURE_MATERIAL_ALL

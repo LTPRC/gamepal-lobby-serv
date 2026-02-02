@@ -206,14 +206,12 @@ public class BlockFactory {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
-                                new Coordinate(BigDecimal.valueOf(0.1D), BigDecimal.valueOf(0.1D),
+                                new Coordinate(BlockConstants.MIN_DROP_INTERACTION_DISTANCE,
+                                        BlockConstants.MIN_DROP_INTERACTION_DISTANCE,
                                         BlockConstants.Z_DEFAULT)),
                         new PlanarCoordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
                 break;
             case BlockConstants.BLOCK_TYPE_TRAP:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID_NO_FLESH,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
-                break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);

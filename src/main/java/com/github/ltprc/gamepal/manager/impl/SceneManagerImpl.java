@@ -472,18 +472,19 @@ public class SceneManagerImpl implements SceneManager {
                 if (null == scene) {
                     continue;
                 }
-                if (!CollectionUtils.isEmpty(scene.getBlocks())) {
-                    scene.getBlocks().values().forEach(block -> {
-                        if (PlayerInfoUtil.checkPerceptionCondition(region, player,
+                if (CollectionUtils.isEmpty(scene.getBlocks())) {
+                    continue;
+                }
+                scene.getBlocks().values().stream()
+                        .filter(block -> PlayerInfoUtil.checkPerceptionCondition(region, player,
                                 player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                                ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
-                                : null, block)) {
+                                        ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
+                                        : null, block))
+                        .forEach(block -> {
                             rankingQueue.add(new StructuredBlock(block,
                                     structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure())));
-                            collectTransformedBlocks(world, rankingQueue, block);
-                        }
-                    });
-                }
+                            collectTransformedBlocks(world, player.getBlockInfo().getId(), rankingQueue, block);
+                        });
             }
         }
         return rankingQueue;
@@ -504,23 +505,17 @@ public class SceneManagerImpl implements SceneManager {
                 // Creature blocks contain running player or NPC 24/03/25
                 .filter(player1 -> playerService.validateActiveness(world, player1.getBlockInfo().getId()))
                 .filter(player1 -> SkillUtil.isSceneDetected(player, player1.getWorldCoordinate(), sceneScanRadius))
-                .forEach(player1 -> {
-                    if (PlayerInfoUtil.checkPerceptionCondition(region, player,
-                            player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                                    ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
-                                    : null, player1)) {
-//                        BlockUtil.adjustCoordinate(newBlock.getWorldCoordinate().getCoordinate(),
-//                                BlockUtil.getCoordinateRelation(player.getWorldCoordinate().getSceneCoordinate(),
-//                                        player.getWorldCoordinate().getSceneCoordinate()),
-//                                region.getHeight(), region.getWidth());
-                        rankingQueue.add(new StructuredBlock(player1,
-                                structureMap.getOrDefault(player1.getBlockInfo().getCode(), new Structure())));
-                    }
-                });
+                .filter(block -> PlayerInfoUtil.checkPerceptionCondition(region, player,
+                        player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
+                                ? world.getPlayerInfoMap().get(player.getBlockInfo().getId()).getPerceptionInfo()
+                                : null, block))
+                .forEach(player1 -> rankingQueue.add(new StructuredBlock(player1,
+                        structureMap.getOrDefault(player1.getBlockInfo().getCode(), new Structure()))));
         return rankingQueue;
     }
 
-    private void collectTransformedBlocks(final GameWorld world, Queue<StructuredBlock> rankingQueue, Block block) {
+    private void collectTransformedBlocks(final GameWorld world, String collectorId,
+                                          Queue<StructuredBlock> rankingQueue, Block block) {
         Map<Integer, Structure> structureMap = worldService.getStructureMap();
         switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_DROP:
@@ -532,6 +527,19 @@ public class SceneManagerImpl implements SceneManager {
                 Optional<Block> cropBlock = farmManager.generateCropByFarm(world, block);
                 cropBlock.ifPresent(cropBlock1 -> rankingQueue.add(new StructuredBlock(cropBlock1,
                         structureMap.getOrDefault(cropBlock1.getBlockInfo().getCode(), new Structure()))));
+                break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                switch (block.getBlockInfo().getCode()) {
+                    case BlockConstants.BLOCK_CODE_MINE:
+                        if (StringUtils.equals(collectorId, world.getSourceMap().get(block.getBlockInfo().getId()))) {
+                            Block mineBlock = new Block(block.getWorldCoordinate(),
+                                    BlockFactory.createBlockInfoByCode(BlockConstants.BLOCK_CODE_MINE_FLAG),
+                                    new MovementInfo());
+                            rankingQueue.add(new StructuredBlock(mineBlock,
+                                    structureMap.getOrDefault(BlockConstants.BLOCK_CODE_MINE_FLAG, new Structure())));
+                        }
+                    break;
+                }
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
             case BlockConstants.BLOCK_TYPE_WALL:
@@ -731,20 +739,20 @@ public class SceneManagerImpl implements SceneManager {
                 WorldCoordinate to = world.getTeleportMap().get(block.getBlockInfo().getId());
                 rst.put("to", to);
                 break;
-            case BlockConstants.BLOCK_TYPE_TRAP:
-                switch (block.getBlockInfo().getCode()) {
-                    case BlockConstants.BLOCK_CODE_MINE:
-                        if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))) {
-                            // Only for the master of the mine
-                            block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG);
-                            webSocketService.resetPlayerBlockMapByUserAndBlock(world, userCode,
-                                    block.getBlockInfo().getId());
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
+//            case BlockConstants.BLOCK_TYPE_TRAP:
+//                switch (block.getBlockInfo().getCode()) {
+//                    case BlockConstants.BLOCK_CODE_MINE:
+//                        if (StringUtils.equals(userCode, world.getSourceMap().get(block.getBlockInfo().getId()))) {
+//                            // Only for the master of the mine
+//                            block.getBlockInfo().setCode(BlockConstants.BLOCK_CODE_MINE_FLAG);
+//                            webSocketService.resetPlayerBlockMapByUserAndBlock(world, userCode,
+//                                    block.getBlockInfo().getId());
+//                        }
+//                        break;
+//                    default:
+//                        break;
+//                }
+//                break;
             case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
                 rst.putAll(JSON.parseObject(JSON.toJSONString(world.getPlayerInfoMap().get(block.getBlockInfo().getId()))));
                 break;
@@ -777,9 +785,9 @@ public class SceneManagerImpl implements SceneManager {
         Block block = addOtherBlock(world, worldCoordinate, BlockConstants.BLOCK_CODE_DROP_DEFAULT);
         world.getDropMap().put(block.getBlockInfo().getId(), drop);
         Coordinate dropSpeed = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO,
-                BigDecimal.valueOf(random.nextDouble() * BlockConstants.DROP_THROW_HEIGHT_MAX.doubleValue()));
+                BigDecimal.valueOf(random.nextDouble() * BlockConstants.DROP_THROW_VERTICAL_SPEED_MAX.doubleValue()));
         movementManager.settleAcceleration(world, block, BlockUtil.locateCoordinateWithDirectionAndDistance(dropSpeed,
-                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS), null, null);
+                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_PLANAR_SPEED_MAX), null, null);
         return block;
     }
 

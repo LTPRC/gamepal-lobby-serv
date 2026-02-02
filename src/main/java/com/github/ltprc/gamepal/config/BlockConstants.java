@@ -281,8 +281,8 @@ public class BlockConstants {
     public static final BigDecimal FIRE_VERTICAL_DISTANCE = BigDecimal.valueOf(1.25D);
     public static final BigDecimal SPRAY_PLANAR_DISTANCE = BigDecimal.ONE;
     public static final BigDecimal SPRAY_VERTICAL_DISTANCE = BigDecimal.valueOf(0.25D);
-    public static final BigDecimal DROP_THROW_RADIUS = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal DROP_THROW_HEIGHT_MAX = BigDecimal.valueOf(0.1D);
+    public static final BigDecimal DROP_THROW_PLANAR_SPEED_MAX = BigDecimal.valueOf(0.2D);
+    public static final BigDecimal DROP_THROW_VERTICAL_SPEED_MAX = BigDecimal.valueOf(0.05D);
     public static final BigDecimal REMAIN_CONTAINER_THROW_RADIUS = BigDecimal.valueOf(0.1D);
     public static final BigDecimal BUBBLE_THROW_RADIUS = BigDecimal.valueOf(0.25D);
     public static final BigDecimal BLEED_RADIUS_MAX = BigDecimal.valueOf(0.1D);
