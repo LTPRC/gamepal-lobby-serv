@@ -235,6 +235,7 @@ public class BlockConstants {
     public static final int BLOCK_TYPE_TEXT_DISPLAY = 40;
     public static final int BLOCK_TYPE_MELEE = 41;
     public static final int BLOCK_TYPE_SHOOT = 42;
+    public static final int BLOCK_TYPE_EXPLOSION = 43;
 
     public static final int CROP_PERIOD = 250;
     public static final int CROP_STATUS_NONE = 0;
@@ -308,7 +309,7 @@ public class BlockConstants {
 
     static {
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_UPGRADE, BLOCK_TYPE_EFFECT);
-        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EXPLODE, BLOCK_TYPE_PLASMA);
+        BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_EXPLODE, BLOCK_TYPE_EXPLOSION);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLEED, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_BLOCK, BLOCK_TYPE_EFFECT);
         BLOCK_CODE_TYPE_MAP.put(BLOCK_CODE_HEAL, BLOCK_TYPE_EFFECT);

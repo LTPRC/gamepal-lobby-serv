@@ -591,6 +591,7 @@ public class SceneManagerImpl implements SceneManager {
                                 blocker, sectorAngle))
                         .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_PLASMA:
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
                 switch (eventBlock.getBlockInfo().getCode()) {
                     case BlockConstants.BLOCK_CODE_EXPLODE:
                         planarDistance = BlockConstants.EXPLODE_RADIUS;
@@ -630,7 +631,7 @@ public class SceneManagerImpl implements SceneManager {
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
         Set<IntegerCoordinate> preSelectedSceneCoordinates =
-                BlockUtil.preSelectSceneCoordinates(region, fromWorldCoordinate, eventBlock);
+                BlockUtil.preSelectLinearSceneCoordinates(region, fromWorldCoordinate, eventBlock.getWorldCoordinate());
         String sourceId = world.getSourceMap().containsKey(eventBlock.getBlockInfo().getId())
                 ? world.getSourceMap().get(eventBlock.getBlockInfo().getId())
                 : eventBlock.getBlockInfo().getId();

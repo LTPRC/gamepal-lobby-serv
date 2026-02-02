@@ -451,8 +451,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (null != convertedBlock
                     && (BlockConstants.BLOCK_TYPE_PLAYER == block.getBlockInfo().getType()
                     || BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER == block.getBlockInfo().getType()
-                    || !userPlayerBlockMap.containsKey(block.getBlockInfo().getId())
-                    || userPlayerBlockMap.get(block.getBlockInfo().getId())
+                    || userPlayerBlockMap.getOrDefault(block.getBlockInfo().getId(), 0L)
                     != block.getBlockInfo().getTimeUpdated())) {
                 blocks.add(convertedBlock);
                 userPlayerBlockMap.put(block.getBlockInfo().getId(), block.getBlockInfo().getTimeUpdated());

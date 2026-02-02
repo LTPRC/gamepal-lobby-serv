@@ -327,22 +327,8 @@ public class BlockUtil {
         return rst;
     }
 
-    public static Set<IntegerCoordinate> preSelectSceneCoordinates(Region region, WorldCoordinate fromWorldCoordinate,
-                                                                   Block eventBlock) {
-//        switch (eventBlock.getBlockInfo().getType()) {
-//            case BlockConstants.BLOCK_TYPE_TRAP:
-//            case BlockConstants.BLOCK_TYPE_PLASMA:
-//            case BlockConstants.BLOCK_TYPE_MELEE:
-//                return BlockUtil.preSelectRoundSceneCoordinates(region, fromWorldCoordinate,
-//                        eventBlock.getWorldCoordinate());
-//            default:
-                return BlockUtil.preSelectLinearSceneCoordinates(region, fromWorldCoordinate,
-                        eventBlock.getWorldCoordinate());
-//        }
-    }
-
-    private static Set<IntegerCoordinate> preSelectLinearSceneCoordinates(Region region, WorldCoordinate wc1,
-                                                                          WorldCoordinate wc2) {
+    public static Set<IntegerCoordinate> preSelectLinearSceneCoordinates(Region region, WorldCoordinate wc1,
+                                                                         WorldCoordinate wc2) {
         Set<IntegerCoordinate> rst = new HashSet<>();
         if (wc1.getRegionNo() != region.getRegionNo() || wc2.getRegionNo() != region.getRegionNo()) {
             return rst;
@@ -390,86 +376,6 @@ public class BlockUtil {
             }
         }
         return filtered;
-    }
-
-    public static Set<IntegerCoordinate> preSelectRoundSceneCoordinates(Region region, WorldCoordinate wc1,
-                                                                        WorldCoordinate wc2) {
-        Set<IntegerCoordinate> rst = new HashSet<>();
-        if (region == null || wc1 == null || wc2 == null) {
-            return rst;
-        }
-        if (wc1.getRegionNo() != region.getRegionNo() || wc2.getRegionNo() != region.getRegionNo()) {
-            return rst;
-        }
-
-        final int h = region.getHeight(); // 每个 scene 在 X 方向的长度
-        final int w = region.getWidth();  // 每个 scene 在 Y 方向的长度
-
-        // ===== 1) 计算圆心（全局平面坐标）=====
-        final double cx = wc1.getCoordinate().getX().doubleValue() + wc1.getSceneCoordinate().getX() * (double) h;
-        final double cy = wc1.getCoordinate().getY().doubleValue() + wc1.getSceneCoordinate().getY() * (double) w;
-
-        // ===== 2) 计算半径（全局平面距离）=====
-        final double x2 = wc2.getCoordinate().getX().doubleValue() + wc2.getSceneCoordinate().getX() * (double) h;
-        final double y2 = wc2.getCoordinate().getY().doubleValue() + wc2.getSceneCoordinate().getY() * (double) w;
-
-        final double dx = x2 - cx;
-        final double dy = y2 - cy;
-        final double r2 = dx * dx + dy * dy; // 半径平方
-
-        // 半径为 0：只返回圆心所在 scene（如果存在）
-        if (r2 <= 1e-12) {
-            IntegerCoordinate sc = new IntegerCoordinate(wc1.getSceneCoordinate().getX(), wc1.getSceneCoordinate().getY());
-            if (region.getScenes().containsKey(sc)) {
-                rst.add(sc);
-            }
-            return rst;
-        }
-
-        final double r = Math.sqrt(r2);
-
-        // ===== 3) 用圆的 AABB 计算 scene 范围（减少遍历）=====
-        final double minX = cx - r;
-        final double maxX = cx + r;
-        final double minY = cy - r;
-        final double maxY = cy + r;
-
-        final int minSceneX = (int) Math.floor(minX / (double) h);
-        final int maxSceneX = (int) Math.floor(maxX / (double) h);
-        final int minSceneY = (int) Math.floor(minY / (double) w);
-        final int maxSceneY = (int) Math.floor(maxY / (double) w);
-
-        // ===== 4) 遍历候选 scene：判断“scene 矩形是否与圆相交”=====
-        // scene 矩形（全局坐标）：
-        // x ∈ [sx*h, sx*h + h], y ∈ [sy*w, sy*w + w]
-        for (int sx = minSceneX; sx <= maxSceneX; sx++) {
-            final double rx0 = sx * (double) h;
-            final double rx1 = rx0 + (double) h;
-
-            for (int sy = minSceneY; sy <= maxSceneY; sy++) {
-                IntegerCoordinate sc = new IntegerCoordinate(sx, sy);
-                if (!region.getScenes().containsKey(sc)) {
-                    continue;
-                }
-
-                final double ry0 = sy * (double) w;
-                final double ry1 = ry0 + (double) w;
-
-                // 圆心到矩形的最近点（clamp）
-                final double px = (cx < rx0) ? rx0 : (cx > rx1 ? rx1 : cx);
-                final double py = (cy < ry0) ? ry0 : (cy > ry1 ? ry1 : cy);
-
-                final double ddx = cx - px;
-                final double ddy = cy - py;
-
-                // 矩形与圆相交（包含相切）
-                if (ddx * ddx + ddy * ddy <= r2) {
-                    rst.add(sc);
-                }
-            }
-        }
-
-        return rst;
     }
 
     public static Set<IntegerCoordinate> expandSceneCoordinates(Set<IntegerCoordinate> sceneCoordinates, int range) {
@@ -554,6 +460,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
             case BlockConstants.BLOCK_TYPE_MELEE:
             case BlockConstants.BLOCK_TYPE_SHOOT:
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
                 return false;
             default:
                 return true;
@@ -566,6 +473,7 @@ public class BlockUtil {
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
             case BlockConstants.BLOCK_TYPE_MELEE:
             case BlockConstants.BLOCK_TYPE_SHOOT:
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
                 return false;
             default:
                 return true;

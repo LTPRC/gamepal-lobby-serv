@@ -137,7 +137,6 @@ public class SkillUtil {
                 || targetType == BlockConstants.BLOCK_TYPE_EFFECT
                 || targetType == BlockConstants.BLOCK_TYPE_DROP
                 || targetType == BlockConstants.BLOCK_TYPE_TELEPORT
-                || targetType == BlockConstants.BLOCK_TYPE_PLASMA
                 || targetType == BlockConstants.BLOCK_TYPE_TEXT_DISPLAY
                 || targetType == BlockConstants.BLOCK_TYPE_MELEE
                 || targetType == BlockConstants.BLOCK_TYPE_SHOOT) {

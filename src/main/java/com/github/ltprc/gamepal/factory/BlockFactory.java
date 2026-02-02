@@ -100,7 +100,6 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
                 switch (blockInfo.getCode()) {
-                    case BlockConstants.BLOCK_CODE_EXPLODE:
                     case BlockConstants.BLOCK_CODE_SPRAY:
                         frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                         break;
@@ -112,12 +111,20 @@ public class BlockFactory {
                         break;
                 }
                 break;
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
+                break;
             case BlockConstants.BLOCK_TYPE_MELEE:
             case BlockConstants.BLOCK_TYPE_SHOOT:
                 frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                 break;
-            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
-                frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
+                switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_EXPLODE:
+                    default:
+                        frameMax = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                }
                 break;
             default:
                 frameMax = BlockConstants.FRAME_MAX_INFINITE_DEFAULT;
@@ -169,10 +176,20 @@ public class BlockFactory {
                 }
                 break;
             case BlockConstants.BLOCK_TYPE_PLASMA:
+            case BlockConstants.BLOCK_TYPE_MELEE:
+            case BlockConstants.BLOCK_TYPE_SHOOT:
                 period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
                 break;
             case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
                 period = BlockConstants.PERIOD_DYNAMIC_DEFAULT * 3;
+                break;
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
+                switch (blockInfo.getCode()) {
+                    case BlockConstants.BLOCK_CODE_EXPLODE:
+                    default:
+                        period = BlockConstants.PERIOD_DYNAMIC_DEFAULT;
+                        break;
+                }
                 break;
             default:
                 period = BlockConstants.PERIOD_STATIC_DEFAULT;
@@ -414,6 +431,10 @@ public class BlockFactory {
                         new Coordinate(BlockConstants.SHOOT_RADIUS, BlockConstants.SHOOT_RADIUS,
                                 BlockConstants.SHOOT_RADIUS)), new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE,
+                        BlockConstants.STRUCTURE_LAYER_TOP);
+                break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
             case BlockConstants.BLOCK_TYPE_WALL:
             default:
@@ -458,7 +479,6 @@ public class BlockFactory {
     public static int convertEventCode2Layer(int eventCode) {
         int layer;
         switch (eventCode) {
-            case BlockConstants.BLOCK_CODE_EXPLODE:
             case BlockConstants.BLOCK_CODE_BLOCK:
             case BlockConstants.BLOCK_CODE_HEAL:
             case BlockConstants.BLOCK_CODE_DECAY:
