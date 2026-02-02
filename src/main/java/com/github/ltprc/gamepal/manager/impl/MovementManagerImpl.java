@@ -10,7 +10,6 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
 import com.github.ltprc.gamepal.model.map.block.Block;
-import com.github.ltprc.gamepal.model.map.block.MovementInfo;
 import com.github.ltprc.gamepal.model.map.block.StructuredBlock;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
@@ -60,56 +59,59 @@ public class MovementManagerImpl implements MovementManager {
     private WebSocketService webSocketService;
 
     @Override
-    public void speedUpBlock(GameWorld world, Block block, Coordinate deltaSpeed) {
-        MovementInfo movementInfo = block.getMovementInfo();
-        movementInfo.getSpeed().setX(movementInfo.getSpeed().getX().add(deltaSpeed.getX()));
-        movementInfo.getSpeed().setY(movementInfo.getSpeed().getY().add(deltaSpeed.getY()));
-        movementInfo.getSpeed().setZ(movementInfo.getSpeed().getZ().add(deltaSpeed.getZ()));
-        movementInfo.setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
-                new PlanarCoordinate(movementInfo.getSpeed().getX(), movementInfo.getSpeed().getY())));
-        settlePlanarSpeed(world, block, 0);
-    }
-
-    @Override
-    public void settlePlanarAcceleration(GameWorld world, Block block, PlanarCoordinate accelerationCoordinate,
-                                         int movementMode) {
+    public void settleCreatureAcceleration(GameWorld world, Block block, PlanarCoordinate accelerationCoordinate,
+                                           int movementMode) {
         if (accelerationCoordinate.getX().equals(BigDecimal.ZERO)
                 && accelerationCoordinate.getY().equals(BigDecimal.ZERO)) {
-            block.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
-            block.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+            limitSpeed(world, block, BigDecimal.ZERO, BigDecimal.ZERO, null);
         } else {
-            double newSpeed = Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
-                    + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-                    + block.getMovementInfo().getPlanarAcceleration().doubleValue()
-                    * Math.sqrt(accelerationCoordinate.getX().pow(2)
-                    .add(accelerationCoordinate.getY().pow(2)).doubleValue());
-            double maxSpeed = block.getMovementInfo().getMaxPlanarSpeed().doubleValue()
-                    * Math.sqrt(accelerationCoordinate.getX().pow(2)
-                    .add(accelerationCoordinate.getY().pow(2)).doubleValue());
-            newSpeed = Math.min(newSpeed, maxSpeed);
+//            double newSpeed = Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
+//                    + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
+//                    + block.getMovementInfo().getPlanarAcceleration().doubleValue()
+//                    * Math.sqrt(accelerationCoordinate.getX().pow(2)
+//                    .add(accelerationCoordinate.getY().pow(2)).doubleValue());
+//            double maxSpeed = block.getMovementInfo().getMaxPlanarSpeed().doubleValue();
+//            newSpeed = Math.min(newSpeed, maxSpeed);
+//            switch (movementMode) {
+//                case MovementConstants.MOVEMENT_MODE_STAND_GROUND:
+//                    newSpeed = 0D;
+//                    break;
+//                case MovementConstants.MOVEMENT_MODE_WALK:
+//                    newSpeed = Math.min(newSpeed, block.getMovementInfo().getMaxPlanarSpeed().doubleValue() / 2);
+//                    break;
+//                case MovementConstants.MOVEMENT_MODE_DEFAULT:
+//                default:
+//                    break;
+//            }
+//            block.getMovementInfo().getSpeed().setX(BigDecimal.valueOf(
+//                    newSpeed * accelerationCoordinate.getX().doubleValue()
+//                            / Math.sqrt(accelerationCoordinate.getX().pow(2)
+//                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())));
+//            block.getMovementInfo().getSpeed().setY(BigDecimal.valueOf(
+//                    newSpeed * accelerationCoordinate.getY().doubleValue()
+//                            / Math.sqrt(accelerationCoordinate.getX().pow(2)
+//                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())));
+//            block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
+//                    accelerationCoordinate));
+            BigDecimal maxPlanarSpeed;
             switch (movementMode) {
                 case MovementConstants.MOVEMENT_MODE_STAND_GROUND:
-                    newSpeed = 0D;
+                    maxPlanarSpeed = BigDecimal.ZERO;
                     break;
                 case MovementConstants.MOVEMENT_MODE_WALK:
-                    newSpeed = Math.min(newSpeed, block.getMovementInfo().getMaxPlanarSpeed().doubleValue() / 2);
+                    maxPlanarSpeed = block.getMovementInfo().getMaxPlanarSpeed().multiply(BigDecimal.valueOf(0.5D));
                     break;
                 case MovementConstants.MOVEMENT_MODE_DEFAULT:
+                    maxPlanarSpeed = block.getMovementInfo().getMaxPlanarSpeed();
+                    break;
                 default:
+                    maxPlanarSpeed = null;
                     break;
             }
-            block.getMovementInfo().getSpeed().setX(BigDecimal.valueOf(
-                    newSpeed * accelerationCoordinate.getX().doubleValue()
-                            / Math.sqrt(accelerationCoordinate.getX().pow(2)
-                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())));
-            block.getMovementInfo().getSpeed().setY(BigDecimal.valueOf(
-                    newSpeed * accelerationCoordinate.getY().doubleValue()
-                            / Math.sqrt(accelerationCoordinate.getX().pow(2)
-                            .add(accelerationCoordinate.getY().pow(2)).doubleValue())));
-            block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
-                    accelerationCoordinate));
+            settleAcceleration(world, block, new Coordinate(accelerationCoordinate.getX(),
+                    accelerationCoordinate.getY(), BigDecimal.ZERO), maxPlanarSpeed, null);
         }
-        settlePlanarSpeed(world, block, 1);
+//        settlePlanarSpeed(world, block);
     }
 
     /**
@@ -118,26 +120,70 @@ public class MovementManagerImpl implements MovementManager {
      * @param block
      */
     @Override
-    public void settleVerticalAcceleration(GameWorld world, Block block) {
+    public void settleGravityAcceleration(GameWorld world, Block block) {
         if (!BlockUtil.checkBlockTypeGravity(block.getBlockInfo().getType())) {
             return;
         }
         BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
         if (block.getWorldCoordinate().getCoordinate().getZ().compareTo(altitude) > 0) {
-            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ()
-                    .subtract(MovementConstants.VERTICAL_ACCELERATION_DEFAULT));
-            if (block.getMovementInfo().getSpeed().getZ()
-                    .compareTo(block.getMovementInfo().getMaxVerticalSpeed().negate()) < 0) {
-                block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getMaxVerticalSpeed().negate());
-            }
-            settleVerticalSpeed(world, block);
+//            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ()
+//                    .subtract(MovementConstants.VERTICAL_ACCELERATION_DEFAULT));
+//            if (block.getMovementInfo().getSpeed().getZ()
+//                    .compareTo(block.getMovementInfo().getMaxVerticalSpeed().negate()) < 0) {
+//                block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getMaxVerticalSpeed().negate());
+//            }
+//            settleVerticalSpeed(world, block);
+            settleAcceleration(world, block, new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO,
+                    block.getMovementInfo().getVerticalAcceleration()), null,
+                    block.getMovementInfo().getMaxVerticalSpeed());
         } else {
-            block.getMovementInfo().getSpeed().setZ(BigDecimal.ZERO);
+            limitSpeed(world, block, null, null, BigDecimal.ZERO);
         }
     }
 
     @Override
-    public void settlePlanarSpeed(GameWorld world, Block worldMovingBlock, int sceneScanDepth) {
+    public void settleAcceleration(GameWorld world, Block block, Coordinate acceleration, BigDecimal maxPlanarSpeed,
+                                   BigDecimal maxVerticalSpeed) {
+        block.getMovementInfo().getSpeed().setX(block.getMovementInfo().getSpeed().getX().add(acceleration.getX()));
+        block.getMovementInfo().getSpeed().setY(block.getMovementInfo().getSpeed().getY().add(acceleration.getY()));
+        block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ().add(acceleration.getZ()));
+        block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
+                new PlanarCoordinate(block.getMovementInfo().getSpeed().getX(),
+                        block.getMovementInfo().getSpeed().getY())));
+        BigDecimal speedXAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
+                Math.cos(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI))).abs();
+        BigDecimal speedYAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
+                Math.sin(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)).negate()).abs();
+        limitSpeed(world, block, speedXAbs, speedYAbs, maxVerticalSpeed);
+        settlePlanarSpeed(world, block);
+        settleVerticalSpeed(world, block);
+    }
+
+    @Override
+    public void limitSpeed(GameWorld world, Block block, BigDecimal speedXAbs, BigDecimal speedYAbs,
+                           BigDecimal speedZAbs) {
+        if (null != speedXAbs) {
+            BigDecimal currentX = block.getMovementInfo().getSpeed().getX();
+            BigDecimal limitedX = currentX.abs().compareTo(speedXAbs) > 0 ? 
+                (currentX.compareTo(BigDecimal.ZERO) >= 0 ? speedXAbs : speedXAbs.negate()) : currentX;
+            block.getMovementInfo().getSpeed().setX(limitedX);
+        }
+        if (null != speedYAbs) {
+            BigDecimal currentY = block.getMovementInfo().getSpeed().getY();
+            BigDecimal limitedY = currentY.abs().compareTo(speedYAbs) > 0 ? 
+                (currentY.compareTo(BigDecimal.ZERO) >= 0 ? speedYAbs : speedYAbs.negate()) : currentY;
+            block.getMovementInfo().getSpeed().setY(limitedY);
+        }
+        if (null != speedZAbs) {
+            BigDecimal currentZ = block.getMovementInfo().getSpeed().getZ();
+            BigDecimal limitedZ = currentZ.abs().compareTo(speedZAbs) > 0 ? 
+                (currentZ.compareTo(BigDecimal.ZERO) >= 0 ? speedZAbs : speedZAbs.negate()) : currentZ;
+            block.getMovementInfo().getSpeed().setZ(limitedZ);
+        }
+    }
+
+    @Override
+    public void settlePlanarSpeed(GameWorld world, Block worldMovingBlock) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         WorldCoordinate teleportWc = null;
         Block expectedNewBlockX = new Block(worldMovingBlock);
@@ -233,10 +279,10 @@ public class MovementManagerImpl implements MovementManager {
             }
         }
         if (xCollision) {
-            worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+            limitSpeed(world, worldMovingBlock, BigDecimal.ZERO, null, null);
         }
         if (yCollision) {
-            worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+            limitSpeed(world, worldMovingBlock, null, BigDecimal.ZERO, null);
         }
         // Settle worldMovingBlock position
         if (null == teleportWc) {
@@ -253,9 +299,7 @@ public class MovementManagerImpl implements MovementManager {
             BlockUtil.fixWorldCoordinate(region, teleportWc);
             settleCoordinate(world, worldMovingBlock, teleportWc, false);
         } else {
-            worldMovingBlock.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
-            worldMovingBlock.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
-            worldService.expandByCoordinate(world, worldMovingBlock.getWorldCoordinate(), teleportWc, sceneScanDepth);
+            limitSpeed(world, worldMovingBlock, BigDecimal.ZERO, BigDecimal.ZERO, null);
             settleCoordinate(world, worldMovingBlock, teleportWc, true);
         }
     }
@@ -267,8 +311,6 @@ public class MovementManagerImpl implements MovementManager {
                 .add(block.getMovementInfo().getSpeed().getZ());
         if (altitude.compareTo(newAltitude) > 0) {
             sceneManager.updateBlockAltitude(world, block);
-//            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_DECAY, block.getBlockInfo().getId(),
-//                    block.getWorldCoordinate());
         } else {
             block.getWorldCoordinate().getCoordinate().setZ(newAltitude);
         }
@@ -286,24 +328,13 @@ public class MovementManagerImpl implements MovementManager {
                 || !oldWorldCoordinate.getSceneCoordinate().getY()
                 .equals(newWorldCoordinate.getSceneCoordinate().getY());
 
-//        BigDecimal altitude = sceneManager.getAltitude(world, newWorldCoordinate);
-//        if (newWorldCoordinate.getCoordinate().getZ().compareTo(altitude) < 0) {
-//            if (worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-//                    .subtract(MovementConstants.MAX_VERTICAL_STEP_DEFAULT).compareTo(altitude) >= 0) {
-//                eventManager.addEvent(world, BlockConstants.BLOCK_CODE_DECAY, worldMovingBlock.getBlockInfo().getId(),
-//                        newWorldCoordinate);
-//            }
-//            newWorldCoordinate.getCoordinate().setZ(altitude);
-//            worldMovingBlock.getMovementInfo().getSpeed().setZ(BigDecimal.ZERO);
-//        }
         BlockUtil.copyWorldCoordinate(newWorldCoordinate, worldMovingBlock.getWorldCoordinate());
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
-//        worldMovingBlock.getWorldCoordinate().getCoordinate().setZ(sceneManager.getAltitude(world, worldMovingBlock.getWorldCoordinate()));
-//        BlockUtil.fixWorldCoordinate(region, worldMovingBlock.getWorldCoordinate());
         syncFloorCode(world, worldMovingBlock);
         if (worldMovingBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER) {
             if (world.getPlayerInfoMap().get(worldMovingBlock.getBlockInfo().getId()).getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN) {
                 if (isTeleport) {
+                    sceneManager.updateBlockAltitude(world, worldMovingBlock);
                     world.getFlagMap().get(worldMovingBlock.getBlockInfo().getId())[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
                 }
                 // Check location change

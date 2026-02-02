@@ -778,8 +778,8 @@ public class SceneManagerImpl implements SceneManager {
         world.getDropMap().put(block.getBlockInfo().getId(), drop);
         Coordinate dropSpeed = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.valueOf(random.nextDouble() * BlockConstants.DROP_THROW_HEIGHT_MAX.doubleValue()));
-        movementManager.speedUpBlock(world, block, BlockUtil.locateCoordinateWithDirectionAndDistance(dropSpeed,
-                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS));
+        movementManager.settleAcceleration(world, block, BlockUtil.locateCoordinateWithDirectionAndDistance(dropSpeed,
+                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_RADIUS), null, null);
         return block;
     }
 

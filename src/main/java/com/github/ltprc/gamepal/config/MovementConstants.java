@@ -10,9 +10,9 @@ public class MovementConstants {
     public static final BigDecimal MAX_PLANAR_ACCELERATION_SPEED_RATIO = BigDecimal.valueOf(0.1D);
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
     public static final int FLOOR_CODE_DEFAULT = BlockConstants.BLOCK_CODE_BLACK;
-    public static final BigDecimal VERTICAL_ACCELERATION_DEFAULT = BigDecimal.valueOf(0.01D);
-    public static final BigDecimal VERTICAL_ACCELERATION_PARACHUTE = BigDecimal.valueOf(0.004D);
-    public static final BigDecimal MAX_VERTICAL_SPEED_DEFAULT = BigDecimal.valueOf(0.16D);
+    public static final BigDecimal VERTICAL_ACCELERATION_DEFAULT = BigDecimal.valueOf(-0.01D);
+    public static final BigDecimal VERTICAL_ACCELERATION_PARACHUTE = BigDecimal.valueOf(-0.004D);
+    public static final BigDecimal MAX_VERTICAL_SPEED_DEFAULT = BigDecimal.valueOf(0.16D); // Positive but downward
     public static final BigDecimal MAX_VERTICAL_SPEED_PARACHUTE = BigDecimal.valueOf(0.1D);
     public static final BigDecimal MAX_VERTICAL_STEP_DEFAULT = BigDecimal.valueOf(0.5D);
 

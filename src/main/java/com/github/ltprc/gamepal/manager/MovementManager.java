@@ -9,10 +9,12 @@ import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import java.math.BigDecimal;
 
 public interface MovementManager {
-    void speedUpBlock(GameWorld world, Block block, Coordinate deltaSpeed);
-    void settlePlanarAcceleration(GameWorld world, Block block, PlanarCoordinate accelerationCoordinate, int movementMode);
-    void settleVerticalAcceleration(GameWorld world, Block block);
-    void settlePlanarSpeed(GameWorld world, Block block, int sceneScanDepth);
+    void settleCreatureAcceleration(GameWorld world, Block block, PlanarCoordinate accelerationCoordinate, int movementMode);
+    void settleGravityAcceleration(GameWorld world, Block block);
+    void settleAcceleration(GameWorld world, Block block, Coordinate acceleration, BigDecimal maxPlanarSpeed,
+                            BigDecimal maxVerticalSpeed);
+    void limitSpeed(GameWorld world, Block block, BigDecimal speedXAbs, BigDecimal speedYAbs, BigDecimal speedZAbs);
+    void settlePlanarSpeed(GameWorld world, Block block);
     void settleVerticalSpeed(GameWorld world, Block block);
     void settleCoordinate(GameWorld world, Block block, final WorldCoordinate newWorldCoordinate, boolean isTeleport);
     void syncFloorCode(GameWorld world, Block block);

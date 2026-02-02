@@ -423,7 +423,7 @@ public class NpcManagerImpl implements NpcManager {
         creatureMap.entrySet().stream()
                 .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN)
                 .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
-                .forEach(entry2 -> movementManager.settlePlanarSpeed(world, entry2.getValue(), 1));
+                .forEach(entry2 -> movementManager.settlePlanarSpeed(world, entry2.getValue()));
     }
 
     private boolean checkAttackCondition(final String fromUserCode, final String toUserCode) {
@@ -545,7 +545,7 @@ public class NpcManagerImpl implements NpcManager {
         PlanarCoordinate accelerationCoordinate = new PlanarCoordinate(
                 BigDecimal.valueOf(Math.cos(direction.doubleValue() / 180 * Math.PI)),
                 BigDecimal.valueOf(-1 * Math.sin(direction.doubleValue() / 180 * Math.PI)));
-        movementManager.settlePlanarAcceleration(world, npcPlayer, accelerationCoordinate, movementMode);
+        movementManager.settleCreatureAcceleration(world, npcPlayer, accelerationCoordinate, movementMode);
         return rst;
     }
 }

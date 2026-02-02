@@ -83,10 +83,10 @@ public class TimedEventTask {
             world.getBlockMap().values()
                     .forEach(block -> {
                         eventManager.updateEvent(world, block, timestamp);
-                        movementManager.settleVerticalAcceleration(world, block);
+                        movementManager.settleGravityAcceleration(world, block);
                     });
             world.getCreatureMap().values()
-                    .forEach(player -> movementManager.settleVerticalAcceleration(world, player));
+                    .forEach(player -> movementManager.settleGravityAcceleration(world, player));
 
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))

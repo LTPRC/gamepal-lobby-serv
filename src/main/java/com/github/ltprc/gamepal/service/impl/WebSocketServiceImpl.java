@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -135,12 +134,12 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (functions.containsKey("updatePlayerInfoCharacter")) {
                 playerService.updatePlayerInfoCharacter(userCode, functions.getJSONObject("updatePlayerInfoCharacter"));
             }
-            if (functions.containsKey("settlePlanarAcceleration")) {
-                JSONObject settleAcceleration = functions.getJSONObject("settlePlanarAcceleration");
+            if (functions.containsKey("settleCreatureAcceleration")) {
+                JSONObject settleAcceleration = functions.getJSONObject("settleCreatureAcceleration");
                 PlanarCoordinate accelerationCoordinate = new PlanarCoordinate(settleAcceleration.getBigDecimal("x"),
                         settleAcceleration.getBigDecimal("y"));
                 Integer movementMode = settleAcceleration.getInteger("movementMode");
-                movementManager.settlePlanarAcceleration(world, player, accelerationCoordinate, movementMode);
+                movementManager.settleCreatureAcceleration(world, player, accelerationCoordinate, movementMode);
                 world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_MOVEMENT] = true;
             }
             if (functions.containsKey("useItems")) {

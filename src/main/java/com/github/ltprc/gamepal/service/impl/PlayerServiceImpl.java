@@ -745,9 +745,9 @@ public class PlayerServiceImpl implements PlayerService {
                 break;
             case SkillConstants.SKILL_CODE_DODGE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode, bottomWorldCoordinate);
-                movementManager.speedUpBlock(world, player, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                        new Coordinate(), direction, BlockConstants.DODGE_RADIUS));
-                player.getMovementInfo().setFaceDirection(direction);
+                movementManager.settleAcceleration(world, player, BlockUtil.locateCoordinateWithDirectionAndDistance(
+                        new Coordinate(), direction, BlockConstants.DODGE_RADIUS), null, null);
+//                player.getMovementInfo().setFaceDirection(direction);
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MINE, userCode,
@@ -976,7 +976,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
         }
 
-        player.getMovementInfo().setSpeed(new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+        movementManager.limitSpeed(world, player, BigDecimal.ZERO, BigDecimal.ZERO, null);
         // Reset all skill remaining time
         for (int i = 0; i < playerInfo.getSkills().size(); i++) {
             if (null != playerInfo.getSkills().get(i)) {
@@ -1124,9 +1124,9 @@ public class PlayerServiceImpl implements PlayerService {
             playerInfoMap.put(remainId, remainPlayerInfo);
         }
 
-        movementManager.speedUpBlock(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
+        movementManager.settleAcceleration(world, remainContainer, BlockUtil.locateCoordinateWithDirectionAndDistance(
                 new Coordinate(), BigDecimal.valueOf(random.nextDouble() * 360),
-                BlockConstants.REMAIN_CONTAINER_THROW_RADIUS));
+                BlockConstants.REMAIN_CONTAINER_THROW_RADIUS), null, null);
 
         if (hasTrophy) {
             Map<String, Integer> itemsMap = new HashMap<>(bagInfo.getItems());
