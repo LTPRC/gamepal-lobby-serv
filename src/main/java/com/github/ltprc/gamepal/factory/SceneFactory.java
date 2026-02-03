@@ -5,6 +5,7 @@ import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.GravitatedStack;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
+import com.github.ltprc.gamepal.util.RegionUtil;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -41,8 +42,7 @@ public class SceneFactory {
         if (region.getTerrainMap().containsKey(sceneCoordinate)) {
             return;
         }
-        if (Math.abs(sceneCoordinate.getX()) > region.getRadius()
-                || Math.abs(sceneCoordinate.getY()) > region.getRadius()) {
+        if (!RegionUtil.validateSceneCoordinate(region, sceneCoordinate)) {
             return;
         }
         if (!altitudeMap.containsKey(sceneCoordinate)) {

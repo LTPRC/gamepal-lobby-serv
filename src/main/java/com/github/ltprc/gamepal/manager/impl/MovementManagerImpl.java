@@ -60,6 +60,10 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public void settleCreatureAcceleration(GameWorld world, Block block, PlanarCoordinate accelerationCoordinate,
                                            int movementMode) {
+        BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
+        if (block.getWorldCoordinate().getCoordinate().getZ().compareTo(altitude) > 0) {
+            return;
+        }
         if (accelerationCoordinate.getX().equals(BigDecimal.ZERO)
                 && accelerationCoordinate.getY().equals(BigDecimal.ZERO)) {
             limitSpeed(world, block, BigDecimal.ZERO, BigDecimal.ZERO, null);

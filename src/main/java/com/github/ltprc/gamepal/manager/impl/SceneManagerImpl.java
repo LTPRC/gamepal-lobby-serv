@@ -37,11 +37,7 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.util.BlockUtil;
-import com.github.ltprc.gamepal.util.ErrorUtil;
-import com.github.ltprc.gamepal.util.PlayerInfoUtil;
-import com.github.ltprc.gamepal.util.SceneUtil;
-import com.github.ltprc.gamepal.util.SkillUtil;
+import com.github.ltprc.gamepal.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,7 +95,8 @@ public class SceneManagerImpl implements SceneManager {
 
     @Override
     public void fillScene(final GameWorld world, final Region region, final IntegerCoordinate sceneCoordinate) {
-        if (region.getScenes().containsKey(sceneCoordinate)) {
+        if (region.getScenes().containsKey(sceneCoordinate)
+                || !RegionUtil.validateSceneCoordinate(region, sceneCoordinate)) {
             return;
         }
         Scene scene = SceneFactory.createScene(region, sceneCoordinate, "Auto Scene (" + sceneCoordinate.getX()
@@ -126,10 +123,6 @@ public class SceneManagerImpl implements SceneManager {
                 break;
             default:
                 break;
-        }
-        if (Math.abs(sceneCoordinate.getX()) > region.getRadius()
-                || Math.abs(sceneCoordinate.getY()) > region.getRadius() ) {
-            terrainCode = BlockConstants.BLOCK_CODE_BLACK;
         }
         fillSceneTemplate(world, region, scene, terrainCode);
     }
@@ -468,13 +461,11 @@ public class SceneManagerImpl implements SceneManager {
             for (int j = sceneCoordinate.getX() - sceneScanRadius;
                  j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
                 final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
+                if (!region.getScenes().containsKey(newSceneCoordinate)
+                        || !RegionUtil.validateSceneCoordinate(region, sceneCoordinate)) {
+                    continue;
+                }
                 Scene scene = region.getScenes().get(newSceneCoordinate);
-                if (null == scene) {
-                    continue;
-                }
-                if (CollectionUtils.isEmpty(scene.getBlocks())) {
-                    continue;
-                }
                 scene.getBlocks().values().stream()
                         .filter(block -> PlayerInfoUtil.checkPerceptionCondition(region, player,
                                 player.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
@@ -660,6 +651,10 @@ public class SceneManagerImpl implements SceneManager {
         for (int i = sceneCoordinate.getY() - sceneScanRadius; i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
             for (int j = sceneCoordinate.getX() - sceneScanRadius; j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
                 final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
+                if (!region.getScenes().containsKey(newSceneCoordinate)
+                        || !RegionUtil.validateSceneCoordinate(region, sceneCoordinate)) {
+                    continue;
+                }
                 Scene scene = region.getScenes().get(newSceneCoordinate);
                 for (int l = 0; l <= region.getWidth(); l++) {
                     for (int k = 0; k <= region.getHeight(); k++) {
@@ -688,6 +683,10 @@ public class SceneManagerImpl implements SceneManager {
         for (int i = sceneCoordinate.getY() - sceneScanRadius; i <= sceneCoordinate.getY() + sceneScanRadius; i++) {
             for (int j = sceneCoordinate.getX() - sceneScanRadius; j <= sceneCoordinate.getX() + sceneScanRadius; j++) {
                 final IntegerCoordinate newSceneCoordinate = new IntegerCoordinate(j, i);
+                if (!region.getScenes().containsKey(newSceneCoordinate)
+                        || !RegionUtil.validateSceneCoordinate(region, sceneCoordinate)) {
+                    continue;
+                }
                 Scene scene = region.getScenes().get(newSceneCoordinate);
                 for (int l = 0; l < region.getWidth(); l++) {
                     for (int k = 0; k < region.getHeight(); k++) {

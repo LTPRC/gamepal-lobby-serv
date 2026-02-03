@@ -29,6 +29,7 @@ import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WorldService;
 import com.github.ltprc.gamepal.util.ContentUtil;
 import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.RegionUtil;
 import com.github.ltprc.gamepal.util.SceneUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -325,17 +326,13 @@ public class WorldServiceImpl implements WorldService {
         }
         Map<Integer, Region> regionMap = world.getRegionMap();
         Region region = regionMap.get(worldCoordinate.getRegionNo());
-        WorldCoordinate newWorldCoordinate = new WorldCoordinate(worldCoordinate);
         for (int i = - depth; i <= depth; i++) {
             for (int j = - depth; j <= depth; j++) {
-                if (worldCoordinate.getSceneCoordinate().getX() + i >= - region.getRadius()
-                        && worldCoordinate.getSceneCoordinate().getX() + i <= region.getRadius()
-                        && worldCoordinate.getSceneCoordinate().getY() + j >= - region.getRadius()
-                        && worldCoordinate.getSceneCoordinate().getY() + j <= region.getRadius()) {
-                    newWorldCoordinate.setSceneCoordinate(new IntegerCoordinate(
-                            worldCoordinate.getSceneCoordinate().getX() + i,
-                            worldCoordinate.getSceneCoordinate().getY() + j));
-                    sceneManager.fillScene(world, region, newWorldCoordinate.getSceneCoordinate());
+                IntegerCoordinate sceneCoordinate = new IntegerCoordinate(
+                        worldCoordinate.getSceneCoordinate().getX() + i,
+                        worldCoordinate.getSceneCoordinate().getY() + j);
+                if (RegionUtil.validateSceneCoordinate(region, sceneCoordinate)) {
+                    sceneManager.fillScene(world, region, sceneCoordinate);
                 }
             }
         }
