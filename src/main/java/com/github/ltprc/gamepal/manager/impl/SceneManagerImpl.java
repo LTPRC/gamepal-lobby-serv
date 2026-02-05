@@ -578,7 +578,7 @@ public class SceneManagerImpl implements SceneManager {
                         .filter(blocker -> BlockUtil.checkMaterials(false, structure1.getMaterial(),
                                 structureMap.getOrDefault(blocker.getBlockInfo().getCode(), new Structure())
                                         .getMaterial()))
-                        .filter(blocker -> movementManager.detectSectorCollision(world, fromWorldCoordinate, eventBlock,
+                        .filter(blocker -> movementManager.detectSectorInfluence(world, fromWorldCoordinate, eventBlock,
                                 blocker, sectorAngle))
                         .collect(Collectors.toList());
             case BlockConstants.BLOCK_TYPE_PLASMA:

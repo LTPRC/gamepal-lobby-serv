@@ -420,10 +420,10 @@ public class NpcManagerImpl implements NpcManager {
                     }
                 });
         // Settle NPC speed
-        creatureMap.entrySet().stream()
-                .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN)
-                .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
-                .forEach(entry2 -> movementManager.settlePlanarSpeed(world, entry2.getValue()));
+//        creatureMap.entrySet().stream()
+//                .filter(entry2 -> world.getPlayerInfoMap().get(entry2.getKey()).getPlayerType() != GamePalConstants.PLAYER_TYPE_HUMAN)
+//                .filter(entry2 -> playerService.validateActiveness(world, entry2.getKey()))
+//                .forEach(entry2 -> movementManager.settlePlanarSpeed(world, entry2.getValue()));
     }
 
     private boolean checkAttackCondition(final String fromUserCode, final String toUserCode) {

@@ -228,8 +228,8 @@ public class BlockFactory {
                                         BlockConstants.Z_DEFAULT)),
                         new PlanarCoordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
                 break;
-            case BlockConstants.BLOCK_TYPE_TRAP:
             case BlockConstants.BLOCK_TYPE_TELEPORT:
+            case BlockConstants.BLOCK_TYPE_TRAP:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
@@ -381,7 +381,7 @@ public class BlockFactory {
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
-                        BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM, new Shape(),
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
@@ -406,6 +406,11 @@ public class BlockFactory {
                                 BlockConstants.STRUCTURE_LAYER_MIDDLE);
                         break;
                 }
+                break;
+            case BlockConstants.BLOCK_TYPE_WALL:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
+                        BlockConstants.STRUCTURE_LAYER_TOP, new Shape(),
+                        new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
@@ -436,7 +441,6 @@ public class BlockFactory {
                         BlockConstants.STRUCTURE_LAYER_TOP);
                 break;
             case BlockConstants.BLOCK_TYPE_NORMAL:
-            case BlockConstants.BLOCK_TYPE_WALL:
             default:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE, new Shape(),

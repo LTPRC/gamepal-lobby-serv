@@ -60,35 +60,11 @@ public class EventManagerImpl implements EventManager {
         Block fromCreature = world.getCreatureMap().getOrDefault(sourceId, eventBlock);
         // Unified directions of event block and origin block
         eventBlock.getMovementInfo().setFaceDirection(fromCreature.getMovementInfo().getFaceDirection());
-//        correctTarget(world, eventBlock, fromCreature);
         if (eventBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_SHOOT) {
             sceneManager.collideBlocks(world, fromCreature.getWorldCoordinate(), eventBlock, true);
         }
         activateEvent(world, eventBlock, fromCreature);
     }
-
-//    private void correctTarget(GameWorld world, Block eventBlock, Block fromCreature) {
-//        WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
-//        WorldCoordinate fromWorldCoordinate = fromCreature.getWorldCoordinate();
-//        if (worldCoordinate.getRegionNo() != fromWorldCoordinate.getRegionNo()) {
-//            logger.error(ErrorUtil.ERROR_1027);
-//            return;
-//        }
-//        Map<Integer, Region> regionMap = world.getRegionMap();
-//        Region region = regionMap.get(worldCoordinate.getRegionNo());
-//        sceneManager.collideBlocks(world, fromWorldCoordinate, eventBlock, true);
-//        preSelectedBlocks.stream()
-//                .filter(blocker -> region.getRegionNo() == blocker.getWorldCoordinate().getRegionNo())
-//                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-//                        BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-//                        BlockUtil.calculateAngle(region, fromWorldCoordinate, worldCoordinate).doubleValue()) < 135D)
-//                .filter(blocker -> BlockUtil.compareAnglesInDegrees(
-//                                BlockUtil.calculateAngle(region, fromWorldCoordinate, blocker.getWorldCoordinate()).doubleValue(),
-//                                fromCreature.getMovementInfo().getFaceDirection().doubleValue()) < 135D)
-//                .forEach(blocker ->
-//                        movementManager.detectLinearCollision(world, fromWorldCoordinate, eventBlock, blocker, true)
-//                );
-//    }
 
     private void activateEvent(GameWorld world, Block eventBlock, Block fromCreature) {
         WorldCoordinate worldCoordinate = eventBlock.getWorldCoordinate();
@@ -252,7 +228,6 @@ public class EventManagerImpl implements EventManager {
         Region region = world.getRegionMap().get(bulletBlock.getWorldCoordinate().getRegionNo());
         Integer eventCode = null;
         Optional<Block> targetBlock = affectedBlockList.stream()
-//                .filter(block -> movementManager.detectCollision(world, bulletBlock, block))
                 .filter(block -> null != BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate()))
                 .min(Comparator.comparing(block -> BlockUtil.calculateDistance(region, bulletBlock.getWorldCoordinate(), block.getWorldCoordinate())));
         switch (bulletBlock.getMovementInfo().getFloorCode()) {

@@ -56,15 +56,6 @@ public class TimedEventTask {
     @Autowired
     private SceneManager sceneManager;
 
-    @Scheduled(fixedRate = 20)
-    public void executeByHalfFrame() {
-        for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
-            GameWorld world = entry.getValue();
-            // NPC movements
-            npcManager.updateNpcBrains(world);
-        }
-    }
-
     @Scheduled(fixedRate = 40)
     public void executeByFrame() {
         long timestamp = System.currentTimeMillis();
@@ -84,9 +75,13 @@ public class TimedEventTask {
                     .forEach(block -> {
                         eventManager.updateEvent(world, block, timestamp);
                         movementManager.settleGravityAcceleration(world, block);
+                        movementManager.settleSpeed(world, block);
                     });
             world.getCreatureMap().values()
-                    .forEach(player -> movementManager.settleGravityAcceleration(world, player));
+                    .forEach(player -> {
+                        movementManager.settleGravityAcceleration(world, player);
+                        movementManager.settleSpeed(world, player);
+                    });
 
             onlineMap.keySet().stream()
                     .filter(id -> playerService.validateActiveness(world, id))
@@ -228,6 +223,12 @@ public class TimedEventTask {
 
             // Update farms
             farmManager.updateFarmStatus(world);
+        }
+
+        // Update NPC
+        for (Map.Entry<String, GameWorld> entry : worldService.getWorldMap().entrySet()) {
+            GameWorld world = entry.getValue();
+            npcManager.updateNpcBrains(world);
         }
     }
 

@@ -14,14 +14,13 @@ public interface MovementManager {
     void settleAcceleration(GameWorld world, Block block, Coordinate acceleration, BigDecimal maxPlanarSpeed,
                             BigDecimal maxVerticalSpeed);
     void limitSpeed(GameWorld world, Block block, BigDecimal speedXAbs, BigDecimal speedYAbs, BigDecimal speedZAbs);
-    void settlePlanarSpeed(GameWorld world, Block block);
-    void settleVerticalSpeed(GameWorld world, Block block);
+    void settleSpeed(GameWorld world, Block worldMovingBlock);
     void settleCoordinate(GameWorld world, Block block, final WorldCoordinate newWorldCoordinate, boolean isTeleport);
     void syncFloorCode(GameWorld world, Block block);
     void updateCreatureMaxSpeed(GameWorld world, String userCode);
     boolean detectCollision(GameWorld world, Block block1, Block block2, boolean relocate);
     boolean detectLinearCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2, boolean relocate);
-    boolean detectSectorCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+    boolean detectSectorInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
                                   BigDecimal sectorAngle);
     boolean detectCylinderInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
                                     BigDecimal planarDistance, BigDecimal verticalDistance);

@@ -31,10 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class MovementManagerImpl implements MovementManager {
@@ -113,7 +110,14 @@ public class MovementManagerImpl implements MovementManager {
                                    BigDecimal maxVerticalSpeed) {
         block.getMovementInfo().getSpeed().setX(block.getMovementInfo().getSpeed().getX().add(acceleration.getX()));
         block.getMovementInfo().getSpeed().setY(block.getMovementInfo().getSpeed().getY().add(acceleration.getY()));
-        block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ().add(acceleration.getZ()));
+        BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
+        BigDecimal newAltitude = block.getWorldCoordinate().getCoordinate().getZ()
+                .add(block.getMovementInfo().getSpeed().getZ());
+        if (altitude.compareTo(newAltitude) > 0) {
+            block.getMovementInfo().getSpeed().setZ(BigDecimal.ZERO);
+        } else {
+            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ().add(acceleration.getZ()));
+        }
         block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
                 new PlanarCoordinate(block.getMovementInfo().getSpeed().getX(),
                         block.getMovementInfo().getSpeed().getY())));
@@ -122,8 +126,8 @@ public class MovementManagerImpl implements MovementManager {
         BigDecimal speedYAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
                 Math.sin(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)).negate()).abs();
         limitSpeed(world, block, speedXAbs, speedYAbs, maxVerticalSpeed);
-        settlePlanarSpeed(world, block);
-        settleVerticalSpeed(world, block);
+//        settlePlanarSpeed(world, block);
+//        settleVerticalSpeed(world, block);
     }
 
     @Override
@@ -150,9 +154,21 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     @Override
-    public void settlePlanarSpeed(GameWorld world, Block worldMovingBlock) {
+    public void settleSpeed(GameWorld world, Block worldMovingBlock) {
+        if (BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getX())
+                && BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getY())
+                && BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getZ())) {
+            return;
+        }
+        slowDownSpeed(worldMovingBlock);
+
+        // Settle planar speed
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
-        WorldCoordinate teleportWc = null;
+        Set<Block> blockers = new HashSet<>();
+        WorldCoordinate destination = null;
+        boolean xCollision = false;
+        boolean yCollision = false;
+
         Block expectedNewBlockX = new Block(worldMovingBlock);
         Block expectedNewBlockY = new Block(worldMovingBlock);
         Block expectedNewBlockXY = new Block(worldMovingBlock);
@@ -160,26 +176,31 @@ public class MovementManagerImpl implements MovementManager {
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getY(),
-                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                        .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()));
         expectedNewBlockY.getWorldCoordinate().setCoordinate(new Coordinate(
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getX(),
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
-                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                        .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()));
         expectedNewBlockXY.getWorldCoordinate().setCoordinate(new Coordinate(
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
                 worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
-                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                        .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()));
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockX.getWorldCoordinate());
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockY.getWorldCoordinate());
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockXY.getWorldCoordinate());
-        boolean xCollision = false;
-        boolean yCollision = false;
+
+        // Linear selection on pre-selected blocks
+        Set<Block> preSelectedBlocks = new HashSet<>();
+        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockXY));
+        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockX));
+        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockY));
+
         if (sceneManager.getAltitude(world, expectedNewBlockX.getWorldCoordinate())
                 .subtract(expectedNewBlockX.getWorldCoordinate().getCoordinate().getZ())
                 .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
@@ -196,51 +217,64 @@ public class MovementManagerImpl implements MovementManager {
             xCollision = true;
             yCollision = true;
         }
-
-        // Linear selection on pre-selected blocks
-        Set<Block> preSelectedBlocks = new HashSet<>();
-        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockXY));
-        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockX));
-        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockY));
+        boolean planarTerrainCollision = xCollision || yCollision;
 
         for (Block block : preSelectedBlocks) {
             if (detectCollision(world, worldMovingBlock, block, false)) {
+                blockers.add(block);
                 continue;
             }
             if (xCollision && yCollision) {
                 break;
             }
             if (!xCollision) {
-                if (detectCollision(world, expectedNewBlockX, block, false)) {
+                if (detectCollision(world, expectedNewBlockX, block, true)) {
                     xCollision = true;
-                    teleportWc = checkCollisionByType(world, expectedNewBlockX, block);
-                    if (null != teleportWc) {
-                        yCollision = true;
-                        break;
-                    }
+//                    destination = checkCollisionByType(world, expectedNewBlockX, block);
+//                    if (null != destination) {
+//                        yCollision = true;
+//                        break;
+//                    }
+//                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
+//                        destination = world.getTeleportMap().get(block.getBlockInfo().getId());
+//                        yCollision = true;
+//                    }
+                }
+                if (detectCollision(world, expectedNewBlockX, block, false)) {
+                    blockers.add(block);
                 }
             }
             if (!yCollision) {
-                if (detectCollision(world, expectedNewBlockY, block, false)) {
+                if (detectCollision(world, expectedNewBlockY, block, true)) {
                     yCollision = true;
-                    teleportWc = checkCollisionByType(world, expectedNewBlockY, block);
-                    if (null != teleportWc) {
-                        xCollision = true;
-                        break;
-                    }
+//                    destination = checkCollisionByType(world, expectedNewBlockY, block);
+//                    if (null != destination) {
+//                        xCollision = true;
+//                        break;
+//                    }
+//                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
+//                        destination = world.getTeleportMap().get(block.getBlockInfo().getId());
+//                        xCollision = true;
+//                    }
+                }
+                if (detectCollision(world, expectedNewBlockY, block, false)) {
+                    blockers.add(block);
                 }
             }
-            if (!xCollision && !yCollision) {
-                if (detectCollision(world, expectedNewBlockXY, block, false)) {
+            if (!xCollision || !yCollision) {
+                if (detectCollision(world, expectedNewBlockXY, block, true)) {
                     xCollision = true;
                     yCollision = true;
-                    teleportWc = checkCollisionByType(world, expectedNewBlockXY, block);
-                    if (null != teleportWc) {
-                        break;
-                    }
+//                    destination = checkCollisionByType(world, expectedNewBlockXY, block);
+//                    if (null != destination) {
+//                        break;
+//                    }
+//                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
+//                        destination = world.getTeleportMap().get(block.getBlockInfo().getId());
+//                    }
+                }
+                if (detectCollision(world, expectedNewBlockXY, block, false)) {
+                    blockers.add(block);
                 }
             }
         }
@@ -250,9 +284,65 @@ public class MovementManagerImpl implements MovementManager {
         if (yCollision) {
             limitSpeed(world, worldMovingBlock, null, BigDecimal.ZERO, null);
         }
+
+        // Settle vertical speed
+        Block expectedNewBlockXYZ = new Block(worldMovingBlock);
+        expectedNewBlockXYZ.getWorldCoordinate().setCoordinate(new Coordinate(
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getX()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
+                worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
+                        .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
+        BlockUtil.fixWorldCoordinate(region, expectedNewBlockXYZ.getWorldCoordinate());
+        BigDecimal altitude = sceneManager.getAltitude(world, expectedNewBlockXYZ.getWorldCoordinate());
+        BigDecimal newAltitude = expectedNewBlockXYZ.getWorldCoordinate().getCoordinate().getZ();
+        boolean zCollision = altitude.compareTo(newAltitude) > 0;
+        boolean verticalTerrainCollision = zCollision;
+
+        for (Block block : preSelectedBlocks) {
+            if (detectCollision(world, worldMovingBlock, block, false)) {
+                blockers.add(block);
+                continue;
+            }
+            if (zCollision) {
+                break;
+            } else {
+                if (detectCollision(world, expectedNewBlockXYZ, block, true)) {
+                    zCollision = true;
+                }
+                if (detectCollision(world, expectedNewBlockXYZ, block, false)) {
+                    blockers.add(block);
+                }
+            }
+        }
+        if (zCollision) {
+            limitSpeed(world, worldMovingBlock, null, null, BigDecimal.ZERO);
+        }
+
         // Settle worldMovingBlock position
-        if (null == teleportWc) {
-            teleportWc = new WorldCoordinate(
+        Optional<Block> teleport = blockers.stream()
+                .filter(blocker -> blocker.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT)
+                .findFirst();
+        if (teleport.isPresent()) {
+            destination = world.getTeleportMap().get(teleport.get().getBlockInfo().getId());
+            BlockUtil.fixWorldCoordinate(region, destination);
+            settleCoordinate(world, worldMovingBlock, destination, true);
+        } else if (!BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getX())
+                || !BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getY())
+                || !BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getZ())) {
+            blockers.forEach(blocker -> {
+                BigDecimal relativeVelocity = BigDecimal.valueOf(Math.sqrt(
+                        worldMovingBlock.getMovementInfo().getSpeed().getX()
+                                .subtract(blocker.getMovementInfo().getSpeed().getX()).pow(2)
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY()
+                                        .subtract(blocker.getMovementInfo().getSpeed().getY()).pow(2))
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ()
+                                        .subtract(blocker.getMovementInfo().getSpeed().getZ()).pow(2))
+                                .doubleValue()));
+                settleBlockCollision(world, worldMovingBlock, blocker, relativeVelocity);
+            });
+            destination = new WorldCoordinate(
                     worldMovingBlock.getWorldCoordinate().getRegionNo(),
                     worldMovingBlock.getWorldCoordinate().getSceneCoordinate(),
                     new Coordinate(
@@ -260,69 +350,57 @@ public class MovementManagerImpl implements MovementManager {
                                     .add(worldMovingBlock.getMovementInfo().getSpeed().getX()),
                             worldMovingBlock.getWorldCoordinate().getCoordinate().getY()
                                     .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
-                            worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
-                                    .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
-            BlockUtil.fixWorldCoordinate(region, teleportWc);
-            settleCoordinate(world, worldMovingBlock, teleportWc, false);
-        } else {
-//            limitSpeed(world, worldMovingBlock, BigDecimal.ZERO, BigDecimal.ZERO, null);
-            settleCoordinate(world, worldMovingBlock, teleportWc, true);
+                            altitude.compareTo(newAltitude) > 0 ? altitude : newAltitude));
+            if (planarTerrainCollision && verticalTerrainCollision) {
+                settleTerrainCollision(world, worldMovingBlock, destination, BigDecimal.valueOf(Math.sqrt(
+                        worldMovingBlock.getMovementInfo().getSpeed().getX().pow(2)
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY().pow(2))
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ().pow(2))
+                                .doubleValue())));
+            } else if (planarTerrainCollision) {
+                settleTerrainCollision(world, worldMovingBlock, destination, BigDecimal.valueOf(Math.sqrt(
+                        worldMovingBlock.getMovementInfo().getSpeed().getX().pow(2)
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY().pow(2))
+                                .doubleValue())));
+            } else if (verticalTerrainCollision) {
+                settleTerrainCollision(world, worldMovingBlock, destination, BigDecimal.valueOf(Math.sqrt(
+                        worldMovingBlock.getMovementInfo().getSpeed().getZ().pow(2).doubleValue())));
+            }
+            BlockUtil.fixWorldCoordinate(region, destination);
+            settleCoordinate(world, worldMovingBlock, destination, false);
         }
     }
 
-    @Override
-    public void settleVerticalSpeed(GameWorld world, Block block) {
-        BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
-        BigDecimal newAltitude = block.getWorldCoordinate().getCoordinate().getZ()
-                .add(block.getMovementInfo().getSpeed().getZ());
-        if (altitude.compareTo(newAltitude) > 0) {
-            sceneManager.updateBlockAltitude(world, block);
-        } else {
-            block.getWorldCoordinate().getCoordinate().setZ(newAltitude);
+    private void slowDownSpeed(Block block) {
+        // 获取当前XY速度分量
+        BigDecimal speedX = block.getMovementInfo().getSpeed().getX();
+        BigDecimal speedY = block.getMovementInfo().getSpeed().getY();
+        
+        // 如果XY速度都为0，无需减速
+        if (speedX.equals(BigDecimal.ZERO) && speedY.equals(BigDecimal.ZERO)) {
+            return;
         }
-    }
-
-    private WorldCoordinate checkCollisionByType(GameWorld world, Block block1, Block block2) {
-        String fromId = world.getSourceMap().containsKey(block2.getBlockInfo().getId())
-                ? world.getSourceMap().get(block2.getBlockInfo().getId())
-                : block2.getBlockInfo().getId();
-        switch (block2.getBlockInfo().getType()) {
-            case BlockConstants.BLOCK_TYPE_DROP:
-                playerService.useDrop(block1.getBlockInfo().getId(), block2.getBlockInfo().getId());
-                break;
-            case BlockConstants.BLOCK_TYPE_TELEPORT:
-                return world.getTeleportMap().get(block2.getBlockInfo().getId());
-            case BlockConstants.BLOCK_TYPE_TRAP:
-                switch (block2.getBlockInfo().getCode()) {
-                    case BlockConstants.BLOCK_CODE_MINE:
-                        if (block1.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                                && playerService.validateActiveness(world, block1.getBlockInfo().getId())
-                                && !StringUtils.equals(fromId, block1.getBlockInfo().getId())) {
-                            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, block2.getWorldCoordinate());
-                            sceneManager.removeBlock(world, block2, true);
-                        }
-                        break;
-                    case BlockConstants.BLOCK_CODE_WIRE_NETTING:
-                    case BlockConstants.BLOCK_CODE_CACTUS_1:
-                    case BlockConstants.BLOCK_CODE_CACTUS_2:
-                    case BlockConstants.BLOCK_CODE_CACTUS_3:
-                        if (block1.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-                                && playerService.validateActiveness(world, block1.getBlockInfo().getId())
-                                && random.nextDouble()
-                                < Math.sqrt(Math.pow(block1.getMovementInfo().getSpeed().getX().doubleValue(), 2)
-                                + Math.pow(block1.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-                                / block1.getMovementInfo().getMaxPlanarSpeed().doubleValue()) {
-                            eventManager.affectBlock(world, block2, block1);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
+        
+        // 计算速度向量的模长（勾股定理）
+        double currentSpeedMagnitude = Math.sqrt(
+            speedX.pow(2).add(speedY.pow(2)).doubleValue()
+        );
+        
+        // 减去阻力加速度
+        double newSpeedMagnitude = currentSpeedMagnitude
+                + MovementConstants.PLANAR_RESISTANCE_ACCELERATION_DEFAULT.doubleValue();
+        
+        // 如果减速后速度小于等于0，则停止运动
+        if (newSpeedMagnitude <= 0) {
+            block.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
+            block.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
+            return;
         }
-        return null;
+        
+        // 保持原角度不变，按比例缩放XY分量
+        double scaleRatio = newSpeedMagnitude / currentSpeedMagnitude;
+        block.getMovementInfo().getSpeed().setX(speedX.multiply(BigDecimal.valueOf(scaleRatio)));
+        block.getMovementInfo().getSpeed().setY(speedY.multiply(BigDecimal.valueOf(scaleRatio)));
     }
 
     @Override
@@ -361,8 +439,6 @@ public class MovementManagerImpl implements MovementManager {
             region.getScenes().get(oldWorldCoordinate.getSceneCoordinate()).getBlocks()
                     .remove(worldMovingBlock.getBlockInfo().getId());
         }
-//        Queue<StructuredBlock> rankingQueue = sceneManager.collectSurroundingBlocks(world, worldMovingBlock, 1);
-//        rankingQueue.forEach(nearbyBlock -> checkBlockInteraction(world, worldMovingBlock, nearbyBlock.getBlock()));
     }
 
     @Override
@@ -382,58 +458,6 @@ public class MovementManagerImpl implements MovementManager {
             worldMovingBlock.getMovementInfo().setFloorCode(code);
         }
     }
-
-//    private void checkBlockInteraction(GameWorld world, Block block, Block nearbyBlock) {
-//        Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
-//        BigDecimal distance = BlockUtil.calculateDistance(region, block.getWorldCoordinate(),
-//                nearbyBlock.getWorldCoordinate());
-//        if (null == distance) {
-//            return;
-//        }
-//        String fromId = world.getSourceMap().containsKey(nearbyBlock.getBlockInfo().getId())
-//                ? world.getSourceMap().get(nearbyBlock.getBlockInfo().getId())
-//                : nearbyBlock.getBlockInfo().getId();
-//        Random random = new Random();
-//        switch (nearbyBlock.getBlockInfo().getType()) {
-//            case BlockConstants.BLOCK_TYPE_DROP:
-//                if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-//                        && distance.compareTo(BlockConstants.MIN_DROP_INTERACTION_DISTANCE) < 0) {
-//                    playerService.useDrop(block.getBlockInfo().getId(), nearbyBlock.getBlockInfo().getId());
-//                }
-//                break;
-//            case BlockConstants.BLOCK_TYPE_TRAP:
-//                switch (nearbyBlock.getBlockInfo().getCode()) {
-//                    case BlockConstants.BLOCK_CODE_MINE:
-//                        if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-//                                && playerService.validateActiveness(world, block.getBlockInfo().getId())
-//                                && !StringUtils.equals(fromId, block.getBlockInfo().getId())
-//                                && distance.compareTo(BlockConstants.MINE_RADIUS) < 0) {
-//                            eventManager.addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, nearbyBlock.getWorldCoordinate());
-//                            sceneManager.removeBlock(world, nearbyBlock, true);
-//                        }
-//                        break;
-//                    case BlockConstants.BLOCK_CODE_WIRE_NETTING:
-//                    case BlockConstants.BLOCK_CODE_CACTUS_1:
-//                    case BlockConstants.BLOCK_CODE_CACTUS_2:
-//                    case BlockConstants.BLOCK_CODE_CACTUS_3:
-//                        if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_PLAYER
-//                                && playerService.validateActiveness(world, block.getBlockInfo().getId())
-//                                && distance.compareTo(BlockConstants.WIRE_NETTING_RADIUS) < 0
-//                                && random.nextDouble()
-//                                < Math.sqrt(Math.pow(block.getMovementInfo().getSpeed().getX().doubleValue(), 2)
-//                                + Math.pow(block.getMovementInfo().getSpeed().getY().doubleValue(), 2))
-//                                / block.getMovementInfo().getMaxPlanarSpeed().doubleValue()) {
-//                            eventManager.affectBlock(world, nearbyBlock, block);
-//                        }
-//                        break;
-//                    default:
-//                        break;
-//                }
-//                break;
-//            default:
-//                break;
-//        }
-//    }
 
     @Override
     public void updateCreatureMaxSpeed(GameWorld world, String userCode) {
@@ -692,7 +716,7 @@ public class MovementManagerImpl implements MovementManager {
      * @return
      */
     @Override
-    public boolean detectSectorCollision(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+    public boolean detectSectorInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
                                          BigDecimal sectorAngle) {
         Region region = world.getRegionMap().get(from.getRegionNo());
         if (region == null) return false;
@@ -798,5 +822,226 @@ public class MovementManagerImpl implements MovementManager {
         final double dz = z2 - z1;
 
         return (dx * dx + dy * dy) <= pd * pd && Math.abs(dz) <= vd;
+    }
+
+    /**
+     * 结合type(替代material), speed, 结算block碰撞block
+     * @param world
+     * @param block1
+     * @param block2
+     * @param relativeVelocity
+     */
+    private void settleBlockCollision(GameWorld world, Block block1, Block block2, BigDecimal relativeVelocity) {
+        if (block1.getBlockInfo().getType() > block2.getBlockInfo().getType()
+                && block2.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_NORMAL) {
+            settleBlockCollision(world, block2, block1, relativeVelocity);
+            return;
+        }
+        String fromId = world.getSourceMap().containsKey(block2.getBlockInfo().getId())
+                ? world.getSourceMap().get(block2.getBlockInfo().getId())
+                : block2.getBlockInfo().getId();
+        switch (block1.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_NORMAL:
+                // 普通类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_EFFECT:
+                // 效果类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                switch (block2.getBlockInfo().getType()) {
+                    case BlockConstants.BLOCK_TYPE_PLAYER:
+                        collideCreature(world, block1, relativeVelocity.multiply(BigDecimal.valueOf(0.5D)));
+                        collideCreature(world, block2, relativeVelocity.multiply(BigDecimal.valueOf(0.5D)));
+                        break;
+                    case BlockConstants.BLOCK_TYPE_DROP:
+                        playerService.useDrop(block1.getBlockInfo().getId(), block2.getBlockInfo().getId());
+                        break;
+                    case BlockConstants.BLOCK_TYPE_TRAP:
+                        switch (block2.getBlockInfo().getCode()) {
+                            case BlockConstants.BLOCK_CODE_MINE:
+                                if (playerService.validateActiveness(world, block1.getBlockInfo().getId())
+                                        && !StringUtils.equals(fromId, block1.getBlockInfo().getId())) {
+                                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_EXPLODE, fromId, block2.getWorldCoordinate());
+                                    sceneManager.removeBlock(world, block2, true);
+                                }
+                                break;
+                            case BlockConstants.BLOCK_CODE_WIRE_NETTING:
+                            case BlockConstants.BLOCK_CODE_CACTUS_1:
+                            case BlockConstants.BLOCK_CODE_CACTUS_2:
+                            case BlockConstants.BLOCK_CODE_CACTUS_3:
+                                if (playerService.validateActiveness(world, block1.getBlockInfo().getId())
+                                        && random.nextDouble()
+                                        < Math.sqrt(Math.pow(block1.getMovementInfo().getSpeed().getX().doubleValue(), 2)
+                                        + Math.pow(block1.getMovementInfo().getSpeed().getY().doubleValue(), 2))
+                                        / block1.getMovementInfo().getMaxPlanarSpeed().doubleValue()) {
+                                    eventManager.affectBlock(world, block2, block1);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case BlockConstants.BLOCK_TYPE_EFFECT:
+                    case BlockConstants.BLOCK_TYPE_TELEPORT:
+                    case BlockConstants.BLOCK_TYPE_FARM:
+                    case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
+                    case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
+                    case BlockConstants.BLOCK_TYPE_PLASMA:
+                    case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                    case BlockConstants.BLOCK_TYPE_MELEE:
+                    case BlockConstants.BLOCK_TYPE_SHOOT:
+                    case BlockConstants.BLOCK_TYPE_EXPLOSION:
+                        // No effect
+                        break;
+                    default:
+                        collideCreature(world, block1, relativeVelocity);
+                        break;
+                }
+                break;
+            case BlockConstants.BLOCK_TYPE_DROP:
+                // 掉落物类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_TELEPORT:
+                // 传送类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_BED:
+                // 床类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_TOILET:
+                // 厕所类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_DRESSER:
+                // 梳妆台类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_GAME:
+                // 游戏类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_STORAGE:
+                // 存储类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_COOKER:
+                // 烹饪类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_SINK:
+                // 水槽类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_CONTAINER:
+                // 容器类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_SPEAKER:
+                // 音响类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_BUILDING:
+                // 建筑类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_TREE:
+                // 树木类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_ROCK:
+                // 岩石类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_FARM:
+                // 农场类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP:
+                // 工坊类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_TOOL:
+                // 工具工坊类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_AMMO:
+                // 弹药工坊类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_OUTFIT:
+                // 装备工坊类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_CHEM:
+                // 化学工坊类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WORKSHOP_RECYCLE:
+                // 回收工坊类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                // 陷阱类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_FLOOR:
+                // 地板类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_FLOOR_DECORATION:
+                // 地板装饰类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WALL:
+                // 墙壁类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_WALL_DECORATION:
+                // 墙壁装饰类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_PLASMA:
+                // 等离子体类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
+                // 人类遗体容器类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
+                // 动物遗体容器类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_TEXT_DISPLAY:
+                // 文本显示类型方块的碰撞处理
+                break;
+            case BlockConstants.BLOCK_TYPE_MELEE:
+                // 近战攻击类型方块的碰撞处理 TODO
+                break;
+            case BlockConstants.BLOCK_TYPE_SHOOT:
+                // 射击类型方块的碰撞处理 TODO
+                break;
+            case BlockConstants.BLOCK_TYPE_EXPLOSION:
+                // 爆炸类型方块的碰撞处理
+                break;
+            default:
+                // 未知类型方块的默认处理
+                break;
+        }
+    }
+
+    /**
+     * 结合type(替代material), speed, 结算block碰撞terrain
+     * @param world
+     * @param block1
+     * @param worldCoordinate2
+     * @param relativeVelocity
+     */
+    private void settleTerrainCollision(GameWorld world, Block block1, WorldCoordinate worldCoordinate2,
+                                        BigDecimal relativeVelocity) {
+        switch (block1.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                collideCreature(world, block1, relativeVelocity);
+                break;
+            case BlockConstants.BLOCK_TYPE_MELEE:
+                // 近战攻击类型方块的碰撞处理 TODO
+                break;
+            case BlockConstants.BLOCK_TYPE_SHOOT:
+                // 射击类型方块的碰撞处理 TODO
+                break;
+            default:
+                // 未知类型方块的默认处理
+                break;
+        }
+    }
+
+    private void collideCreature(GameWorld world, Block creature, BigDecimal relativeVelocity) {
+        switch (creature.getBlockInfo().getType()) {
+            case BlockConstants.BLOCK_TYPE_PLAYER:
+                if (relativeVelocity.compareTo(MovementConstants.MIN_CREATURE_LETHAL_SPEED_DEFAULT) >= 0) {
+                    playerService.killPlayer(creature.getBlockInfo().getId());
+                } else if (relativeVelocity.compareTo(MovementConstants.MIN_CREATURE_INJURIOUS_SPEED_DEFAULT) >= 0) {
+                    int changedHp = (int) Math.round(creature.getBlockInfo().getHpMax().doubleValue()
+                            * relativeVelocity.doubleValue()
+                            / (MovementConstants.MIN_CREATURE_LETHAL_SPEED_DEFAULT.doubleValue()
+                            - MovementConstants.MIN_CREATURE_INJURIOUS_SPEED_DEFAULT.doubleValue()));
+                    eventManager.changeHp(world, creature, - changedHp, false);
+                }
+            default:
+                break;
+        }
     }
 }
