@@ -52,7 +52,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.AbstractMap;
@@ -747,7 +746,7 @@ public class PlayerServiceImpl implements PlayerService {
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode, bottomWorldCoordinate);
                 movementManager.settleAcceleration(world, player, BlockUtil.locateCoordinateWithDirectionAndDistance(
                         new Coordinate(), direction, BlockConstants.DODGE_RADIUS), null, null);
-//                player.getMovementInfo().setFaceDirection(direction);
+                player.getMovementInfo().setFaceDirection(direction);
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_MINE, userCode,
@@ -952,7 +951,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> knockPlayer(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -991,11 +989,12 @@ public class PlayerServiceImpl implements PlayerService {
         } else if (playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] == 0) {
             playerInfo.getBuff()[BuffConstants.BUFF_CODE_KNOCKED] = BuffConstants.BUFF_DEFAULT_FRAME_KNOCKED;
         }
+        eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED_SEVERE, userCode,
+                player.getWorldCoordinate());
         return ResponseEntity.ok().body(rst.toString());
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> killPlayer(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);
@@ -1014,6 +1013,8 @@ public class PlayerServiceImpl implements PlayerService {
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         addPlayerTrophy(userCode, playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] != 0);
+        eventManager.changeHp(world, player, BigDecimal.valueOf(player.getBlockInfo().getHpMax().get())
+                .multiply(BlockConstants.HP_PULL_RATIO).intValue(), true);
         changeVp(userCode, 0, true);
         changeHunger(userCode, 0, true);
         changeThirst(userCode, 0, true);
@@ -1032,7 +1033,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> pullPlayer(String fromUserCode, String toUserCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(toUserCode);
@@ -1058,7 +1058,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public ResponseEntity<String> revivePlayer(String userCode) {
         JSONObject rst = ContentUtil.generateRst();
         GameWorld world = userService.getWorldByUserCode(userCode);

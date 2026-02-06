@@ -77,13 +77,13 @@ public class TimedEventTask {
                         eventManager.updateEvent(world, block, timestamp);
                         movementManager.settleGravityAcceleration(world, block);
                         movementManager.applyFriction(block);
-                        movementManager.settleSpeed(world, block);
+                        movementManager.settleSpeed(world, block, true, true);
                     });
             world.getCreatureMap().values()
                     .forEach(player -> {
                         movementManager.settleGravityAcceleration(world, player);
                         movementManager.applyFriction(player);
-                        movementManager.settleSpeed(world, player);
+                        movementManager.settleSpeed(world, player, false, true);
                     });
 
             onlineMap.keySet().stream()

@@ -71,8 +71,6 @@ public class BuffManagerImpl implements BuffManager {
                 if (playerInfo.getBuff()[i] == 0) {
                     playerService.generateNotificationMessage(userCode, "濒死结束。");
                 } else {
-                    eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED_SEVERE, userCode,
-                            player.getWorldCoordinate());
                     if (playerInfo.getBuff()[i] % GamePalConstants.FRAME_PER_SECOND == 0) {
                         eventManager.addEvent(world, BlockConstants.BLOCK_CODE_BLEED, userCode,
                                 BlockUtil.locateCoordinateWithDirectionAndDistance(

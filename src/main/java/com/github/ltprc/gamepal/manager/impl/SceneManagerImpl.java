@@ -1076,16 +1076,17 @@ public class SceneManagerImpl implements SceneManager {
     }
 
     @Override
-    public BigDecimal getAltitude(GameWorld world, WorldCoordinate worldCoordinate) {
+    public BigDecimal getAltitude(GameWorld world, WorldCoordinate worldCoordinate, boolean checkGravitatedStack) {
         Region region = world.getRegionMap().get(worldCoordinate.getRegionNo());
         GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
-        return null == gravitatedStack ? region.getAltitude() : gravitatedStack.getMaxAltitude();
+        return (!checkGravitatedStack || null == gravitatedStack) ? region.getAltitude()
+                : gravitatedStack.getMaxAltitude();
     }
 
     @Override
     public void updateBlockAltitude(GameWorld world, Block block) {
         if (BlockUtil.checkBlockTypeGravity(block.getBlockInfo().getType())) {
-            block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate()));
+            block.getWorldCoordinate().getCoordinate().setZ(getAltitude(world, block.getWorldCoordinate(), true));
             webSocketService.resetPlayerBlockMapByBlock(world, block.getBlockInfo().getId());
         }
     }

@@ -115,6 +115,7 @@ public class NpcManagerImpl implements NpcManager {
         worldService.expandByCoordinate(world, null, player.getWorldCoordinate(),
                 playerInfo.getPlayerType() == GamePalConstants.PLAYER_TYPE_HUMAN ? 1 : 0);
         worldService.registerOnline(world, userCode, timestamp);
+        // Every creature needs flagMap 26/02/07
         world.getFlagMap().putIfAbsent(userCode, new boolean[FlagConstants.FLAG_LENGTH]);
         world.getFlagMap().get(userCode)[FlagConstants.FLAG_UPDATE_GRIDS] = true;
         userService.addUserIntoWorldMap(userCode, world.getId());

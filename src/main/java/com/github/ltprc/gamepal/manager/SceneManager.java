@@ -35,6 +35,6 @@ public interface SceneManager {
     void removeBlock(GameWorld world, Block block, boolean isDestroyed);
     int getGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate);
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
-    BigDecimal getAltitude(final GameWorld world, final WorldCoordinate worldCoordinate);
+    BigDecimal getAltitude(final GameWorld world, final WorldCoordinate worldCoordinate, boolean checkGravitatedStack);
     void updateBlockAltitude(final GameWorld world, Block block);
 }
