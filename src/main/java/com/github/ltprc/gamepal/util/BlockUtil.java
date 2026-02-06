@@ -3,7 +3,6 @@ package com.github.ltprc.gamepal.util;
 import com.github.ltprc.gamepal.config.BlockConstants;
 import com.github.ltprc.gamepal.config.ItemConstants;
 import com.github.ltprc.gamepal.factory.BlockFactory;
-import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.BlockInfo;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.IntegerCoordinate;
@@ -11,6 +10,8 @@ import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.region.RegionInfo;
+import com.github.ltprc.gamepal.model.map.structure.Shape;
+import com.github.ltprc.gamepal.model.map.structure.Structure;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -584,5 +585,138 @@ public class BlockUtil {
 
     public static int convertBlockCode2Type(int blockCode) {
         return BlockConstants.BLOCK_CODE_TYPE_MAP.getOrDefault(blockCode, BlockConstants.BLOCK_TYPE_FLOOR);
+    }
+
+    public static boolean detectPlanarCollision(RegionInfo regionInfo, WorldCoordinate worldCoordinate1,
+                                                WorldCoordinate worldCoordinate2, Structure structure1,
+                                                Structure structure2) {
+        if (worldCoordinate1.getRegionNo() != regionInfo.getRegionNo()
+                || worldCoordinate2.getRegionNo() != regionInfo.getRegionNo()) {
+            return false;
+        }
+        Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, worldCoordinate1);
+        Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, worldCoordinate2);
+        Shape shape1 = structure1.getShape();
+        Shape shape2 = structure2.getShape();
+        return detectPlanarCollision(coordinate1, coordinate2, shape1, shape2);
+    }
+
+    private static boolean detectPlanarCollision(Coordinate coordinate1, Coordinate coordinate2, Shape shape1,
+                                                 Shape shape2) {
+        // ===== 坐标（double）=====
+        final double x1 = coordinate1.getX().doubleValue();
+        final double y1 = coordinate1.getY().doubleValue();
+        final double x2 = coordinate2.getX().doubleValue();
+        final double y2 = coordinate2.getY().doubleValue();
+
+        final double dx = Math.abs(x1 - x2);
+        final double dy = Math.abs(y1 - y2);
+
+        // ===== 类型（只识别 ROUND，其它都当 RECTANGLE）=====
+        final boolean round1 = shape1.getShapeType() == BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND;
+        final boolean round2 = shape2.getShapeType() == BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND;
+
+        // ===== 半径/半边长（double）=====
+        // ROUND: 用 radius.x 作为半径
+        // RECTANGLE: 用 radius.x/radius.y 作为半宽/半高
+        final double r1x = shape1.getRadius().getX().doubleValue();
+        final double r1y = shape1.getRadius().getY().doubleValue();
+        final double r2x = shape2.getRadius().getX().doubleValue();
+        final double r2y = shape2.getRadius().getY().doubleValue();
+
+        // ===== 圆-圆 =====
+        if (round1 && round2) {
+            final double rr = r1x + r2x;
+            return (dx * dx + dy * dy) < (rr * rr); // 用平方避免 sqrt
+        }
+
+        // ===== 矩形-矩形（或非圆都当矩形）=====
+        if (!round1 && !round2) {
+            return dx < (r1x + r2x) && dy < (r1y + r2y);
+        }
+
+        // ===== 圆-矩形（保证 shape1 是圆，shape2 是矩形）=====
+        if (!round1) {
+            // swap
+            return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
+        }
+
+        // 现在：shape1 圆，shape2 矩形
+        final double circleR = r1x;
+        final double rectHalfW = r2x;
+        final double rectHalfH = r2y;
+
+        // 快速排除（外接判断）
+        if (dx >= (rectHalfW + circleR) || dy >= (rectHalfH + circleR)) {
+            return false;
+        }
+        // 圆心投影落在矩形范围内 => 必碰
+        if (dx < rectHalfW || dy < rectHalfH) {
+            return true;
+        }
+        // 检查角点
+        final double cornerDx = dx - rectHalfW;
+        final double cornerDy = dy - rectHalfH;
+        return (cornerDx * cornerDx + cornerDy * cornerDy) < (circleR * circleR);
+    }
+
+    public static boolean detectVerticalCollision(WorldCoordinate worldCoordinate1, WorldCoordinate worldCoordinate2,
+                                                  Structure structure1, Structure structure2) {
+        if (worldCoordinate1.getRegionNo() != worldCoordinate2.getRegionNo()) {
+            return false;
+        }
+
+        final double z1 = worldCoordinate1.getCoordinate().getZ().doubleValue();
+        final double z2 = worldCoordinate2.getCoordinate().getZ().doubleValue();
+
+        final double h1 = structure1.getShape().getRadius().getZ().doubleValue();
+        final double h2 = structure2.getShape().getRadius().getZ().doubleValue();
+
+        return (z1 + h1) > z2 && (z2 + h2) > z1;
+    }
+
+    public static void limitSpeed(Coordinate speed, BigDecimal speedXAbs, BigDecimal speedYAbs, BigDecimal speedZAbs) {
+        if (null != speedXAbs) {
+            BigDecimal currentX = speed.getX();
+            BigDecimal limitedX;
+            if (currentX.abs().compareTo(speedXAbs) > 0) {
+                if (currentX.compareTo(BigDecimal.ZERO) >= 0) {
+                    limitedX = speedXAbs;
+                } else {
+                    limitedX = speedXAbs.negate();
+                }
+            } else {
+                limitedX = currentX;
+            }
+            speed.setX(limitedX);
+        }
+        if (null != speedYAbs) {
+            BigDecimal currentY = speed.getY();
+            BigDecimal limitedY;
+            if (currentY.abs().compareTo(speedYAbs) > 0) {
+                if (currentY.compareTo(BigDecimal.ZERO) >= 0) {
+                    limitedY = speedYAbs;
+                } else {
+                    limitedY = speedYAbs.negate();
+                }
+            } else {
+                limitedY = currentY;
+            }
+            speed.setY(limitedY);
+        }
+        if (null != speedZAbs) {
+            BigDecimal currentZ = speed.getZ();
+            BigDecimal limitedZ;
+            if (currentZ.abs().compareTo(speedZAbs) > 0) {
+                if (currentZ.compareTo(BigDecimal.ZERO) >= 0) {
+                    limitedZ = speedZAbs;
+                } else {
+                    limitedZ = speedZAbs.negate();
+                }
+            } else {
+                limitedZ = currentZ;
+            }
+            speed.setZ(limitedZ);
+        }
     }
 }

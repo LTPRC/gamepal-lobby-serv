@@ -6,6 +6,8 @@ public class MovementConstants {
 
     // Backend constants
 
+    public static final BigDecimal MIN_BLOCK_ACCELERATION = BigDecimal.valueOf(0.0001D);
+    public static final BigDecimal MIN_BLOCK_SPEED = BigDecimal.valueOf(0.001D);
     public static final BigDecimal MAX_PLANAR_SPEED_DEFAULT = BigDecimal.valueOf(0.2D);
     public static final BigDecimal MAX_PLANAR_ACCELERATION_SPEED_RATIO = BigDecimal.valueOf(0.1D);
     public static final BigDecimal FACE_DIRECTION_DEFAULT = BigDecimal.ZERO;
@@ -21,7 +23,7 @@ public class MovementConstants {
     public static final BigDecimal MAX_VERTICAL_STEP_DEFAULT = BigDecimal.valueOf(0.5D);
     public static final BigDecimal MIN_CREATURE_INJURIOUS_SPEED_DEFAULT = BigDecimal.valueOf(0.2D);
     public static final BigDecimal MIN_CREATURE_LETHAL_SPEED_DEFAULT = BigDecimal.valueOf(0.4D);
-    public static final BigDecimal PLANAR_RESISTANCE_ACCELERATION_DEFAULT = BigDecimal.valueOf(-0.01D);
+    public static final BigDecimal FRICTION_FACTOR = BigDecimal.valueOf(0.9D);
 
     public static final int MOVEMENT_MODE_DEFAULT = 0;
     public static final int MOVEMENT_MODE_STAND_GROUND = 1;

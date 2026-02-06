@@ -8,6 +8,7 @@ import com.github.ltprc.gamepal.manager.MovementManager;
 import com.github.ltprc.gamepal.manager.NpcManager;
 import com.github.ltprc.gamepal.manager.SceneManager;
 import com.github.ltprc.gamepal.model.creature.PlayerInfo;
+import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
 import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.block.MovementInfo;
@@ -75,11 +76,13 @@ public class TimedEventTask {
                     .forEach(block -> {
                         eventManager.updateEvent(world, block, timestamp);
                         movementManager.settleGravityAcceleration(world, block);
+                        movementManager.applyFriction(block);
                         movementManager.settleSpeed(world, block);
                     });
             world.getCreatureMap().values()
                     .forEach(player -> {
                         movementManager.settleGravityAcceleration(world, player);
+                        movementManager.applyFriction(player);
                         movementManager.settleSpeed(world, player);
                     });
 

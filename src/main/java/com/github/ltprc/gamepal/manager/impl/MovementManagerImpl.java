@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -63,7 +64,7 @@ public class MovementManagerImpl implements MovementManager {
         }
         if (accelerationCoordinate.getX().equals(BigDecimal.ZERO)
                 && accelerationCoordinate.getY().equals(BigDecimal.ZERO)) {
-            limitSpeed(world, block, BigDecimal.ZERO, BigDecimal.ZERO, null);
+            BlockUtil.limitSpeed(block.getMovementInfo().getSpeed(), BigDecimal.ZERO, BigDecimal.ZERO, null);
         } else {
             BigDecimal maxPlanarSpeed;
             switch (movementMode) {
@@ -101,56 +102,51 @@ public class MovementManagerImpl implements MovementManager {
                     block.getMovementInfo().getVerticalAcceleration()), null,
                     block.getMovementInfo().getMaxVerticalSpeed());
         } else {
-            limitSpeed(world, block, null, null, BigDecimal.ZERO);
+            BlockUtil.limitSpeed(block.getMovementInfo().getSpeed(), null, null, BigDecimal.ZERO);
         }
     }
 
     @Override
     public void settleAcceleration(GameWorld world, Block block, Coordinate acceleration, BigDecimal maxPlanarSpeed,
                                    BigDecimal maxVerticalSpeed) {
-        block.getMovementInfo().getSpeed().setX(block.getMovementInfo().getSpeed().getX().add(acceleration.getX()));
-        block.getMovementInfo().getSpeed().setY(block.getMovementInfo().getSpeed().getY().add(acceleration.getY()));
-        BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
-        BigDecimal newAltitude = block.getWorldCoordinate().getCoordinate().getZ()
-                .add(block.getMovementInfo().getSpeed().getZ());
-        if (altitude.compareTo(newAltitude) > 0) {
-            block.getMovementInfo().getSpeed().setZ(BigDecimal.ZERO);
-        } else {
-            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ().add(acceleration.getZ()));
-        }
-        block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
-                new PlanarCoordinate(block.getMovementInfo().getSpeed().getX(),
-                        block.getMovementInfo().getSpeed().getY())));
-        BigDecimal speedXAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
-                Math.cos(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI))).abs();
-        BigDecimal speedYAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
-                Math.sin(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)).negate()).abs();
-        limitSpeed(world, block, speedXAbs, speedYAbs, maxVerticalSpeed);
-//        settlePlanarSpeed(world, block);
-//        settleVerticalSpeed(world, block);
-    }
+//        block.getMovementInfo().getSpeed().setX(block.getMovementInfo().getSpeed().getX().add(acceleration.getX()));
+//        block.getMovementInfo().getSpeed().setY(block.getMovementInfo().getSpeed().getY().add(acceleration.getY()));
+//        BigDecimal altitude = sceneManager.getAltitude(world, block.getWorldCoordinate());
+//        BigDecimal newAltitude = block.getWorldCoordinate().getCoordinate().getZ()
+//                .add(block.getMovementInfo().getSpeed().getZ());
+//        if (altitude.compareTo(newAltitude) > 0) {
+//            block.getMovementInfo().getSpeed().setZ(BigDecimal.ZERO);
+//        } else {
+//            block.getMovementInfo().getSpeed().setZ(block.getMovementInfo().getSpeed().getZ().add(acceleration.getZ()));
+//        }
+        BigDecimal speedX = block.getMovementInfo().getSpeed().getX().add(acceleration.getX());
+        BigDecimal speedY = block.getMovementInfo().getSpeed().getY().add(acceleration.getY());
 
-    @Override
-    public void limitSpeed(GameWorld world, Block block, BigDecimal speedXAbs, BigDecimal speedYAbs,
-                           BigDecimal speedZAbs) {
-        if (null != speedXAbs) {
-            BigDecimal currentX = block.getMovementInfo().getSpeed().getX();
-            BigDecimal limitedX = currentX.abs().compareTo(speedXAbs) > 0 ? 
-                (currentX.compareTo(BigDecimal.ZERO) >= 0 ? speedXAbs : speedXAbs.negate()) : currentX;
-            block.getMovementInfo().getSpeed().setX(limitedX);
+        // 更新方向
+        block.getMovementInfo().setFaceDirection(BlockUtil.calculateAngle(new PlanarCoordinate(),
+                new PlanarCoordinate(acceleration.getX(), acceleration.getY())));
+        
+        // 计算最大速度分量
+        BigDecimal maxSpeedXAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
+                Math.cos(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI))).abs();
+        BigDecimal maxSpeedYAbs = null == maxPlanarSpeed ? null : maxPlanarSpeed.multiply(BigDecimal.valueOf(
+                Math.sin(block.getMovementInfo().getFaceDirection().doubleValue() / 180 * Math.PI)).negate()).abs();
+        
+        // 限制speedX和speedY使其绝对值不超过对应的最大值
+        if (maxSpeedXAbs != null && speedX.abs().compareTo(maxSpeedXAbs) > 0) {
+            speedX = speedX.compareTo(BigDecimal.ZERO) >= 0 ? maxSpeedXAbs : maxSpeedXAbs.negate();
         }
-        if (null != speedYAbs) {
-            BigDecimal currentY = block.getMovementInfo().getSpeed().getY();
-            BigDecimal limitedY = currentY.abs().compareTo(speedYAbs) > 0 ? 
-                (currentY.compareTo(BigDecimal.ZERO) >= 0 ? speedYAbs : speedYAbs.negate()) : currentY;
-            block.getMovementInfo().getSpeed().setY(limitedY);
+        if (maxSpeedYAbs != null && speedY.abs().compareTo(maxSpeedYAbs) > 0) {
+            speedY = speedY.compareTo(BigDecimal.ZERO) >= 0 ? maxSpeedYAbs : maxSpeedYAbs.negate();
         }
-        if (null != speedZAbs) {
-            BigDecimal currentZ = block.getMovementInfo().getSpeed().getZ();
-            BigDecimal limitedZ = currentZ.abs().compareTo(speedZAbs) > 0 ? 
-                (currentZ.compareTo(BigDecimal.ZERO) >= 0 ? speedZAbs : speedZAbs.negate()) : currentZ;
-            block.getMovementInfo().getSpeed().setZ(limitedZ);
+
+        BigDecimal speedZ = block.getMovementInfo().getSpeed().getZ().add(acceleration.getZ());
+        if (maxVerticalSpeed != null && speedZ.abs().compareTo(maxVerticalSpeed) > 0) {
+            speedZ = speedZ.compareTo(BigDecimal.ZERO) >= 0 ? maxVerticalSpeed : maxVerticalSpeed.negate();
         }
+        
+        // 更新速度分量
+        block.getMovementInfo().setSpeed(new Coordinate(speedX, speedY, speedZ));
     }
 
     @Override
@@ -160,7 +156,6 @@ public class MovementManagerImpl implements MovementManager {
                 && BigDecimal.ZERO.equals(worldMovingBlock.getMovementInfo().getSpeed().getZ())) {
             return;
         }
-        slowDownSpeed(worldMovingBlock);
 
         // Settle planar speed
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
@@ -230,15 +225,6 @@ public class MovementManagerImpl implements MovementManager {
             if (!xCollision) {
                 if (detectCollision(world, expectedNewBlockX, block, true)) {
                     xCollision = true;
-//                    destination = checkCollisionByType(world, expectedNewBlockX, block);
-//                    if (null != destination) {
-//                        yCollision = true;
-//                        break;
-//                    }
-//                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
-//                        destination = world.getTeleportMap().get(block.getBlockInfo().getId());
-//                        yCollision = true;
-//                    }
                 }
                 if (detectCollision(world, expectedNewBlockX, block, false)) {
                     blockers.add(block);
@@ -247,15 +233,6 @@ public class MovementManagerImpl implements MovementManager {
             if (!yCollision) {
                 if (detectCollision(world, expectedNewBlockY, block, true)) {
                     yCollision = true;
-//                    destination = checkCollisionByType(world, expectedNewBlockY, block);
-//                    if (null != destination) {
-//                        xCollision = true;
-//                        break;
-//                    }
-//                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
-//                        destination = world.getTeleportMap().get(block.getBlockInfo().getId());
-//                        xCollision = true;
-//                    }
                 }
                 if (detectCollision(world, expectedNewBlockY, block, false)) {
                     blockers.add(block);
@@ -265,13 +242,6 @@ public class MovementManagerImpl implements MovementManager {
                 if (detectCollision(world, expectedNewBlockXY, block, true)) {
                     xCollision = true;
                     yCollision = true;
-//                    destination = checkCollisionByType(world, expectedNewBlockXY, block);
-//                    if (null != destination) {
-//                        break;
-//                    }
-//                    if (block.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT) {
-//                        destination = world.getTeleportMap().get(block.getBlockInfo().getId());
-//                    }
                 }
                 if (detectCollision(world, expectedNewBlockXY, block, false)) {
                     blockers.add(block);
@@ -279,10 +249,10 @@ public class MovementManagerImpl implements MovementManager {
             }
         }
         if (xCollision) {
-            limitSpeed(world, worldMovingBlock, BigDecimal.ZERO, null, null);
+            BlockUtil.limitSpeed(worldMovingBlock.getMovementInfo().getSpeed(), BigDecimal.ZERO, null, null);
         }
         if (yCollision) {
-            limitSpeed(world, worldMovingBlock, null, BigDecimal.ZERO, null);
+            BlockUtil.limitSpeed(worldMovingBlock.getMovementInfo().getSpeed(), null, BigDecimal.ZERO, null);
         }
 
         // Settle vertical speed
@@ -317,7 +287,7 @@ public class MovementManagerImpl implements MovementManager {
             }
         }
         if (zCollision) {
-            limitSpeed(world, worldMovingBlock, null, null, BigDecimal.ZERO);
+            BlockUtil.limitSpeed(worldMovingBlock.getMovementInfo().getSpeed(), null, null, BigDecimal.ZERO);
         }
 
         // Settle worldMovingBlock position
@@ -369,38 +339,6 @@ public class MovementManagerImpl implements MovementManager {
             BlockUtil.fixWorldCoordinate(region, destination);
             settleCoordinate(world, worldMovingBlock, destination, false);
         }
-    }
-
-    private void slowDownSpeed(Block block) {
-        // 获取当前XY速度分量
-        BigDecimal speedX = block.getMovementInfo().getSpeed().getX();
-        BigDecimal speedY = block.getMovementInfo().getSpeed().getY();
-        
-        // 如果XY速度都为0，无需减速
-        if (speedX.equals(BigDecimal.ZERO) && speedY.equals(BigDecimal.ZERO)) {
-            return;
-        }
-        
-        // 计算速度向量的模长（勾股定理）
-        double currentSpeedMagnitude = Math.sqrt(
-            speedX.pow(2).add(speedY.pow(2)).doubleValue()
-        );
-        
-        // 减去阻力加速度
-        double newSpeedMagnitude = currentSpeedMagnitude
-                + MovementConstants.PLANAR_RESISTANCE_ACCELERATION_DEFAULT.doubleValue();
-        
-        // 如果减速后速度小于等于0，则停止运动
-        if (newSpeedMagnitude <= 0) {
-            block.getMovementInfo().getSpeed().setX(BigDecimal.ZERO);
-            block.getMovementInfo().getSpeed().setY(BigDecimal.ZERO);
-            return;
-        }
-        
-        // 保持原角度不变，按比例缩放XY分量
-        double scaleRatio = newSpeedMagnitude / currentSpeedMagnitude;
-        block.getMovementInfo().getSpeed().setX(speedX.multiply(BigDecimal.valueOf(scaleRatio)));
-        block.getMovementInfo().getSpeed().setY(speedY.multiply(BigDecimal.valueOf(scaleRatio)));
     }
 
     @Override
@@ -529,95 +467,8 @@ public class MovementManagerImpl implements MovementManager {
         WorldCoordinate worldCoordinate2 = block2.getWorldCoordinate();
         Region region = world.getRegionMap().get(worldCoordinate1.getRegionNo());
         return BlockUtil.checkMaterials(relocate, structure1.getMaterial(), structure2.getMaterial())
-                && detectPlanarCollision(region, worldCoordinate1, worldCoordinate2, structure1, structure2)
-                && detectZCollision(worldCoordinate1, worldCoordinate2, structure1, structure2);
-    }
-
-    private boolean detectPlanarCollision(RegionInfo regionInfo, WorldCoordinate worldCoordinate1,
-                                          WorldCoordinate worldCoordinate2, Structure structure1,
-                                          Structure structure2) {
-        if (worldCoordinate1.getRegionNo() != regionInfo.getRegionNo()
-                || worldCoordinate2.getRegionNo() != regionInfo.getRegionNo()) {
-            return false;
-        }
-        Coordinate coordinate1 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, worldCoordinate1);
-        Coordinate coordinate2 = BlockUtil.convertWorldCoordinate2Coordinate(regionInfo, worldCoordinate2);
-        Shape shape1 = structure1.getShape();
-        Shape shape2 = structure2.getShape();
-        return detectPlanarCollision(coordinate1, coordinate2, shape1, shape2);
-    }
-
-    private boolean detectPlanarCollision(Coordinate coordinate1, Coordinate coordinate2, Shape shape1, Shape shape2) {
-        // ===== 坐标（double）=====
-        final double x1 = coordinate1.getX().doubleValue();
-        final double y1 = coordinate1.getY().doubleValue();
-        final double x2 = coordinate2.getX().doubleValue();
-        final double y2 = coordinate2.getY().doubleValue();
-
-        final double dx = Math.abs(x1 - x2);
-        final double dy = Math.abs(y1 - y2);
-
-        // ===== 类型（只识别 ROUND，其它都当 RECTANGLE）=====
-        final boolean round1 = shape1.getShapeType() == BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND;
-        final boolean round2 = shape2.getShapeType() == BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND;
-
-        // ===== 半径/半边长（double）=====
-        // ROUND: 用 radius.x 作为半径
-        // RECTANGLE: 用 radius.x/radius.y 作为半宽/半高
-        final double r1x = shape1.getRadius().getX().doubleValue();
-        final double r1y = shape1.getRadius().getY().doubleValue();
-        final double r2x = shape2.getRadius().getX().doubleValue();
-        final double r2y = shape2.getRadius().getY().doubleValue();
-
-        // ===== 圆-圆 =====
-        if (round1 && round2) {
-            final double rr = r1x + r2x;
-            return (dx * dx + dy * dy) < (rr * rr); // 用平方避免 sqrt
-        }
-
-        // ===== 矩形-矩形（或非圆都当矩形）=====
-        if (!round1 && !round2) {
-            return dx < (r1x + r2x) && dy < (r1y + r2y);
-        }
-
-        // ===== 圆-矩形（保证 shape1 是圆，shape2 是矩形）=====
-        if (!round1) {
-            // swap
-            return detectPlanarCollision(coordinate2, coordinate1, shape2, shape1);
-        }
-
-        // 现在：shape1 圆，shape2 矩形
-        final double circleR = r1x;
-        final double rectHalfW = r2x;
-        final double rectHalfH = r2y;
-
-        // 快速排除（外接判断）
-        if (dx >= (rectHalfW + circleR) || dy >= (rectHalfH + circleR)) {
-            return false;
-        }
-        // 圆心投影落在矩形范围内 => 必碰
-        if (dx < rectHalfW || dy < rectHalfH) {
-            return true;
-        }
-        // 检查角点
-        final double cornerDx = dx - rectHalfW;
-        final double cornerDy = dy - rectHalfH;
-        return (cornerDx * cornerDx + cornerDy * cornerDy) < (circleR * circleR);
-    }
-
-    private boolean detectZCollision(WorldCoordinate worldCoordinate1, WorldCoordinate worldCoordinate2,
-                                     Structure structure1, Structure structure2) {
-        if (worldCoordinate1.getRegionNo() != worldCoordinate2.getRegionNo()) {
-            return false;
-        }
-
-        final double z1 = worldCoordinate1.getCoordinate().getZ().doubleValue();
-        final double z2 = worldCoordinate2.getCoordinate().getZ().doubleValue();
-
-        final double h1 = structure1.getShape().getRadius().getZ().doubleValue();
-        final double h2 = structure2.getShape().getRadius().getZ().doubleValue();
-
-        return (z1 + h1) > z2 && (z2 + h2) > z1;
+                && BlockUtil.detectPlanarCollision(region, worldCoordinate1, worldCoordinate2, structure1, structure2)
+                && BlockUtil.detectVerticalCollision(worldCoordinate1, worldCoordinate2, structure1, structure2);
     }
 
     @Override
@@ -718,6 +569,21 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public boolean detectSectorInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
                                          BigDecimal sectorAngle) {
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        Structure structure1 = structureMap.getOrDefault(block1.getBlockInfo().getCode(), new Structure());
+        Structure structure2 = structureMap.getOrDefault(block2.getBlockInfo().getCode(), new Structure());
+        if (null == structure1 || null == structure2) {
+            return false;
+        }
+        WorldCoordinate worldCoordinate1 = block1.getWorldCoordinate();
+        WorldCoordinate worldCoordinate2 = block2.getWorldCoordinate();
+        return BlockUtil.checkMaterials(false, structure1.getMaterial(), structure2.getMaterial())
+                && detectPlanarSectorInfluence(world, from, block1, block2, sectorAngle)
+                && BlockUtil.detectVerticalCollision(worldCoordinate1, worldCoordinate2, structure1, structure2);
+    }
+
+    private boolean detectPlanarSectorInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                                BigDecimal sectorAngle) {
         Region region = world.getRegionMap().get(from.getRegionNo());
         if (region == null) return false;
 
@@ -790,6 +656,21 @@ public class MovementManagerImpl implements MovementManager {
     @Override
     public boolean detectCylinderInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
                                            BigDecimal planarDistance, BigDecimal verticalDistance) {
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        Structure structure1 = structureMap.getOrDefault(block1.getBlockInfo().getCode(), new Structure());
+        Structure structure2 = structureMap.getOrDefault(block2.getBlockInfo().getCode(), new Structure());
+        if (null == structure1 || null == structure2) {
+            return false;
+        }
+        WorldCoordinate worldCoordinate1 = block1.getWorldCoordinate();
+        WorldCoordinate worldCoordinate2 = block2.getWorldCoordinate();
+        return BlockUtil.checkMaterials(false, structure1.getMaterial(), structure2.getMaterial())
+                && detectPlanarCylinderInfluence(world, from, block1, block2, planarDistance, verticalDistance)
+                && BlockUtil.detectVerticalCollision(worldCoordinate1, worldCoordinate2, structure1, structure2);
+    }
+
+    private boolean detectPlanarCylinderInfluence(GameWorld world, WorldCoordinate from, Block block1, Block block2,
+                                                  BigDecimal planarDistance, BigDecimal verticalDistance) {
         Region region = world.getRegionMap().get(from.getRegionNo());
         if (region == null) return false;
 
@@ -1043,5 +924,27 @@ public class MovementManagerImpl implements MovementManager {
             default:
                 break;
         }
+    }
+
+    /**
+     * 对人类玩家应用摩擦力，当他们停止移动时减慢速度
+     */
+    public void applyFriction(Block block) {
+        // 获取当前速度
+        Coordinate currentSpeed = block.getMovementInfo().getSpeed();
+            
+        // 减少水平速度，使其更快地接近零
+        BigDecimal newXSpeed = currentSpeed.getX().multiply(MovementConstants.FRICTION_FACTOR);
+        BigDecimal newYSpeed = currentSpeed.getY().multiply(MovementConstants.FRICTION_FACTOR);
+
+        // 如果速度已经非常接近0，则设为0
+        if (newXSpeed.abs().compareTo(MovementConstants.MIN_BLOCK_SPEED) < 0) {
+            newXSpeed = BigDecimal.ZERO;
+        }
+        if (newYSpeed.abs().compareTo(MovementConstants.MIN_BLOCK_SPEED) < 0) {
+            newYSpeed = BigDecimal.ZERO;
+        }
+
+        block.getMovementInfo().setSpeed(new Coordinate(newXSpeed, newYSpeed, currentSpeed.getZ()));
     }
 }

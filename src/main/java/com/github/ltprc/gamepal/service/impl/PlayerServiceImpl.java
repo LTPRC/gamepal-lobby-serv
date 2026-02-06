@@ -976,7 +976,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.ok().body(JSON.toJSONString(ErrorUtil.ERROR_1043));
         }
 
-        movementManager.limitSpeed(world, player, BigDecimal.ZERO, BigDecimal.ZERO, null);
+        BlockUtil.limitSpeed(player.getMovementInfo().getSpeed(), BigDecimal.ZERO, BigDecimal.ZERO, null);
         // Reset all skill remaining time
         for (int i = 0; i < playerInfo.getSkills().size(); i++) {
             if (null != playerInfo.getSkills().get(i)) {
@@ -1007,7 +1007,7 @@ public class PlayerServiceImpl implements PlayerService {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));
         }
         Block player = creatureMap.get(userCode);
-        movementManager.limitSpeed(world, player, BigDecimal.ZERO, BigDecimal.ZERO, null);
+        BlockUtil.limitSpeed(player.getMovementInfo().getSpeed(), BigDecimal.ZERO, BigDecimal.ZERO, null);
         Map<String, PlayerInfo> playerInfoMap = world.getPlayerInfoMap();
         if (!playerInfoMap.containsKey(userCode)) {
             return ResponseEntity.badRequest().body(JSON.toJSONString(ErrorUtil.ERROR_1007));

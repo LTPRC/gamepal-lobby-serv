@@ -575,9 +575,6 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_MELEE:
                 BigDecimal sectorAngle = SkillConstants.SKILL_ANGLE_MELEE_MAX;
                 return preSelectedBlocks.stream()
-                        .filter(blocker -> BlockUtil.checkMaterials(false, structure1.getMaterial(),
-                                structureMap.getOrDefault(blocker.getBlockInfo().getCode(), new Structure())
-                                        .getMaterial()))
                         .filter(blocker -> movementManager.detectSectorInfluence(world, fromWorldCoordinate, eventBlock,
                                 blocker, sectorAngle))
                         .collect(Collectors.toList());
@@ -602,9 +599,6 @@ public class SceneManagerImpl implements SceneManager {
                         break;
                 }
                 return preSelectedBlocks.stream()
-                        .filter(blocker -> BlockUtil.checkMaterials(false, structure1.getMaterial(),
-                                structureMap.getOrDefault(blocker.getBlockInfo().getCode(), new Structure())
-                                        .getMaterial()))
                         .filter(blocker -> movementManager.detectCylinderInfluence(world, fromWorldCoordinate, eventBlock,
                                 blocker, planarDistance, verticalDistance))
                         .collect(Collectors.toList());

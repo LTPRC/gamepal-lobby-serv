@@ -220,7 +220,7 @@ public class BlockFactory {
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_PARTICLE_NO_FLESH,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
                                 new Coordinate(BlockConstants.MIN_DROP_INTERACTION_DISTANCE,
