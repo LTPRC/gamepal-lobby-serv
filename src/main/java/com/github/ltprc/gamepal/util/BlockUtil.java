@@ -434,13 +434,98 @@ public class BlockUtil {
     }
 
     /**
-     * 通义千问
-     * @param coordinate1
-     * @param coordinate2
-     * @return
+     * 计算两个三维坐标的点积（内积）
+     *
+     * @param coordinate1 第一个坐标向量
+     * @param coordinate2 第二个坐标向量
+     * @return 点积结果
      */
     private static BigDecimal dotProduct(Coordinate coordinate1, Coordinate coordinate2) {
-        return coordinate1.getX().multiply(coordinate2.getX()).add(coordinate1.getY().multiply(coordinate2.getY()));
+        return coordinate1.getX().multiply(coordinate2.getX())
+                .add(coordinate1.getY().multiply(coordinate2.getY()))
+                .add(coordinate1.getZ().multiply(coordinate2.getZ()));
+    }
+
+    /**
+     * 计算三维向量的模长（大小）
+     * @param coordinate 向量坐标
+     * @return 向量模长
+     */
+    private static BigDecimal vectorMagnitude(Coordinate coordinate) {
+        double x = coordinate.getX().doubleValue();
+        double y = coordinate.getY().doubleValue();
+        double z = coordinate.getZ().doubleValue();
+        return BigDecimal.valueOf(Math.sqrt(x * x + y * y + z * z));
+    }
+
+    /**
+     * 计算从from到to的位移向量在从from到target方向上的投影（WorldCoordinate版本）
+     * 即：将位移向量 (to - from) 投影到目标向量 (target - from) 上
+     *
+     * @param regionInfo 区域信息
+     * @param from 起始点世界坐标
+     * @param to 终点世界坐标
+     * @param target 目标方向点世界坐标
+     * @return 投影后的三维坐标向量
+     */
+    public static Coordinate calculateDisplacementProjection(RegionInfo regionInfo, WorldCoordinate from,
+                                                             WorldCoordinate to, WorldCoordinate target) {
+        // 确保在同一区域内
+        if (from.getRegionNo() != to.getRegionNo() || from.getRegionNo() != target.getRegionNo()) {
+            return new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
+        
+        return calculateDisplacementProjection(convertWorldCoordinate2Coordinate(regionInfo, from),
+                convertWorldCoordinate2Coordinate(regionInfo, to),
+                convertWorldCoordinate2Coordinate(regionInfo, target));
+    }
+
+    /**
+     * 计算从from到to的位移向量在从from到target方向上的投影
+     * 即：将位移向量 (to - from) 投影到目标向量 (target - from) 上
+     * 
+     * @param from 起始点坐标
+     * @param to 终点坐标
+     * @param target 目标方向点坐标
+     * @return 投影后的三维坐标向量
+     */
+    public static Coordinate calculateDisplacementProjection(Coordinate from, Coordinate to, Coordinate target) {
+        // 计算位移向量：from -> to
+        Coordinate displacement = new Coordinate(
+                to.getX().subtract(from.getX()),
+                to.getY().subtract(from.getY()),
+                to.getZ().subtract(from.getZ())
+        );
+        
+        // 计算目标向量：from -> target
+        Coordinate targetVector = new Coordinate(
+                target.getX().subtract(from.getX()),
+                target.getY().subtract(from.getY()),
+                target.getZ().subtract(from.getZ())
+        );
+        
+        // 计算目标向量的模长平方
+        BigDecimal targetMagnitudeSquared = vectorMagnitude(targetVector).pow(2);
+        
+        // 防止除零错误
+        if (targetMagnitudeSquared.compareTo(BigDecimal.ZERO) <= 0) {
+            return new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
+        
+        // 计算点积
+        BigDecimal dotProduct = dotProduct(displacement, targetVector);
+        
+        // 计算投影系数：(displacement · targetVector) / |targetVector|²
+        BigDecimal projectionScale = dotProduct.divide(targetMagnitudeSquared, 10, RoundingMode.HALF_UP);
+        
+        // 计算投影向量：scale * targetVector
+        Coordinate projection = new Coordinate(
+                targetVector.getX().multiply(projectionScale),
+                targetVector.getY().multiply(projectionScale),
+                targetVector.getZ().multiply(projectionScale)
+        );
+        
+        return projection;
     }
 
     public static boolean checkBlockTypeInteractive(int blockType) {

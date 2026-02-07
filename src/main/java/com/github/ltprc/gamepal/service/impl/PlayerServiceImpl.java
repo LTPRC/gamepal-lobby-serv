@@ -1013,8 +1013,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
         PlayerInfo playerInfo = playerInfoMap.get(userCode);
         addPlayerTrophy(userCode, playerInfo.getBuff()[BuffConstants.BUFF_CODE_TROPHY] != 0);
-        eventManager.changeHp(world, player, BigDecimal.valueOf(player.getBlockInfo().getHpMax().get())
-                .multiply(BlockConstants.HP_PULL_RATIO).intValue(), true);
+        eventManager.changeHp(world, player, 0, true);
         changeVp(userCode, 0, true);
         changeHunger(userCode, 0, true);
         changeThirst(userCode, 0, true);

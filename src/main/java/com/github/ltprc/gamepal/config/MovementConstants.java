@@ -21,8 +21,8 @@ public class MovementConstants {
     public static final BigDecimal MAX_VERTICAL_SPEED_DEFAULT = BigDecimal.valueOf(25); // Positive but downward
     public static final BigDecimal MAX_VERTICAL_SPEED_PARACHUTE = BigDecimal.valueOf(2); // Positive but downward
     public static final BigDecimal MAX_VERTICAL_STEP_DEFAULT = BigDecimal.valueOf(0.5D);
-    public static final BigDecimal MIN_CREATURE_INJURIOUS_SPEED_DEFAULT = BigDecimal.valueOf(0.2D);
-    public static final BigDecimal MIN_CREATURE_LETHAL_SPEED_DEFAULT = BigDecimal.valueOf(0.4D);
+    public static final BigDecimal MIN_CREATURE_INJURIOUS_SPEED_DEFAULT = BigDecimal.valueOf(0.5D);
+    public static final BigDecimal MIN_CREATURE_LETHAL_SPEED_DEFAULT = BigDecimal.valueOf(5);
     public static final BigDecimal FRICTION_FACTOR = BigDecimal.valueOf(0.9D);
 
     public static final int MOVEMENT_MODE_DEFAULT = 0;
