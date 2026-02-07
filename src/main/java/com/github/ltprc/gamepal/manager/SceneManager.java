@@ -11,6 +11,7 @@ import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 
 public interface SceneManager {
@@ -37,4 +38,5 @@ public interface SceneManager {
     void setGridBlockCode(final GameWorld world, final WorldCoordinate worldCoordinate, final int code);
     BigDecimal getAltitude(final GameWorld world, final WorldCoordinate worldCoordinate, boolean checkGravitatedStack);
     void updateBlockAltitude(final GameWorld world, Block block);
+    Optional<Block> queryGravitatedStackByWorldCoordinate(final GameWorld world, final WorldCoordinate worldCoordinate);
 }

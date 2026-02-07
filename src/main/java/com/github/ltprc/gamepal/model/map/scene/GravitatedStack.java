@@ -11,11 +11,10 @@ public class GravitatedStack {
 
     private BigDecimal minAltitude;
     private BigDecimal maxAltitude;
-    private Stack<Block> stack;
+    private Stack<Block> stack = new Stack<>();
 
     public GravitatedStack(BigDecimal altitude) {
         minAltitude = altitude;
         maxAltitude = altitude;
-        stack = new Stack<>();
     }
 }

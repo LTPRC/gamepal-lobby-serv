@@ -13,9 +13,7 @@ import com.github.ltprc.gamepal.model.map.block.Block;
 import com.github.ltprc.gamepal.model.map.coordinate.Coordinate;
 import com.github.ltprc.gamepal.model.map.coordinate.PlanarCoordinate;
 import com.github.ltprc.gamepal.model.map.region.Region;
-import com.github.ltprc.gamepal.model.map.region.RegionInfo;
 import com.github.ltprc.gamepal.model.map.scene.Scene;
-import com.github.ltprc.gamepal.model.map.structure.Shape;
 import com.github.ltprc.gamepal.model.map.structure.Structure;
 import com.github.ltprc.gamepal.model.map.world.GameWorld;
 import com.github.ltprc.gamepal.model.map.coordinate.WorldCoordinate;
@@ -29,10 +27,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
 
 @Component
 public class MovementManagerImpl implements MovementManager {
@@ -157,7 +159,9 @@ public class MovementManagerImpl implements MovementManager {
 
     private void settlePlanarSpeed(GameWorld world, Block worldMovingBlock) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
-        Set<Block> blockers = new HashSet<>();
+        Coordinate oldSpeed = new Coordinate(worldMovingBlock.getMovementInfo().getSpeed());
+        Optional<Block> firstBlocker = Optional.empty();
+        Set<Block> influencedBlocks = new HashSet<>();
         boolean xCollision = false;
         boolean yCollision = false;
 
@@ -185,35 +189,35 @@ public class MovementManagerImpl implements MovementManager {
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockXY.getWorldCoordinate());
 
         // Linear selection on pre-selected blocks
-        Set<Block> preSelectedBlocks = new HashSet<>();
-        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockXY));
-        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockX));
-        preSelectedBlocks.addAll(sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
-                expectedNewBlockY));
+        List<Block> preSelectedBlocks = sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockXY);
 
-        if (sceneManager.getAltitude(world, expectedNewBlockX.getWorldCoordinate(), false)
+        if (sceneManager.getAltitude(world, expectedNewBlockX.getWorldCoordinate(), true)
                 .subtract(expectedNewBlockX.getWorldCoordinate().getCoordinate().getZ())
                 .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
+            firstBlocker = sceneManager.queryGravitatedStackByWorldCoordinate(world,
+                    expectedNewBlockX.getWorldCoordinate());
             xCollision = true;
         }
-        if (sceneManager.getAltitude(world, expectedNewBlockY.getWorldCoordinate(), false)
+        if (sceneManager.getAltitude(world, expectedNewBlockY.getWorldCoordinate(), true)
                 .subtract(expectedNewBlockY.getWorldCoordinate().getCoordinate().getZ())
                 .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
+            firstBlocker = sceneManager.queryGravitatedStackByWorldCoordinate(world,
+                    expectedNewBlockY.getWorldCoordinate());
             yCollision = true;
         }
-        if (sceneManager.getAltitude(world, expectedNewBlockXY.getWorldCoordinate(), false)
+        if (sceneManager.getAltitude(world, expectedNewBlockXY.getWorldCoordinate(), true)
                 .subtract(expectedNewBlockXY.getWorldCoordinate().getCoordinate().getZ())
                 .compareTo(MovementConstants.MAX_VERTICAL_STEP_DEFAULT) > 0) {
+            firstBlocker = sceneManager.queryGravitatedStackByWorldCoordinate(world,
+                    expectedNewBlockXY.getWorldCoordinate());
             xCollision = true;
             yCollision = true;
         }
-        boolean planarTerrainCollision = xCollision || yCollision;
 
         for (Block block : preSelectedBlocks) {
             if (detectCollision(world, worldMovingBlock, block, false)) {
-                blockers.add(block);
+                influencedBlocks.add(block);
                 continue;
             }
             if (xCollision && yCollision) {
@@ -221,27 +225,33 @@ public class MovementManagerImpl implements MovementManager {
             }
             if (!xCollision) {
                 if (detectCollision(world, expectedNewBlockX, block, true)) {
+                    firstBlocker = sceneManager.queryGravitatedStackByWorldCoordinate(world,
+                            expectedNewBlockX.getWorldCoordinate());
                     xCollision = true;
                 }
                 if (detectCollision(world, expectedNewBlockX, block, false)) {
-                    blockers.add(block);
+                    influencedBlocks.add(block);
                 }
             }
             if (!yCollision) {
                 if (detectCollision(world, expectedNewBlockY, block, true)) {
+                    firstBlocker = sceneManager.queryGravitatedStackByWorldCoordinate(world,
+                            expectedNewBlockY.getWorldCoordinate());
                     yCollision = true;
                 }
                 if (detectCollision(world, expectedNewBlockY, block, false)) {
-                    blockers.add(block);
+                    influencedBlocks.add(block);
                 }
             }
             if (!xCollision || !yCollision) {
                 if (detectCollision(world, expectedNewBlockXY, block, true)) {
+                    firstBlocker = sceneManager.queryGravitatedStackByWorldCoordinate(world,
+                            expectedNewBlockXY.getWorldCoordinate());
                     xCollision = true;
                     yCollision = true;
                 }
                 if (detectCollision(world, expectedNewBlockXY, block, false)) {
-                    blockers.add(block);
+                    influencedBlocks.add(block);
                 }
             }
         }
@@ -252,12 +262,23 @@ public class MovementManagerImpl implements MovementManager {
             BlockUtil.limitSpeed(worldMovingBlock.getMovementInfo().getSpeed(), null, BigDecimal.ZERO, null);
         }
 
-        settleBlockers(world, worldMovingBlock, blockers, planarTerrainCollision, false);
+        settleBlockers(world, worldMovingBlock, influencedBlocks);
+        if (xCollision || yCollision) {
+            Coordinate firstBlockerSpeed = firstBlocker
+                    .map(block -> block.getMovementInfo().getSpeed())
+                    .orElse(new Coordinate());
+            BigDecimal relativeVelocity = BigDecimal.valueOf(Math.sqrt(
+                    oldSpeed.getX().subtract(firstBlockerSpeed.getX()).pow(2)
+                            .add(oldSpeed.getY().subtract(firstBlockerSpeed.getY()).pow(2))
+                            .doubleValue()));
+            settleBlockCollision(world, worldMovingBlock, relativeVelocity);
+        }
     }
 
     private void settleVerticalSpeed(GameWorld world, Block worldMovingBlock) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
-        Set<Block> blockers = new HashSet<>();
+        Coordinate oldSpeed = new Coordinate(worldMovingBlock.getMovementInfo().getSpeed());
+        Set<Block> influencedBlocks = new HashSet<>();
 
         Block expectedNewBlockXYZ = new Block(worldMovingBlock);
         expectedNewBlockXYZ.getWorldCoordinate().setCoordinate(new Coordinate(
@@ -269,33 +290,31 @@ public class MovementManagerImpl implements MovementManager {
                         .add(worldMovingBlock.getMovementInfo().getSpeed().getZ())));
         BlockUtil.fixWorldCoordinate(region, expectedNewBlockXYZ.getWorldCoordinate());
         BigDecimal currentAltitude = sceneManager.getAltitude(world, worldMovingBlock.getWorldCoordinate(), true);
-        BigDecimal terrainAltitude = sceneManager.getAltitude(world, worldMovingBlock.getWorldCoordinate(), false);
         boolean zCollision = expectedNewBlockXYZ.getWorldCoordinate().getCoordinate().getZ()
                 .compareTo(currentAltitude) <= 0;
 
-        Set<Block> preSelectedBlocks = new HashSet<>(sceneManager.collectBlocks(world,
-                worldMovingBlock.getWorldCoordinate(), expectedNewBlockXYZ));
+        // Linear selection on pre-selected blocks
+        List<Block> preSelectedBlocks = sceneManager.collectBlocks(world, worldMovingBlock.getWorldCoordinate(),
+                expectedNewBlockXYZ);
 
         for (Block block : preSelectedBlocks) {
             if (detectCollision(world, worldMovingBlock, block, false)) {
-                blockers.add(block);
+                influencedBlocks.add(block);
                 continue;
             }
-            if (detectCollision(world, expectedNewBlockXYZ, block, true)) {
-                zCollision = true;
-            }
             if (detectCollision(world, expectedNewBlockXYZ, block, false)) {
-                blockers.add(block);
+                influencedBlocks.add(block);
             }
         }
 
-        boolean verticalTerrainCollision = !zCollision
-                && expectedNewBlockXYZ.getWorldCoordinate().getCoordinate().getZ().compareTo(terrainAltitude) <= 0;
-        settleBlockers(world, worldMovingBlock, blockers, false, verticalTerrainCollision);
+        settleBlockers(world, worldMovingBlock, influencedBlocks);
+        if (zCollision) {
+            BigDecimal relativeVelocity = oldSpeed.getZ().abs();
+            settleBlockCollision(world, worldMovingBlock, relativeVelocity);
+        }
     }
 
-    private void settleBlockers(GameWorld world, Block worldMovingBlock, Set<Block> blockers,
-                                boolean planarTerrainCollision, boolean verticalTerrainCollision) {
+    private void settleBlockers(GameWorld world, Block worldMovingBlock, Set<Block> influencedBlocks) {
         Region region = world.getRegionMap().get(worldMovingBlock.getWorldCoordinate().getRegionNo());
         BigDecimal altitude = sceneManager.getAltitude(world, worldMovingBlock.getWorldCoordinate(), true);
         BigDecimal newAltitude = worldMovingBlock.getWorldCoordinate().getCoordinate().getZ()
@@ -305,8 +324,8 @@ public class MovementManagerImpl implements MovementManager {
             BlockUtil.limitSpeed(worldMovingBlock.getMovementInfo().getSpeed(), null, null, BigDecimal.ZERO);
         }
         WorldCoordinate destination = null;
-        Optional<Block> teleport = blockers.stream()
-                .filter(blocker -> blocker.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT)
+        Optional<Block> teleport = influencedBlocks.stream()
+                .filter(influencedBlock -> influencedBlock.getBlockInfo().getType() == BlockConstants.BLOCK_TYPE_TELEPORT)
                 .findFirst();
         if (teleport.isPresent()) {
             destination = world.getTeleportMap().get(teleport.get().getBlockInfo().getId());
@@ -325,34 +344,19 @@ public class MovementManagerImpl implements MovementManager {
                                     .add(worldMovingBlock.getMovementInfo().getSpeed().getY()),
                             zCollision ? altitude : newAltitude));
             BlockUtil.fixWorldCoordinate(region, destination);
-            WorldCoordinate oldWc = new WorldCoordinate(worldMovingBlock.getWorldCoordinate());
             settleCoordinate(world, worldMovingBlock, destination, false);
 
-            blockers.forEach(blocker -> {
-                Coordinate projection = BlockUtil.calculateDisplacementProjection(region, oldWc,
-                        worldMovingBlock.getWorldCoordinate(), blocker.getWorldCoordinate());
+            influencedBlocks.forEach(blocker -> {
                 BigDecimal relativeVelocity = BigDecimal.valueOf(Math.sqrt(
-                                projection.getX().pow(2)
-                                .add(projection.getY().pow(2))
-                                .add(projection.getZ().pow(2))
+                        worldMovingBlock.getMovementInfo().getSpeed().getX()
+                                .subtract(blocker.getMovementInfo().getSpeed().getX()).pow(2)
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY()
+                                        .subtract(blocker.getMovementInfo().getSpeed().getY()).pow(2))
+                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ()
+                                        .subtract(blocker.getMovementInfo().getSpeed().getZ()).pow(2))
                                 .doubleValue()));
-                settleBlockCollision(world, worldMovingBlock, blocker, relativeVelocity);
+                settleBlocksCollision(world, worldMovingBlock, blocker, relativeVelocity);
             });
-            if (planarTerrainCollision && verticalTerrainCollision) {
-                settleTerrainCollision(world, worldMovingBlock, destination, BigDecimal.valueOf(Math.sqrt(
-                        worldMovingBlock.getMovementInfo().getSpeed().getX().pow(2)
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY().pow(2))
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getZ().pow(2))
-                                .doubleValue())));
-            } else if (planarTerrainCollision) {
-                settleTerrainCollision(world, worldMovingBlock, destination, BigDecimal.valueOf(Math.sqrt(
-                        worldMovingBlock.getMovementInfo().getSpeed().getX().pow(2)
-                                .add(worldMovingBlock.getMovementInfo().getSpeed().getY().pow(2))
-                                .doubleValue())));
-            } else if (verticalTerrainCollision) {
-                settleTerrainCollision(world, worldMovingBlock, destination, BigDecimal.valueOf(Math.sqrt(
-                        worldMovingBlock.getMovementInfo().getSpeed().getZ().pow(2).doubleValue())));
-            }
         }
     }
 
@@ -721,16 +725,16 @@ public class MovementManagerImpl implements MovementManager {
     }
 
     /**
-     * 结合type(替代material), speed, 结算block碰撞block
+     * 结合type(替代material), speed, 结算block1碰撞block2
      * @param world
      * @param block1
      * @param block2
      * @param relativeVelocity
      */
-    private void settleBlockCollision(GameWorld world, Block block1, Block block2, BigDecimal relativeVelocity) {
+    private void settleBlocksCollision(GameWorld world, Block block1, Block block2, BigDecimal relativeVelocity) {
         if (block1.getBlockInfo().getType() > block2.getBlockInfo().getType()
                 && block2.getBlockInfo().getType() != BlockConstants.BLOCK_TYPE_NORMAL) {
-            settleBlockCollision(world, block2, block1, relativeVelocity);
+            settleBlocksCollision(world, block2, block1, relativeVelocity);
             return;
         }
         String fromId = world.getSourceMap().containsKey(block2.getBlockInfo().getId())
@@ -746,8 +750,7 @@ public class MovementManagerImpl implements MovementManager {
             case BlockConstants.BLOCK_TYPE_PLAYER:
                 switch (block2.getBlockInfo().getType()) {
                     case BlockConstants.BLOCK_TYPE_PLAYER:
-                        collideCreature(world, block1, relativeVelocity.multiply(BigDecimal.valueOf(0.5D)));
-                        collideCreature(world, block2, relativeVelocity.multiply(BigDecimal.valueOf(0.5D)));
+                        collideCreature(world, block2, relativeVelocity);
                         break;
                     case BlockConstants.BLOCK_TYPE_DROP:
                         playerService.useDrop(block1.getBlockInfo().getId(), block2.getBlockInfo().getId());
@@ -787,10 +790,8 @@ public class MovementManagerImpl implements MovementManager {
                     case BlockConstants.BLOCK_TYPE_MELEE:
                     case BlockConstants.BLOCK_TYPE_SHOOT:
                     case BlockConstants.BLOCK_TYPE_EXPLOSION:
-                        // No effect
-                        break;
                     default:
-                        collideCreature(world, block1, relativeVelocity);
+                        // No effect
                         break;
                 }
                 break;
@@ -899,18 +900,10 @@ public class MovementManagerImpl implements MovementManager {
         }
     }
 
-    /**
-     * 结合type(替代material), speed, 结算block碰撞terrain
-     * @param world
-     * @param block1
-     * @param worldCoordinate2
-     * @param relativeVelocity
-     */
-    private void settleTerrainCollision(GameWorld world, Block block1, WorldCoordinate worldCoordinate2,
-                                        BigDecimal relativeVelocity) {
-        switch (block1.getBlockInfo().getType()) {
+    private void settleBlockCollision(GameWorld world, Block block, BigDecimal relativeVelocity) {
+        switch (block.getBlockInfo().getType()) {
             case BlockConstants.BLOCK_TYPE_PLAYER:
-                collideCreature(world, block1, relativeVelocity);
+                collideCreature(world, block, relativeVelocity);
                 break;
             case BlockConstants.BLOCK_TYPE_MELEE:
                 // 近战攻击类型方块的碰撞处理 TODO

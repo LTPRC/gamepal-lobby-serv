@@ -37,13 +37,17 @@ import com.github.ltprc.gamepal.service.PlayerService;
 import com.github.ltprc.gamepal.service.UserService;
 import com.github.ltprc.gamepal.service.WebSocketService;
 import com.github.ltprc.gamepal.service.WorldService;
-import com.github.ltprc.gamepal.util.*;
+import com.github.ltprc.gamepal.util.BlockUtil;
+import com.github.ltprc.gamepal.util.ErrorUtil;
+import com.github.ltprc.gamepal.util.PlayerInfoUtil;
+import com.github.ltprc.gamepal.util.RegionUtil;
+import com.github.ltprc.gamepal.util.SceneUtil;
+import com.github.ltprc.gamepal.util.SkillUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.AbstractMap;
@@ -941,10 +945,9 @@ public class SceneManagerImpl implements SceneManager {
             case BlockConstants.BLOCK_TYPE_CONTAINER:
             case BlockConstants.BLOCK_TYPE_HUMAN_REMAIN_CONTAINER:
             case BlockConstants.BLOCK_TYPE_ANIMAL_REMAIN_CONTAINER:
-                world.getBagInfoMap().get(block.getBlockInfo().getId()).getItems().entrySet()
-                        .forEach(entry -> {
-                            Block dropFromContainer = addDropBlock(world, block.getWorldCoordinate(), entry);
-                        });
+                world.getBagInfoMap().get(block.getBlockInfo().getId()).getItems().entrySet().stream()
+                        .filter(entry -> entry.getValue() > 0)
+                        .forEach(entry -> addDropBlock(world, block.getWorldCoordinate(), entry));
                 switch (block.getBlockInfo().getType()) {
                     case BlockConstants.BLOCK_TYPE_CONTAINER:
                         for (int i = 0; i < 1 + random.nextInt(3); i++) {
@@ -1159,5 +1162,25 @@ public class SceneManagerImpl implements SceneManager {
 //                .filter(block1 -> BlockUtil.convertCoordinate2ClosestIntegerCoordinate(block1.getWorldCoordinate())
 //                        .equals(BlockUtil.convertCoordinate2ClosestIntegerCoordinate(worldCoordinate)))
 //                .forEach(block1 -> updateBlockAltitude(world, block1));
+    }
+
+    @Override
+    public Optional<Block> queryGravitatedStackByWorldCoordinate(final GameWorld world,
+                                                                 final WorldCoordinate worldCoordinate) {
+        Map<Integer, Structure> structureMap = worldService.getStructureMap();
+        GravitatedStack gravitatedStack = locateGravitatedStack(world, worldCoordinate);
+        if (null == gravitatedStack) {
+            return Optional.empty();
+        }
+        return gravitatedStack.getStack().stream()
+                .filter(block -> {
+                    Structure structure = structureMap.getOrDefault(block.getBlockInfo().getCode(), new Structure());
+                    return block.getWorldCoordinate().getCoordinate().getZ()
+                            .compareTo(worldCoordinate.getCoordinate().getZ()) <= 0
+                            && block.getWorldCoordinate().getCoordinate().getZ()
+                            .add(structure.getShape().getRadius().getZ())
+                            .compareTo(worldCoordinate.getCoordinate().getZ()) >= 0;
+                })
+                .findFirst();
     }
 }
