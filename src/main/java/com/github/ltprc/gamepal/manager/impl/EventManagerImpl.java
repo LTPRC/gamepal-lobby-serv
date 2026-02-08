@@ -114,7 +114,7 @@ public class EventManagerImpl implements EventManager {
                     WorldCoordinate sparkWc = BlockUtil.locateCoordinateWithDirectionAndDistance(
                             world.getRegionMap().get(fromCreature.getWorldCoordinate().getRegionNo()),
                             fromCreature.getWorldCoordinate(),
-                            fromCreature.getMovementInfo().getFaceDirection().add(BigDecimal.valueOf(
+                            BlockUtil.changeAngle(fromCreature.getMovementInfo().getFaceDirection(), BigDecimal.valueOf(
                                     SkillConstants.SKILL_ANGLE_SHOOT_MAX.doubleValue() * 2
                                             * (random.nextDouble() - 0.5D))), SkillConstants.SKILL_RANGE_SPARK_SHORT);
                     addEvent(world, BlockConstants.BLOCK_CODE_SPARK_SHORT, fromCreature.getBlockInfo().getId(), sparkWc);
