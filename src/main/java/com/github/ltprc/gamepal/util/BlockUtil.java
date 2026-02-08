@@ -804,4 +804,8 @@ public class BlockUtil {
             speed.setZ(limitedZ);
         }
     }
+
+    public static BigDecimal changeAngle(BigDecimal oldAngle, BigDecimal deltaAngle) {
+        return oldAngle.add(deltaAngle).remainder(BigDecimal.valueOf(360));
+    }
 }

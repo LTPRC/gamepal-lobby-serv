@@ -745,7 +745,9 @@ public class PlayerServiceImpl implements PlayerService {
             case SkillConstants.SKILL_CODE_DODGE:
                 eventManager.addEvent(world, BlockConstants.BLOCK_CODE_LIGHT_SMOKE, userCode, bottomWorldCoordinate);
                 movementManager.settleAcceleration(world, player, BlockUtil.locateCoordinateWithDirectionAndDistance(
-                        new Coordinate(), direction, BlockConstants.DODGE_RADIUS), null, null);
+                        new Coordinate(), BlockUtil.changeAngle(direction, BigDecimal.valueOf(180)),
+                        BlockConstants.DODGE_RADIUS), null, null);
+                movementManager.settleSpeed(world, player, true, false);
                 player.getMovementInfo().setFaceDirection(direction);
                 break;
             case SkillConstants.SKILL_CODE_LAY_MINE:

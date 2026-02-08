@@ -220,6 +220,7 @@ public class BlockFactory {
                         new PlanarCoordinate(BigDecimal.ONE, BigDecimal.ONE));
                 break;
             case BlockConstants.BLOCK_TYPE_DROP:
+                // TODO Avoid collision with no-flesh solid blocks
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         new Shape(BlockConstants.STRUCTURE_SHAPE_TYPE_ROUND,
@@ -229,13 +230,8 @@ public class BlockFactory {
                         new PlanarCoordinate(BigDecimal.valueOf(0.5D), BigDecimal.valueOf(0.5D)));
                 break;
             case BlockConstants.BLOCK_TYPE_TELEPORT:
-            case BlockConstants.BLOCK_TYPE_TRAP:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH,
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_TARGET,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE);
-                break;
-            case BlockConstants.BLOCK_TYPE_GAME:
-                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
-                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
                 break;
             case BlockConstants.BLOCK_TYPE_BED:
                 switch (blockCode) {
@@ -260,6 +256,10 @@ public class BlockFactory {
                                         BlockConstants.Z_DEFAULT)));
                 break;
             case BlockConstants.BLOCK_TYPE_DRESSER:
+            case BlockConstants.BLOCK_TYPE_GAME:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_NONE,
+                        BlockConstants.STRUCTURE_LAYER_BOTTOM);
+                break;
             case BlockConstants.BLOCK_TYPE_STORAGE:
             case BlockConstants.BLOCK_TYPE_COOKER:
             case BlockConstants.BLOCK_TYPE_SINK:
@@ -378,6 +378,10 @@ public class BlockFactory {
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,
                         BlockConstants.STRUCTURE_LAYER_MIDDLE,
                         roundShape);
+                break;
+            case BlockConstants.BLOCK_TYPE_TRAP:
+                structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_TARGET_FLESH,
+                        BlockConstants.STRUCTURE_LAYER_MIDDLE);
                 break;
             case BlockConstants.BLOCK_TYPE_FLOOR:
                 structure = new Structure(BlockConstants.STRUCTURE_MATERIAL_SOLID,

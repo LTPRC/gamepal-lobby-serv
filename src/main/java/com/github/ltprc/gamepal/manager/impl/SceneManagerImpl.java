@@ -781,11 +781,16 @@ public class SceneManagerImpl implements SceneManager {
             return null;
         }
         Block block = addOtherBlock(world, worldCoordinate, BlockConstants.BLOCK_CODE_DROP_DEFAULT);
+        Region region = world.getRegionMap().get(block.getWorldCoordinate().getRegionNo());
         world.getDropMap().put(block.getBlockInfo().getId(), drop);
+        BigDecimal direction = BigDecimal.valueOf(random.nextDouble() * 360);
         Coordinate dropSpeed = new Coordinate(BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.valueOf(random.nextDouble() * BlockConstants.DROP_THROW_VERTICAL_SPEED_MAX.doubleValue()));
+        WorldCoordinate destination = BlockUtil.locateCoordinateWithDirectionAndDistance(region,
+                block.getWorldCoordinate(), direction, BlockConstants.DROP_THROW_PLANAR_DISTANCE_DEFAULT);
+        movementManager.settleCoordinate(world, block, destination, false);
         movementManager.settleAcceleration(world, block, BlockUtil.locateCoordinateWithDirectionAndDistance(dropSpeed,
-                BigDecimal.valueOf(random.nextDouble() * 360), BlockConstants.DROP_THROW_PLANAR_SPEED_MAX), null, null);
+                direction, BlockConstants.DROP_THROW_PLANAR_SPEED_MAX), null, null);
         return block;
     }
 
@@ -804,6 +809,13 @@ public class SceneManagerImpl implements SceneManager {
         if (StringUtils.isNotBlank(textDisplay)) {
             world.getTextDisplayMap().put(block.getBlockInfo().getId(), textDisplay);
         }
+        WorldCoordinate textBlockCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(
+                world.getRegionMap().get(worldCoordinate.getRegionNo()), worldCoordinate,
+                BigDecimal.valueOf(random.nextDouble() * 360),
+                BlockConstants.TEXT_DISPLAY_PLANAR_DISTANCE);
+        textBlockCoordinate.getCoordinate().setZ(textBlockCoordinate.getCoordinate().getZ()
+                .add(BlockConstants.TEXT_DISPLAY_VERTICAL_DISTANCE));
+        movementManager.settleCoordinate(world, block, textBlockCoordinate, false);
         return block;
     }
 

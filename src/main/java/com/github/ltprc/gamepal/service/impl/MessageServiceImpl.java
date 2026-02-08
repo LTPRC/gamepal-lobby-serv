@@ -161,14 +161,8 @@ public class MessageServiceImpl implements MessageService {
                     .forEach(msg1 -> {
                         messageMap.get(userCode).add(msg1);
                         if (MessageConstants.SCOPE_SELF != msg1.getScope()) {
-                            WorldCoordinate textBlockCoordinate = BlockUtil.locateCoordinateWithDirectionAndDistance(
-                                    world.getRegionMap().get(senderWc.getRegionNo()), senderWc,
-                                    BigDecimal.valueOf(random.nextDouble() * 360),
-                                    BlockConstants.TEXT_DISPLAY_PLANAR_DISTANCE);
-                            textBlockCoordinate.getCoordinate().setZ(textBlockCoordinate.getCoordinate().getZ()
-                                    .add(BlockConstants.TEXT_DISPLAY_VERTICAL_DISTANCE));
-                            sceneManager.addTextDisplayBlock(world, textBlockCoordinate,
-                                    BlockConstants.BLOCK_CODE_TEXT_DISPLAY, msg1.getContent());
+                            sceneManager.addTextDisplayBlock(world, senderWc, BlockConstants.BLOCK_CODE_TEXT_DISPLAY,
+                                    msg1.getContent());
                         }
                     });
         } else if (GamePalConstants.PLAYER_TYPE_NPC == world.getPlayerInfoMap().get(userCode).getPlayerType()
